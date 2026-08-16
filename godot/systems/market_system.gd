@@ -5,7 +5,6 @@ const MIN_PROGRESS_PER_SPEED: float = 0.08
 const MAX_PROGRESS_PER_SPEED: float = 0.16
 const MARKET_RESPONSE_RATIO: float = 0.35
 const NOISE_RATIO: float = 1.10
-const SNAP_THRESHOLD: float = 0.01
 
 
 func settle_month(context: RunContext) -> void:
@@ -50,4 +49,14 @@ func _move_value(current: int, target: int, random_system: RandomSystem) -> int:
 	var base_change := float(gap) * MARKET_RESPONSE_RATIO
 	var noise := random_system.random_float(-NOISE_RATIO, NOISE_RATIO)
 	var actual_change := base_change * (1.0 + noise)
-	return current + roundi(actual_change)
+	var rounded_change := roundi(actual_change)
+
+	if rounded_change == 0:
+		if actual_change > 0.0:
+			rounded_change = 1
+		elif actual_change < 0.0:
+			rounded_change = -1
+		else:
+			return current
+
+	return current + rounded_change
