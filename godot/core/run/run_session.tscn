@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://7k6yvye5exuh"]
+
+[ext_resource type="Script" uid="uid://bjpqs5818eka7" path="res://core/run/run_session.gd" id="1_ujlsk"]
+
+[node name="RunSession" type="Node" unique_id=1121832609]
+script = ExtResource("1_ujlsk")
