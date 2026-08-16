@@ -47,3 +47,15 @@ func apply_delta(delta: MetricVector) -> void:
 	wage += delta.wage
 	employment += delta.employment
 	trade += delta.trade
+
+
+func copy() -> MetricValues:
+	var result := MetricValues.new()
+
+	result.tax = tax
+	result.price = price
+	result.wage = wage
+	result.employment = employment
+	result.trade = trade
+
+	return result

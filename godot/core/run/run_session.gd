@@ -3,6 +3,8 @@ class_name RunSession
 
 var state: RunState
 var time_system: TimeSystem
+var proposal_system: ProposalSystem
+var random_system: RandomSystem
 var flow_controller: FlowController
 
 
@@ -10,6 +12,9 @@ func start_new_run() -> void:
 	state = RunState.new()
 
 	time_system = TimeSystem.new()
+	proposal_system = ProposalSystem.new()
+	random_system = RandomSystem.new()
+	random_system.set_seed(12345)
 
 	flow_controller = FlowController.new()
 	flow_controller.setup(state, time_system)

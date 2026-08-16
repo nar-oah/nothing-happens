@@ -39,3 +39,23 @@ func set_value(metric: Metric.Id, value: float) -> void:
 			trade = value
 		_:
 			push_error("Unknown metric: %s" % metric)
+
+
+func add(other: MetricVector) -> void:
+	tax += other.tax
+	price += other.price
+	wage += other.wage
+	employment += other.employment
+	trade += other.trade
+
+
+func copy() -> MetricVector:
+	var result := MetricVector.new()
+
+	result.tax = tax
+	result.price = price
+	result.wage = wage
+	result.employment = employment
+	result.trade = trade
+
+	return result
