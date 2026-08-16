@@ -4,6 +4,7 @@ class_name ActiveBillState
 var start_values: MetricValues
 var pure_target: MetricValues
 var proposals: Array[ActiveProposalState] = []
+var policies: Array[PolicyState] = []
 
 
 func _init() -> void:

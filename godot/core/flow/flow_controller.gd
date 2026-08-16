@@ -10,4 +10,5 @@ func setup(run_context: RunContext) -> void:
 
 func advance_month() -> void:
 	context.market_system.settle_month(context)
+	context.policy_system.resolve_policy_chain(context.state)
 	context.time_system.advance_month(context.state)

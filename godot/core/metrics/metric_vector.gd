@@ -59,3 +59,7 @@ func copy() -> MetricVector:
 	result.trade = trade
 
 	return result
+
+
+func add_value(metric: Metric.Id, delta: int) -> void:
+	set_value(metric, get_value(metric) + delta)

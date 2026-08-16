@@ -7,6 +7,7 @@ var time_system: TimeSystem
 var random_system: RandomSystem
 var proposal_system: ProposalSystem
 var market_system: MarketSystem
+var policy_system: PolicySystem
 var flow_controller: FlowController
 
 
@@ -17,9 +18,10 @@ func start_new_run() -> void:
 	random_system.set_seed(12345)
 	proposal_system = ProposalSystem.new()
 	market_system = MarketSystem.new()
+	policy_system = PolicySystem.new()
 
 	context = RunContext.new()
-	context.setup(state, time_system, random_system, proposal_system, market_system)
+	context.setup(state, time_system, random_system, proposal_system, market_system, policy_system)
 
 	flow_controller = FlowController.new()
 	flow_controller.setup(context)
