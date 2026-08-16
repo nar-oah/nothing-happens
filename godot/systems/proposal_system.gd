@@ -29,3 +29,31 @@ func create_active_states(proposals: Array[ProposalInstance]) -> Array[ActivePro
 		result.append(ActiveProposalState.new(proposal))
 
 	return result
+
+
+func calculate_digested_anchor(bill: ActiveBillState) -> MetricValues:
+	var tax := float(bill.start_values.tax)
+	var price := float(bill.start_values.price)
+	var wage := float(bill.start_values.wage)
+	var employment := float(bill.start_values.employment)
+	var trade := float(bill.start_values.trade)
+
+	for active_proposal in bill.proposals:
+		var effect := active_proposal.proposal.get_total_effect()
+		var progress := clampf(active_proposal.digestion_progress, 0.0, 1.0)
+
+		tax += effect.tax * progress
+		price += effect.price * progress
+		wage += effect.wage * progress
+		employment += effect.employment * progress
+		trade += effect.trade * progress
+
+	var result := MetricValues.new()
+
+	result.tax = roundi(tax)
+	result.price = roundi(price)
+	result.wage = roundi(wage)
+	result.employment = roundi(employment)
+	result.trade = roundi(trade)
+
+	return result

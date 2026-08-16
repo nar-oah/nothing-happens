@@ -1,14 +1,13 @@
 extends RefCounted
 class_name FlowController
 
-var state: RunState
-var time_system: TimeSystem
+var context: RunContext
 
 
-func setup(run_state: RunState, run_time_system: TimeSystem) -> void:
-	state = run_state
-	time_system = run_time_system
+func setup(run_context: RunContext) -> void:
+	context = run_context
 
 
 func advance_month() -> void:
-	time_system.advance_month(state)
+	context.market_system.settle_month(context)
+	context.time_system.advance_month(context.state)

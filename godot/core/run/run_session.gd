@@ -2,22 +2,27 @@ extends Node
 class_name RunSession
 
 var state: RunState
+var context: RunContext
 var time_system: TimeSystem
-var proposal_system: ProposalSystem
 var random_system: RandomSystem
+var proposal_system: ProposalSystem
+var market_system: MarketSystem
 var flow_controller: FlowController
 
 
 func start_new_run() -> void:
 	state = RunState.new()
-
 	time_system = TimeSystem.new()
-	proposal_system = ProposalSystem.new()
 	random_system = RandomSystem.new()
 	random_system.set_seed(12345)
+	proposal_system = ProposalSystem.new()
+	market_system = MarketSystem.new()
+
+	context = RunContext.new()
+	context.setup(state, time_system, random_system, proposal_system, market_system)
 
 	flow_controller = FlowController.new()
-	flow_controller.setup(state, time_system)
+	flow_controller.setup(context)
 
 	print("Run started.")
 	print_current_date()

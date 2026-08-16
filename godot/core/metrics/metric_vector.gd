@@ -1,14 +1,14 @@
 extends RefCounted
 class_name MetricVector
 
-var tax: float = 0.0
-var price: float = 0.0
-var wage: float = 0.0
-var employment: float = 0.0
-var trade: float = 0.0
+var tax: int = 0
+var price: int = 0
+var wage: int = 0
+var employment: int = 0
+var trade: int = 0
 
 
-func get_value(metric: Metric.Id) -> float:
+func get_value(metric: Metric.Id) -> int:
 	match metric:
 		Metric.Id.TAX:
 			return tax
@@ -22,10 +22,10 @@ func get_value(metric: Metric.Id) -> float:
 			return trade
 		_:
 			push_error("Unknown metric: %s" % metric)
-			return 0.0
+			return 0
 
 
-func set_value(metric: Metric.Id, value: float) -> void:
+func set_value(metric: Metric.Id, value: int) -> void:
 	match metric:
 		Metric.Id.TAX:
 			tax = value
