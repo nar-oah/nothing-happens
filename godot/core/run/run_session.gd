@@ -92,8 +92,6 @@ func start_new_run() -> void:
 	var groups := constitution_system.get_effective_groups(state, interest_groups)
 	parliament_system.rebuild_all_rows(state, groups)
 	constitution_system.apply_annual_influence_rules(context)
-	parliament_system.rebuild_all_rows(state, groups)
-	constitution_system.apply_annual_influence_rules(context)
 
 	flow_controller = FlowController.new()
 	flow_controller.setup(context)

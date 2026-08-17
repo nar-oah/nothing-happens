@@ -20,31 +20,6 @@ func initialize_races(
 		state.races.append(race)
 
 
-func calculate_annual_seat_count(race: RaceState) -> int:
-	if race == null or race.definition == null:
-		return 0
-	var definition := race.definition
-	if definition.id == Race.ZHUSHUI:
-		return 1
-	if definition.fixed_seat_count >= 0:
-		return definition.fixed_seat_count
-	var trust := clampf(race.political_trust, 0.0, 100.0)
-	var pivot := clampf(definition.initial_political_trust, 0.01, 99.99)
-	var seat_value: float
-	if trust <= pivot:
-		seat_value = lerpf(definition.minimum_seats, definition.initial_seats, trust / pivot)
-	else:
-		seat_value = lerpf(
-			definition.initial_seats, definition.maximum_seats, (trust - pivot) / (100.0 - pivot)
-		)
-	return clampi(roundi(seat_value), definition.minimum_seats, definition.maximum_seats)
-
-
-func recalculate_all_seat_counts(state: RunState) -> void:
-	for race in state.races:
-		race.seat_count = calculate_annual_seat_count(race)
-
-
 func advance_era_expectations(state: RunState) -> void:
 	for race in state.races:
 		if race.definition == null:

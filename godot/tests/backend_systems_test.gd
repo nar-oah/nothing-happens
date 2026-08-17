@@ -59,7 +59,6 @@ func _test_race_seats_and_full_parliament() -> void:
 		session.state.get_race(Race.ZHUSHUI).seat_count, 1, "Zhushui has one governing seat"
 	)
 	_check_equal(session.state.seats.size(), 21, "twenty variable seats plus one Zhushui seat")
-	session.free()
 	var state := session.state
 	state.get_race(Race.NANKE).political_trust = 100.0
 	state.get_race(Race.BIYI).political_trust = 0.0
@@ -73,6 +72,7 @@ func _test_race_seats_and_full_parliament() -> void:
 		state.get_race(Race.NANKE).seat_count, 16, "dominant trust receives all non-reserved seats"
 	)
 	_check_equal(state.get_race(Race.BIYI).seat_count, 1, "minimum seat is preserved")
+	session.free()
 
 
 func _test_authorization_stats_and_coloring() -> void:
