@@ -22,7 +22,10 @@ func settle_year(context: RunContext) -> void:
 	context.parliament_system.apply_annual_coloring(context.state, groups, context.random_system)
 	context.constitution_system.apply_annual_influence_rules(context)
 	context.state.constitution.revision_available = true
-	context.race_system.advance_era_expectations(context.state)
+	context.race_system.advance_era_expectations(
+		context.state, context.balance, context.inflation_system
+	)
+	context.state.year_start_metrics = (context.state.metrics.copy())
 	context.state.annual_proposal_slot_counts.clear()
 	for race in context.state.races:
 		race.archive_annual_results()

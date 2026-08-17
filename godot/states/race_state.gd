@@ -18,13 +18,8 @@ var last_year_promises_kept: int = 0
 var last_year_promises_broken: int = 0
 
 
-func _init(source_definition: RaceDefinition = null, year: int = 1) -> void:
+func _init(source_definition: RaceDefinition = null) -> void:
 	definition = source_definition
-	if definition == null:
-		return
-	for stance in definition.metric_stances:
-		if stance != null and stance.direction != MetricStanceDefinition.Direction.NONE:
-			expectation_targets[stance.metric] = stance.target_for_year(year)
 
 
 func get_id() -> StringName:

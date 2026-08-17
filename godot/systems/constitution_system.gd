@@ -4,6 +4,8 @@ class_name ConstitutionSystem
 const FLAG_FREE_TRADE: StringName = &"free_trade"
 const FLAG_YANO_RECOGNIZED: StringName = &"yano_recognized"
 const FLAG_PEACH_CLOSED: StringName = &"peach_closed"
+const FLAG_YIN_YANG_BIYI_ONLY: StringName = &"yin_yang_biyi_only"
+const FLAG_YIN_YANG_ALL: StringName = &"yin_yang_all"
 const MERGER_STRONG_RATE: float = 0.5
 const MERGER_WEAK_RATE: float = 0.05
 const ARTICLE_OUTER_VASSAL: StringName = &"outer_vassal"
@@ -482,3 +484,11 @@ func _variable_seats(state: RunState) -> Array[SeatState]:
 		if seat.race_id != Race.ZHUSHUI:
 			result.append(seat)
 	return result
+
+
+func uses_yin_yang_for_race(state: RunState, race_id: StringName) -> bool:
+	if state.constitution.has_flag(FLAG_YIN_YANG_ALL):
+		return true
+	if state.constitution.has_flag(FLAG_YIN_YANG_BIYI_ONLY):
+		return race_id == Race.BIYI
+	return false

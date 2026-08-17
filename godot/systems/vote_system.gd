@@ -60,6 +60,26 @@ func clear_donations(state: RunState) -> void:
 	state.vote_donations.clear()
 
 
+func _is_striking(
+	seat: SeatState, race: RaceState, draft: DraftBillState, context: RunContext
+) -> bool:
+	var nanke := context.state.get_race(Race.NANKE)
+	if nanke == null:
+		return false
+	if context.state.constitution.has_flag(&"nanke_mutual_aid"):
+		return false
+	var cooperative := context.state.constitution.has_flag(&"nanke_cooperative")
+	var affected_by_labor_group := seat.actual_group_id == nanke.definition.special_group_id
+	if not affected_by_labor_group:
+		return false
+	if not cooperative and race.get_id() != Race.NANKE:
+		return false
+	var pure_target := context.proposal_system.calculate_pure_target(
+		context.state.metrics, draft.proposals
+	)
+	return pure_target.wage < context.state.year_start_metrics.wage
+
+
 func _calculate_seat_vote(
 	seat: SeatState,
 	draft: DraftBillState,
@@ -77,6 +97,10 @@ func _calculate_seat_vote(
 		vote.add_reason(&"zhushui_governing_seat", 1000.0)
 		vote.position = SeatVoteState.Position.SUPPORT
 		return vote
+	if _is_striking(seat, race, draft, context):
+		vote.position = SeatVoteState.Position.OPPOSE
+		vote.breakdown[&"nanke_strike"] = 1.0
+		return vote
 	if resolve_absence and _is_absent(seat, race, context):
 		vote.position = SeatVoteState.Position.ABSENT
 		vote.breakdown[&"special_absence"] = 1.0
@@ -86,9 +110,7 @@ func _calculate_seat_vote(
 		var shared_human := context.state.get_race(Race.HUMAN)
 		if shared_human != null:
 			attitude_race = shared_human
-	vote.add_reason(
-		&"race_expectation", _race_expectation_score(attitude_race, projected, context.state)
-	)
+	vote.add_reason(&"race_expectation", _race_expectation_score(attitude_race, projected, context))
 	var use_human_attitude := (
 		context.state.constitution.has_flag(&"free_trade")
 		and _is_transport_group(seat.actual_group_id, context.state)
@@ -97,8 +119,7 @@ func _calculate_seat_vote(
 		var human_race := context.state.get_race(Race.HUMAN)
 		if human_race != null:
 			vote.add_reason(
-				&"transport_human_attitude",
-				_race_expectation_score(human_race, projected, context.state)
+				&"transport_human_attitude", _race_expectation_score(human_race, projected, context)
 			)
 	else:
 		vote.add_reason(&"group_stance", _group_stance_score(seat.actual_group_id, draft, context))
@@ -118,14 +139,19 @@ func _calculate_seat_vote(
 	return vote
 
 
-func _race_expectation_score(race: RaceState, projected: MetricValues, state: RunState) -> float:
+func _race_expectation_score(
+	race: RaceState, projected: MetricValues, context: RunContext
+) -> float:
 	var score := 0.0
-	for stance in race.definition.get_stances(state.month):
-		if stance == null or stance.direction == MetricStanceDefinition.Direction.NONE:
+	for metric in race.definition.get_stance_metrics():
+		if (
+			race.get_id() == Race.BIYI
+			and not context.balance.is_biyi_vote_metric_active(metric, context.state.month)
+		):
 			continue
-		var target := race.get_expectation(stance.metric, stance.initial_target)
-		var before_distance := absf(float(state.metrics.get_value(stance.metric) - target))
-		var after_distance := absf(float(projected.get_value(stance.metric) - target))
+		var target := context.race_system.get_effective_expectation(race, metric, context)
+		var before_distance := absf(float(context.state.metrics.get_value(metric) - target))
+		var after_distance := absf(float(projected.get_value(metric) - target))
 		if after_distance < before_distance:
 			score += RACE_EXPECTATION_SCORE
 		elif after_distance > before_distance:
@@ -175,8 +201,6 @@ func _is_absent(seat: SeatState, race: RaceState, context: RunContext) -> bool:
 		if protected
 		else context.balance.nanke_normal_absence_probability
 	)
-	if protected and context.state.metrics.wage < nanke.definition.strike_wage_floor:
-		return true
 	if not is_nanke and not protected:
 		return false
 	return context.random_system.chance(probability)

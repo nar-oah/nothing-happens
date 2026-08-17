@@ -20,6 +20,8 @@ func _run() -> void:
 	_test_annual_settlement()
 	_test_flow_reaches_new_year()
 	_test_collapse_routes()
+	_test_era_expectations()
+	_test_yin_yang_expectations()
 	if failures == 0:
 		print("BACKEND TESTS PASSED: %s assertions" % assertions)
 	else:
@@ -120,7 +122,9 @@ func _test_positive_traits_and_merge() -> void:
 	var generated := _make_proposal(&"guild")
 	var random := RandomSystem.new()
 	random.set_seed(12)
-	system.add_positive_trait(generated, 3, InflationSystem.new(), random)
+	system.add_positive_trait(
+		generated, 3, InflationSystem.new(), GameBalanceDefinition.new(), random
+	)
 	_check_equal(
 		generated.positive_effect.non_zero_metrics().size(), 1, "visitor trait has one metric"
 	)
@@ -139,11 +143,10 @@ func _test_positive_traits_and_merge() -> void:
 
 
 func _test_draft_editing_and_vote() -> void:
-	var stance := _make_stance(Metric.Id.WAGE, MetricStanceDefinition.Direction.HIGHER, 100, 0)
 	var race := _make_race(&"workers")
-	race.metric_stances = [stance]
+	race.increase_wage = true
 	var group := _make_group(&"union", 1, 0)
-	group.metric_stances = [stance]
+	group.metric_stances = [_make_stance(Metric.Id.WAGE, MetricStanceDefinition.Direction.HIGHER)]
 	var session := _make_session([race], [group], [], [], 3)
 	session.state.metrics.wage = 50
 	var proposal := _make_proposal(&"union")
@@ -307,8 +310,9 @@ func _test_constitution_revision_threshold() -> void:
 
 
 func _test_annual_settlement() -> void:
-	var stance := _make_stance(Metric.Id.TRADE, MetricStanceDefinition.Direction.HIGHER, 100, 10)
+	var stance := _make_stance(Metric.Id.TRADE, MetricStanceDefinition.Direction.HIGHER)
 	var race := _make_race(&"annual")
+	race.increase_trade = true
 	race.metric_stances = [stance]
 	var groups: Array[InterestGroupDefinition] = [
 		_make_group(&"a", 1, 0),
@@ -362,8 +366,9 @@ func _test_collapse_routes() -> void:
 
 
 func _test_flow_reaches_new_year() -> void:
-	var stance := _make_stance(Metric.Id.WAGE, MetricStanceDefinition.Direction.HIGHER, 20, 5)
+	var stance := _make_stance(Metric.Id.WAGE, MetricStanceDefinition.Direction.HIGHER)
 	var race := _make_race(&"flow")
+	race.increase_wage = true
 	race.metric_stances = [stance]
 	var session := _make_session([race], [_make_group(&"group", 1, 0)])
 	session.state.month = 12
@@ -417,13 +422,11 @@ func _make_group(id: StringName, weight: int, order: int) -> InterestGroupDefini
 
 
 func _make_stance(
-	metric: Metric.Id, direction: MetricStanceDefinition.Direction, target: int, step: int
+	metric: Metric.Id, direction: MetricStanceDefinition.Direction
 ) -> MetricStanceDefinition:
 	var result := MetricStanceDefinition.new()
 	result.metric = metric
 	result.direction = direction
-	result.initial_target = target
-	result.annual_step = step
 	return result
 
 
@@ -464,3 +467,69 @@ func _check(condition: bool, message: String) -> void:
 
 func _check_equal(actual: Variant, expected: Variant, message: String) -> void:
 	_check(actual == expected, "%s (actual=%s expected=%s)" % [message, actual, expected])
+
+
+func _test_era_expectations() -> void:
+	var balance := GameBalanceDefinition.new()
+	var inflation := InflationSystem.new()
+	_check_equal(
+		inflation.get_expectation_target(MetricStanceDefinition.Direction.HIGHER, 1, balance),
+		100,
+		"year one higher expectation starts at baseline"
+	)
+	_check_equal(
+		inflation.get_expectation_target(MetricStanceDefinition.Direction.LOWER, 1, balance),
+		100,
+		"year one lower expectation starts at baseline"
+	)
+	_check_equal(
+		inflation.get_expectation_target(MetricStanceDefinition.Direction.HIGHER, 2, balance),
+		110,
+		"year two higher expectation tightens upward"
+	)
+	_check_equal(
+		inflation.get_expectation_target(MetricStanceDefinition.Direction.LOWER, 2, balance),
+		90,
+		"year two lower expectation tightens downward"
+	)
+
+
+func _test_yin_yang_expectations() -> void:
+	var biyi := _make_race(Race.BIYI)
+	biyi.decrease_tax = true
+	biyi.decrease_price = true
+	biyi.increase_wage = true
+	biyi.decrease_trade = true
+	var article := ConstitutionArticleDefinition.new()
+	article.id = &"inclusive_culture"
+	article.axis_id = &"culture"
+	article.is_initial = true
+	article.flags = [ConstitutionSystem.FLAG_YIN_YANG_BIYI_ONLY]
+	var session := _make_session([biyi], [_make_group(&"group", 1, 0)], [], [article])
+	var race := session.state.get_race(Race.BIYI)
+	_check_equal(
+		race.get_expectation(Metric.Id.TAX), 100, "annual base target is not mutated by month"
+	)
+	session.state.month = 1
+	_check_equal(
+		session.race_system.get_effective_expectation(race, Metric.Id.TAX, session.context),
+		90,
+		"yin month tightens lower tax expectation"
+	)
+	_check_equal(
+		session.race_system.get_effective_expectation(race, Metric.Id.WAGE, session.context),
+		90,
+		"yin month relaxes yang wage expectation"
+	)
+	session.state.month = 2
+	_check_equal(
+		session.race_system.get_effective_expectation(race, Metric.Id.TAX, session.context),
+		110,
+		"yang month relaxes yin tax expectation"
+	)
+	_check_equal(
+		session.race_system.get_effective_expectation(race, Metric.Id.WAGE, session.context),
+		110,
+		"yang month tightens yang wage expectation"
+	)
+	session.free()

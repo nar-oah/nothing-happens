@@ -3,7 +3,10 @@ class_name RaceSystem
 
 
 func initialize_races(
-	state: RunState, definitions: Array[RaceDefinition], balance: GameBalanceDefinition
+	state: RunState,
+	definitions: Array[RaceDefinition],
+	balance: GameBalanceDefinition,
+	inflation_system: InflationSystem
 ) -> void:
 	state.races.clear()
 	var seen_ids: Dictionary[StringName, bool] = {}
@@ -12,27 +15,29 @@ func initialize_races(
 			push_error("Race definitions must have unique non-empty ids.")
 			continue
 		seen_ids[definition.id] = true
-		var race := RaceState.new(definition, state.year)
-		race.political_trust = balance.initial_political_trust
-		for stance in _all_stances(definition):
-			if stance.direction != MetricStanceDefinition.Direction.NONE:
-				race.expectation_targets[stance.metric] = stance.target_for_year(state.year)
+		var race := RaceState.new(definition)
+		race.political_trust = (balance.initial_political_trust)
+		for metric in definition.get_stance_metrics():
+			var direction := definition.get_stance(metric)
+			race.expectation_targets[metric] = (inflation_system.get_expectation_target(
+				direction, state.year, balance
+			))
 		state.races.append(race)
 
 
-func advance_era_expectations(state: RunState) -> void:
+func advance_era_expectations(
+	state: RunState, balance: GameBalanceDefinition, inflation_system: InflationSystem
+) -> void:
+	var next_year := state.year + 1
 	for race in state.races:
 		if race.definition == null:
 			continue
-		for stance in _all_stances(race.definition):
-			if stance.direction == MetricStanceDefinition.Direction.NONE:
-				continue
-			race.expectation_targets[stance.metric] = stance.target_for_year(state.year + 1)
-	if state.constitution.has_flag(&"trust_established"):
-		var human := state.get_race(Race.HUMAN)
-		if human != null:
-			for race in state.races:
-				race.expectation_targets = human.expectation_targets.duplicate()
+		race.expectation_targets.clear()
+		for metric in race.definition.get_stance_metrics():
+			var direction := race.definition.get_stance(metric)
+			race.expectation_targets[metric] = (inflation_system.get_expectation_target(
+				direction, next_year, balance
+			))
 
 
 func _all_stances(definition: RaceDefinition) -> Array[MetricStanceDefinition]:
@@ -195,3 +200,16 @@ func _calculate_bounded_quotas(
 			result[race.get_id()] = (remaining_pool * weight / total_weight)
 		break
 	return result
+
+
+func get_effective_expectation(race: RaceState, metric: Metric.Id, context: RunContext) -> int:
+	if race == null or race.definition == null:
+		return context.balance.initial_metric_value
+	var base_target := race.get_expectation(metric, context.balance.initial_metric_value)
+	var direction := race.definition.get_stance(metric)
+	if direction == MetricStanceDefinition.Direction.NONE:
+		return base_target
+	if not context.constitution_system.uses_yin_yang_for_race(context.state, race.get_id()):
+		return base_target
+	var month_sign := context.balance.get_yin_yang_month_sign(metric, context.state.month)
+	return base_target + int(direction) * month_sign * context.balance.yin_yang_adjustment

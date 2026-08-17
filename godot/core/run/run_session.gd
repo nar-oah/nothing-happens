@@ -49,6 +49,9 @@ func start_new_run() -> void:
 	market_system = MarketSystem.new()
 	policy_system = PolicySystem.new()
 	inflation_system = InflationSystem.new()
+	inflation_system.initialize_metrics(state.metrics, balance)
+	state.year_start_metrics = (state.metrics.copy())
+
 	parliament_system = ParliamentSystem.new()
 	race_system = RaceSystem.new()
 	political_trust_system = PoliticalTrustSystem.new()
@@ -85,7 +88,7 @@ func start_new_run() -> void:
 	context.constitution_articles = constitution_articles
 	context.automatic_draw_count = automatic_draw_count
 	constitution_system.initialize(state, constitution_articles)
-	race_system.initialize_races(state, race_definitions, balance)
+	race_system.initialize_races(state, race_definitions, balance, inflation_system)
 	if not race_system.allocate_seats(state, balance, constitution_system, random_system):
 		push_error("Failed to allocate initial race seats.")
 		return
