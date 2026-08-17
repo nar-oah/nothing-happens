@@ -18,6 +18,7 @@ func _run() -> void:
 	_test_special_voting_rules()
 	_test_constitution_revision_threshold()
 	_test_annual_settlement()
+	_test_flow_reaches_new_year()
 	_test_collapse_routes()
 	if failures == 0:
 		print("BACKEND TESTS PASSED: %s assertions" % assertions)
@@ -316,6 +317,22 @@ func _test_collapse_routes() -> void:
 	interrupted.silent_observation = true
 	system.record_intervention(interrupted, &"constitution_revision", 1.0)
 	_check(interrupted.run_failed, "intervention interrupts silent observation immediately")
+
+
+func _test_flow_reaches_new_year() -> void:
+	var stance := _make_stance(Metric.Id.WAGE, MetricStanceDefinition.Direction.HIGHER, 20, 5)
+	var race := _make_race(&"flow", 2)
+	race.metric_stances = [stance]
+	var session := _make_session([race], [_make_group(&"group", 1, 0)])
+	session.state.month = 12
+	var race_state := session.state.get_race(&"flow")
+	race_state.pending_trust_delta = 50.0
+	session.advance_month()
+	_check_equal(session.state.year, 2, "December flow enters next year")
+	_check_equal(session.state.month, 1, "new year starts at first month")
+	_check_equal(race_state.seat_count, 4, "flow runs trust and seats before new year")
+	_check_equal(race_state.get_expectation(Metric.Id.WAGE), 25, "flow tightens expectation before new year")
+	session.free()
 
 
 func _make_session(
