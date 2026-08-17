@@ -9,6 +9,7 @@ var proposal_system: ProposalSystem
 var market_system: MarketSystem
 var policy_system: PolicySystem
 var inflation_system: InflationSystem
+var parliament_system: ParliamentSystem
 var flow_controller: FlowController
 
 
@@ -21,6 +22,7 @@ func start_new_run() -> void:
 	market_system = MarketSystem.new()
 	policy_system = PolicySystem.new()
 	inflation_system = InflationSystem.new()
+	parliament_system = ParliamentSystem.new()
 
 	context = RunContext.new()
 	context.setup(
@@ -30,7 +32,8 @@ func start_new_run() -> void:
 		proposal_system,
 		market_system,
 		policy_system,
-		inflation_system
+		inflation_system,
+		parliament_system
 	)
 
 	flow_controller = FlowController.new()

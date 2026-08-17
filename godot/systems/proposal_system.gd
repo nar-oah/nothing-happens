@@ -1,6 +1,10 @@
 extends RefCounted
 class_name ProposalSystem
 
+const DEV_DRAW_BASE_WEIGHT: float = 1.0
+const DEV_DRAW_REVERSE_FACTOR: float = 3.0
+const DEV_DRAW_MIN_WEIGHT: float = 0.5
+const DEV_DRAW_MAX_WEIGHT: float = 2.0
 const DEV_DIGESTION_SPEED_MIN: float = 0.8
 const DEV_DIGESTION_SPEED_MAX: float = 1.2
 
@@ -80,3 +84,57 @@ func add_to_hand(state: RunState, proposal: ProposalInstance) -> void:
 		push_error("Cannot add null proposal to hand.")
 		return
 	state.proposal_hand.append(proposal)
+
+
+func calculate_automatic_draw_weight(current_influence: float, baseline_influence: float) -> float:
+	return clampf(
+		DEV_DRAW_BASE_WEIGHT + DEV_DRAW_REVERSE_FACTOR * (baseline_influence - current_influence),
+		DEV_DRAW_MIN_WEIGHT,
+		DEV_DRAW_MAX_WEIGHT
+	)
+
+
+func choose_automatic_source(
+	groups: Array[InterestGroupDefinition], context: RunContext
+) -> InterestGroupDefinition:
+	var candidates: Array[InterestGroupDefinition] = []
+	for group in groups:
+		if group == null:
+			continue
+		if group.proposal_definition == null:
+			continue
+		candidates.append(group)
+	if candidates.is_empty():
+		return null
+	var baseline_influence := 1.0 / float(candidates.size())
+	var weights: Array[float] = []
+	for group in candidates:
+		var current_influence := context.parliament_system.get_group_influence_rate(
+			context.state, group.id
+		)
+		weights.append(calculate_automatic_draw_weight(current_influence, baseline_influence))
+	var selected_index := context.random_system.weighted_index(weights)
+	if selected_index < 0:
+		return null
+	return candidates[selected_index]
+
+
+func draw_automatic_proposal(
+	groups: Array[InterestGroupDefinition], context: RunContext
+) -> ProposalInstance:
+	var source := choose_automatic_source(groups, context)
+	if source == null:
+		return null
+	return generate_automatic_proposal(
+		source.proposal_definition, context.state, context.inflation_system, context.random_system
+	)
+
+
+func draw_automatic_proposals(
+	groups: Array[InterestGroupDefinition], count: int, context: RunContext
+) -> void:
+	for i in range(maxi(count, 0)):
+		var proposal := draw_automatic_proposal(groups, context)
+		if proposal == null:
+			continue
+		add_to_hand(context.state, proposal)
