@@ -33,6 +33,7 @@ func record_promise(state: RunState, race_id: StringName, kept: bool, trust_delt
 
 func settle_annual_trust(state: RunState) -> void:
 	for race in state.races:
+		race.last_year_trust_delta = race.pending_trust_delta
 		race.political_trust = clampf(
 			race.political_trust + race.pending_trust_delta, MIN_TRUST, MAX_TRUST
 		)

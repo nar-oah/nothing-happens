@@ -54,11 +54,13 @@ func revise(context: RunContext, definition: ConstitutionArticleDefinition) -> b
 		context.state, &"constitution_revision", 3.0
 	)
 	_rebuild_article_affected_row(context, definition)
-	apply_annual_influence_rules(context)
+	if not had_free_trade and context.state.constitution.has_flag(FLAG_FREE_TRADE):
+		_rebuild_human_row(context)
+	_apply_static_revision_rules(context.state)
 	if not had_free_trade and context.state.constitution.has_flag(FLAG_FREE_TRADE):
 		apply_free_trade_mergers(context.state)
 		apply_special_fixed_relations(context.state)
-		update_petition_count(context.state)
+	update_petition_count(context.state)
 	return true
 
 
@@ -438,3 +440,22 @@ func _rebuild_article_affected_row(
 	apply_annual_seat_corrections(context.state)
 	var groups := get_effective_groups(context.state, context.interest_groups)
 	context.parliament_system.replace_race_row(context.state, race, groups)
+
+
+func _rebuild_human_row(context: RunContext) -> void:
+	var human := _find_special_race(context.state, RaceDefinition.SpecialMechanism.HUMAN)
+	if human == null:
+		return
+	apply_annual_seat_corrections(context.state)
+	var groups := get_effective_groups(context.state, context.interest_groups)
+	context.parliament_system.replace_race_row(context.state, human, groups)
+
+
+func _apply_static_revision_rules(state: RunState) -> void:
+	var rules := state.constitution.get_influence_rules()
+	for priority in range(ConstitutionInfluenceRule.Priority.TARGET + 1):
+		for rule in rules:
+			if rule != null and rule.priority == priority:
+				_apply_rule(state, rule)
+		if priority == ConstitutionInfluenceRule.Priority.FIXED:
+			apply_special_fixed_relations(state)

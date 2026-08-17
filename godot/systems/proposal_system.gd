@@ -248,6 +248,8 @@ func _can_merge(
 ) -> bool:
 	if mothers.size() != 3 or negative_base == null or negative_base not in mothers:
 		return false
+	if mothers[0] == null:
+		return false
 	var seen: Dictionary[int, bool] = {}
 	var group_id: StringName = mothers[0].source_group_id
 	for mother in mothers:

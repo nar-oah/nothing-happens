@@ -11,6 +11,11 @@ var resolved_events_this_year: int = 0
 var erupted_events_this_year: int = 0
 var promises_kept_this_year: int = 0
 var promises_broken_this_year: int = 0
+var last_year_trust_delta: float = 0.0
+var last_year_resolved_events: int = 0
+var last_year_erupted_events: int = 0
+var last_year_promises_kept: int = 0
+var last_year_promises_broken: int = 0
 
 
 func _init(source_definition: RaceDefinition = null, year: int = 1) -> void:
@@ -32,7 +37,11 @@ func get_expectation(metric: Metric.Id, fallback: int = 0) -> int:
 	return expectation_targets.get(metric, fallback)
 
 
-func reset_annual_results() -> void:
+func archive_annual_results() -> void:
+	last_year_resolved_events = resolved_events_this_year
+	last_year_erupted_events = erupted_events_this_year
+	last_year_promises_kept = promises_kept_this_year
+	last_year_promises_broken = promises_broken_this_year
 	resolved_events_this_year = 0
 	erupted_events_this_year = 0
 	promises_kept_this_year = 0

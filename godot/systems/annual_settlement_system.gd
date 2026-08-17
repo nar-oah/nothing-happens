@@ -24,4 +24,4 @@ func settle_year(context: RunContext) -> void:
 	context.race_system.advance_era_expectations(context.state)
 	context.state.annual_proposal_slot_counts.clear()
 	for race in context.state.races:
-		race.reset_annual_results()
+		race.archive_annual_results()
