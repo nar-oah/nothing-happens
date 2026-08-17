@@ -37,3 +37,7 @@ func advance_month() -> void:
 
 func print_current_date() -> void:
 	print("Year: ", state.year, ", Month: ", state.month)
+
+
+func enact_bill(draft: DraftBillState) -> void:
+	flow_controller.enact_bill(draft)
