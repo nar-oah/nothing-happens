@@ -22,11 +22,6 @@ func _init(source_definition: RaceDefinition = null, year: int = 1) -> void:
 	definition = source_definition
 	if definition == null:
 		return
-	seat_count = (
-		definition.fixed_seat_count
-		if definition.fixed_seat_count >= 0
-		else definition.initial_seats
-	)
 	for stance in definition.metric_stances:
 		if stance != null and stance.direction != MetricStanceDefinition.Direction.NONE:
 			expectation_targets[stance.metric] = stance.target_for_year(year)

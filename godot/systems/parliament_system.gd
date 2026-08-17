@@ -24,13 +24,17 @@ func get_group_influence_rate(state: RunState, group_id: StringName) -> float:
 
 
 func get_race_seat_rate(state: RunState, race_id: StringName) -> float:
-	if state.seats.is_empty():
-		return 0.0
-	var count := 0
+	var variable_count := 0
+	var race_count := 0
 	for seat in state.seats:
+		if seat.race_id == Race.ZHUSHUI:
+			continue
+		variable_count += 1
 		if seat.race_id == race_id:
-			count += 1
-	return float(count) / float(state.seats.size())
+			race_count += 1
+	if variable_count == 0:
+		return 0.0
+	return float(race_count) / float(variable_count)
 
 
 func _validate_base_groups(groups: Array[InterestGroupDefinition]) -> bool:
@@ -147,15 +151,19 @@ func create_full_parliament(
 	for race in races:
 		if race == null or race.definition == null:
 			continue
+		if race.get_id() == Race.ZHUSHUI:
+			for i in range(race.seat_count):
+				var seat := SeatState.new(next_seat_id, Race.ZHUSHUI, &"", &"")
+				result.append(seat)
+				next_seat_id += 1
+			continue
 		var row := create_base_row(race.get_id(), race.seat_count, groups, next_seat_id)
 		result.append_array(row)
 		next_seat_id += row.size()
 	return result
 
 
-func rebuild_all_rows(
-	state: RunState, groups: Array[InterestGroupDefinition]
-) -> void:
+func rebuild_all_rows(state: RunState, groups: Array[InterestGroupDefinition]) -> void:
 	state.seats = create_full_parliament(state.races, groups)
 
 
@@ -179,9 +187,7 @@ func replace_race_row(
 	state.seats = result
 
 
-func record_authorized_proposal_slots(
-	state: RunState, proposals: Array[ProposalInstance]
-) -> void:
+func record_authorized_proposal_slots(state: RunState, proposals: Array[ProposalInstance]) -> void:
 	for proposal in proposals:
 		if proposal == null or proposal.source_group_id == &"":
 			continue
@@ -225,6 +231,8 @@ func apply_annual_coloring(
 	if source_ids.is_empty():
 		return
 	for seat in state.seats:
+		if seat.race_id == Race.ZHUSHUI:
+			continue
 		if not random_system.chance(coloring_rate):
 			continue
 		var index := random_system.weighted_index(weights)

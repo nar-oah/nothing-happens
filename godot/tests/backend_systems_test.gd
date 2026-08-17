@@ -28,32 +28,51 @@ func _run() -> void:
 
 
 func _test_race_seats_and_full_parliament() -> void:
-	var race_definition := _make_race(&"race_a", 4)
-	var race := RaceState.new(race_definition)
-	var race_system := RaceSystem.new()
-	race.political_trust = 0.0
-	_check_equal(race_system.calculate_annual_seat_count(race), 1, "minimum trust seats")
-	race.political_trust = 50.0
-	_check_equal(race_system.calculate_annual_seat_count(race), 4, "pivot trust seats")
-	race.political_trust = 100.0
-	_check_equal(race_system.calculate_annual_seat_count(race), 8, "maximum trust seats")
-	var groups: Array[InterestGroupDefinition] = [
-		_make_group(&"strong", 6, 0),
-		_make_group(&"standard", 3, 1),
-		_make_group(&"local", 1, 2),
+	var races: Array[RaceDefinition] = [
+		_make_race(Race.ZHUSHUI),
+		_make_race(Race.NANKE),
+		_make_race(Race.BIYI),
+		_make_race(Race.YANO),
+		_make_race(Race.PEACH_BLOSSOM),
+		_make_race(Race.HUMAN),
 	]
-	race.seat_count = 10
-	var race_b := RaceState.new(_make_race(&"race_b", 10))
-	var races: Array[RaceState] = [race, race_b]
-	var parliament := ParliamentSystem.new()
-	var seats := parliament.create_full_parliament(races, groups)
-	_check_equal(seats.size(), 20, "all race rows generated")
-	var strong_count := 0
-	for seat in seats:
-		if seat.base_group_id == &"strong":
-			strong_count += 1
-	_check_equal(strong_count, 12, "formal 6:3:1 base weights")
-	_check_equal(Metric.proposal_negative_sign(Metric.Id.TAX), 1, "tax proposal cost rises")
+	var group := _make_group(&"group", 1, 0)
+	var session := _make_session(races, [group], [], [], 20)
+	_check_equal(
+		session.state.get_race(Race.NANKE).seat_count, 4, "equal trust gives Nanke four seats"
+	)
+	_check_equal(
+		session.state.get_race(Race.BIYI).seat_count, 4, "equal trust gives Biyi four seats"
+	)
+	_check_equal(
+		session.state.get_race(Race.YANO).seat_count, 4, "equal trust gives Yano four seats"
+	)
+	_check_equal(
+		session.state.get_race(Race.PEACH_BLOSSOM).seat_count,
+		4,
+		"equal trust gives Peach Blossom four seats"
+	)
+	_check_equal(
+		session.state.get_race(Race.HUMAN).seat_count, 4, "equal trust gives Human four seats"
+	)
+	_check_equal(
+		session.state.get_race(Race.ZHUSHUI).seat_count, 1, "Zhushui has one governing seat"
+	)
+	_check_equal(session.state.seats.size(), 21, "twenty variable seats plus one Zhushui seat")
+	session.free()
+	var state := session.state
+	state.get_race(Race.NANKE).political_trust = 100.0
+	state.get_race(Race.BIYI).political_trust = 0.0
+	state.get_race(Race.YANO).political_trust = 0.0
+	state.get_race(Race.PEACH_BLOSSOM).political_trust = 0.0
+	state.get_race(Race.HUMAN).political_trust = 0.0
+	session.race_system.allocate_seats(
+		state, session.balance, session.constitution_system, session.random_system
+	)
+	_check_equal(
+		state.get_race(Race.NANKE).seat_count, 16, "dominant trust receives all non-reserved seats"
+	)
+	_check_equal(state.get_race(Race.BIYI).seat_count, 1, "minimum seat is preserved")
 
 
 func _test_authorization_stats_and_coloring() -> void:
@@ -65,7 +84,7 @@ func _test_authorization_stats_and_coloring() -> void:
 		_make_group(&"a", 1, 0),
 		_make_group(&"b", 1, 1),
 	]
-	state.races = [RaceState.new(_make_race(&"race", 6))]
+	state.races = [RaceState.new(_make_race(&"race"))]
 	state.races[0].seat_count = 6
 	parliament.rebuild_all_rows(state, groups)
 	parliament.apply_annual_coloring(state, groups, random, 1.0)
@@ -121,12 +140,11 @@ func _test_positive_traits_and_merge() -> void:
 
 func _test_draft_editing_and_vote() -> void:
 	var stance := _make_stance(Metric.Id.WAGE, MetricStanceDefinition.Direction.HIGHER, 100, 0)
-	var race := _make_race(&"workers", 3)
-	race.fixed_seat_count = 3
+	var race := _make_race(&"workers")
 	race.metric_stances = [stance]
 	var group := _make_group(&"union", 1, 0)
 	group.metric_stances = [stance]
-	var session := _make_session([race], [group])
+	var session := _make_session([race], [group], [], [], 3)
 	session.state.metrics.wage = 50
 	var proposal := _make_proposal(&"union")
 	proposal.base_effect.wage = 10
@@ -149,8 +167,7 @@ func _test_draft_editing_and_vote() -> void:
 
 
 func _test_event_lifecycle_and_trust() -> void:
-	var race := _make_race(&"event_race", 2)
-	race.fixed_seat_count = 2
+	var race := _make_race(&"event_race")
 	var group := _make_group(&"group", 1, 0)
 	var session := _make_session([race], [group])
 	var requirement := EventRequirementDefinition.new()
@@ -181,17 +198,14 @@ func _test_event_lifecycle_and_trust() -> void:
 
 
 func _test_constitution_and_special_races() -> void:
-	var yano := _make_race(Race.YANO, 2)
-	yano.fixed_seat_count = 2
+	var yano := _make_race(Race.YANO)
 	yano.special_group_id = &"factory"
-	var peach := _make_race(Race.PEACH_BLOSSOM, 2)
-	peach.fixed_seat_count = 2
+	var peach := _make_race(Race.PEACH_BLOSSOM)
 	peach.local_group_prefix = &"county"
-	var human := _make_race(Race.HUMAN, 3)
-	human.fixed_seat_count = 3
+	var human := _make_race(Race.HUMAN)
 	human.special_group_id = &"transport"
 	var article := ConstitutionArticleDefinition.new()
-	article.id = &"special_rules"
+	article.id = ConstitutionSystem.ARTICLE_FREE_TRADE
 	article.axis_id = &"initial"
 	article.is_initial = true
 	article.flags = [&"free_trade", &"yano_recognized", &"peach_closed"]
@@ -222,13 +236,11 @@ func _test_constitution_and_special_races() -> void:
 
 
 func _test_special_voting_rules() -> void:
-	var zhushui := _make_race(Race.ZHUSHUI, 4)
-	var nanke := _make_race(Race.NANKE, 1)
-	nanke.fixed_seat_count = 1
+	var zhushui := _make_race(Race.ZHUSHUI)
+	var nanke := _make_race(Race.NANKE)
 	nanke.special_group_id = &"union"
 	nanke.strike_wage_floor = 10
-	var biyi := _make_race(Race.BIYI, 1)
-	biyi.fixed_seat_count = 1
+	var biyi := _make_race(Race.BIYI)
 	var group := _make_group(&"union", 1, 0)
 	var session := _make_session([zhushui, nanke, biyi], [group])
 	for seat in session.state.seats:
@@ -266,8 +278,7 @@ func _test_special_voting_rules() -> void:
 
 
 func _test_constitution_revision_threshold() -> void:
-	var race := _make_race(&"majority", 3)
-	race.fixed_seat_count = 3
+	var race := _make_race(&"majority")
 	var group := _make_group(&"group", 1, 0)
 	var initial := ConstitutionArticleDefinition.new()
 	initial.id = &"center"
@@ -297,7 +308,7 @@ func _test_constitution_revision_threshold() -> void:
 
 func _test_annual_settlement() -> void:
 	var stance := _make_stance(Metric.Id.TRADE, MetricStanceDefinition.Direction.HIGHER, 100, 10)
-	var race := _make_race(&"annual", 4)
+	var race := _make_race(&"annual")
 	race.metric_stances = [stance]
 	var groups: Array[InterestGroupDefinition] = [
 		_make_group(&"a", 1, 0),
@@ -352,7 +363,7 @@ func _test_collapse_routes() -> void:
 
 func _test_flow_reaches_new_year() -> void:
 	var stance := _make_stance(Metric.Id.WAGE, MetricStanceDefinition.Direction.HIGHER, 20, 5)
-	var race := _make_race(&"flow", 2)
+	var race := _make_race(&"flow")
 	race.metric_stances = [stance]
 	var session := _make_session([race], [_make_group(&"group", 1, 0)])
 	session.state.month = 12
@@ -372,23 +383,22 @@ func _make_session(
 	races: Array[RaceDefinition],
 	groups: Array[InterestGroupDefinition],
 	events: Array[EventDefinition] = [],
-	articles: Array[ConstitutionArticleDefinition] = []
+	articles: Array[ConstitutionArticleDefinition] = [],
+	variable_seat_count: int = 20
 ) -> RunSession:
 	var session := RunSession.new()
 	session.balance = GameBalanceDefinition.new()
+	session.balance.variable_seat_count = variable_seat_count
 	session.configure_content(races, groups, events, articles)
 	session.automatic_draw_count = 0
 	session.start_new_run()
 	return session
 
 
-func _make_race(id: StringName, seats: int) -> RaceDefinition:
+func _make_race(id: StringName) -> RaceDefinition:
 	var result := RaceDefinition.new()
 	result.id = id
 	result.display_name = String(id)
-	result.minimum_seats = 1
-	result.initial_seats = seats
-	result.maximum_seats = maxi(seats * 2, seats)
 	return result
 
 

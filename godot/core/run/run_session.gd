@@ -86,26 +86,21 @@ func start_new_run() -> void:
 	context.automatic_draw_count = automatic_draw_count
 	constitution_system.initialize(state, constitution_articles)
 	race_system.initialize_races(state, race_definitions, balance)
-	race_system.recalculate_all_seat_counts(state)
-	constitution_system.apply_annual_seat_corrections(state)
+	if not race_system.allocate_seats(state, balance, constitution_system, random_system):
+		push_error("Failed to allocate initial race seats.")
+		return
 	var groups := constitution_system.get_effective_groups(state, interest_groups)
+	parliament_system.rebuild_all_rows(state, groups)
+	constitution_system.apply_annual_influence_rules(context)
 	parliament_system.rebuild_all_rows(state, groups)
 	constitution_system.apply_annual_influence_rules(context)
 
 	flow_controller = FlowController.new()
 	flow_controller.setup(context)
 
-	print("Run started.")
-	print_current_date()
-
 
 func advance_month() -> void:
 	flow_controller.advance_month()
-	print_current_date()
-
-
-func print_current_date() -> void:
-	print("Year: ", state.year, ", Month: ", state.month)
 
 
 func enact_bill(draft: DraftBillState) -> void:

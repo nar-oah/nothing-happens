@@ -6,6 +6,11 @@ const FLAG_YANO_RECOGNIZED: StringName = &"yano_recognized"
 const FLAG_PEACH_CLOSED: StringName = &"peach_closed"
 const MERGER_STRONG_RATE: float = 0.5
 const MERGER_WEAK_RATE: float = 0.05
+const ARTICLE_OUTER_VASSAL: StringName = &"outer_vassal"
+const ARTICLE_FREE_TRADE: StringName = &"free_trade"
+const ARTICLE_INCORPORATION: StringName = &"incorporation"
+const ARTICLE_PROVINCE: StringName = &"province"
+const ARTICLE_CITIZENSHIP_VETO: StringName = &"citizenship_veto"
 
 
 func initialize(state: RunState, definitions: Array[ConstitutionArticleDefinition]) -> void:
@@ -47,9 +52,8 @@ func revise(context: RunContext, definition: ConstitutionArticleDefinition) -> b
 	if definition.is_terminal:
 		context.state.constitution.terminal_article_id = definition.id
 	context.collapse_system.record_intervention(context.state, &"constitution_revision", 3.0)
-	_rebuild_article_affected_row(context, definition)
-	if not had_free_trade and context.state.constitution.has_flag(FLAG_FREE_TRADE):
-		_rebuild_human_row(context)
+	if _article_changes_race_seats(definition.id):
+		_rebuild_for_seat_constraints(context)
 	_apply_static_revision_rules(context.state)
 	if not had_free_trade and context.state.constitution.has_flag(FLAG_FREE_TRADE):
 		apply_free_trade_mergers(context.state)
@@ -77,26 +81,6 @@ func get_unlocked_policies(state: RunState) -> Array[PolicyDefinition]:
 				seen[policy.id] = true
 				result.append(policy)
 	return result
-
-
-func apply_annual_seat_corrections(state: RunState) -> void:
-	for article in state.constitution.active_articles.values():
-		if article == null or article.seat_race_id == &"":
-			continue
-		var race := state.get_race(article.seat_race_id)
-		if race == null:
-			continue
-		if article.fixed_seat_count >= 0:
-			race.seat_count = article.fixed_seat_count
-		else:
-			if article.seat_minimum >= 0:
-				race.seat_count = maxi(race.seat_count, article.seat_minimum)
-			if article.seat_maximum >= 0:
-				race.seat_count = mini(race.seat_count, article.seat_maximum)
-	if state.constitution.has_flag(FLAG_FREE_TRADE):
-		var human := state.get_race(Race.HUMAN)
-		if human != null:
-			human.seat_count = 1
 
 
 func get_effective_groups(
@@ -158,26 +142,29 @@ func apply_annual_influence_rules(context: RunContext) -> void:
 
 
 func apply_free_trade_mergers(state: RunState) -> void:
-	if not state.constitution.has_flag(FLAG_FREE_TRADE) or state.seats.is_empty():
+	if not state.constitution.has_flag(FLAG_FREE_TRADE):
+		return
+	var eligible := _eligible_seats(state, &"")
+	if eligible.is_empty():
 		return
 	var counts: Dictionary[StringName, int] = {}
-	for seat in state.seats:
-		counts[seat.actual_group_id] = counts.get(seat.actual_group_id, 0) + 1
+	for seat in eligible:
+		counts[seat.actual_group_id] = (counts.get(seat.actual_group_id, 0) + 1)
 	var strongest: StringName
 	var strongest_rate := 0.0
 	for group_id in counts:
-		var rate := float(counts[group_id]) / float(state.seats.size())
+		var rate := float(counts[group_id]) / float(eligible.size())
 		if rate > MERGER_STRONG_RATE and rate > strongest_rate:
 			strongest = group_id
 			strongest_rate = rate
 	if strongest == &"":
 		return
 	for group_id in counts:
-		var rate := float(counts[group_id]) / float(state.seats.size())
+		var rate := float(counts[group_id]) / float(eligible.size())
 		if group_id == strongest or rate >= MERGER_WEAK_RATE:
 			continue
 		state.constitution.group_mergers[group_id] = strongest
-		for seat in state.seats:
+		for seat in eligible:
 			if seat.actual_group_id == group_id and seat.influence_priority >= 1:
 				seat.actual_group_id = strongest
 				seat.influence_priority = 1
@@ -247,13 +234,14 @@ func _threshold_met(state: RunState, definition: ConstitutionArticleDefinition) 
 		ConstitutionArticleDefinition.ThresholdKind.NONE:
 			return true
 		ConstitutionArticleDefinition.ThresholdKind.RACE_SEAT_RATE:
-			if state.seats.is_empty():
+			var seats := _variable_seats(state)
+			if seats.is_empty():
 				return false
 			var count := 0
-			for seat in state.seats:
+			for seat in seats:
 				if seat.race_id == definition.threshold_target_id:
 					count += 1
-			return float(count) / float(state.seats.size()) >= definition.threshold_rate
+			return float(count) / float(seats.size()) >= definition.threshold_rate
 		ConstitutionArticleDefinition.ThresholdKind.GROUP_INFLUENCE_RATE:
 			if state.seats.is_empty():
 				return false
@@ -383,6 +371,8 @@ func _localize_race(
 func _eligible_seats(state: RunState, race_id: StringName) -> Array[SeatState]:
 	var result: Array[SeatState] = []
 	for seat in state.seats:
+		if seat.race_id == Race.ZHUSHUI:
+			continue
 		if race_id == &"" or seat.race_id == race_id:
 			result.append(seat)
 	return result
@@ -420,26 +410,27 @@ func _clone_group(source: InterestGroupDefinition) -> InterestGroupDefinition:
 	return result
 
 
-func _rebuild_article_affected_row(
-	context: RunContext, article: ConstitutionArticleDefinition
-) -> void:
-	if article.seat_race_id == &"":
-		return
-	var race := context.state.get_race(article.seat_race_id)
-	if race == null:
-		return
-	apply_annual_seat_corrections(context.state)
-	var groups := get_effective_groups(context.state, context.interest_groups)
-	context.parliament_system.replace_race_row(context.state, race, groups)
+func _article_changes_race_seats(article_id: StringName) -> bool:
+	return (
+		article_id
+		in [
+			ARTICLE_OUTER_VASSAL,
+			ARTICLE_FREE_TRADE,
+			ARTICLE_INCORPORATION,
+			ARTICLE_PROVINCE,
+			ARTICLE_CITIZENSHIP_VETO,
+		]
+	)
 
 
-func _rebuild_human_row(context: RunContext) -> void:
-	var human := context.state.get_race(Race.HUMAN)
-	if human == null:
+func _rebuild_for_seat_constraints(context: RunContext) -> void:
+	if not context.race_system.allocate_seats(
+		context.state, context.balance, self, context.random_system
+	):
+		push_error("Failed to reallocate seats after constitution revision.")
 		return
-	apply_annual_seat_corrections(context.state)
 	var groups := get_effective_groups(context.state, context.interest_groups)
-	context.parliament_system.replace_race_row(context.state, human, groups)
+	context.parliament_system.rebuild_all_rows(context.state, groups)
 
 
 func _apply_static_revision_rules(state: RunState) -> void:
@@ -450,3 +441,44 @@ func _apply_static_revision_rules(state: RunState) -> void:
 				_apply_rule(state, rule)
 		if priority == ConstitutionInfluenceRule.Priority.FIXED:
 			apply_special_fixed_relations(state)
+
+
+func get_race_seat_constraints(
+	state: RunState, balance: GameBalanceDefinition
+) -> Dictionary[StringName, RaceSeatConstraint]:
+	var result: Dictionary[StringName, RaceSeatConstraint] = {}
+	for race in state.races:
+		if race == null or race.definition == null:
+			continue
+		var race_id := race.get_id()
+		if race_id == Race.ZHUSHUI:
+			continue
+		result[race_id] = RaceSeatConstraint.new(balance.default_race_minimum_seats)
+	if state.constitution.has_article(ARTICLE_PROVINCE):
+		for race_id in result:
+			var constraint: RaceSeatConstraint = result[race_id]
+			if race_id == Race.HUMAN:
+				constraint.fixed_count = balance.variable_seat_count
+			else:
+				constraint.fixed_count = 0
+		return result
+	var human: RaceSeatConstraint = result.get(Race.HUMAN)
+	if human != null:
+		if state.constitution.has_article(ARTICLE_FREE_TRADE):
+			human.fixed_count = 1
+		elif state.constitution.has_article(ARTICLE_INCORPORATION):
+			human.minimum_count = ceili(float(balance.variable_seat_count) * 0.50)
+		elif state.constitution.has_article(ARTICLE_OUTER_VASSAL):
+			human.minimum_count = ceili(float(balance.variable_seat_count) * 0.20)
+	var yano: RaceSeatConstraint = result.get(Race.YANO)
+	if yano != null and state.constitution.has_article(ARTICLE_CITIZENSHIP_VETO):
+		yano.fixed_count = 0
+	return result
+
+
+func _variable_seats(state: RunState) -> Array[SeatState]:
+	var result: Array[SeatState] = []
+	for seat in state.seats:
+		if seat.race_id != Race.ZHUSHUI:
+			result.append(seat)
+	return result
