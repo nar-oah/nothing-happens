@@ -1,6 +1,8 @@
 extends Node
 class_name RunSession
 
+@export var balance: GameBalanceDefinition
+
 var state: RunState
 var context: RunContext
 var time_system: TimeSystem
@@ -60,6 +62,7 @@ func start_new_run() -> void:
 	context = RunContext.new()
 	context.setup(
 		state,
+		balance,
 		time_system,
 		random_system,
 		proposal_system,
@@ -82,7 +85,7 @@ func start_new_run() -> void:
 	context.constitution_articles = constitution_articles
 	context.automatic_draw_count = automatic_draw_count
 	constitution_system.initialize(state, constitution_articles)
-	race_system.initialize_races(state, race_definitions)
+	race_system.initialize_races(state, race_definitions, balance)
 	race_system.recalculate_all_seat_counts(state)
 	constitution_system.apply_annual_seat_corrections(state)
 	var groups := constitution_system.get_effective_groups(state, interest_groups)

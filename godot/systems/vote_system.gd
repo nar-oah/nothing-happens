@@ -171,9 +171,9 @@ func _is_absent(seat: SeatState, race: RaceState, context: RunContext) -> bool:
 		)
 	)
 	var probability := (
-		nanke.definition.protected_absence_probability
+		context.balance.nanke_protected_absence_probability
 		if protected
-		else nanke.definition.normal_absence_probability
+		else context.balance.nanke_normal_absence_probability
 	)
 	if protected and context.state.metrics.wage < nanke.definition.strike_wage_floor:
 		return true

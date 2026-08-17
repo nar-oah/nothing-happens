@@ -2,7 +2,9 @@ extends RefCounted
 class_name RaceSystem
 
 
-func initialize_races(state: RunState, definitions: Array[RaceDefinition]) -> void:
+func initialize_races(
+	state: RunState, definitions: Array[RaceDefinition], balance: GameBalanceDefinition
+) -> void:
 	state.races.clear()
 	var seen_ids: Dictionary[StringName, bool] = {}
 	for definition in definitions:
@@ -11,6 +13,7 @@ func initialize_races(state: RunState, definitions: Array[RaceDefinition]) -> vo
 			continue
 		seen_ids[definition.id] = true
 		var race := RaceState.new(definition, state.year)
+		race.political_trust = balance.initial_political_trust
 		for stance in _all_stances(definition):
 			if stance.direction != MetricStanceDefinition.Direction.NONE:
 				race.expectation_targets[stance.metric] = stance.target_for_year(state.year)

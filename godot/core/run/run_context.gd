@@ -2,6 +2,7 @@ extends RefCounted
 class_name RunContext
 
 var state: RunState
+var balance: GameBalanceDefinition
 var time_system: TimeSystem
 var random_system: RandomSystem
 var proposal_system: ProposalSystem
@@ -26,6 +27,7 @@ var automatic_draw_count: int = 3
 
 func setup(
 	run_state: RunState,
+	run_balance: GameBalanceDefinition,
 	run_time_system: TimeSystem,
 	run_random_system: RandomSystem,
 	run_proposal_system: ProposalSystem,
@@ -43,6 +45,7 @@ func setup(
 	run_annual_settlement_system: AnnualSettlementSystem
 ) -> void:
 	state = run_state
+	balance = run_balance
 	time_system = run_time_system
 	random_system = run_random_system
 	proposal_system = run_proposal_system

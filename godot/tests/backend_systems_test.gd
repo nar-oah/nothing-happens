@@ -375,6 +375,7 @@ func _make_session(
 	articles: Array[ConstitutionArticleDefinition] = []
 ) -> RunSession:
 	var session := RunSession.new()
+	session.balance = GameBalanceDefinition.new()
 	session.configure_content(races, groups, events, articles)
 	session.automatic_draw_count = 0
 	session.start_new_run()
