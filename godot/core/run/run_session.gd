@@ -1,7 +1,17 @@
 extends Node
 class_name RunSession
 
+@export_group("配置")
 @export var balance: GameBalanceDefinition
+
+@export_group("游戏内容")
+@export var race_definitions: Array[RaceDefinition] = []
+@export var interest_groups: Array[InterestGroupDefinition] = []
+@export var event_definitions: Array[EventDefinition] = []
+@export var constitution_articles: Array[ConstitutionArticleDefinition] = []
+
+@export_group("流程")
+@export var automatic_draw_count: int = 3
 
 var state: RunState
 var context: RunContext
@@ -21,11 +31,6 @@ var constitution_system: ConstitutionSystem
 var collapse_system: CollapseSystem
 var annual_settlement_system: AnnualSettlementSystem
 var flow_controller: FlowController
-var race_definitions: Array[RaceDefinition] = []
-var interest_groups: Array[InterestGroupDefinition] = []
-var event_definitions: Array[EventDefinition] = []
-var constitution_articles: Array[ConstitutionArticleDefinition] = []
-var automatic_draw_count: int = 3
 
 
 func configure_content(
