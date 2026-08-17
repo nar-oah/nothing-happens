@@ -27,12 +27,19 @@ func calculate_vote(
 	return result
 
 
-func set_donation(state: RunState, seat_id: int, support_amount: float) -> bool:
+func set_donation(context: RunContext, seat_id: int, support_amount: float) -> bool:
 	if support_amount <= 0.0:
 		return false
-	for seat in state.seats:
+	for seat in context.state.seats:
 		if seat.seat_id == seat_id:
-			state.vote_donations[seat_id] = support_amount
+			context.state.vote_donations[seat_id] = support_amount
+			var detection_probability := 0.25
+			if context.state.constitution.has_flag(&"transparent_government"):
+				detection_probability = 0.65
+			elif context.state.constitution.has_flag(&"unregulated_donations"):
+				detection_probability = 0.0
+			if context.random_system.chance(detection_probability):
+				context.state.pending_collapse_delta += 5.0
 			return true
 	return false
 
@@ -133,17 +140,24 @@ func _proposal_source_score(group_id: StringName, draft: DraftBillState) -> floa
 
 
 func _is_absent(seat: SeatState, race: RaceState, context: RunContext) -> bool:
-	if race.definition.special_mechanism != RaceDefinition.SpecialMechanism.NANKE:
+	var nanke := _find_special_race(context.state, RaceDefinition.SpecialMechanism.NANKE)
+	if nanke == null:
 		return false
-	var protected := (
-		seat.actual_group_id == race.definition.special_group_id
-		and not context.state.constitution.has_flag(&"nanke_mutual_aid")
+	var is_nanke := race == nanke
+	var cooperative := context.state.constitution.has_flag(&"nanke_cooperative")
+	var protected := seat.actual_group_id == nanke.definition.special_group_id and (
+		(is_nanke and not context.state.constitution.has_flag(&"nanke_mutual_aid"))
+		or cooperative
 	)
 	var probability := (
-		race.definition.protected_absence_probability
+		nanke.definition.protected_absence_probability
 		if protected
-		else race.definition.normal_absence_probability
+		else nanke.definition.normal_absence_probability
 	)
+	if protected and context.state.metrics.wage < nanke.definition.strike_wage_floor:
+		return true
+	if not is_nanke and not protected:
+		return false
 	return context.random_system.chance(probability)
 
 

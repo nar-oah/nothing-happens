@@ -222,13 +222,13 @@ func merge_three(
 	result.positive_effect = MetricVector.new()
 	if selected_positive != null:
 		var metric_value := selected_positive.get_positive_metric()
-		var metric := metric_value as Metric.Id
+		var metric: Metric.Id = metric_value
 		var selected_magnitude := absi(selected_positive.positive_effect.get_value(metric))
 		var discarded_magnitude := 0
 		for mother in mothers:
 			if mother == selected_positive or not mother.has_positive_trait():
 				continue
-			var discarded_metric := mother.get_positive_metric() as Metric.Id
+			var discarded_metric: Metric.Id = mother.get_positive_metric()
 			discarded_magnitude += absi(mother.positive_effect.get_value(discarded_metric))
 		var converted := float(discarded_magnitude) * MERGE_CONVERSION_RATIO
 		var upgraded := maxi(1, roundi(pow(float(selected_magnitude) + converted, MERGE_UPGRADE_EXPONENT)))

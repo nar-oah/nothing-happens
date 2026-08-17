@@ -5,7 +5,7 @@ class_name DraftBillSystem
 func move_proposal_from_hand(state: RunState, hand_index: int) -> bool:
 	if hand_index < 0 or hand_index >= state.proposal_hand.size():
 		return false
-	var proposal := state.proposal_hand.pop_at(hand_index)
+	var proposal: ProposalInstance = state.proposal_hand.pop_at(hand_index)
 	state.draft_bill.proposals.append(proposal)
 	return true
 
@@ -13,7 +13,7 @@ func move_proposal_from_hand(state: RunState, hand_index: int) -> bool:
 func return_proposal_to_hand(state: RunState, draft_index: int) -> bool:
 	if draft_index < 0 or draft_index >= state.draft_bill.proposals.size():
 		return false
-	var proposal := state.draft_bill.proposals.pop_at(draft_index)
+	var proposal: ProposalInstance = state.draft_bill.proposals.pop_at(draft_index)
 	state.proposal_hand.append(proposal)
 	return true
 

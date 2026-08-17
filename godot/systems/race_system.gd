@@ -10,7 +10,11 @@ func initialize_races(state: RunState, definitions: Array[RaceDefinition]) -> vo
 			push_error("Race definitions must have unique non-empty ids.")
 			continue
 		seen_ids[definition.id] = true
-		state.races.append(RaceState.new(definition, state.year))
+		var race := RaceState.new(definition, state.year)
+		for stance in _all_stances(definition):
+			if stance.direction != MetricStanceDefinition.Direction.NONE:
+				race.expectation_targets[stance.metric] = stance.target_for_year(state.year)
+		state.races.append(race)
 
 
 func calculate_annual_seat_count(race: RaceState) -> int:

@@ -232,6 +232,14 @@ func add_next_year_group_target(
 	return true
 
 
+func use_petition(context: RunContext) -> bool:
+	if context.state.constitution.annual_petition_count <= 0:
+		return false
+	context.state.constitution.annual_petition_count -= 1
+	context.collapse_system.record_intervention(context.state, &"imperial_petition", 2.0)
+	return true
+
+
 func _threshold_met(state: RunState, definition: ConstitutionArticleDefinition) -> bool:
 	match definition.threshold_kind:
 		ConstitutionArticleDefinition.ThresholdKind.NONE:
