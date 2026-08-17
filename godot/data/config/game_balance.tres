@@ -1,0 +1,6 @@
+[gd_resource type="Resource" script_class="GameBalanceDefinition" format=3 uid="uid://61kkkntclnv"]
+
+[ext_resource type="Script" uid="uid://c2xh5m2ibfgwx" path="res://definitions/game_balance_definition.gd" id="1_14gic"]
+
+[resource]
+script = ExtResource("1_14gic")

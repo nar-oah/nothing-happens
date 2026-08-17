@@ -1,6 +1,18 @@
 extends Node
 class_name RunSession
 
+@export_group("配置")
+@export var balance: GameBalanceDefinition
+
+@export_group("游戏内容")
+@export var race_definitions: Array[RaceDefinition] = []
+@export var interest_groups: Array[InterestGroupDefinition] = []
+@export var event_definitions: Array[EventDefinition] = []
+@export var constitution_articles: Array[ConstitutionArticleDefinition] = []
+
+@export_group("流程")
+@export var automatic_draw_count: int = 3
+
 var state: RunState
 var context: RunContext
 var time_system: TimeSystem
@@ -19,11 +31,6 @@ var constitution_system: ConstitutionSystem
 var collapse_system: CollapseSystem
 var annual_settlement_system: AnnualSettlementSystem
 var flow_controller: FlowController
-var race_definitions: Array[RaceDefinition] = []
-var interest_groups: Array[InterestGroupDefinition] = []
-var event_definitions: Array[EventDefinition] = []
-var constitution_articles: Array[ConstitutionArticleDefinition] = []
-var automatic_draw_count: int = 3
 
 
 func configure_content(
@@ -47,6 +54,9 @@ func start_new_run() -> void:
 	market_system = MarketSystem.new()
 	policy_system = PolicySystem.new()
 	inflation_system = InflationSystem.new()
+	inflation_system.initialize_metrics(state.metrics, balance)
+	state.year_start_metrics = (state.metrics.copy())
+
 	parliament_system = ParliamentSystem.new()
 	race_system = RaceSystem.new()
 	political_trust_system = PoliticalTrustSystem.new()
@@ -60,6 +70,7 @@ func start_new_run() -> void:
 	context = RunContext.new()
 	context.setup(
 		state,
+		balance,
 		time_system,
 		random_system,
 		proposal_system,
@@ -82,9 +93,10 @@ func start_new_run() -> void:
 	context.constitution_articles = constitution_articles
 	context.automatic_draw_count = automatic_draw_count
 	constitution_system.initialize(state, constitution_articles)
-	race_system.initialize_races(state, race_definitions)
-	race_system.recalculate_all_seat_counts(state)
-	constitution_system.apply_annual_seat_corrections(state)
+	race_system.initialize_races(state, race_definitions, balance, inflation_system)
+	if not race_system.allocate_seats(state, balance, constitution_system, random_system):
+		push_error("Failed to allocate initial race seats.")
+		return
 	var groups := constitution_system.get_effective_groups(state, interest_groups)
 	parliament_system.rebuild_all_rows(state, groups)
 	constitution_system.apply_annual_influence_rules(context)
@@ -92,17 +104,9 @@ func start_new_run() -> void:
 	flow_controller = FlowController.new()
 	flow_controller.setup(context)
 
-	print("Run started.")
-	print_current_date()
-
 
 func advance_month() -> void:
 	flow_controller.advance_month()
-	print_current_date()
-
-
-func print_current_date() -> void:
-	print("Year: ", state.year, ", Month: ", state.month)
 
 
 func enact_bill(draft: DraftBillState) -> void:

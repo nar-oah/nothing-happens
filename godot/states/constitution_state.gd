@@ -27,3 +27,10 @@ func get_influence_rules() -> Array[ConstitutionInfluenceRule]:
 			continue
 		result.append_array(article.influence_rules)
 	return result
+
+
+func has_article(article_id: StringName) -> bool:
+	for article in active_articles.values():
+		if article != null and article.id == article_id:
+			return true
+	return false

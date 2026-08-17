@@ -23,19 +23,19 @@ func spawn_event(state: RunState, definition: EventDefinition) -> EventState:
 
 func try_generate_month(context: RunContext) -> Array[EventState]:
 	var generated: Array[EventState] = []
-	_update_gap_durations(context.state)
+	_update_gap_durations(context)
 	for definition in context.event_definitions:
 		if definition == null or _has_active_event(context.state, definition.id):
 			continue
 		var race := context.state.get_race(definition.race_id)
 		if race == null:
 			continue
-		var gap_pressure := _race_gap_pressure(race, context.state.metrics, context.state)
+		var gap_pressure := _race_gap_pressure(race, context)
 		var duration_pressure := _race_gap_duration_pressure(race)
 		var probability := definition.local_issue_chance
 		if gap_pressure > 0.0:
-			probability += definition.monthly_spawn_chance * (
-				1.0 + gap_pressure * 2.0 + duration_pressure
+			probability += (
+				definition.monthly_spawn_chance * (1.0 + gap_pressure * 2.0 + duration_pressure)
 			)
 		probability *= context.collapse_system.get_event_density_multiplier(context.state)
 		if context.random_system.chance(clampf(probability, 0.0, 0.95)):
@@ -49,7 +49,7 @@ func settle_month(context: RunContext) -> void:
 			continue
 		event.months_alive += 1
 		_update_effective_intensity(event, context.state)
-		event.satisfaction_rate = _calculate_satisfaction(event, context.state.metrics)
+		event.satisfaction_rate = _calculate_satisfaction(event, context)
 		if event.satisfaction_rate < WORSEN_THRESHOLD:
 			_worsen(event, context)
 		elif event.satisfaction_rate < RELIEF_THRESHOLD:
@@ -132,10 +132,7 @@ func _relieve(event: EventState, context: RunContext) -> void:
 func _resolve(event: EventState, context: RunContext) -> void:
 	event.phase = EventState.Phase.RESOLVED
 	context.political_trust_system.record_event_result(
-		context.state,
-		event.definition.race_id,
-		event.definition.trust_on_resolve,
-		true
+		context.state, event.definition.race_id, event.definition.trust_on_resolve, true
 	)
 	context.state.pending_collapse_delta += event.definition.collapse_on_resolve
 
@@ -145,10 +142,7 @@ func _erupt(event: EventState, context: RunContext) -> void:
 	event.known = true
 	event.published = true
 	context.political_trust_system.record_event_result(
-		context.state,
-		event.definition.race_id,
-		event.definition.trust_on_erupt,
-		false
+		context.state, event.definition.race_id, event.definition.trust_on_erupt, false
 	)
 	context.state.pending_collapse_delta += event.definition.collapse_on_erupt
 
@@ -158,7 +152,7 @@ func _update_effective_intensity(event: EventState, state: RunState) -> void:
 	event.effective_intensity = minf(MAX_INTENSITY, event.base_intensity + bonus)
 
 
-func _calculate_satisfaction(event: EventState, current: MetricValues) -> float:
+func _calculate_satisfaction(event: EventState, context: RunContext) -> float:
 	if event.definition.requirements.is_empty():
 		return 1.0
 	var result := INF
@@ -166,7 +160,9 @@ func _calculate_satisfaction(event: EventState, current: MetricValues) -> float:
 		if requirement != null:
 			result = minf(
 				result,
-				requirement.satisfaction(current, event.baseline, event.effective_intensity)
+				requirement.satisfaction(
+					context.state.metrics, event.baseline, event.effective_intensity
+				)
 			)
 	return 1.0 if is_inf(result) else result
 
@@ -178,39 +174,36 @@ func _has_active_event(state: RunState, definition_id: StringName) -> bool:
 	return false
 
 
-func _update_gap_durations(state: RunState) -> void:
-	for race in state.races:
+func _update_gap_durations(context: RunContext) -> void:
+	for race in context.state.races:
 		if race.definition == null:
 			continue
-		for stance in _expectation_stances(race, state):
-			if stance == null or stance.direction == MetricStanceDefinition.Direction.NONE:
-				continue
-			var target := race.get_expectation(stance.metric, stance.initial_target)
-			var value := state.metrics.get_value(stance.metric)
+		for metric in race.definition.get_stance_metrics():
+			var direction := race.definition.get_stance(metric)
+
+			var target := context.race_system.get_effective_expectation(race, metric, context)
+			var value := context.state.metrics.get_value(metric)
 			var has_gap := (
 				value < target
-				if stance.direction == MetricStanceDefinition.Direction.HIGHER
+				if direction == MetricStanceDefinition.Direction.HIGHER
 				else value > target
 			)
-			race.expectation_gap_months[stance.metric] = (
-				race.expectation_gap_months.get(stance.metric, 0) + 1 if has_gap else 0
+			race.expectation_gap_months[metric] = (
+				race.expectation_gap_months.get(metric, 0) + 1 if has_gap else 0
 			)
 
 
-func _race_gap_pressure(
-	race: RaceState, current: MetricValues, state: RunState
-) -> float:
+func _race_gap_pressure(race: RaceState, context: RunContext) -> float:
 	var total := 0.0
 	var count := 0
-	for stance in _expectation_stances(race, state):
-		if stance == null or stance.direction == MetricStanceDefinition.Direction.NONE:
-			continue
-		var target := race.get_expectation(stance.metric, stance.initial_target)
-		var value := current.get_value(stance.metric)
+	for metric in race.definition.get_stance_metrics():
+		var direction := race.definition.get_stance(metric)
+		var target := context.race_system.get_effective_expectation(race, metric, context)
+		var value := context.state.metrics.get_value(metric)
 		var gap := maxf(float(target - value), 0.0)
-		if stance.direction == MetricStanceDefinition.Direction.LOWER:
+		if direction == MetricStanceDefinition.Direction.LOWER:
 			gap = maxf(float(value - target), 0.0)
-		total += gap / maxf(absf(float(target)), 1.0)
+		total += (gap / maxf(absf(float(target)), 1.0))
 		count += 1
 	return 0.0 if count == 0 else total / float(count)
 
@@ -224,14 +217,15 @@ func _race_gap_duration_pressure(race: RaceState) -> float:
 	return minf(float(longest) * 0.05, 1.0)
 
 
-func _expectation_stances(
-	race: RaceState, state: RunState
-) -> Array[MetricStanceDefinition]:
-	if state != null and state.constitution.has_flag(&"trust_established"):
-		for candidate in state.races:
-			if (
-				candidate.definition != null
-				and candidate.definition.special_mechanism == RaceDefinition.SpecialMechanism.HUMAN
-			):
-				return candidate.definition.metric_stances
-	return race.definition.metric_stances
+func _effective_requirement_base_amount(
+	event: EventState, requirement: EventRequirementDefinition, context: RunContext
+) -> int:
+	var amount := requirement.base_amount
+	if not context.constitution_system.uses_yin_yang_for_race(
+		context.state, event.definition.race_id
+	):
+		return amount
+	var month_sign := context.balance.get_yin_yang_month_sign(
+		requirement.metric, context.state.month
+	)
+	return maxi(0, amount + month_sign * context.balance.yin_yang_adjustment)

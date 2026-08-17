@@ -4,6 +4,7 @@ class_name RunState
 var year: int = 1
 var month: int = 1
 var metrics: MetricValues
+var year_start_metrics: MetricValues
 var active_bill: ActiveBillState
 var proposal_hand: Array[ProposalInstance] = []
 var draft_bill: DraftBillState
@@ -27,6 +28,7 @@ var ending_id: StringName
 
 func _init() -> void:
 	metrics = MetricValues.new()
+	year_start_metrics = MetricValues.new()
 	draft_bill = DraftBillState.new()
 	constitution = ConstitutionState.new()
 

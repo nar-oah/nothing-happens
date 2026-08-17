@@ -73,13 +73,14 @@ func generate_automatic_proposal(
 	definition: ProposalDefinition,
 	state: RunState,
 	inflation_system: InflationSystem,
+	balance: GameBalanceDefinition,
 	random_system: RandomSystem
 ) -> ProposalInstance:
 	var proposal := ProposalInstance.new()
 	proposal.definition_id = definition.id
 	proposal.source_group_id = definition.source_group_id
 	proposal.base_effect = inflation_system.generate_negative_effect(
-		definition, state.year, random_system
+		definition, state.year, balance, random_system
 	)
 	proposal.digestion_speed = random_system.random_float(
 		DEV_DIGESTION_SPEED_MIN, DEV_DIGESTION_SPEED_MAX
@@ -93,6 +94,7 @@ func add_positive_trait(
 	proposal: ProposalInstance,
 	year: int,
 	inflation_system: InflationSystem,
+	balance: GameBalanceDefinition,
 	random_system: RandomSystem
 ) -> void:
 	if proposal == null:
@@ -102,7 +104,9 @@ func add_positive_trait(
 	var base_magnitude := random_system.random_int(
 		DEV_POSITIVE_MAGNITUDE_MIN, DEV_POSITIVE_MAGNITUDE_MAX
 	)
-	var magnitude := maxi(1, roundi(base_magnitude * inflation_system.get_era_multiplier(year)))
+	var magnitude := maxi(
+		1, roundi(base_magnitude * inflation_system.get_era_multiplier(year, balance))
+	)
 	proposal.positive_effect.set_value(metric, magnitude * Metric.favorable_sign(metric))
 
 
@@ -123,8 +127,10 @@ func calculate_automatic_draw_weight(current_influence: float, baseline_influenc
 
 func calculate_visit_probability(current_influence: float, baseline_influence: float) -> float:
 	return clampf(
-		DEV_VISIT_BASE_PROBABILITY
-		+ DEV_VISIT_REVERSE_FACTOR * (baseline_influence - current_influence),
+		(
+			DEV_VISIT_BASE_PROBABILITY
+			+ DEV_VISIT_REVERSE_FACTOR * (baseline_influence - current_influence)
+		),
 		DEV_VISIT_MIN_PROBABILITY,
 		DEV_VISIT_MAX_PROBABILITY
 	)
@@ -162,7 +168,11 @@ func draw_automatic_proposal(
 	if source == null:
 		return null
 	return generate_automatic_proposal(
-		source.proposal_definition, context.state, context.inflation_system, context.random_system
+		source.proposal_definition,
+		context.state,
+		context.inflation_system,
+		context.balance,
+		context.random_system
 	)
 
 
@@ -188,9 +198,7 @@ func resolve_active_visits(
 		return result
 	var baseline_influence := 1.0 / float(candidates.size())
 	for group in candidates:
-		var influence := context.parliament_system.get_group_influence_rate(
-			context.state, group.id
-		)
+		var influence := context.parliament_system.get_group_influence_rate(context.state, group.id)
 		var probability := calculate_visit_probability(influence, baseline_influence)
 		if not context.random_system.chance(probability):
 			continue
@@ -198,12 +206,14 @@ func resolve_active_visits(
 			group.proposal_definition,
 			context.state,
 			context.inflation_system,
+			context.balance,
 			context.random_system
 		)
 		add_positive_trait(
 			proposal,
 			context.state.year,
 			context.inflation_system,
+			context.balance,
 			context.random_system
 		)
 		add_to_hand(context.state, proposal)
@@ -223,16 +233,18 @@ func merge_three(
 	result.positive_effect = MetricVector.new()
 	if selected_positive != null:
 		var metric_value := selected_positive.get_positive_metric()
-		var metric: Metric.Id = metric_value
+		var metric := metric_value as Metric.Id
 		var selected_magnitude := absi(selected_positive.positive_effect.get_value(metric))
 		var discarded_magnitude := 0
 		for mother in mothers:
 			if mother == selected_positive or not mother.has_positive_trait():
 				continue
-			var discarded_metric: Metric.Id = mother.get_positive_metric()
+			var discarded_metric := mother.get_positive_metric() as Metric.Id
 			discarded_magnitude += absi(mother.positive_effect.get_value(discarded_metric))
 		var converted := float(discarded_magnitude) * MERGE_CONVERSION_RATIO
-		var upgraded := maxi(1, roundi(pow(float(selected_magnitude) + converted, MERGE_UPGRADE_EXPONENT)))
+		var upgraded := maxi(
+			1, roundi(pow(float(selected_magnitude) + converted, MERGE_UPGRADE_EXPONENT))
+		)
 		result.positive_effect.set_value(metric, upgraded * Metric.favorable_sign(metric))
 	for mother in mothers:
 		state.proposal_hand.erase(mother)

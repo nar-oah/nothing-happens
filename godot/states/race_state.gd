@@ -2,7 +2,7 @@ extends RefCounted
 class_name RaceState
 
 var definition: RaceDefinition
-var political_trust: float = 50.0
+var political_trust: float = 0.0
 var seat_count: int = 0
 var expectation_targets: Dictionary[int, int] = {}
 var pending_trust_delta: float = 0.0
@@ -18,15 +18,8 @@ var last_year_promises_kept: int = 0
 var last_year_promises_broken: int = 0
 
 
-func _init(source_definition: RaceDefinition = null, year: int = 1) -> void:
+func _init(source_definition: RaceDefinition = null) -> void:
 	definition = source_definition
-	if definition == null:
-		return
-	political_trust = definition.initial_political_trust
-	seat_count = definition.fixed_seat_count if definition.fixed_seat_count >= 0 else definition.initial_seats
-	for stance in definition.metric_stances:
-		if stance != null and stance.direction != MetricStanceDefinition.Direction.NONE:
-			expectation_targets[stance.metric] = stance.target_for_year(year)
 
 
 func get_id() -> StringName:
