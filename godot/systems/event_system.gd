@@ -182,7 +182,7 @@ func _update_gap_durations(state: RunState) -> void:
 	for race in state.races:
 		if race.definition == null:
 			continue
-		for stance in race.definition.metric_stances:
+		for stance in _expectation_stances(race, state):
 			if stance == null or stance.direction == MetricStanceDefinition.Direction.NONE:
 				continue
 			var target := race.get_expectation(stance.metric, stance.initial_target)
@@ -200,7 +200,7 @@ func _update_gap_durations(state: RunState) -> void:
 func _race_gap_pressure(race: RaceState, current: MetricValues) -> float:
 	var total := 0.0
 	var count := 0
-	for stance in race.definition.metric_stances:
+	for stance in _expectation_stances(race, null):
 		if stance == null or stance.direction == MetricStanceDefinition.Direction.NONE:
 			continue
 		var target := race.get_expectation(stance.metric, stance.initial_target)
@@ -220,3 +220,16 @@ func _race_gap_duration_pressure(race: RaceState) -> float:
 	for months in race.expectation_gap_months.values():
 		longest = maxi(longest, int(months))
 	return minf(float(longest) * 0.05, 1.0)
+
+
+func _expectation_stances(
+	race: RaceState, state: RunState
+) -> Array[MetricStanceDefinition]:
+	if state != null and state.constitution.has_flag(&"trust_established"):
+		for candidate in state.races:
+			if (
+				candidate.definition != null
+				and candidate.definition.special_mechanism == RaceDefinition.SpecialMechanism.HUMAN
+			):
+				return candidate.definition.metric_stances
+	return race.definition.metric_stances

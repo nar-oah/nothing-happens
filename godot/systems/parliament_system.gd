@@ -162,15 +162,21 @@ func rebuild_all_rows(
 func replace_race_row(
 	state: RunState, race: RaceState, groups: Array[InterestGroupDefinition]
 ) -> void:
-	var kept: Array[SeatState] = []
+	var existing_by_race: Dictionary[StringName, Array] = {}
 	for seat in state.seats:
-		if seat.race_id != race.get_id():
-			kept.append(seat)
-	var replacement := create_base_row(race.get_id(), race.seat_count, groups)
-	kept.append_array(replacement)
-	for i in range(kept.size()):
-		kept[i].seat_id = i
-	state.seats = kept
+		if not existing_by_race.has(seat.race_id):
+			existing_by_race[seat.race_id] = []
+		existing_by_race[seat.race_id].append(seat)
+	var result: Array[SeatState] = []
+	for row_race in state.races:
+		if row_race.get_id() == race.get_id():
+			result.append_array(create_base_row(race.get_id(), race.seat_count, groups))
+		else:
+			for seat in existing_by_race.get(row_race.get_id(), []):
+				result.append(seat)
+	for i in range(result.size()):
+		result[i].seat_id = i
+	state.seats = result
 
 
 func record_authorized_proposal_slots(

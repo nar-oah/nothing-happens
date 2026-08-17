@@ -52,6 +52,11 @@ func advance_era_expectations(state: RunState) -> void:
 			if stance.direction == MetricStanceDefinition.Direction.NONE:
 				continue
 			race.expectation_targets[stance.metric] = stance.target_for_year(state.year + 1)
+	if state.constitution.has_flag(&"trust_established"):
+		var human := _find_human_race(state)
+		if human != null:
+			for race in state.races:
+				race.expectation_targets = human.expectation_targets.duplicate()
 
 
 func _all_stances(definition: RaceDefinition) -> Array[MetricStanceDefinition]:
@@ -67,3 +72,13 @@ func _all_stances(definition: RaceDefinition) -> Array[MetricStanceDefinition]:
 				seen[stance.metric] = true
 				result.append(stance)
 	return result
+
+
+func _find_human_race(state: RunState) -> RaceState:
+	for race in state.races:
+		if (
+			race.definition != null
+			and race.definition.special_mechanism == RaceDefinition.SpecialMechanism.HUMAN
+		):
+			return race
+	return null

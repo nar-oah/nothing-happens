@@ -12,6 +12,8 @@ var races: Array[RaceState] = []
 var events: Array[EventState] = []
 var constitution: ConstitutionState
 var annual_proposal_slot_counts: Dictionary[StringName, int] = {}
+var last_annual_proposal_slot_counts: Dictionary[StringName, int] = {}
+var last_annual_source_shares: Dictionary[StringName, float] = {}
 var vote_donations: Dictionary[int, float] = {}
 var intervention_records: Array[InterventionRecordState] = []
 var collapse_level: float = 0.0

@@ -3,6 +3,12 @@ class_name AnnualSettlementSystem
 
 
 func settle_year(context: RunContext) -> void:
+	context.state.last_annual_proposal_slot_counts = (
+		context.state.annual_proposal_slot_counts.duplicate()
+	)
+	context.state.last_annual_source_shares = context.parliament_system.get_annual_source_shares(
+		context.state
+	)
 	context.political_trust_system.settle_annual_trust(context.state)
 	context.race_system.recalculate_all_seat_counts(context.state)
 	context.constitution_system.apply_annual_seat_corrections(context.state)

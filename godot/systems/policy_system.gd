@@ -20,6 +20,18 @@ func resolve_policy_chain(state: RunState) -> void:
 		_resolve_batch(triggered_batch, state.metrics)
 
 
+func calculate_immediate_result(
+	current: MetricValues, definitions: Array[PolicyDefinition]
+) -> MetricValues:
+	var simulation := RunState.new()
+	simulation.metrics = current.copy()
+	var bill := ActiveBillState.new()
+	bill.policies = create_states(definitions)
+	simulation.active_bill = bill
+	resolve_policy_chain(simulation)
+	return simulation.metrics
+
+
 func _find_triggered_batch(bill: ActiveBillState, values: MetricValues) -> Array[PolicyState]:
 	var result: Array[PolicyState] = []
 	for policy_state in bill.policies:

@@ -118,6 +118,10 @@ func get_effective_groups(
 			removed[rule.source_group_id] = true
 		elif rule.action == ConstitutionInfluenceRule.Action.MERGE_GROUP:
 			mergers[rule.source_group_id] = rule.target_group_id
+	var sources: Dictionary[StringName, InterestGroupDefinition] = {}
+	for source in groups:
+		if source != null:
+			sources[source.id] = source
 	var by_id: Dictionary[StringName, InterestGroupDefinition] = {}
 	for source in groups:
 		if source == null or removed.has(source.id):
@@ -126,11 +130,15 @@ func get_effective_groups(
 		if removed.has(target_id):
 			continue
 		if not by_id.has(target_id):
-			var clone := _clone_group(source)
+			var template: InterestGroupDefinition = sources.get(target_id, source)
+			var clone := _clone_group(template)
 			clone.id = target_id
 			clone.base_column_weight = 0
 			by_id[target_id] = clone
 		by_id[target_id].base_column_weight += source.base_column_weight
+		by_id[target_id].fixed_sort_order = mini(
+			by_id[target_id].fixed_sort_order, source.fixed_sort_order
+		)
 	var result: Array[InterestGroupDefinition] = []
 	for group in by_id.values():
 		result.append(group)

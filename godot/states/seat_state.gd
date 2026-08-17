@@ -6,6 +6,8 @@ var race_id: StringName
 var base_group_id: StringName
 var actual_group_id: StringName
 var personal_relation: float = 0.0
+var odd_month_relation: float = 0.0
+var even_month_relation: float = 0.0
 var influence_priority: int = 5
 
 

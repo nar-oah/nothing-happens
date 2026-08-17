@@ -19,6 +19,16 @@ func calculate_vote(
 	var projected := context.proposal_system.calculate_pure_target(
 		context.state.metrics, draft.proposals
 	)
+	var immediate := context.policy_system.calculate_immediate_result(
+		context.state.metrics, draft.policies
+	)
+	for metric in Metric.all_ids():
+		projected.set_value(
+			metric,
+			projected.get_value(metric)
+			+ immediate.get_value(metric)
+			- context.state.metrics.get_value(metric)
+		)
 	for seat in context.state.seats:
 		var vote := _calculate_seat_vote(seat, draft, projected, context, resolve_absence)
 		result.seat_votes.append(vote)
@@ -69,7 +79,16 @@ func _calculate_seat_vote(
 		vote.position = SeatVoteState.Position.ABSENT
 		vote.breakdown[&"special_absence"] = 1.0
 		return vote
-	vote.add_reason(&"race_expectation", _race_expectation_score(race, projected, context.state))
+	var attitude_race := race
+	if context.state.constitution.has_flag(&"trust_established"):
+		var shared_human := _find_special_race(
+			context.state, RaceDefinition.SpecialMechanism.HUMAN
+		)
+		if shared_human != null:
+			attitude_race = shared_human
+	vote.add_reason(
+		&"race_expectation", _race_expectation_score(attitude_race, projected, context.state)
+	)
 	var use_human_attitude := (
 		context.state.constitution.has_flag(&"free_trade")
 		and _is_transport_group(seat.actual_group_id, context.state)
@@ -92,7 +111,10 @@ func _calculate_seat_vote(
 		&"constitution",
 		context.constitution_system.get_race_support_modifier(context.state, seat.race_id)
 	)
-	vote.add_reason(&"personal_relation", seat.personal_relation)
+	var relation := seat.personal_relation
+	if race.definition.special_mechanism == RaceDefinition.SpecialMechanism.BIYI:
+		relation += seat.odd_month_relation if context.state.month % 2 == 1 else seat.even_month_relation
+	vote.add_reason(&"personal_relation", relation)
 	vote.add_reason(&"political_donation", context.state.vote_donations.get(seat.seat_id, 0.0))
 	vote.position = _position_from_score(vote.score)
 	return vote
