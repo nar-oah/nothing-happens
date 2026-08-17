@@ -1,6 +1,8 @@
 extends RefCounted
 class_name ParliamentSystem
 
+const ANNUAL_COLORING_RATE: float = 0.65
+
 
 func get_group_influence_count(state: RunState, group_id: StringName) -> int:
 	var count := 0
@@ -19,6 +21,16 @@ func get_group_influence_rate(state: RunState, group_id: StringName) -> float:
 		return 0.0
 	var influence_count := get_group_influence_count(state, group_id)
 	return float(influence_count) / float(assigned_seat_count)
+
+
+func get_race_seat_rate(state: RunState, race_id: StringName) -> float:
+	if state.seats.is_empty():
+		return 0.0
+	var count := 0
+	for seat in state.seats:
+		if seat.race_id == race_id:
+			count += 1
+	return float(count) / float(state.seats.size())
 
 
 func _validate_base_groups(groups: Array[InterestGroupDefinition]) -> bool:
@@ -125,3 +137,90 @@ func create_base_row(
 			result.append(seat)
 			next_seat_id += 1
 	return result
+
+
+func create_full_parliament(
+	races: Array[RaceState], groups: Array[InterestGroupDefinition]
+) -> Array[SeatState]:
+	var result: Array[SeatState] = []
+	var next_seat_id := 0
+	for race in races:
+		if race == null or race.definition == null:
+			continue
+		var row := create_base_row(race.get_id(), race.seat_count, groups, next_seat_id)
+		result.append_array(row)
+		next_seat_id += row.size()
+	return result
+
+
+func rebuild_all_rows(
+	state: RunState, groups: Array[InterestGroupDefinition]
+) -> void:
+	state.seats = create_full_parliament(state.races, groups)
+
+
+func replace_race_row(
+	state: RunState, race: RaceState, groups: Array[InterestGroupDefinition]
+) -> void:
+	var kept: Array[SeatState] = []
+	for seat in state.seats:
+		if seat.race_id != race.get_id():
+			kept.append(seat)
+	var replacement := create_base_row(race.get_id(), race.seat_count, groups)
+	kept.append_array(replacement)
+	for i in range(kept.size()):
+		kept[i].seat_id = i
+	state.seats = kept
+
+
+func record_authorized_proposal_slots(
+	state: RunState, proposals: Array[ProposalInstance]
+) -> void:
+	for proposal in proposals:
+		if proposal == null or proposal.source_group_id == &"":
+			continue
+		state.annual_proposal_slot_counts[proposal.source_group_id] = (
+			state.annual_proposal_slot_counts.get(proposal.source_group_id, 0) + 1
+		)
+
+
+func get_annual_source_shares(state: RunState) -> Dictionary[StringName, float]:
+	var result: Dictionary[StringName, float] = {}
+	var total := 0
+	for count in state.annual_proposal_slot_counts.values():
+		total += maxi(int(count), 0)
+	if total <= 0:
+		return result
+	for group_id in state.annual_proposal_slot_counts:
+		var count: int = state.annual_proposal_slot_counts[group_id]
+		if count > 0:
+			result[group_id] = float(count) / float(total)
+	return result
+
+
+func apply_annual_coloring(
+	state: RunState,
+	groups: Array[InterestGroupDefinition],
+	random_system: RandomSystem,
+	coloring_rate: float = ANNUAL_COLORING_RATE
+) -> void:
+	for seat in state.seats:
+		seat.actual_group_id = seat.base_group_id
+		seat.influence_priority = 5
+	var shares := get_annual_source_shares(state)
+	if shares.is_empty():
+		return
+	var source_ids: Array[StringName] = []
+	var weights: Array[float] = []
+	for group in groups:
+		if group != null and shares.has(group.id):
+			source_ids.append(group.id)
+			weights.append(shares[group.id])
+	if source_ids.is_empty():
+		return
+	for seat in state.seats:
+		if not random_system.chance(coloring_rate):
+			continue
+		var index := random_system.weighted_index(weights)
+		if index >= 0:
+			seat.actual_group_id = source_ids[index]

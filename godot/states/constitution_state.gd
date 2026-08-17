@@ -6,6 +6,7 @@ var revision_available: bool = true
 var terminal_article_id: StringName
 var annual_petition_count: int = 0
 var pending_group_seat_targets: Dictionary[StringName, int] = {}
+var group_mergers: Dictionary[StringName, StringName] = {}
 
 
 func has_flag(flag: StringName) -> bool:

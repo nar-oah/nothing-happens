@@ -22,5 +22,9 @@ enum ThresholdKind {
 @export var flags: Array[StringName] = []
 @export var support_race_id: StringName
 @export var base_support_modifier: float = 0.0
+@export var seat_race_id: StringName
+@export_range(-1, 999, 1) var seat_minimum: int = -1
+@export_range(-1, 999, 1) var seat_maximum: int = -1
+@export_range(-1, 999, 1) var fixed_seat_count: int = -1
 @export var influence_rules: Array[ConstitutionInfluenceRule] = []
 @export var unlocked_policies: Array[PolicyDefinition] = []
