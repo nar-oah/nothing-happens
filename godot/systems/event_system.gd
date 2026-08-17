@@ -34,8 +34,8 @@ func try_generate_month(context: RunContext) -> Array[EventState]:
 		var duration_pressure := _race_gap_duration_pressure(race)
 		var probability := definition.local_issue_chance
 		if gap_pressure > 0.0:
-			probability += definition.monthly_spawn_chance * (
-				1.0 + gap_pressure * 2.0 + duration_pressure
+			probability += (
+				definition.monthly_spawn_chance * (1.0 + gap_pressure * 2.0 + duration_pressure)
 			)
 		probability *= context.collapse_system.get_event_density_multiplier(context.state)
 		if context.random_system.chance(clampf(probability, 0.0, 0.95)):
@@ -132,10 +132,7 @@ func _relieve(event: EventState, context: RunContext) -> void:
 func _resolve(event: EventState, context: RunContext) -> void:
 	event.phase = EventState.Phase.RESOLVED
 	context.political_trust_system.record_event_result(
-		context.state,
-		event.definition.race_id,
-		event.definition.trust_on_resolve,
-		true
+		context.state, event.definition.race_id, event.definition.trust_on_resolve, true
 	)
 	context.state.pending_collapse_delta += event.definition.collapse_on_resolve
 
@@ -145,10 +142,7 @@ func _erupt(event: EventState, context: RunContext) -> void:
 	event.known = true
 	event.published = true
 	context.political_trust_system.record_event_result(
-		context.state,
-		event.definition.race_id,
-		event.definition.trust_on_erupt,
-		false
+		context.state, event.definition.race_id, event.definition.trust_on_erupt, false
 	)
 	context.state.pending_collapse_delta += event.definition.collapse_on_erupt
 
@@ -165,8 +159,7 @@ func _calculate_satisfaction(event: EventState, current: MetricValues) -> float:
 	for requirement in event.definition.requirements:
 		if requirement != null:
 			result = minf(
-				result,
-				requirement.satisfaction(current, event.baseline, event.effective_intensity)
+				result, requirement.satisfaction(current, event.baseline, event.effective_intensity)
 			)
 	return 1.0 if is_inf(result) else result
 
@@ -197,9 +190,7 @@ func _update_gap_durations(state: RunState) -> void:
 			)
 
 
-func _race_gap_pressure(
-	race: RaceState, current: MetricValues, state: RunState
-) -> float:
+func _race_gap_pressure(race: RaceState, current: MetricValues, state: RunState) -> float:
 	var total := 0.0
 	var count := 0
 	for stance in _expectation_stances(race, state):
@@ -224,14 +215,9 @@ func _race_gap_duration_pressure(race: RaceState) -> float:
 	return minf(float(longest) * 0.05, 1.0)
 
 
-func _expectation_stances(
-	race: RaceState, state: RunState
-) -> Array[MetricStanceDefinition]:
+func _expectation_stances(race: RaceState, state: RunState) -> Array[MetricStanceDefinition]:
 	if state != null and state.constitution.has_flag(&"trust_established"):
-		for candidate in state.races:
-			if (
-				candidate.definition != null
-				and candidate.definition.special_mechanism == RaceDefinition.SpecialMechanism.HUMAN
-			):
-				return candidate.definition.metric_stances
+		var human := state.get_race(Race.HUMAN)
+		if human != null and human.definition != null:
+			return human.definition.metric_stances
 	return race.definition.metric_stances

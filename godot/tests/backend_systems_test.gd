@@ -102,15 +102,19 @@ func _test_positive_traits_and_merge() -> void:
 	var random := RandomSystem.new()
 	random.set_seed(12)
 	system.add_positive_trait(generated, 3, InflationSystem.new(), random)
-	_check_equal(generated.positive_effect.non_zero_metrics().size(), 1, "visitor trait has one metric")
+	_check_equal(
+		generated.positive_effect.non_zero_metrics().size(), 1, "visitor trait has one metric"
+	)
 	var metric: Metric.Id = generated.positive_effect.non_zero_metrics()[0]
 	_check(
 		generated.positive_effect.get_value(metric) * Metric.favorable_sign(metric) > 0,
 		"visitor trait uses favorable direction"
 	)
 	_check(
-		system.calculate_visit_probability(0.01, 0.5)
-		> system.calculate_visit_probability(0.9, 0.5),
+		(
+			system.calculate_visit_probability(0.01, 0.5)
+			> system.calculate_visit_probability(0.9, 0.5)
+		),
 		"weak group visits more often"
 	)
 
@@ -127,7 +131,9 @@ func _test_draft_editing_and_vote() -> void:
 	var proposal := _make_proposal(&"union")
 	proposal.base_effect.wage = 10
 	session.state.proposal_hand.append(proposal)
-	_check(session.draft_bill_system.move_proposal_from_hand(session.state, 0), "move card to draft")
+	_check(
+		session.draft_bill_system.move_proposal_from_hand(session.state, 0), "move card to draft"
+	)
 	_check_equal(session.state.proposal_hand.size(), 0, "hand loses drafted card")
 	var preview := session.vote_system.preview_vote(session.state.draft_bill, session.context)
 	_check_equal(preview.support_count, 3, "members support movement toward expectation")
@@ -175,17 +181,14 @@ func _test_event_lifecycle_and_trust() -> void:
 
 
 func _test_constitution_and_special_races() -> void:
-	var yano := _make_race(&"yano", 2)
+	var yano := _make_race(Race.YANO, 2)
 	yano.fixed_seat_count = 2
-	yano.special_mechanism = RaceDefinition.SpecialMechanism.YANO
 	yano.special_group_id = &"factory"
-	var peach := _make_race(&"peach", 2)
+	var peach := _make_race(Race.PEACH_BLOSSOM, 2)
 	peach.fixed_seat_count = 2
-	peach.special_mechanism = RaceDefinition.SpecialMechanism.PEACH_BLOSSOM
 	peach.local_group_prefix = &"county"
-	var human := _make_race(&"human", 3)
+	var human := _make_race(Race.HUMAN, 3)
 	human.fixed_seat_count = 3
-	human.special_mechanism = RaceDefinition.SpecialMechanism.HUMAN
 	human.special_group_id = &"transport"
 	var article := ConstitutionArticleDefinition.new()
 	article.id = &"special_rules"
@@ -198,50 +201,67 @@ func _test_constitution_and_special_races() -> void:
 		_make_group(&"minor", 1, 2),
 	]
 	var session := _make_session([yano, peach, human], groups, [], [article])
-	_check_equal(session.state.get_race(&"human").seat_count, 1, "free trade keeps one human seat")
+	_check_equal(
+		session.state.get_race(Race.HUMAN).seat_count, 1, "free trade keeps one human seat"
+	)
 	var peach_groups: Dictionary[StringName, bool] = {}
 	for seat in session.state.seats:
-		if seat.race_id == &"yano":
+		if seat.race_id == Race.YANO:
 			_check_equal(seat.actual_group_id, &"factory", "recognized yano fixed to factory")
-		elif seat.race_id == &"peach":
+		elif seat.race_id == Race.PEACH_BLOSSOM:
 			peach_groups[seat.actual_group_id] = true
-		elif seat.race_id == &"human":
+		elif seat.race_id == Race.HUMAN:
 			_check_equal(seat.actual_group_id, &"transport", "free-trade human fixed to transport")
 	_check_equal(peach_groups.size(), 2, "closed peach seats get unique local groups")
-	_check_equal(session.state.constitution.annual_petition_count, 1, "20 percent transport grants petition")
+	_check_equal(
+		session.state.constitution.annual_petition_count, 1, "20 percent transport grants petition"
+	)
 	_check(session.constitution_system.use_petition(session.context), "petition can be consumed")
 	_check_equal(session.state.constitution.annual_petition_count, 0, "petition count decreases")
 	session.free()
 
 
 func _test_special_voting_rules() -> void:
-	var zhushui := _make_race(&"zhushui", 4)
-	zhushui.special_mechanism = RaceDefinition.SpecialMechanism.ZHUSHUI
-	var nanke := _make_race(&"nanke", 1)
+	var zhushui := _make_race(Race.ZHUSHUI, 4)
+	var nanke := _make_race(Race.NANKE, 1)
 	nanke.fixed_seat_count = 1
-	nanke.special_mechanism = RaceDefinition.SpecialMechanism.NANKE
 	nanke.special_group_id = &"union"
 	nanke.strike_wage_floor = 10
-	var biyi := _make_race(&"biyi", 1)
+	var biyi := _make_race(Race.BIYI, 1)
 	biyi.fixed_seat_count = 1
-	biyi.special_mechanism = RaceDefinition.SpecialMechanism.BIYI
 	var group := _make_group(&"union", 1, 0)
 	var session := _make_session([zhushui, nanke, biyi], [group])
 	for seat in session.state.seats:
-		if seat.race_id == &"biyi":
+		if seat.race_id == Race.BIYI:
 			seat.odd_month_relation = 10.0
 			seat.even_month_relation = -10.0
 	var actual := session.vote_system.calculate_vote(
 		session.state.draft_bill, session.context, true
 	)
-	_check_equal(_vote_for_race(actual, session.state, &"zhushui"), SeatVoteState.Position.SUPPORT, "zhushui always supports")
-	_check_equal(_vote_for_race(actual, session.state, &"nanke"), SeatVoteState.Position.ABSENT, "nanke strike cannot be bought away")
-	_check_equal(_vote_for_race(actual, session.state, &"biyi"), SeatVoteState.Position.SUPPORT, "odd-month biyi half uses own relation")
+	_check_equal(
+		_vote_for_race(actual, session.state, Race.ZHUSHUI),
+		SeatVoteState.Position.SUPPORT,
+		"zhushui always supports"
+	)
+	_check_equal(
+		_vote_for_race(actual, session.state, &"nanke"),
+		SeatVoteState.Position.ABSENT,
+		"nanke strike cannot be bought away"
+	)
+	_check_equal(
+		_vote_for_race(actual, session.state, &"biyi"),
+		SeatVoteState.Position.SUPPORT,
+		"odd-month biyi half uses own relation"
+	)
 	session.state.month = 2
 	var even_vote := session.vote_system.calculate_vote(
 		session.state.draft_bill, session.context, false
 	)
-	_check_equal(_vote_for_race(even_vote, session.state, &"biyi"), SeatVoteState.Position.OPPOSE, "even-month biyi half replaces attitude")
+	_check_equal(
+		_vote_for_race(even_vote, session.state, &"biyi"),
+		SeatVoteState.Position.OPPOSE,
+		"even-month biyi half replaces attitude"
+	)
 	session.free()
 
 
@@ -263,9 +283,14 @@ func _test_constitution_revision_threshold() -> void:
 	next.threshold_target_id = &"majority"
 	next.threshold_rate = 0.9
 	var session := _make_session([race], [group], [], [initial, next])
-	_check(session.constitution_system.can_revise(session.state, next), "90 percent threshold reads annual snapshot")
+	_check(
+		session.constitution_system.can_revise(session.state, next),
+		"90 percent threshold reads annual snapshot"
+	)
 	_check(session.revise_constitution(next), "valid one-step constitution revision succeeds")
-	_check(not session.state.constitution.revision_available, "revision consumes annual opportunity")
+	_check(
+		not session.state.constitution.revision_available, "revision consumes annual opportunity"
+	)
 	_check(session.state.has_intervened, "constitution revision records intervention")
 	session.free()
 
@@ -289,9 +314,13 @@ func _test_annual_settlement() -> void:
 	_check_equal(race_state.seat_count, 8, "new trust determines annual row size")
 	_check_equal(session.state.seats.size(), 8, "whole parliament rebuilt with new rows")
 	_check_equal(race_state.get_expectation(Metric.Id.TRADE), 110, "era expectation tightens last")
-	_check_equal(session.state.last_annual_proposal_slot_counts[&"b"], 1, "annual slot ledger retained")
+	_check_equal(
+		session.state.last_annual_proposal_slot_counts[&"b"], 1, "annual slot ledger retained"
+	)
 	_check_equal(session.state.last_annual_source_shares[&"b"], 1.0, "annual source share retained")
-	_check(session.state.annual_proposal_slot_counts.is_empty(), "new year slot ledger starts empty")
+	_check(
+		session.state.annual_proposal_slot_counts.is_empty(), "new year slot ledger starts empty"
+	)
 	_check(session.state.constitution.revision_available, "one annual revision window opens")
 	session.free()
 
@@ -305,7 +334,9 @@ func _test_collapse_routes() -> void:
 	_check(silent_state.silent_observation, "no-intervention collapse enters silent observation")
 	for i in range(13):
 		system.settle_month(silent_state)
-	_check_equal(silent_state.ending_id, &"nothing_happens", "silent recovery reaches unique ending")
+	_check_equal(
+		silent_state.ending_id, &"nothing_happens", "silent recovery reaches unique ending"
+	)
 	var failed_state := RunState.new()
 	failed_state.collapse_level = 99.0
 	system.record_intervention(failed_state, &"bill_submission", 1.0)
@@ -331,7 +362,9 @@ func _test_flow_reaches_new_year() -> void:
 	_check_equal(session.state.year, 2, "December flow enters next year")
 	_check_equal(session.state.month, 1, "new year starts at first month")
 	_check_equal(race_state.seat_count, 4, "flow runs trust and seats before new year")
-	_check_equal(race_state.get_expectation(Metric.Id.WAGE), 25, "flow tightens expectation before new year")
+	_check_equal(
+		race_state.get_expectation(Metric.Id.WAGE), 25, "flow tightens expectation before new year"
+	)
 	session.free()
 
 

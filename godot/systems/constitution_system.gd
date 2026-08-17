@@ -8,9 +8,7 @@ const MERGER_STRONG_RATE: float = 0.5
 const MERGER_WEAK_RATE: float = 0.05
 
 
-func initialize(
-	state: RunState, definitions: Array[ConstitutionArticleDefinition]
-) -> void:
+func initialize(state: RunState, definitions: Array[ConstitutionArticleDefinition]) -> void:
 	state.constitution = ConstitutionState.new()
 	for definition in definitions:
 		if definition != null and definition.is_initial:
@@ -19,9 +17,7 @@ func initialize(
 				state.constitution.terminal_article_id = definition.id
 
 
-func can_revise(
-	state: RunState, definition: ConstitutionArticleDefinition
-) -> bool:
+func can_revise(state: RunState, definition: ConstitutionArticleDefinition) -> bool:
 	if definition == null or not state.constitution.revision_available:
 		return false
 	if definition.is_regulation:
@@ -50,9 +46,7 @@ func revise(context: RunContext, definition: ConstitutionArticleDefinition) -> b
 	context.state.constitution.revision_available = false
 	if definition.is_terminal:
 		context.state.constitution.terminal_article_id = definition.id
-	context.collapse_system.record_intervention(
-		context.state, &"constitution_revision", 3.0
-	)
+	context.collapse_system.record_intervention(context.state, &"constitution_revision", 3.0)
 	_rebuild_article_affected_row(context, definition)
 	if not had_free_trade and context.state.constitution.has_flag(FLAG_FREE_TRADE):
 		_rebuild_human_row(context)
@@ -99,13 +93,10 @@ func apply_annual_seat_corrections(state: RunState) -> void:
 				race.seat_count = maxi(race.seat_count, article.seat_minimum)
 			if article.seat_maximum >= 0:
 				race.seat_count = mini(race.seat_count, article.seat_maximum)
-	for race in state.races:
-		if (
-			race.definition != null
-			and race.definition.special_mechanism == RaceDefinition.SpecialMechanism.HUMAN
-			and state.constitution.has_flag(FLAG_FREE_TRADE)
-		):
-			race.seat_count = 1
+	if state.constitution.has_flag(FLAG_FREE_TRADE):
+		var human := state.get_race(Race.HUMAN)
+		if human != null:
+			human.seat_count = 1
 
 
 func get_effective_groups(
@@ -144,8 +135,9 @@ func get_effective_groups(
 	var result: Array[InterestGroupDefinition] = []
 	for group in by_id.values():
 		result.append(group)
-	result.sort_custom(func(a: InterestGroupDefinition, b: InterestGroupDefinition) -> bool:
-		return a.fixed_sort_order < b.fixed_sort_order
+	result.sort_custom(
+		func(a: InterestGroupDefinition, b: InterestGroupDefinition) -> bool:
+			return a.fixed_sort_order < b.fixed_sort_order
 	)
 	return result
 
@@ -195,20 +187,20 @@ func apply_special_fixed_relations(state: RunState) -> void:
 	for race in state.races:
 		if race.definition == null:
 			continue
-		var mechanism := race.definition.special_mechanism
-		if mechanism == RaceDefinition.SpecialMechanism.YANO and state.constitution.has_flag(FLAG_YANO_RECOGNIZED):
-			_fix_race(state, race.get_id(), race.definition.special_group_id, 2)
-		elif mechanism == RaceDefinition.SpecialMechanism.PEACH_BLOSSOM and state.constitution.has_flag(FLAG_PEACH_CLOSED):
-			_localize_race(state, race.get_id(), race.definition.local_group_prefix, 0)
-		elif mechanism == RaceDefinition.SpecialMechanism.HUMAN and state.constitution.has_flag(FLAG_FREE_TRADE):
-			_fix_race(state, race.get_id(), race.definition.special_group_id, 2)
+		var race_id := race.definition.id
+		if race_id == Race.YANO and state.constitution.has_flag(FLAG_YANO_RECOGNIZED):
+			_fix_race(state, race_id, race.definition.special_group_id, 2)
+		elif race_id == Race.PEACH_BLOSSOM and state.constitution.has_flag(FLAG_PEACH_CLOSED):
+			_localize_race(state, race_id, race.definition.local_group_prefix, 0)
+		elif race_id == Race.HUMAN and state.constitution.has_flag(FLAG_FREE_TRADE):
+			_fix_race(state, race_id, race.definition.special_group_id, 2)
 
 
 func update_petition_count(state: RunState) -> void:
 	state.constitution.annual_petition_count = 0
 	if not state.constitution.has_flag(FLAG_FREE_TRADE):
 		return
-	var human := _find_special_race(state, RaceDefinition.SpecialMechanism.HUMAN)
+	var human := state.get_race(Race.HUMAN)
 	if human == null:
 		return
 	var group_id := human.definition.special_group_id
@@ -289,14 +281,19 @@ func _apply_rule(state: RunState, rule: ConstitutionInfluenceRule) -> void:
 		ConstitutionInfluenceRule.Action.GROUP_MAXIMUM:
 			_apply_group_limit(state, rule, false)
 		ConstitutionInfluenceRule.Action.GROUP_TARGET:
-			_apply_group_target(state, rule.target_group_id, ceili(rule.rate * _eligible_seats(state, rule.race_id).size()), rule.race_id)
+			_apply_group_target(
+				state,
+				rule.target_group_id,
+				ceili(rule.rate * _eligible_seats(state, rule.race_id).size()),
+				rule.race_id
+			)
 
 
-func _apply_group_limit(
-	state: RunState, rule: ConstitutionInfluenceRule, is_minimum: bool
-) -> void:
+func _apply_group_limit(state: RunState, rule: ConstitutionInfluenceRule, is_minimum: bool) -> void:
 	var eligible := _eligible_seats(state, rule.race_id)
-	var target_count := ceili(rule.rate * eligible.size()) if is_minimum else floori(rule.rate * eligible.size())
+	var target_count := (
+		ceili(rule.rate * eligible.size()) if is_minimum else floori(rule.rate * eligible.size())
+	)
 	var current: Array[SeatState] = []
 	for seat in eligible:
 		if seat.actual_group_id == rule.target_group_id:
@@ -306,7 +303,10 @@ func _apply_group_limit(
 		for seat in eligible:
 			if needed <= 0:
 				break
-			if seat.actual_group_id != rule.target_group_id and seat.influence_priority >= rule.priority:
+			if (
+				seat.actual_group_id != rule.target_group_id
+				and seat.influence_priority >= rule.priority
+			):
 				seat.actual_group_id = rule.target_group_id
 				seat.influence_priority = rule.priority
 				needed -= 1
@@ -351,9 +351,7 @@ func _apply_pending_targets(state: RunState) -> void:
 	state.constitution.pending_group_seat_targets.clear()
 
 
-func _replace_group(
-	state: RunState, source: StringName, target: StringName, priority: int
-) -> void:
+func _replace_group(state: RunState, source: StringName, target: StringName, priority: int) -> void:
 	for seat in state.seats:
 		if seat.actual_group_id == source and seat.influence_priority >= priority:
 			seat.actual_group_id = (
@@ -422,13 +420,6 @@ func _clone_group(source: InterestGroupDefinition) -> InterestGroupDefinition:
 	return result
 
 
-func _find_special_race(state: RunState, mechanism: RaceDefinition.SpecialMechanism) -> RaceState:
-	for race in state.races:
-		if race.definition != null and race.definition.special_mechanism == mechanism:
-			return race
-	return null
-
-
 func _rebuild_article_affected_row(
 	context: RunContext, article: ConstitutionArticleDefinition
 ) -> void:
@@ -443,7 +434,7 @@ func _rebuild_article_affected_row(
 
 
 func _rebuild_human_row(context: RunContext) -> void:
-	var human := _find_special_race(context.state, RaceDefinition.SpecialMechanism.HUMAN)
+	var human := context.state.get_race(Race.HUMAN)
 	if human == null:
 		return
 	apply_annual_seat_corrections(context.state)
