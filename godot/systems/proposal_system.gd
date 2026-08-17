@@ -1,6 +1,9 @@
 extends RefCounted
 class_name ProposalSystem
 
+const DEV_DIGESTION_SPEED_MIN: float = 0.8
+const DEV_DIGESTION_SPEED_MAX: float = 1.2
+
 
 func calculate_total_effect(proposals: Array[ProposalInstance]) -> MetricVector:
 	var total := MetricVector.new()
@@ -52,3 +55,28 @@ func calculate_digested_anchor(bill: ActiveBillState) -> MetricValues:
 	result.trade = roundi(trade)
 
 	return result
+
+
+func generate_automatic_proposal(
+	definition: ProposalDefinition,
+	state: RunState,
+	inflation_system: InflationSystem,
+	random_system: RandomSystem
+) -> ProposalInstance:
+	var proposal := ProposalInstance.new()
+	proposal.definition_id = definition.id
+	proposal.source_group_id = definition.source_group_id
+	proposal.base_effect = inflation_system.generate_negative_effect(
+		definition, state.year, random_system
+	)
+	proposal.digestion_speed = random_system.random_float(
+		DEV_DIGESTION_SPEED_MIN, DEV_DIGESTION_SPEED_MAX
+	)
+	return proposal
+
+
+func add_to_hand(state: RunState, proposal: ProposalInstance) -> void:
+	if proposal == null:
+		push_error("Cannot add null proposal to hand.")
+		return
+	state.proposal_hand.append(proposal)

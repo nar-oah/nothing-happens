@@ -24,3 +24,20 @@ static func display_name(metric: Id) -> String:
 			return "商贸"
 		_:
 			return "未知指标"
+
+
+static func proposal_negative_sign(metric: Id) -> int:
+	match metric:
+		Id.TAX:
+			return -1
+		Id.PRICE:
+			return 1
+		Id.WAGE:
+			return -1
+		Id.EMPLOYMENT:
+			return -1
+		Id.TRADE:
+			return -1
+		_:
+			push_error("Unknown metric: %s" % metric)
+			return 0

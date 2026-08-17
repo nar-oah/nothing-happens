@@ -1,6 +1,8 @@
 extends RefCounted
 class_name ProposalInstance
 
+var definition_id: StringName
+var source_group_id: StringName
 var base_effect: MetricVector
 var positive_effect: MetricVector
 var digestion_speed: float = 1.0
@@ -19,6 +21,8 @@ func get_total_effect() -> MetricVector:
 
 func copy() -> ProposalInstance:
 	var result := ProposalInstance.new()
+	result.definition_id = definition_id
+	result.source_group_id = source_group_id
 	result.base_effect = base_effect.copy()
 	result.positive_effect = positive_effect.copy()
 	result.digestion_speed = digestion_speed

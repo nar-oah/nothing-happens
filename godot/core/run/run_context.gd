@@ -7,6 +7,7 @@ var random_system: RandomSystem
 var proposal_system: ProposalSystem
 var market_system: MarketSystem
 var policy_system: PolicySystem
+var inflation_system: InflationSystem
 
 
 func setup(
@@ -15,7 +16,8 @@ func setup(
 	run_random_system: RandomSystem,
 	run_proposal_system: ProposalSystem,
 	run_market_system: MarketSystem,
-	run_policy_system: PolicySystem
+	run_policy_system: PolicySystem,
+	run_inflation_system: InflationSystem
 ) -> void:
 	state = run_state
 	time_system = run_time_system
@@ -23,3 +25,4 @@ func setup(
 	proposal_system = run_proposal_system
 	market_system = run_market_system
 	policy_system = run_policy_system
+	inflation_system = run_inflation_system
