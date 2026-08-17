@@ -20,6 +20,10 @@ func random_int(min_value: int, max_value: int) -> int:
 	return rng.randi_range(min_value, max_value)
 
 
+func chance(probability: float) -> bool:
+	return rng.randf() < clampf(probability, 0.0, 1.0)
+
+
 func weighted_index(weights: Array[float]) -> int:
 	if weights.is_empty():
 		return -1
