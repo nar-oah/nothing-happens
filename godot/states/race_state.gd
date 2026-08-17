@@ -6,6 +6,7 @@ var political_trust: float = 50.0
 var seat_count: int = 0
 var expectation_targets: Dictionary[int, int] = {}
 var pending_trust_delta: float = 0.0
+var expectation_gap_months: Dictionary[int, int] = {}
 var resolved_events_this_year: int = 0
 var erupted_events_this_year: int = 0
 var promises_kept_this_year: int = 0
