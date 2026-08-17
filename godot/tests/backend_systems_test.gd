@@ -15,6 +15,8 @@ func _run() -> void:
 	_test_draft_editing_and_vote()
 	_test_event_lifecycle_and_trust()
 	_test_constitution_and_special_races()
+	_test_special_voting_rules()
+	_test_constitution_revision_threshold()
 	_test_annual_settlement()
 	_test_collapse_routes()
 	if failures == 0:
@@ -211,6 +213,62 @@ func _test_constitution_and_special_races() -> void:
 	session.free()
 
 
+func _test_special_voting_rules() -> void:
+	var zhushui := _make_race(&"zhushui", 4)
+	zhushui.special_mechanism = RaceDefinition.SpecialMechanism.ZHUSHUI
+	var nanke := _make_race(&"nanke", 1)
+	nanke.fixed_seat_count = 1
+	nanke.special_mechanism = RaceDefinition.SpecialMechanism.NANKE
+	nanke.special_group_id = &"union"
+	nanke.strike_wage_floor = 10
+	var biyi := _make_race(&"biyi", 1)
+	biyi.fixed_seat_count = 1
+	biyi.special_mechanism = RaceDefinition.SpecialMechanism.BIYI
+	var group := _make_group(&"union", 1, 0)
+	var session := _make_session([zhushui, nanke, biyi], [group])
+	for seat in session.state.seats:
+		if seat.race_id == &"biyi":
+			seat.odd_month_relation = 10.0
+			seat.even_month_relation = -10.0
+	var actual := session.vote_system.calculate_vote(
+		session.state.draft_bill, session.context, true
+	)
+	_check_equal(_vote_for_race(actual, session.state, &"zhushui"), SeatVoteState.Position.SUPPORT, "zhushui always supports")
+	_check_equal(_vote_for_race(actual, session.state, &"nanke"), SeatVoteState.Position.ABSENT, "nanke strike cannot be bought away")
+	_check_equal(_vote_for_race(actual, session.state, &"biyi"), SeatVoteState.Position.SUPPORT, "odd-month biyi half uses own relation")
+	session.state.month = 2
+	var even_vote := session.vote_system.calculate_vote(
+		session.state.draft_bill, session.context, false
+	)
+	_check_equal(_vote_for_race(even_vote, session.state, &"biyi"), SeatVoteState.Position.OPPOSE, "even-month biyi half replaces attitude")
+	session.free()
+
+
+func _test_constitution_revision_threshold() -> void:
+	var race := _make_race(&"majority", 3)
+	race.fixed_seat_count = 3
+	var group := _make_group(&"group", 1, 0)
+	var initial := ConstitutionArticleDefinition.new()
+	initial.id = &"center"
+	initial.axis_id = &"race_axis"
+	initial.is_initial = true
+	var next := ConstitutionArticleDefinition.new()
+	next.id = &"branch_one"
+	next.axis_id = &"race_axis"
+	next.level = 1
+	next.direction = 1
+	next.prerequisite_id = &"center"
+	next.threshold_kind = ConstitutionArticleDefinition.ThresholdKind.RACE_SEAT_RATE
+	next.threshold_target_id = &"majority"
+	next.threshold_rate = 0.9
+	var session := _make_session([race], [group], [], [initial, next])
+	_check(session.constitution_system.can_revise(session.state, next), "90 percent threshold reads annual snapshot")
+	_check(session.revise_constitution(next), "valid one-step constitution revision succeeds")
+	_check(not session.state.constitution.revision_available, "revision consumes annual opportunity")
+	_check(session.state.has_intervened, "constitution revision records intervention")
+	session.free()
+
+
 func _test_annual_settlement() -> void:
 	var stance := _make_stance(Metric.Id.TRADE, MetricStanceDefinition.Direction.HIGHER, 100, 10)
 	var race := _make_race(&"annual", 4)
@@ -323,6 +381,16 @@ func _make_event(
 	result.race_id = race_id
 	result.requirements = [requirement]
 	return result
+
+
+func _vote_for_race(
+	result: VoteResultState, state: RunState, race_id: StringName
+) -> SeatVoteState.Position:
+	for vote in result.seat_votes:
+		for seat in state.seats:
+			if seat.seat_id == vote.seat_id and seat.race_id == race_id:
+				return vote.position
+	return SeatVoteState.Position.ABSTAIN
 
 
 func _check(condition: bool, message: String) -> void:
