@@ -17,7 +17,19 @@ func resolve_policy_chain(state: RunState) -> void:
 		var triggered_batch := _find_triggered_batch(bill, state.metrics)
 		if triggered_batch.is_empty():
 			return
-		_resolve_batch(triggered_batch, state.metrics)
+		_resolve_batch(triggered_batch, state)
+
+
+func calculate_immediate_result(
+	current: MetricValues, definitions: Array[PolicyDefinition]
+) -> MetricValues:
+	var simulation := RunState.new()
+	simulation.metrics = current.copy()
+	var bill := ActiveBillState.new()
+	bill.policies = create_states(definitions)
+	simulation.active_bill = bill
+	resolve_policy_chain(simulation)
+	return simulation.metrics
 
 
 func _find_triggered_batch(bill: ActiveBillState, values: MetricValues) -> Array[PolicyState]:
@@ -37,16 +49,17 @@ func _find_triggered_batch(bill: ActiveBillState, values: MetricValues) -> Array
 	return result
 
 
-func _resolve_batch(batch: Array[PolicyState], current_values: MetricValues) -> void:
-	var snapshot := current_values.copy()
+func _resolve_batch(batch: Array[PolicyState], state: RunState) -> void:
+	var snapshot := state.metrics.copy()
 	for policy_state in batch:
 		policy_state.triggered = true
 	var total_delta := MetricVector.new()
 	for policy_state in batch:
 		var definition := policy_state.definition
+		state.pending_collapse_delta += definition.collapse_impact
 		for effect in definition.effects:
 			if effect == null:
 				continue
 			var amount := effect.calculate_amount(snapshot)
 			total_delta.add_value(effect.target_metric, amount)
-	current_values.apply_delta(total_delta)
+	state.metrics.apply_delta(total_delta)

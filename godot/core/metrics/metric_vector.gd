@@ -63,3 +63,15 @@ func copy() -> MetricVector:
 
 func add_value(metric: Metric.Id, delta: int) -> void:
 	set_value(metric, get_value(metric) + delta)
+
+
+func non_zero_metrics() -> Array[Metric.Id]:
+	var result: Array[Metric.Id] = []
+	for metric in Metric.all_ids():
+		if get_value(metric) != 0:
+			result.append(metric)
+	return result
+
+
+func is_zero() -> bool:
+	return non_zero_metrics().is_empty()

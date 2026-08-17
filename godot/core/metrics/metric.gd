@@ -29,7 +29,7 @@ static func display_name(metric: Id) -> String:
 static func proposal_negative_sign(metric: Id) -> int:
 	match metric:
 		Id.TAX:
-			return -1
+			return 1
 		Id.PRICE:
 			return 1
 		Id.WAGE:
@@ -41,3 +41,11 @@ static func proposal_negative_sign(metric: Id) -> int:
 		_:
 			push_error("Unknown metric: %s" % metric)
 			return 0
+
+
+static func favorable_sign(metric: Id) -> int:
+	return -proposal_negative_sign(metric)
+
+
+static func all_ids() -> Array[Id]:
+	return [Id.TAX, Id.PRICE, Id.WAGE, Id.EMPLOYMENT, Id.TRADE]
