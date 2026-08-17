@@ -38,6 +38,8 @@ func enact_bill(draft: DraftBillState) -> void:
 	context.parliament_system.record_authorized_proposal_slots(
 		context.state, draft.proposals
 	)
+	for proposal in draft.proposals:
+		context.state.pending_collapse_delta += proposal.collapse_impact
 	context.policy_system.resolve_policy_chain(context.state)
 
 

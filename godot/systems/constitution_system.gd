@@ -354,7 +354,9 @@ func _replace_group(
 ) -> void:
 	for seat in state.seats:
 		if seat.actual_group_id == source and seat.influence_priority >= priority:
-			seat.actual_group_id = seat.base_group_id if target == &"" else target
+			seat.actual_group_id = (
+				_fallback_group(state, seat, source) if target == &"" else target
+			)
 			seat.influence_priority = priority
 
 

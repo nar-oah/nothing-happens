@@ -85,6 +85,7 @@ func generate_automatic_proposal(
 		DEV_DIGESTION_SPEED_MIN, DEV_DIGESTION_SPEED_MAX
 	)
 	proposal.political_support = definition.political_support
+	proposal.collapse_impact = definition.collapse_impact
 	return proposal
 
 

@@ -7,6 +7,7 @@ var base_effect: MetricVector
 var positive_effect: MetricVector
 var digestion_speed: float = 1.0
 var political_support: float = 8.0
+var collapse_impact: float = 0.0
 
 
 func _init() -> void:
@@ -37,4 +38,5 @@ func copy() -> ProposalInstance:
 	result.positive_effect = positive_effect.copy()
 	result.digestion_speed = digestion_speed
 	result.political_support = political_support
+	result.collapse_impact = collapse_impact
 	return result

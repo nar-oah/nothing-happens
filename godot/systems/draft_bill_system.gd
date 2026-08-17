@@ -35,6 +35,42 @@ func remove_policy(state: RunState, draft_index: int) -> bool:
 	return true
 
 
+func add_unlocked_policy(context: RunContext, policy: PolicyDefinition) -> bool:
+	if policy == null:
+		return false
+	var unlocked := context.constitution_system.get_unlocked_policies(context.state)
+	for candidate in unlocked:
+		if candidate.id == policy.id:
+			return add_policy(context.state, policy)
+	return false
+
+
+func reorder_proposal(state: RunState, from_index: int, to_index: int) -> bool:
+	if (
+		from_index < 0
+		or from_index >= state.draft_bill.proposals.size()
+		or to_index < 0
+		or to_index >= state.draft_bill.proposals.size()
+	):
+		return false
+	var proposal: ProposalInstance = state.draft_bill.proposals.pop_at(from_index)
+	state.draft_bill.proposals.insert(to_index, proposal)
+	return true
+
+
+func reorder_policy(state: RunState, from_index: int, to_index: int) -> bool:
+	if (
+		from_index < 0
+		or from_index >= state.draft_bill.policies.size()
+		or to_index < 0
+		or to_index >= state.draft_bill.policies.size()
+	):
+		return false
+	var policy: PolicyDefinition = state.draft_bill.policies.pop_at(from_index)
+	state.draft_bill.policies.insert(to_index, policy)
+	return true
+
+
 func clear_draft(state: RunState) -> void:
 	state.proposal_hand.append_array(state.draft_bill.proposals)
 	state.draft_bill = DraftBillState.new()

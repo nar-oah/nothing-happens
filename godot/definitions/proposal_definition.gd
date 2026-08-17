@@ -5,6 +5,7 @@ class_name ProposalDefinition
 @export var display_name: String
 @export var source_group_id: StringName
 @export_range(0.0, 100.0, 0.5) var political_support: float = 8.0
+@export var collapse_impact: float = 0.0
 
 @export_group("负面指标槽位")
 @export var affects_tax: bool = false
