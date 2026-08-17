@@ -30,7 +30,7 @@ func try_generate_month(context: RunContext) -> Array[EventState]:
 		var race := context.state.get_race(definition.race_id)
 		if race == null:
 			continue
-		var gap_pressure := _race_gap_pressure(race, context.state.metrics)
+		var gap_pressure := _race_gap_pressure(race, context.state.metrics, context.state)
 		var duration_pressure := _race_gap_duration_pressure(race)
 		var probability := definition.local_issue_chance
 		if gap_pressure > 0.0:
@@ -197,10 +197,12 @@ func _update_gap_durations(state: RunState) -> void:
 			)
 
 
-func _race_gap_pressure(race: RaceState, current: MetricValues) -> float:
+func _race_gap_pressure(
+	race: RaceState, current: MetricValues, state: RunState
+) -> float:
 	var total := 0.0
 	var count := 0
-	for stance in _expectation_stances(race, null):
+	for stance in _expectation_stances(race, state):
 		if stance == null or stance.direction == MetricStanceDefinition.Direction.NONE:
 			continue
 		var target := race.get_expectation(stance.metric, stance.initial_target)
