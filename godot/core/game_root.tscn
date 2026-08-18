@@ -3,9 +3,17 @@
 [ext_resource type="Script" uid="uid://c4br5jp0geu1s" path="res://core/game_root.gd" id="1_x0thd"]
 [ext_resource type="PackedScene" uid="uid://7k6yvye5exuh" path="res://core/run/run_session.tscn" id="2_5gaxf"]
 [ext_resource type="Resource" uid="uid://61kkkntclnv" path="res://data/config/game_balance.tres" id="3_d342j"]
+[ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="4_0r11x"]
+[ext_resource type="Resource" uid="uid://bw162ei21njtt" path="res://data/races/biyi.tres" id="5_we0k6"]
+[ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/human.tres" id="6_bycul"]
+[ext_resource type="Resource" uid="uid://bto7mkhf8cqca" path="res://data/races/nanke.tres" id="7_6olyg"]
+[ext_resource type="Resource" uid="uid://b4e7rdu770lrv" path="res://data/races/peach_blossom.tres" id="8_n86qh"]
+[ext_resource type="Resource" uid="uid://c2eco18e42n34" path="res://data/races/yano.tres" id="9_o4ws2"]
+[ext_resource type="Resource" uid="uid://dknll48i00v4u" path="res://data/races/zhushui.tres" id="10_iqiaq"]
 
 [node name="GameRoot" type="Node" unique_id=1300880904]
 script = ExtResource("1_x0thd")
 
 [node name="RunSession" parent="." unique_id=1121832609 instance=ExtResource("2_5gaxf")]
 balance = ExtResource("3_d342j")
+race_definitions = Array[ExtResource("4_0r11x")]([ExtResource("5_we0k6"), ExtResource("6_bycul"), ExtResource("7_6olyg"), ExtResource("8_n86qh"), ExtResource("9_o4ws2"), ExtResource("10_iqiaq")])

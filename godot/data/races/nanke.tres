@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="RaceDefinition" format=3 uid="uid://bto7mkhf8cqca"]
+
+[ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="2_de8f7"]
+
+[resource]
+script = ExtResource("2_de8f7")
+id = &"nanke"
+display_name = "南柯"
+increase_wage = true
+decrease_price = true
+metadata/_custom_type_script = "uid://britky0yedt0q"

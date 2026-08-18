@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="RaceDefinition" format=3 uid="uid://bw162ei21njtt"]
+
+[ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="2_7v15b"]
+
+[resource]
+script = ExtResource("2_7v15b")
+id = &"biyi"
+display_name = "比翼"
+increase_wage = true
+decrease_tax = true
+decrease_price = true
+decrease_trade = true
+metadata/_custom_type_script = "uid://britky0yedt0q"

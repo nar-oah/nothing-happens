@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="RaceDefinition" format=3 uid="uid://bkkiux2yl5gln"]
+
+[ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="2_uck63"]
+
+[resource]
+script = ExtResource("2_uck63")
+id = &"human"
+display_name = "人类"
+increase_trade = true
+decrease_tax = true
+decrease_wage = true
+metadata/_custom_type_script = "uid://britky0yedt0q"

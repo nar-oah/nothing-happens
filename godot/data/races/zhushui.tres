@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="RaceDefinition" format=3 uid="uid://dknll48i00v4u"]
+
+[ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="2_mb808"]
+
+[resource]
+script = ExtResource("2_mb808")
+id = &"zhushui"
+display_name = "驻岁"
+metadata/_custom_type_script = "uid://c6jh5c18ipwnq"
