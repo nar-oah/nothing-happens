@@ -198,7 +198,7 @@ func add_next_year_group_target(
 	if additional_seats <= 0:
 		return false
 	var free_capacity := 0
-	for seat in state.seats:
+	for seat in _variable_seats(state):
 		if seat.influence_priority >= 4 and seat.actual_group_id != group_id:
 			free_capacity += 1
 	if free_capacity < additional_seats:
@@ -231,13 +231,14 @@ func _threshold_met(state: RunState, definition: ConstitutionArticleDefinition) 
 					count += 1
 			return float(count) / float(seats.size()) >= definition.threshold_rate
 		ConstitutionArticleDefinition.ThresholdKind.GROUP_INFLUENCE_RATE:
-			if state.seats.is_empty():
+			var seats := _variable_seats(state)
+			if seats.is_empty():
 				return false
 			var count := 0
-			for seat in state.seats:
+			for seat in seats:
 				if seat.actual_group_id == definition.threshold_target_id:
 					count += 1
-			return float(count) / float(state.seats.size()) >= definition.threshold_rate
+			return float(count) / float(seats.size()) >= definition.threshold_rate
 	return false
 
 
@@ -405,7 +406,6 @@ func _article_changes_race_seats(article_id: StringName) -> bool:
 			ARTICLE_OUTER_VASSAL,
 			ARTICLE_FREE_TRADE,
 			ARTICLE_INCORPORATION,
-			ARTICLE_PROVINCE,
 			ARTICLE_CITIZENSHIP_VETO,
 		]
 	)

@@ -39,7 +39,7 @@ func try_generate_month(context: RunContext) -> Array[EventState]:
 
 func settle_month(context: RunContext) -> void:
 	for event in context.state.events:
-		if not event.is_active() or event.definition == null:
+		if not event.is_active():
 			continue
 		event.months_alive += 1
 		_update_effective_intensity(event, context.state)
