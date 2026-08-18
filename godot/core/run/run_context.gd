@@ -20,7 +20,6 @@ var collapse_system: CollapseSystem
 var annual_settlement_system: AnnualSettlementSystem
 var race_definitions: Array[RaceDefinition] = []
 var interest_groups: Array[InterestGroupDefinition] = []
-var event_definitions: Array[EventDefinition] = []
 var constitution_articles: Array[ConstitutionArticleDefinition] = []
 var automatic_draw_count: int = 3
 

@@ -13,39 +13,33 @@ const INTEL_MAX_PROBABILITY: float = 0.65
 const JINYI_EXTRA_INTEL_PROBABILITY: float = 0.15
 
 
-func spawn_event(state: RunState, definition: EventDefinition) -> EventState:
-	if definition == null:
-		return null
-	var event := EventState.new(definition, state.metrics)
-	state.events.append(event)
-	return event
-
-
 func try_generate_month(context: RunContext) -> Array[EventState]:
 	var generated: Array[EventState] = []
 	_update_gap_durations(context)
-	for definition in context.event_definitions:
-		if definition == null or _has_active_event(context.state, definition.id):
+	for race in context.state.races:
+		if race == null or race.definition == null:
 			continue
-		var race := context.state.get_race(definition.race_id)
-		if race == null:
+		if _has_active_event_for_race(context.state, race.get_id()):
 			continue
 		var gap_pressure := _race_gap_pressure(race, context)
+		if gap_pressure <= 0.0:
+			continue
 		var duration_pressure := _race_gap_duration_pressure(race)
-		var probability := definition.local_issue_chance
-		if gap_pressure > 0.0:
-			probability += (
-				definition.monthly_spawn_chance * (1.0 + gap_pressure * 2.0 + duration_pressure)
-			)
-		probability *= context.collapse_system.get_event_density_multiplier(context.state)
+		var probability := (
+			context.balance.event_monthly_spawn_chance
+			* (1.0 + gap_pressure * 2.0 + duration_pressure)
+		)
+		probability *= (context.collapse_system.get_event_density_multiplier(context.state))
 		if context.random_system.chance(clampf(probability, 0.0, 0.95)):
-			generated.append(spawn_event(context.state, definition))
+			var event := spawn_race_event(context, race.get_id())
+			if event != null:
+				generated.append(event)
 	return generated
 
 
 func settle_month(context: RunContext) -> void:
 	for event in context.state.events:
-		if not event.is_active() or event.definition == null:
+		if not event.is_active():
 			continue
 		event.months_alive += 1
 		_update_effective_intensity(event, context.state)
@@ -68,7 +62,7 @@ func update_information(context: RunContext) -> void:
 			event.known = true
 			event.published = true
 			continue
-		var race := context.state.get_race(event.definition.race_id)
+		var race := context.state.get_race(event.race_id)
 		var seats := 0 if race == null else race.seat_count
 		var probability := clampf(
 			INTEL_BASE_PROBABILITY + INTEL_PER_SEAT * seats,
@@ -81,15 +75,13 @@ func update_information(context: RunContext) -> void:
 			event.known = true
 
 
-func get_current_requirements(event: EventState) -> Dictionary[int, int]:
+func get_current_requirements(event: EventState, context: RunContext) -> Dictionary[int, int]:
 	var result: Dictionary[int, int] = {}
-	if event == null or event.definition == null:
+	if event == null:
 		return result
-	for requirement in event.definition.requirements:
-		if requirement != null:
-			result[requirement.metric] = requirement.current_target(
-				event.baseline, event.effective_intensity
-			)
+	for metric_value in event.requirement_targets:
+		var metric = metric_value as Metric.Id
+		result[metric] = _get_current_target(event, metric, context)
 	return result
 
 
@@ -97,14 +89,14 @@ func _worsen(event: EventState, context: RunContext) -> void:
 	event.phase = EventState.Phase.WORSENING
 	event.relief_streak = 0
 	event.base_intensity = minf(
-		MAX_INTENSITY, event.base_intensity + event.definition.worsening_per_month
+		MAX_INTENSITY, event.base_intensity + context.balance.event_worsening_per_month
 	)
 	_update_effective_intensity(event, context.state)
 	if event.effective_intensity >= MAX_INTENSITY:
 		event.known = true
 		event.published = true
 		event.crisis_progress += 1
-	if event.crisis_progress >= event.definition.crisis_months:
+	if event.crisis_progress >= context.balance.event_crisis_months:
 		_erupt(event, context)
 
 
@@ -121,9 +113,9 @@ func _relieve(event: EventState, context: RunContext) -> void:
 	event.relief_streak += 1
 	var overfulfillment := maxf(event.satisfaction_rate - RELIEF_THRESHOLD, 0.0)
 	var relief := (
-		event.definition.relief_per_month
-		+ float(event.relief_streak - 1) * event.definition.relief_streak_bonus
-		+ overfulfillment * event.definition.overfulfillment_bonus
+		context.balance.event_relief_per_month
+		+ float(event.relief_streak - 1) * context.balance.event_relief_streak_bonus
+		+ overfulfillment * context.balance.event_overfulfillment_bonus
 	)
 	event.base_intensity = maxf(BASE_INTENSITY, event.base_intensity - relief)
 	_update_effective_intensity(event, context.state)
@@ -132,9 +124,9 @@ func _relieve(event: EventState, context: RunContext) -> void:
 func _resolve(event: EventState, context: RunContext) -> void:
 	event.phase = EventState.Phase.RESOLVED
 	context.political_trust_system.record_event_result(
-		context.state, event.definition.race_id, event.definition.trust_on_resolve, true
+		context.state, event.race_id, context.balance.event_trust_on_resolve, true
 	)
-	context.state.pending_collapse_delta += event.definition.collapse_on_resolve
+	context.state.pending_collapse_delta += (context.balance.event_collapse_on_resolve)
 
 
 func _erupt(event: EventState, context: RunContext) -> void:
@@ -142,9 +134,9 @@ func _erupt(event: EventState, context: RunContext) -> void:
 	event.known = true
 	event.published = true
 	context.political_trust_system.record_event_result(
-		context.state, event.definition.race_id, event.definition.trust_on_erupt, false
+		context.state, event.race_id, context.balance.event_trust_on_erupt, false
 	)
-	context.state.pending_collapse_delta += event.definition.collapse_on_erupt
+	context.state.pending_collapse_delta += (context.balance.event_collapse_on_erupt)
 
 
 func _update_effective_intensity(event: EventState, state: RunState) -> void:
@@ -152,24 +144,9 @@ func _update_effective_intensity(event: EventState, state: RunState) -> void:
 	event.effective_intensity = minf(MAX_INTENSITY, event.base_intensity + bonus)
 
 
-func _calculate_satisfaction(event: EventState, context: RunContext) -> float:
-	if event.definition.requirements.is_empty():
-		return 1.0
-	var result := INF
-	for requirement in event.definition.requirements:
-		if requirement != null:
-			result = minf(
-				result,
-				requirement.satisfaction(
-					context.state.metrics, event.baseline, event.effective_intensity
-				)
-			)
-	return 1.0 if is_inf(result) else result
-
-
-func _has_active_event(state: RunState, definition_id: StringName) -> bool:
+func _has_active_event_for_race(state: RunState, race_id: StringName) -> bool:
 	for event in state.events:
-		if event.definition != null and event.definition.id == definition_id and event.is_active():
+		if event.race_id == race_id and event.is_active():
 			return true
 	return false
 
@@ -217,15 +194,70 @@ func _race_gap_duration_pressure(race: RaceState) -> float:
 	return minf(float(longest) * 0.05, 1.0)
 
 
-func _effective_requirement_base_amount(
-	event: EventState, requirement: EventRequirementDefinition, context: RunContext
-) -> int:
-	var amount := requirement.base_amount
-	if not context.constitution_system.uses_yin_yang_for_race(
-		context.state, event.definition.race_id
-	):
-		return amount
-	var month_sign := context.balance.get_yin_yang_month_sign(
-		requirement.metric, context.state.month
-	)
-	return maxi(0, amount + month_sign * context.balance.yin_yang_adjustment)
+func spawn_race_event(context: RunContext, race_id: StringName) -> EventState:
+	var race := context.state.get_race(race_id)
+	if race == null or race.definition == null:
+		return null
+	var targets: Dictionary[int, int] = {}
+	for metric in race.definition.get_stance_metrics():
+		var target := race.get_expectation(metric, context.balance.initial_metric_value)
+		var current_target := context.race_system.get_effective_expectation(race, metric, context)
+		var current := context.state.metrics.get_value(metric)
+		var direction := race.definition.get_stance(metric)
+		var has_gap := (
+			current < current_target
+			if direction == MetricStanceDefinition.Direction.HIGHER
+			else current > current_target
+		)
+		if has_gap:
+			targets[metric] = target
+	if targets.is_empty():
+		return null
+	var event := EventState.new(race_id, targets, context.state.metrics)
+	context.state.events.append(event)
+	return event
+
+
+func _get_full_target(event: EventState, metric: Metric.Id, context: RunContext) -> int:
+	var target: int = event.requirement_targets.get(metric, event.baseline.get_value(metric))
+	var race := context.state.get_race(event.race_id)
+	if race == null or race.definition == null:
+		return target
+	var direction := race.definition.get_stance(metric)
+	if context.constitution_system.uses_yin_yang_for_race(context.state, event.race_id):
+		var month_sign := context.balance.get_yin_yang_month_sign(metric, context.state.month)
+		target += (int(direction) * month_sign * context.balance.yin_yang_adjustment)
+	var baseline := event.baseline.get_value(metric)
+	if direction == MetricStanceDefinition.Direction.HIGHER:
+		return maxi(baseline, target)
+	if direction == MetricStanceDefinition.Direction.LOWER:
+		return mini(baseline, target)
+	return baseline
+
+
+func _get_current_target(event: EventState, metric: Metric.Id, context: RunContext) -> int:
+	var start := float(event.baseline.get_value(metric))
+	var target := float(_get_full_target(event, metric, context))
+	return roundi(lerpf(start, target, event.effective_intensity))
+
+
+func _metric_satisfaction(event: EventState, metric: Metric.Id, context: RunContext) -> float:
+	var baseline := event.baseline.get_value(metric)
+	var target := _get_current_target(event, metric, context)
+	var required := absf(float(target - baseline))
+	if required <= 0.000001:
+		return 1.0
+	var current := context.state.metrics.get_value(metric)
+	var direction := 1.0 if target >= baseline else -1.0
+	var achieved := maxf(float(current - baseline) * direction, 0.0)
+	return achieved / required
+
+
+func _calculate_satisfaction(event: EventState, context: RunContext) -> float:
+	if event.requirement_targets.is_empty():
+		return 1.0
+	var result := INF
+	for metric_value in event.requirement_targets:
+		var metric = metric_value as Metric.Id
+		result = minf(result, _metric_satisfaction(event, metric, context))
+	return 1.0 if is_inf(result) else result

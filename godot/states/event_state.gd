@@ -9,7 +9,8 @@ enum Phase {
 	ERUPTED,
 }
 
-var definition: EventDefinition
+var race_id: StringName
+var requirement_targets: Dictionary[int, int] = {}
 var baseline: MetricValues
 var base_intensity: float = 0.5
 var effective_intensity: float = 0.5
@@ -22,9 +23,14 @@ var phase: Phase = Phase.WORSENING
 var months_alive: int = 0
 
 
-func _init(source_definition: EventDefinition = null, source_baseline: MetricValues = null) -> void:
-	definition = source_definition
-	baseline = MetricValues.new() if source_baseline == null else source_baseline.copy()
+func _init(
+	source_race_id: StringName = &"",
+	source_targets: Dictionary[int, int] = {},
+	source_baseline: MetricValues = null
+) -> void:
+	race_id = source_race_id
+	requirement_targets = source_targets.duplicate()
+	baseline = (MetricValues.new() if source_baseline == null else source_baseline.copy())
 
 
 func is_active() -> bool:

@@ -40,21 +40,6 @@ func advance_era_expectations(
 			))
 
 
-func _all_stances(definition: RaceDefinition) -> Array[MetricStanceDefinition]:
-	var result: Array[MetricStanceDefinition] = []
-	var seen: Dictionary[int, bool] = {}
-	for list in [
-		definition.metric_stances,
-		definition.odd_month_stances,
-		definition.even_month_stances,
-	]:
-		for stance in list:
-			if stance != null and not seen.has(stance.metric):
-				seen[stance.metric] = true
-				result.append(stance)
-	return result
-
-
 func allocate_seats(
 	state: RunState,
 	balance: GameBalanceDefinition,

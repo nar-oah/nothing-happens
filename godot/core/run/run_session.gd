@@ -7,7 +7,6 @@ class_name RunSession
 @export_group("游戏内容")
 @export var race_definitions: Array[RaceDefinition] = []
 @export var interest_groups: Array[InterestGroupDefinition] = []
-@export var event_definitions: Array[EventDefinition] = []
 @export var constitution_articles: Array[ConstitutionArticleDefinition] = []
 
 @export_group("流程")
@@ -36,16 +35,23 @@ var flow_controller: FlowController
 func configure_content(
 	races: Array[RaceDefinition],
 	groups: Array[InterestGroupDefinition],
-	events: Array[EventDefinition] = [],
 	articles: Array[ConstitutionArticleDefinition] = []
 ) -> void:
 	race_definitions = races
 	interest_groups = groups
-	event_definitions = events
 	constitution_articles = articles
 
 
 func start_new_run() -> void:
+	if balance == null:
+		push_error("RunSession requires GameBalanceDefinition.")
+		return
+	if race_definitions.is_empty():
+		push_error("RunSession requires race definitions.")
+		return
+	if interest_groups.is_empty():
+		push_error("RunSession requires interest group definitions.")
+		return
 	state = RunState.new()
 	time_system = TimeSystem.new()
 	random_system = RandomSystem.new()
@@ -89,7 +95,6 @@ func start_new_run() -> void:
 	)
 	context.race_definitions = race_definitions
 	context.interest_groups = interest_groups
-	context.event_definitions = event_definitions
 	context.constitution_articles = constitution_articles
 	context.automatic_draw_count = automatic_draw_count
 	constitution_system.initialize(state, constitution_articles)

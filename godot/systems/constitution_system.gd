@@ -48,7 +48,6 @@ func can_revise(state: RunState, definition: ConstitutionArticleDefinition) -> b
 func revise(context: RunContext, definition: ConstitutionArticleDefinition) -> bool:
 	if not can_revise(context.state, definition):
 		return false
-	var had_free_trade := context.state.constitution.has_flag(FLAG_FREE_TRADE)
 	context.state.constitution.active_articles[definition.axis_id] = definition
 	context.state.constitution.revision_available = false
 	if definition.is_terminal:
@@ -57,9 +56,6 @@ func revise(context: RunContext, definition: ConstitutionArticleDefinition) -> b
 	if _article_changes_race_seats(definition.id):
 		_rebuild_for_seat_constraints(context)
 	_apply_static_revision_rules(context.state)
-	if not had_free_trade and context.state.constitution.has_flag(FLAG_FREE_TRADE):
-		apply_free_trade_mergers(context.state)
-		apply_special_fixed_relations(context.state)
 	update_petition_count(context.state)
 	return true
 
@@ -136,8 +132,6 @@ func apply_annual_influence_rules(context: RunContext) -> void:
 				_apply_rule(context.state, rule)
 		if priority == ConstitutionInfluenceRule.Priority.MERGER:
 			apply_free_trade_mergers(context.state)
-		if priority == ConstitutionInfluenceRule.Priority.FIXED:
-			apply_special_fixed_relations(context.state)
 	if context.state.constitution.has_flag(FLAG_FREE_TRADE):
 		_apply_pending_targets(context.state)
 	update_petition_count(context.state)
@@ -172,19 +166,6 @@ func apply_free_trade_mergers(state: RunState) -> void:
 				seat.influence_priority = 1
 
 
-func apply_special_fixed_relations(state: RunState) -> void:
-	for race in state.races:
-		if race.definition == null:
-			continue
-		var race_id := race.definition.id
-		if race_id == Race.YANO and state.constitution.has_flag(FLAG_YANO_RECOGNIZED):
-			_fix_race(state, race_id, race.definition.special_group_id, 2)
-		elif race_id == Race.PEACH_BLOSSOM and state.constitution.has_flag(FLAG_PEACH_CLOSED):
-			_localize_race(state, race_id, race.definition.local_group_prefix, 0)
-		elif race_id == Race.HUMAN and state.constitution.has_flag(FLAG_FREE_TRADE):
-			_fix_race(state, race_id, race.definition.special_group_id, 2)
-
-
 func update_petition_count(state: RunState) -> void:
 	state.constitution.annual_petition_count = 0
 	if not state.constitution.has_flag(FLAG_FREE_TRADE):
@@ -192,12 +173,17 @@ func update_petition_count(state: RunState) -> void:
 	var human := state.get_race(Race.HUMAN)
 	if human == null:
 		return
-	var group_id := human.definition.special_group_id
+	var group_id := get_fixed_group_for_race(state, Race.HUMAN)
+	if group_id == &"":
+		return
 	var count := 0
-	for seat in state.seats:
+	var seats := _variable_seats(state)
+	if seats.is_empty():
+		return
+	for seat in seats:
 		if seat.actual_group_id == group_id:
 			count += 1
-	var rate := 0.0 if state.seats.is_empty() else float(count) / float(state.seats.size())
+	var rate := float(count) / float(seats.size())
 	if rate >= 0.9:
 		state.constitution.annual_petition_count = 3
 	elif rate >= 0.5:
@@ -212,7 +198,7 @@ func add_next_year_group_target(
 	if additional_seats <= 0:
 		return false
 	var free_capacity := 0
-	for seat in state.seats:
+	for seat in _variable_seats(state):
 		if seat.influence_priority >= 4 and seat.actual_group_id != group_id:
 			free_capacity += 1
 	if free_capacity < additional_seats:
@@ -245,13 +231,14 @@ func _threshold_met(state: RunState, definition: ConstitutionArticleDefinition) 
 					count += 1
 			return float(count) / float(seats.size()) >= definition.threshold_rate
 		ConstitutionArticleDefinition.ThresholdKind.GROUP_INFLUENCE_RATE:
-			if state.seats.is_empty():
+			var seats := _variable_seats(state)
+			if seats.is_empty():
 				return false
 			var count := 0
-			for seat in state.seats:
+			for seat in seats:
 				if seat.actual_group_id == definition.threshold_target_id:
 					count += 1
-			return float(count) / float(state.seats.size()) >= definition.threshold_rate
+			return float(count) / float(seats.size()) >= definition.threshold_rate
 	return false
 
 
@@ -419,7 +406,6 @@ func _article_changes_race_seats(article_id: StringName) -> bool:
 			ARTICLE_OUTER_VASSAL,
 			ARTICLE_FREE_TRADE,
 			ARTICLE_INCORPORATION,
-			ARTICLE_PROVINCE,
 			ARTICLE_CITIZENSHIP_VETO,
 		]
 	)
@@ -427,7 +413,7 @@ func _article_changes_race_seats(article_id: StringName) -> bool:
 
 func _rebuild_for_seat_constraints(context: RunContext) -> void:
 	if not context.race_system.allocate_seats(
-		context.state, context.balance, self, context.random_system
+		context.state, context.balance, context.constitution_system, context.random_system
 	):
 		push_error("Failed to reallocate seats after constitution revision.")
 		return
@@ -441,8 +427,8 @@ func _apply_static_revision_rules(state: RunState) -> void:
 		for rule in rules:
 			if rule != null and rule.priority == priority:
 				_apply_rule(state, rule)
-		if priority == ConstitutionInfluenceRule.Priority.FIXED:
-			apply_special_fixed_relations(state)
+		if priority == ConstitutionInfluenceRule.Priority.MERGER:
+			apply_free_trade_mergers(state)
 
 
 func get_race_seat_constraints(
@@ -456,14 +442,6 @@ func get_race_seat_constraints(
 		if race_id == Race.ZHUSHUI:
 			continue
 		result[race_id] = RaceSeatConstraint.new(balance.default_race_minimum_seats)
-	if state.constitution.has_article(ARTICLE_PROVINCE):
-		for race_id in result:
-			var constraint: RaceSeatConstraint = result[race_id]
-			if race_id == Race.HUMAN:
-				constraint.fixed_count = balance.variable_seat_count
-			else:
-				constraint.fixed_count = 0
-		return result
 	var human: RaceSeatConstraint = result.get(Race.HUMAN)
 	if human != null:
 		if state.constitution.has_article(ARTICLE_FREE_TRADE):
@@ -492,3 +470,25 @@ func uses_yin_yang_for_race(state: RunState, race_id: StringName) -> bool:
 	if state.constitution.has_flag(FLAG_YIN_YANG_BIYI_ONLY):
 		return race_id == Race.BIYI
 	return false
+
+
+func get_rule_target_group(state: RunState, race_id: StringName, action: int) -> StringName:
+	for rule in state.constitution.get_influence_rules():
+		if rule == null:
+			continue
+		if rule.action != action:
+			continue
+		if rule.race_id != race_id:
+			continue
+		if rule.target_group_id == &"":
+			continue
+		return rule.target_group_id
+	return &""
+
+
+func get_fixed_group_for_race(state: RunState, race_id: StringName) -> StringName:
+	return get_rule_target_group(state, race_id, ConstitutionInfluenceRule.Action.FIX_RACE_TO_GROUP)
+
+
+func get_minimum_group_for_race(state: RunState, race_id: StringName) -> StringName:
+	return get_rule_target_group(state, race_id, ConstitutionInfluenceRule.Action.GROUP_MINIMUM)

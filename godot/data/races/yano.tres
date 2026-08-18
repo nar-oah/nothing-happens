@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="RaceDefinition" format=3 uid="uid://c2eco18e42n34"]
+
+[ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="2_qanow"]
+
+[resource]
+script = ExtResource("2_qanow")
+id = &"yano"
+display_name = "偃偶"
+increase_trade = true
+decrease_price = true
+decrease_employment = true
+metadata/_custom_type_script = "uid://britky0yedt0q"

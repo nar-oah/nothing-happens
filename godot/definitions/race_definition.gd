@@ -18,9 +18,6 @@ class_name RaceDefinition
 @export var decrease_employment: bool = false
 @export var decrease_trade: bool = false
 
-@export var special_group_id: StringName
-@export var local_group_prefix: StringName = &"local"
-
 
 func get_stance(metric: Metric.Id) -> MetricStanceDefinition.Direction:
 	match metric:

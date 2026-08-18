@@ -13,6 +13,18 @@ class_name GameBalanceDefinition
 @export_group("政治信任")
 @export_range(0.0, 100.0, 0.5) var initial_political_trust: float = 50.0
 
+@export_group("事件")
+@export_range(0.0, 1.0, 0.01) var event_monthly_spawn_chance: float = 0.03
+@export_range(0.0, 1.0, 0.01) var event_worsening_per_month: float = 0.10
+@export_range(0.0, 1.0, 0.01) var event_relief_per_month: float = 0.05
+@export_range(0.0, 1.0, 0.01) var event_relief_streak_bonus: float = 0.01
+@export_range(0.0, 1.0, 0.01) var event_overfulfillment_bonus: float = 0.03
+@export_range(1, 12, 1) var event_crisis_months: int = 3
+@export var event_trust_on_resolve: float = 8.0
+@export var event_trust_on_erupt: float = -12.0
+@export var event_collapse_on_resolve: float = -4.0
+@export var event_collapse_on_erupt: float = 12.0
+
 @export_group("南柯")
 @export_range(0.0, 1.0, 0.01) var nanke_normal_absence_probability: float = 0.15
 @export_range(0.0, 1.0, 0.01) var nanke_protected_absence_probability: float = 0.03
