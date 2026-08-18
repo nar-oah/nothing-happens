@@ -39,7 +39,7 @@ func _test_race_seats_and_full_parliament() -> void:
 		_make_race(Race.HUMAN),
 	]
 	var group := _make_group(&"group", 1, 0)
-	var session := _make_session(races, [group], [], [], 20)
+	var session := _make_session(races, [group], [], 20)
 	_check_equal(
 		session.state.get_race(Race.NANKE).seat_count, 4, "equal trust gives Nanke four seats"
 	)
@@ -147,7 +147,7 @@ func _test_draft_editing_and_vote() -> void:
 	race.increase_wage = true
 	var group := _make_group(&"union", 1, 0)
 	group.metric_stances = [_make_stance(Metric.Id.WAGE, MetricStanceDefinition.Direction.HIGHER)]
-	var session := _make_session([race], [group], [], [], 3)
+	var session := _make_session([race], [group], [], 3)
 	session.state.metrics.wage = 50
 	var proposal := _make_proposal(&"union")
 	proposal.base_effect.wage = 10
@@ -170,33 +170,95 @@ func _test_draft_editing_and_vote() -> void:
 
 
 func _test_event_lifecycle_and_trust() -> void:
-	var race := _make_race(&"event_race")
-	var group := _make_group(&"group", 1, 0)
-	var session := _make_session([race], [group])
-	var requirement := EventRequirementDefinition.new()
-	requirement.metric = Metric.Id.WAGE
-	requirement.direction = EventRequirementDefinition.Direction.HIGHER
-	requirement.base_amount = 100
-	var eruption_definition := _make_event(&"eruption", &"event_race", requirement)
-	eruption_definition.worsening_per_month = 0.1
-	eruption_definition.crisis_months = 3
-	var eruption := session.event_system.spawn_event(session.state, eruption_definition)
+	var race := _make_race(
+		&"event_race"
+	)
+	race.increase_wage = true
+	var group := _make_group(
+		&"group",
+		1,
+		0
+	)
+	var session := _make_session(
+		[race],
+		[group]
+	)
+	session.state.metrics.wage = 0
+	var eruption := (
+		session.event_system
+		.spawn_race_event(
+			session.context,
+			&"event_race"
+		)
+	)
+	_check(
+		eruption != null,
+		"expectation gap creates race event"
+	)
 	eruption.base_intensity = 0.9
 	for i in range(3):
-		session.event_system.settle_month(session.context)
-	_check_equal(eruption.phase, EventState.Phase.ERUPTED, "three uncontrolled full months erupt")
-	_check(eruption.known and eruption.published, "full event is permanently public")
-	var relief_definition := _make_event(&"relief", &"event_race", requirement)
-	var relief := session.event_system.spawn_event(session.state, relief_definition)
+		session.event_system.settle_month(
+			session.context
+		)
+	_check_equal(
+		eruption.phase,
+		EventState.Phase.ERUPTED,
+		"three uncontrolled full months erupt"
+	)
+	_check(
+		eruption.known
+		and eruption.published,
+		"full event is permanently public"
+	)
+	session.state.metrics.wage = 0
+	var relief := (
+		session.event_system
+		.spawn_race_event(
+			session.context,
+			&"event_race"
+		)
+	)
+	_check(
+		relief != null,
+		"second expectation event can be created"
+	)
 	session.state.metrics.wage = 100
-	session.event_system.settle_month(session.context)
-	_check_equal(relief.phase, EventState.Phase.RELIEVING, "first floor relief is retained")
-	session.event_system.settle_month(session.context)
-	_check_equal(relief.phase, EventState.Phase.RESOLVED, "second floor relief resolves event")
-	var race_state := session.state.get_race(&"event_race")
-	_check_equal(race_state.erupted_events_this_year, 1, "eruption trust ledger count")
-	_check_equal(race_state.resolved_events_this_year, 1, "resolution trust ledger count")
-	_check_equal(race_state.pending_trust_delta, -4.0, "event trust deltas wait for year end")
+	session.event_system.settle_month(
+		session.context
+	)
+	_check_equal(
+		relief.phase,
+		EventState.Phase.RELIEVING,
+		"first floor relief is retained"
+	)
+	session.event_system.settle_month(
+		session.context
+	)
+	_check_equal(
+		relief.phase,
+		EventState.Phase.RESOLVED,
+		"second floor relief resolves event"
+	)
+	var race_state := (
+		session.state.get_race(
+			&"event_race"
+		)
+	)
+	_check_equal(
+		race_state.erupted_events_this_year,
+		1,
+		"eruption trust ledger count"
+	)
+	_check_equal(
+		race_state.resolved_events_this_year,
+		1,
+		"resolution trust ledger count"
+	)
+	_check_equal(
+		race_state.pending_trust_delta,
+		-4.0,
+		"event trust deltas wait for year end"
+	)
 	session.free()
 
 
@@ -212,12 +274,34 @@ func _test_constitution_and_special_races() -> void:
 	article.axis_id = &"initial"
 	article.is_initial = true
 	article.flags = [&"free_trade", &"yano_recognized", &"peach_closed"]
+	article.influence_rules = [
+	_make_group_rule(
+		ConstitutionInfluenceRule.Action.LOCALIZE,
+		ConstitutionInfluenceRule.Priority.TERMINAL,
+		Race.PEACH_BLOSSOM,
+		&"",
+		0.0,
+		&"county"
+	),
+	_make_group_rule(
+		ConstitutionInfluenceRule.Action.FIX_RACE_TO_GROUP,
+		ConstitutionInfluenceRule.Priority.FIXED,
+		Race.YANO,
+		&"factory"
+	),
+	_make_group_rule(
+		ConstitutionInfluenceRule.Action.FIX_RACE_TO_GROUP,
+		ConstitutionInfluenceRule.Priority.FIXED,
+		Race.HUMAN,
+		&"transport"
+	),
+]
 	var groups: Array[InterestGroupDefinition] = [
 		_make_group(&"factory", 6, 0),
 		_make_group(&"transport", 6, 1),
 		_make_group(&"minor", 1, 2),
 	]
-	var session := _make_session([yano, peach, human], groups, [], [article])
+	var session := _make_session([yano, peach, human], groups, [article],5)
 	_check_equal(
 		session.state.get_race(Race.HUMAN).seat_count, 1, "free trade keeps one human seat"
 	)
@@ -240,12 +324,40 @@ func _test_constitution_and_special_races() -> void:
 
 func _test_special_voting_rules() -> void:
 	var zhushui := _make_race(Race.ZHUSHUI)
-	var nanke := _make_race(Race.NANKE)
+	var nanke := _make_race(
+	Race.NANKE
+)
+	nanke.increase_wage = true
 	nanke.special_group_id = &"union"
 	nanke.strike_wage_floor = 10
+	var labor_rule := _make_group_rule(
+	ConstitutionInfluenceRule.Action.GROUP_MINIMUM,
+	ConstitutionInfluenceRule.Priority.LIMIT,
+	Race.NANKE,
+	&"union",
+	0.5
+)
+	var labor_article :=ConstitutionArticleDefinition.new()
+	labor_article.id = &"union"
+	labor_article.axis_id = &"labor"
+	labor_article.is_initial = true
+	labor_article.influence_rules = [
+		labor_rule
+	]
 	var biyi := _make_race(Race.BIYI)
 	var group := _make_group(&"union", 1, 0)
-	var session := _make_session([zhushui, nanke, biyi], [group])
+	var session := _make_session(
+	[zhushui, nanke, biyi],
+	[group],
+	[labor_article]
+)
+	var strike_proposal := _make_proposal(
+	&"union"
+)
+	strike_proposal.base_effect.wage = -10
+	session.state.draft_bill.proposals.append(
+		strike_proposal
+	)
 	for seat in session.state.seats:
 		if seat.race_id == Race.BIYI:
 			seat.odd_month_relation = 10.0
@@ -259,10 +371,14 @@ func _test_special_voting_rules() -> void:
 		"zhushui always supports"
 	)
 	_check_equal(
-		_vote_for_race(actual, session.state, &"nanke"),
-		SeatVoteState.Position.ABSENT,
-		"nanke strike cannot be bought away"
-	)
+	_vote_for_race(
+		actual,
+		session.state,
+		Race.NANKE
+	),
+	SeatVoteState.Position.OPPOSE,
+	"nanke strike counts as opposition"
+)
 	_check_equal(
 		_vote_for_race(actual, session.state, &"biyi"),
 		SeatVoteState.Position.SUPPORT,
@@ -296,7 +412,7 @@ func _test_constitution_revision_threshold() -> void:
 	next.threshold_kind = ConstitutionArticleDefinition.ThresholdKind.RACE_SEAT_RATE
 	next.threshold_target_id = &"majority"
 	next.threshold_rate = 0.9
-	var session := _make_session([race], [group], [], [initial, next])
+	var session := _make_session([race], [group], [initial, next])
 	_check(
 		session.constitution_system.can_revise(session.state, next),
 		"90 percent threshold reads annual snapshot"
@@ -310,15 +426,18 @@ func _test_constitution_revision_threshold() -> void:
 
 
 func _test_annual_settlement() -> void:
-	var stance := _make_stance(Metric.Id.TRADE, MetricStanceDefinition.Direction.HIGHER)
 	var race := _make_race(&"annual")
 	race.increase_trade = true
-	race.metric_stances = [stance]
 	var groups: Array[InterestGroupDefinition] = [
 		_make_group(&"a", 1, 0),
 		_make_group(&"b", 1, 1),
 	]
-	var session := _make_session([race], groups)
+	var session := _make_session(
+	[race],
+	groups,
+	[],
+	8
+)
 	var race_state := session.state.get_race(&"annual")
 	race_state.pending_trust_delta = 50.0
 	var proposal := _make_proposal(&"b")
@@ -366,11 +485,14 @@ func _test_collapse_routes() -> void:
 
 
 func _test_flow_reaches_new_year() -> void:
-	var stance := _make_stance(Metric.Id.WAGE, MetricStanceDefinition.Direction.HIGHER)
 	var race := _make_race(&"flow")
 	race.increase_wage = true
-	race.metric_stances = [stance]
-	var session := _make_session([race], [_make_group(&"group", 1, 0)])
+	var session := _make_session(
+	[race],
+	[_make_group(&"group", 1, 0)],
+	[],
+	4
+)
 	session.state.month = 12
 	var race_state := session.state.get_race(&"flow")
 	race_state.pending_trust_delta = 50.0
@@ -379,22 +501,33 @@ func _test_flow_reaches_new_year() -> void:
 	_check_equal(session.state.month, 1, "new year starts at first month")
 	_check_equal(race_state.seat_count, 4, "flow runs trust and seats before new year")
 	_check_equal(
-		race_state.get_expectation(Metric.Id.WAGE), 25, "flow tightens expectation before new year"
-	)
+	race_state.get_expectation(
+		Metric.Id.WAGE
+	),
+	110,
+	"flow tightens expectation before new year"
+)
 	session.free()
 
 
 func _make_session(
 	races: Array[RaceDefinition],
 	groups: Array[InterestGroupDefinition],
-	events: Array[EventDefinition] = [],
-	articles: Array[ConstitutionArticleDefinition] = [],
+	articles: Array[
+		ConstitutionArticleDefinition
+	] = [],
 	variable_seat_count: int = 20
 ) -> RunSession:
 	var session := RunSession.new()
 	session.balance = GameBalanceDefinition.new()
-	session.balance.variable_seat_count = variable_seat_count
-	session.configure_content(races, groups, events, articles)
+	session.balance.variable_seat_count = (
+		variable_seat_count
+	)
+	session.configure_content(
+		races,
+		groups,
+		articles
+	)
 	session.automatic_draw_count = 0
 	session.start_new_run()
 	return session
@@ -434,16 +567,6 @@ func _make_proposal(group_id: StringName) -> ProposalInstance:
 	var result := ProposalInstance.new()
 	result.definition_id = StringName("%s_card" % group_id)
 	result.source_group_id = group_id
-	return result
-
-
-func _make_event(
-	id: StringName, race_id: StringName, requirement: EventRequirementDefinition
-) -> EventDefinition:
-	var result := EventDefinition.new()
-	result.id = id
-	result.race_id = race_id
-	result.requirements = [requirement]
 	return result
 
 
@@ -505,7 +628,7 @@ func _test_yin_yang_expectations() -> void:
 	article.axis_id = &"culture"
 	article.is_initial = true
 	article.flags = [ConstitutionSystem.FLAG_YIN_YANG_BIYI_ONLY]
-	var session := _make_session([biyi], [_make_group(&"group", 1, 0)], [], [article])
+	var session := _make_session([biyi], [_make_group(&"group", 1, 0)], [article])
 	var race := session.state.get_race(Race.BIYI)
 	_check_equal(
 		race.get_expectation(Metric.Id.TAX), 100, "annual base target is not mutated by month"
@@ -531,5 +654,44 @@ func _test_yin_yang_expectations() -> void:
 		session.race_system.get_effective_expectation(race, Metric.Id.WAGE, session.context),
 		110,
 		"yang month tightens yang wage expectation"
+	)
+	session.free()
+
+
+func _make_group_rule(
+	action: int,
+	priority: int,
+	race_id: StringName,
+	target_group_id: StringName = &"",
+	rate: float = 0.0,
+	local_prefix: StringName = &"local"
+) -> ConstitutionInfluenceRule:
+	var rule := ConstitutionInfluenceRule.new()
+	rule.action = action as ConstitutionInfluenceRule.Action
+	rule.priority = priority as ConstitutionInfluenceRule.Priority
+	rule.race_id = race_id
+	rule.target_group_id = target_group_id
+	rule.rate = rate
+	rule.local_group_prefix = local_prefix
+	return rule
+
+
+func _test_event_yin_yang_relaxation() -> void:
+	var biyi := _make_race(Race.BIYI)
+	biyi.decrease_tax = true
+	var article := ConstitutionArticleDefinition.new()
+	article.id = &"inclusive"
+	article.axis_id = &"culture"
+	article.is_initial = true
+	article.flags = [ConstitutionSystem.FLAG_YIN_YANG_BIYI_ONLY]
+	var session := _make_session([biyi], [_make_group(&"group", 1, 0)], [article])
+	session.state.month = 1
+	session.state.metrics.tax = 95
+	var event := session.event_system.spawn_race_event(session.context, Race.BIYI)
+	_check(event != null, "yin tightening creates tax gap")
+	session.state.month = 2
+	var requirements := session.event_system.get_current_requirements(event, session.context)
+	_check_equal(
+		requirements[Metric.Id.TAX], 95, "relaxed yin-yang requirement never reverses direction"
 	)
 	session.free()

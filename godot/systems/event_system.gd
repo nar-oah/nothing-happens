@@ -124,9 +124,9 @@ func _relieve(event: EventState, context: RunContext) -> void:
 func _resolve(event: EventState, context: RunContext) -> void:
 	event.phase = EventState.Phase.RESOLVED
 	context.political_trust_system.record_event_result(
-		context.state, event.race_id, event.definition.trust_on_resolve, true
+		context.state, event.race_id, context.balance.event_trust_on_resolve, true
 	)
-	context.state.pending_collapse_delta += event.definition.collapse_on_resolve
+	context.state.pending_collapse_delta += (context.balance.event_collapse_on_resolve)
 
 
 func _erupt(event: EventState, context: RunContext) -> void:
@@ -134,9 +134,9 @@ func _erupt(event: EventState, context: RunContext) -> void:
 	event.known = true
 	event.published = true
 	context.political_trust_system.record_event_result(
-		context.state, event.race_id, event.definition.trust_on_erupt, false
+		context.state, event.race_id, context.balance.event_trust_on_erupt, false
 	)
-	context.state.pending_collapse_delta += event.definition.collapse_on_erupt
+	context.state.pending_collapse_delta += (context.balance.event_collapse_on_erupt)
 
 
 func _update_effective_intensity(event: EventState, state: RunState) -> void:
@@ -223,11 +223,16 @@ func _get_full_target(event: EventState, metric: Metric.Id, context: RunContext)
 	var race := context.state.get_race(event.race_id)
 	if race == null or race.definition == null:
 		return target
-	if not context.constitution_system.uses_yin_yang_for_race(context.state, event.race_id):
-		return target
 	var direction := race.definition.get_stance(metric)
-	var month_sign := context.balance.get_yin_yang_month_sign(metric, context.state.month)
-	return target + int(direction) * month_sign * context.balance.yin_yang_adjustment
+	if context.constitution_system.uses_yin_yang_for_race(context.state, event.race_id):
+		var month_sign := context.balance.get_yin_yang_month_sign(metric, context.state.month)
+		target += (int(direction) * month_sign * context.balance.yin_yang_adjustment)
+	var baseline := event.baseline.get_value(metric)
+	if direction == MetricStanceDefinition.Direction.HIGHER:
+		return maxi(baseline, target)
+	if direction == MetricStanceDefinition.Direction.LOWER:
+		return mini(baseline, target)
+	return baseline
 
 
 func _get_current_target(event: EventState, metric: Metric.Id, context: RunContext) -> int:

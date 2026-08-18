@@ -442,14 +442,6 @@ func get_race_seat_constraints(
 		if race_id == Race.ZHUSHUI:
 			continue
 		result[race_id] = RaceSeatConstraint.new(balance.default_race_minimum_seats)
-	if state.constitution.has_article(ARTICLE_PROVINCE):
-		for race_id in result:
-			var constraint: RaceSeatConstraint = result[race_id]
-			if race_id == Race.HUMAN:
-				constraint.fixed_count = balance.variable_seat_count
-			else:
-				constraint.fixed_count = 0
-		return result
 	var human: RaceSeatConstraint = result.get(Race.HUMAN)
 	if human != null:
 		if state.constitution.has_article(ARTICLE_FREE_TRADE):
