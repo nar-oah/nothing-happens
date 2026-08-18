@@ -69,7 +69,12 @@ func _is_striking(
 	if context.state.constitution.has_flag(&"nanke_mutual_aid"):
 		return false
 	var cooperative := context.state.constitution.has_flag(&"nanke_cooperative")
-	var affected_by_labor_group := seat.actual_group_id == nanke.definition.special_group_id
+	var labor_group_id := context.constitution_system.get_minimum_group_for_race(
+		context.state, Race.NANKE
+	)
+	if labor_group_id == &"":
+		return false
+	var affected_by_labor_group := seat.actual_group_id == labor_group_id
 	if not affected_by_labor_group:
 		return false
 	if not cooperative and race.get_id() != Race.NANKE:
@@ -113,7 +118,7 @@ func _calculate_seat_vote(
 	vote.add_reason(&"race_expectation", _race_expectation_score(attitude_race, projected, context))
 	var use_human_attitude := (
 		context.state.constitution.has_flag(&"free_trade")
-		and _is_transport_group(seat.actual_group_id, context.state)
+		and _is_transport_group(seat.actual_group_id, context)
 	)
 	if use_human_attitude:
 		var human_race := context.state.get_race(Race.HUMAN)
@@ -189,8 +194,12 @@ func _is_absent(seat: SeatState, race: RaceState, context: RunContext) -> bool:
 		return false
 	var is_nanke := race.definition.id == Race.NANKE
 	var cooperative := context.state.constitution.has_flag(&"nanke_cooperative")
+	var labor_group_id := context.constitution_system.get_minimum_group_for_race(
+		context.state, Race.NANKE
+	)
 	var protected := (
-		seat.actual_group_id == nanke.definition.special_group_id
+		labor_group_id != &""
+		and seat.actual_group_id == labor_group_id
 		and (
 			(is_nanke and not context.state.constitution.has_flag(&"nanke_mutual_aid"))
 			or cooperative
@@ -206,9 +215,11 @@ func _is_absent(seat: SeatState, race: RaceState, context: RunContext) -> bool:
 	return context.random_system.chance(probability)
 
 
-func _is_transport_group(group_id: StringName, state: RunState) -> bool:
-	var human := state.get_race(Race.HUMAN)
-	return human != null and human.definition.special_group_id == group_id
+func _is_transport_group(group_id: StringName, context: RunContext) -> bool:
+	var transport_group_id := context.constitution_system.get_fixed_group_for_race(
+		context.state, Race.HUMAN
+	)
+	return transport_group_id != &"" and transport_group_id == group_id
 
 
 func _find_group(
