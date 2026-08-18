@@ -46,6 +46,15 @@ func configure_content(
 
 
 func start_new_run() -> void:
+	if balance == null:
+		push_error("RunSession requires GameBalanceDefinition.")
+		return
+	if race_definitions.is_empty():
+		push_error("RunSession requires race definitions.")
+		return
+	if interest_groups.is_empty():
+		push_error("RunSession requires interest group definitions.")
+		return
 	state = RunState.new()
 	time_system = TimeSystem.new()
 	random_system = RandomSystem.new()
