@@ -36,7 +36,7 @@
 	<p
 		class:text-surface-indigo={face === 'requirement'}
 		class:text-ink-primary={face === 'effect'}
-		class="typo-seal-policy-detail absolute left-[12px] right-[12px] top-[36px] origin-center rotate-[0.35deg] whitespace-nowrap"
+		class="typo-seal-policy-detail absolute left-[12px] right-[12px] origin-center rotate-[0.35deg] whitespace-nowrap"
 	>
 		{detail ?? DEFAULT_CONTENT[face].detail}
 	</p>

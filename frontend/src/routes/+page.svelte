@@ -18,6 +18,7 @@
 		{ text: MetricText.Employment, symbol: MetricSymbol.Decrease, value: 5 }
 	];
 	let direction = $state<'up' | 'down'>('up');
+	let directionb = $state<'up' | 'down'>('up');
 </script>
 
 <svelte:head>
@@ -28,6 +29,18 @@
 	<Memorial count={4} title="造身公所" lag={12} {metrics} />
 	<Mark
 		bind:direction
+		policyName="以工代赈"
+		requirement={{
+			headline: '所需　用工＜商贸六成',
+			detail: '今数　42＜48　本批触发'
+		}}
+		effect={{
+			headline: '效用　用工补至商贸六成',
+			detail: '本批　用工＋6'
+		}}
+	/>
+	<Mark
+		bind:direction={directionb}
 		policyName="以工代赈"
 		requirement={{
 			headline: '所需　用工＜商贸六成',
