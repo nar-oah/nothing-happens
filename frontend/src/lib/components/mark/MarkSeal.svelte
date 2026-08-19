@@ -1,9 +1,8 @@
 <script lang="ts">
 	type Props = {
-		text?: string;
+		text: string;
 	};
-
-	let { text = '以工代赈' }: Props = $props();
+	let { text }: Props = $props();
 </script>
 
 <div class="relative h-full w-full overflow-hidden bg-surface-indigo" aria-label={text}>
