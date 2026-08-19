@@ -111,7 +111,7 @@ export default defineConfig({
 			getCSS: () => `
 @font-face {
 	font-family: "Huiwen-Fangsong";
-	src: url("/fonts/Huiwen-Fangsong-Regular.woff2") format("woff2");
+	src: url("/fonts/Huiwen-Fangsong.woff2") format("woff2");
 	font-style: normal;
 	font-weight: 400;
 	font-display: swap;
@@ -119,7 +119,7 @@ export default defineConfig({
 
 @font-face {
 	font-family: "Huiwen-MinchoGBK";
-	src: url("/fonts/Huiwen-MinchoGBK-Regular.woff2") format("woff2");
+	src: url("/fonts/Huiwen-MinchoGBK.woff2") format("woff2");
 	font-style: normal;
 	font-weight: 400;
 	font-display: swap;
@@ -127,7 +127,7 @@ export default defineConfig({
 
 @font-face {
 	font-family: "ZhaohuaMinA";
-	src: url("/fonts/ZhaohuaMinA-Bold.woff2") format("woff2");
+	src: url("/fonts/ZhaohuaMinA.woff2") format("woff2");
 	font-style: normal;
 	font-weight: 700;
 	font-display: swap;
@@ -135,7 +135,7 @@ export default defineConfig({
 
 @font-face {
 	font-family: "RealTypeWriter";
-	src: url("/fonts/RealTypeWriter-Light.woff2") format("woff2");
+	src: url("/fonts/RealTypeWriter.woff2") format("woff2");
 	font-style: normal;
 	font-weight: 300;
 	font-display: swap;
@@ -143,7 +143,7 @@ export default defineConfig({
 
 @font-face {
 	font-family: "taisyoRyakuji";
-	src: url("/fonts/taisyoRyakuji-Regular.woff2") format("woff2");
+	src: url("/fonts/taisyoRyakuji.woff2") format("woff2");
 	font-style: normal;
 	font-weight: 400;
 	font-display: swap;
