@@ -39,10 +39,10 @@ function matrix(a: number, b: number, c: number, d: number, e: number, f: number
 }
 
 export function createMarkGeometry(
-	width: number,
-	height: number,
-	split: number,
 	direction: MarkDirection,
+	width = MARK_WIDTH,
+	height = MARK_HEIGHT,
+	split = MARK_SPLIT,
 	depthRatio = MARK_DEPTH_RATIO,
 	slantRatio = MARK_SLANT_RATIO
 ): MarkGeometry {

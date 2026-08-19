@@ -1,49 +1,26 @@
 <script lang="ts">
 	import MarkFace from './MarkFace.svelte';
 	import MarkSeal from './MarkSeal.svelte';
-	import {
-		MARK_DEPTH_RATIO,
-		MARK_HEIGHT,
-		MARK_SEAL_SOURCE_SIZE,
-		MARK_SLANT_RATIO,
-		MARK_SPLIT,
-		MARK_WIDTH,
-		createMarkGeometry,
-		type MarkDirection,
-		type MarkFaceContent
-	} from './mark';
+	import { MARK_SEAL_SOURCE_SIZE, createMarkGeometry } from './mark';
+	import type { MarkDirection, MarkFaceContent } from './mark';
 
 	type Props = {
 		direction?: MarkDirection;
-		width?: number;
-		height?: number;
-		split?: number;
-		depthRatio?: number;
-		slantRatio?: number;
-		policyName?: string;
-		requirement?: Partial<MarkFaceContent>;
-		effect?: Partial<MarkFaceContent>;
-		disabled?: boolean;
+		policyName: string;
+		requirement: MarkFaceContent;
+		effect: MarkFaceContent;
 		onDirectionChange?: (direction: MarkDirection) => void;
 	};
 
 	let {
 		direction = $bindable<MarkDirection>('up'),
-		width = MARK_WIDTH,
-		height = MARK_HEIGHT,
-		split = MARK_SPLIT,
-		depthRatio = MARK_DEPTH_RATIO,
-		slantRatio = MARK_SLANT_RATIO,
-		policyName = '以工代赈',
+		policyName,
 		requirement,
 		effect,
-		disabled = false,
 		onDirectionChange
 	}: Props = $props();
 
-	let geometry = $derived(
-		createMarkGeometry(width, height, split, direction, depthRatio, slantRatio)
-	);
+	let geometry = $derived(createMarkGeometry(direction));
 
 	function setDirection(next: MarkDirection) {
 		if (direction === next) return;
@@ -63,7 +40,6 @@
 	style:--mark-height={`${geometry.height}px`}
 	aria-label={direction === 'up' ? '查看政策效果' : '查看政策条件'}
 	aria-pressed={direction === 'down'}
-	{disabled}
 	onclick={toggleDirection}
 >
 	<div
@@ -72,7 +48,11 @@
 		style:--front-width={`${geometry.frontWidth}px`}
 		style:transform={geometry.requirementTransform}
 	>
-		<MarkFace face="requirement" headline={requirement?.headline} detail={requirement?.detail} />
+		<MarkFace
+			headline={requirement.headline}
+			detail={requirement.detail}
+			is_show={direction === 'up'}
+		/>
 	</div>
 
 	<div
@@ -81,7 +61,7 @@
 		style:--front-width={`${geometry.frontWidth}px`}
 		style:transform={geometry.effectTransform}
 	>
-		<MarkFace face="effect" headline={effect?.headline} detail={effect?.detail} />
+		<MarkFace headline={effect.headline} detail={effect.detail} is_show={direction === 'down'} />
 	</div>
 
 	<div
