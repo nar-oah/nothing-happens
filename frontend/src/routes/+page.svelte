@@ -6,6 +6,6 @@
 	<title>Memorial Demo</title>
 </svelte:head>
 
-<main class="box-border min-h-screen bg-shadow-deep p-[80px]">
+<main class="box-border min-h-screen bg-surface-indigo-muted p-[80px]">
 	<Memorial />
 </main>
