@@ -22,12 +22,7 @@
 		<div class="flex min-w-0">
 			{#each metrics as metric, index}
 				<div class="mr-[-10px]" style:z-index={metrics.length - index}>
-					<MemorialMetric
-						isReverse={metric.isReverse}
-						symbol={metric.symbol}
-						text={metric.text}
-						value={metric.value}
-					/>
+					<MemorialMetric {metric} />
 				</div>
 			{/each}
 		</div>

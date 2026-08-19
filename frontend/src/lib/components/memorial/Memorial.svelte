@@ -6,24 +6,30 @@
 
 	type Props = {
 		open?: boolean;
-		skews?: number[];
+		count: number;
 		title: string;
 		lag: number;
 		metrics: MemorialMetricData[];
 		onOpenChange?: (open: boolean) => void;
 	};
 
-	let {
-		open = $bindable(false),
-		skews = [4.5, -3.5, 3, -2.5],
-		title,
-		lag,
-		metrics,
-		onOpenChange
-	}: Props = $props();
-
+	let { open = $bindable(false), count, title, lag, metrics, onOpenChange }: Props = $props();
 	let showClosed = $state(!open);
 	let closeTimer: ReturnType<typeof setTimeout> | undefined;
+	const skews = $derived(createFoldSkews(count));
+
+	function createFoldSkews(count: number): number[] {
+		const MAX_FOLD_SKEW = 4.5;
+		const MIN_FOLD_SKEW = 2.5;
+		if (count <= 0) return [];
+		if (count === 1) return [0];
+		return Array.from({ length: count }, (_, index) => {
+			const progress = index / (count - 1);
+			const magnitude = MAX_FOLD_SKEW - (MAX_FOLD_SKEW - MIN_FOLD_SKEW) * progress;
+			const direction = index % 2 === 0 ? 1 : -1;
+			return magnitude * direction;
+		});
+	}
 
 	function getFoldX(skews: number[]): number {
 		return skews.reduce((x, skew) => x + FOLD_HEIGHT * Math.tan((skew * Math.PI) / 180), 0);

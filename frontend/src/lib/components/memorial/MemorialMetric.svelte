@@ -1,12 +1,8 @@
 <script lang="ts">
-	type Props = {
-		isReverse?: boolean;
-		symbol?: string;
-		text?: string;
-		value?: string | number;
-	};
-
-	let { isReverse = false, symbol = '+', text = '税课', value = 0 }: Props = $props();
+	import type { MemorialMetricData } from './memorial';
+	type Props = { metric: MemorialMetricData };
+	let { metric }: Props = $props();
+	let { isReverse, symbol, text, value }: MemorialMetricData = $derived(metric);
 </script>
 
 <div class="flex items-center">
