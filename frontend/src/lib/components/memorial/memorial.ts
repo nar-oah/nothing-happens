@@ -4,6 +4,6 @@ export const FOLD_HEIGHT = 82;
 export type MemorialMetricData = {
 	text: string;
 	symbol: string;
-	value: string | number;
+	value: number;
 	isReverse?: boolean;
 };

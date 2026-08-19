@@ -1,9 +1,8 @@
 <script lang="ts">
 	type Props = {
-		text?: string;
+		text: string;
 	};
-
-	let { text = '造身公所' }: Props = $props();
+	let { text }: Props = $props();
 </script>
 
 <div

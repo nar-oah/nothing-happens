@@ -7,17 +7,17 @@
 	type Props = {
 		open?: boolean;
 		skews?: number[];
-		title?: string;
-		lag?: string | number;
-		metrics?: MemorialMetricData[];
+		title: string;
+		lag: number;
+		metrics: MemorialMetricData[];
 		onOpenChange?: (open: boolean) => void;
 	};
 
 	let {
 		open = $bindable(false),
 		skews = [4.5, -3.5, 3, -2.5],
-		title = '造身公所',
-		lag = 12,
+		title,
+		lag,
 		metrics,
 		onOpenChange
 	}: Props = $props();
