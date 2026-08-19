@@ -2,21 +2,24 @@
 	import MarkFace from './MarkFace.svelte';
 	import MarkSeal from './MarkSeal.svelte';
 	import {
-		MARK_FACE_HEIGHT,
-		MARK_FACE_WIDTH,
+		MARK_DEPTH_RATIO,
 		MARK_HEIGHT,
-		MARK_PART_TRANSFORMS,
-		MARK_SEAL_SIZE,
-		MARK_STAGE_HEIGHT,
-		MARK_STAGE_TRANSFORMS,
-		MARK_STAGE_WIDTH,
+		MARK_SEAL_SOURCE_SIZE,
+		MARK_SLANT_RATIO,
+		MARK_SPLIT,
 		MARK_WIDTH,
+		createMarkGeometry,
 		type MarkDirection,
 		type MarkFaceContent
 	} from './mark';
 
 	type Props = {
 		direction?: MarkDirection;
+		width?: number;
+		height?: number;
+		split?: number;
+		depthRatio?: number;
+		slantRatio?: number;
 		policyName?: string;
 		requirement?: Partial<MarkFaceContent>;
 		effect?: Partial<MarkFaceContent>;
@@ -26,12 +29,21 @@
 
 	let {
 		direction = $bindable<MarkDirection>('up'),
+		width = MARK_WIDTH,
+		height = MARK_HEIGHT,
+		split = MARK_SPLIT,
+		depthRatio = MARK_DEPTH_RATIO,
+		slantRatio = MARK_SLANT_RATIO,
 		policyName = '以工代赈',
 		requirement,
 		effect,
 		disabled = false,
 		onDirectionChange
 	}: Props = $props();
+
+	let geometry = $derived(
+		createMarkGeometry(width, height, split, direction, depthRatio, slantRatio)
+	);
 
 	function setDirection(next: MarkDirection) {
 		if (direction === next) return;
@@ -46,51 +58,37 @@
 
 <button
 	type="button"
-	class="relative block h-[var(--mark-height)] w-[var(--mark-width)] cursor-pointer border-0 bg-transparent p-0 text-left disabled:cursor-default"
-	style:--mark-width={`${MARK_WIDTH}px`}
-	style:--mark-height={`${MARK_HEIGHT}px`}
+	class="relative block h-[var(--mark-height)] w-[var(--mark-width)] cursor-pointer overflow-hidden border-0 bg-transparent p-0 text-left disabled:cursor-default"
+	style:--mark-width={`${geometry.width}px`}
+	style:--mark-height={`${geometry.height}px`}
 	aria-label={direction === 'up' ? '查看政策效果' : '查看政策条件'}
 	aria-pressed={direction === 'down'}
 	{disabled}
 	onclick={toggleDirection}
 >
 	<div
-		class="mark-stage absolute left-0 top-0 h-[var(--stage-height)] w-[var(--stage-width)] origin-top-left will-change-transform"
-		style:--stage-width={`${MARK_STAGE_WIDTH}px`}
-		style:--stage-height={`${MARK_STAGE_HEIGHT}px`}
-		style:transform={MARK_STAGE_TRANSFORMS[direction]}
+		class="absolute left-0 top-0 h-[var(--face-height)] w-[var(--front-width)] origin-top-left overflow-hidden"
+		style:--face-height={`${geometry.requirementHeight}px`}
+		style:--front-width={`${geometry.frontWidth}px`}
+		style:transform={geometry.requirementTransform}
 	>
-		<div
-			class="mark-part absolute left-0 top-0 h-[var(--face-height)] w-[var(--face-width)] origin-top-left will-change-transform"
-			style:--face-width={`${MARK_FACE_WIDTH}px`}
-			style:--face-height={`${MARK_FACE_HEIGHT}px`}
-			style:transform={MARK_PART_TRANSFORMS[direction].requirement}
-		>
-			<MarkFace face="requirement" headline={requirement?.headline} detail={requirement?.detail} />
-		</div>
-		<div
-			class="mark-part absolute left-0 top-0 h-[var(--face-height)] w-[var(--face-width)] origin-top-left will-change-transform"
-			style:--face-width={`${MARK_FACE_WIDTH}px`}
-			style:--face-height={`${MARK_FACE_HEIGHT}px`}
-			style:transform={MARK_PART_TRANSFORMS[direction].effect}
-		>
-			<MarkFace face="effect" headline={effect?.headline} detail={effect?.detail} />
-		</div>
-		<div
-			class="mark-part absolute left-0 top-0 h-[var(--seal-size)] w-[var(--seal-size)] origin-top-left will-change-transform"
-			style:--seal-size={`${MARK_SEAL_SIZE}px`}
-			style:transform={MARK_PART_TRANSFORMS[direction].seal}
-		>
-			<MarkSeal text={policyName} />
-		</div>
+		<MarkFace face="requirement" headline={requirement?.headline} detail={requirement?.detail} />
+	</div>
+
+	<div
+		class="absolute left-0 top-0 h-[var(--face-height)] w-[var(--front-width)] origin-top-left overflow-hidden"
+		style:--face-height={`${geometry.effectHeight}px`}
+		style:--front-width={`${geometry.frontWidth}px`}
+		style:transform={geometry.effectTransform}
+	>
+		<MarkFace face="effect" headline={effect?.headline} detail={effect?.detail} />
+	</div>
+
+	<div
+		class="absolute left-0 top-0 h-[var(--seal-size)] w-[var(--seal-size)] origin-top-left overflow-hidden"
+		style:--seal-size={`${MARK_SEAL_SOURCE_SIZE}px`}
+		style:transform={geometry.sealTransform}
+	>
+		<MarkSeal text={policyName} />
 	</div>
 </button>
-
-<style>
-	.mark-stage,
-	.mark-part {
-		transition-property: transform;
-		transition-duration: 320ms;
-		transition-timing-function: cubic-bezier(0.22, 0.8, 0.2, 1);
-	}
-</style>

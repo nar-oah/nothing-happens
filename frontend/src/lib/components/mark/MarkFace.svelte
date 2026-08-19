@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { MarkFaceContent, MarkFaceKind } from './mark';
-	import { MARK_FACE_HEIGHT, MARK_FACE_WIDTH } from './mark';
 
 	type Props = {
 		face: MarkFaceKind;
@@ -25,21 +24,19 @@
 <div
 	class:bg-surface-amber-pressed={face === 'requirement'}
 	class:bg-accent-amber-deep={face === 'effect'}
-	class="relative h-[var(--face-height)] w-[var(--face-width)] overflow-hidden"
-	style:--face-width={`${MARK_FACE_WIDTH}px`}
-	style:--face-height={`${MARK_FACE_HEIGHT}px`}
+	class="relative h-full w-full overflow-hidden"
 >
 	<p
 		class:text-surface-indigo={face === 'requirement'}
 		class:text-ink-primary={face === 'effect'}
-		class="typo-seal-policy-clause absolute left-[12px] top-[8px] w-[196px] origin-center rotate-[0.35deg] whitespace-nowrap"
+		class="typo-seal-policy-clause absolute left-[12px] right-[12px] top-[8px] origin-center rotate-[0.35deg] whitespace-nowrap"
 	>
 		{headline ?? DEFAULT_CONTENT[face].headline}
 	</p>
 	<p
 		class:text-surface-indigo={face === 'requirement'}
 		class:text-ink-primary={face === 'effect'}
-		class="typo-seal-policy-detail absolute left-[12px] top-[36px] w-[196px] origin-center rotate-[0.35deg] whitespace-nowrap"
+		class="typo-seal-policy-detail absolute left-[12px] right-[12px] top-[36px] origin-center rotate-[0.35deg] whitespace-nowrap"
 	>
 		{detail ?? DEFAULT_CONTENT[face].detail}
 	</p>
