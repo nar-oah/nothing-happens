@@ -74,7 +74,7 @@
 <button
 	class="relative w-[var(--width)] h-[var(--height)] overflow-visible border-0 bg-transparent p-0 text-left"
 	style:--width={`${FOLD_WIDTH}px`}
-	style:--height={`${FOLD_HEIGHT}px`}
+	style:--height={`${open ? count * FOLD_HEIGHT : FOLD_HEIGHT}px`}
 	type="button"
 	aria-expanded={open}
 	aria-label={open ? '收起奏折' : '展开奏折'}
