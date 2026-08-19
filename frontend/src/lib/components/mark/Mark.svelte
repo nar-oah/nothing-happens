@@ -44,9 +44,9 @@
 >
 	<div
 		class="absolute left-0 top-0 h-[var(--face-height)] w-[var(--front-width)] origin-top-left overflow-hidden"
-		style:--face-height={`${geometry.requirementHeight}px`}
+		style:--face-height={`${geometry.requirement.height}px`}
 		style:--front-width={`${geometry.frontWidth}px`}
-		style:transform={geometry.requirementTransform}
+		style:transform={geometry.requirement.transform}
 	>
 		<MarkFace
 			headline={requirement.headline}
@@ -57,9 +57,9 @@
 
 	<div
 		class="absolute left-0 top-0 h-[var(--face-height)] w-[var(--front-width)] origin-top-left overflow-hidden"
-		style:--face-height={`${geometry.effectHeight}px`}
+		style:--face-height={`${geometry.effect.height}px`}
 		style:--front-width={`${geometry.frontWidth}px`}
-		style:transform={geometry.effectTransform}
+		style:transform={geometry.effect.transform}
 	>
 		<MarkFace headline={effect.headline} detail={effect.detail} is_show={direction === 'down'} />
 	</div>
