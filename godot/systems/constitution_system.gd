@@ -205,7 +205,10 @@ func _fallback_group(
 	seat: SeatState,
 	excluded: InterestGroupDefinition
 ) -> InterestGroupDefinition:
-	var base := _resolve_merger(context.state, seat.base_group)
+	var underlying := seat.annual_group
+	if underlying == null:
+		underlying = seat.base_group
+	var base := _resolve_merger(context.state, underlying)
 	if base != null and base != excluded:
 		return base
 	for group in get_effective_groups(context):
