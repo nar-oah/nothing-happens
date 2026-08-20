@@ -6,10 +6,7 @@
 		body?: string;
 	};
 
-	let {
-		title = '以工代赈',
-		body = '税课低于商贸时，按两者落差降低物价。'
-	}: Props = $props();
+	let { title = '以工代赈', body = '税课低于商贸时，按两者落差降低物价。' }: Props = $props();
 </script>
 
 <div

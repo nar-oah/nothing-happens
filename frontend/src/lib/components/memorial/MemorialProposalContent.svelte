@@ -4,10 +4,7 @@
 		body?: string;
 	};
 
-	let {
-		title = '永乐轮运局',
-		body = '测试测试测试测试测试测试测试测试'
-	}: Props = $props();
+	let { title = '永乐轮运局', body = '测试测试测试测试测试测试测试测试' }: Props = $props();
 </script>
 
 <div class="flex h-[345px] w-[123px] gap-5 overflow-hidden text-ink-primary">
