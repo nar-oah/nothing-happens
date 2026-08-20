@@ -45,7 +45,6 @@ func revise(context: RunContext, definition: ConstitutionArticleDefinition) -> b
 	for seat in context.state.seats:
 		previous_races[seat] = seat.race
 	context.state.constitution.active_articles[definition.race] = definition
-	refresh_runtime(context)
 	if not context.race_system.allocate_seats(context):
 		for seat in previous_races:
 			seat.race = previous_races[seat]
@@ -57,10 +56,10 @@ func revise(context: RunContext, definition: ConstitutionArticleDefinition) -> b
 		return false
 	if previous != null:
 		previous.on_deactivate(context)
+	_restore_constitution_base_groups(context)
+	refresh_runtime(context)
 	context.state.constitution.clicked_articles[definition] = true
 	context.state.constitution.revision_available = false
-	for seat in context.state.seats:
-		seat.actual_group = seat.base_group
 	context.collapse_system.record_intervention(
 		context, &"constitution_revision", context.balance.constitution_revision_pressure
 	)
@@ -110,10 +109,9 @@ func get_effective_groups(context: RunContext) -> Array[InterestGroupDefinition]
 	for group in context.interest_groups:
 		_append_effective_group(result, context.state, group)
 	for seat in context.state.seats:
-		var local: InterestGroupDefinition = context.state.constitution.local_interest_groups.get(
-			seat.definition
-		)
-		_append_effective_group(result, context.state, local)
+		_append_effective_group(result, context.state, seat.base_group)
+		_append_effective_group(result, context.state, seat.annual_group)
+		_append_effective_group(result, context.state, seat.actual_group)
 	return result
 
 
@@ -237,6 +235,14 @@ func _resolve_merger(
 		visited[current] = true
 		current = state.constitution.group_mergers[current]
 	return current
+
+
+func _restore_constitution_base_groups(context: RunContext) -> void:
+	for seat in context.state.seats:
+		var underlying := seat.annual_group
+		if underlying == null:
+			underlying = seat.base_group
+		seat.actual_group = _resolve_merger(context.state, underlying)
 
 
 func _has_anchor(context: RunContext, race: RaceDefinition) -> bool:

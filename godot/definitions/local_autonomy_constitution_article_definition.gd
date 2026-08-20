@@ -4,7 +4,20 @@ class_name LocalAutonomyConstitutionArticleDefinition
 @export_range(1, 999, 1) var local_group_base_column_weight: int = 1
 
 
+func apply_runtime(context) -> void:
+	super.apply_runtime(context)
+	_apply_local_groups(context)
+
+
 func on_activate(context) -> void:
+	_apply_local_groups(context)
+
+
+func on_year_settlement(context) -> void:
+	_apply_local_groups(context)
+
+
+func _apply_local_groups(context) -> void:
 	for seat_definition in context.seat_definitions:
 		if seat_definition == null:
 			continue
@@ -20,5 +33,4 @@ func on_activate(context) -> void:
 			context.state.constitution.local_interest_groups.get(seat.definition)
 		)
 		if local != null:
-			seat.base_group = local
 			seat.actual_group = local

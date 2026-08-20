@@ -4,6 +4,7 @@ class_name SeatState
 var definition: SeatDefinition
 var race: RaceDefinition
 var base_group: InterestGroupDefinition
+var annual_group: InterestGroupDefinition
 var actual_group: InterestGroupDefinition
 var personal_relation: float = 0.0
 var odd_month_relation: float = 0.0
@@ -19,4 +20,5 @@ func _init(
 	definition = source_definition
 	race = source_race
 	base_group = source_base_group
-	actual_group = source_base_group if source_actual_group == null else source_actual_group
+	annual_group = source_base_group if source_actual_group == null else source_actual_group
+	actual_group = annual_group

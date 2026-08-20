@@ -115,6 +115,7 @@ func initialize_base_groups(
 			if seat_index >= state.seats.size():
 				return
 			state.seats[seat_index].base_group = group
+			state.seats[seat_index].annual_group = group
 			state.seats[seat_index].actual_group = group
 			seat_index += 1
 
@@ -201,7 +202,8 @@ func get_annual_source_shares(
 
 func apply_annual_coloring(context: RunContext) -> void:
 	for seat in context.state.seats:
-		seat.actual_group = _resolve_group(context.state, seat.base_group)
+		seat.annual_group = _resolve_group(context.state, seat.base_group)
+		seat.actual_group = seat.annual_group
 	var shares := get_annual_source_shares(context.state)
 	if shares.is_empty():
 		return
@@ -219,7 +221,8 @@ func apply_annual_coloring(context: RunContext) -> void:
 			continue
 		var index := context.random_system.weighted_index(weights)
 		if index >= 0:
-			seat.actual_group = _resolve_group(context.state, sources[index])
+			seat.annual_group = _resolve_group(context.state, sources[index])
+			seat.actual_group = seat.annual_group
 
 
 func can_reassign_seat(
