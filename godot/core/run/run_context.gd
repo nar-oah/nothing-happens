@@ -11,7 +11,6 @@ var policy_system: PolicySystem
 var inflation_system: InflationSystem
 var parliament_system: ParliamentSystem
 var race_system: RaceSystem
-var political_trust_system: PoliticalTrustSystem
 var draft_bill_system: DraftBillSystem
 var vote_system: VoteSystem
 var event_system: EventSystem
@@ -20,8 +19,8 @@ var collapse_system: CollapseSystem
 var annual_settlement_system: AnnualSettlementSystem
 var race_definitions: Array[RaceDefinition] = []
 var interest_groups: Array[InterestGroupDefinition] = []
+var seat_definitions: Array[SeatDefinition] = []
 var constitution_articles: Array[ConstitutionArticleDefinition] = []
-var automatic_draw_count: int = 3
 
 
 func setup(
@@ -35,7 +34,6 @@ func setup(
 	run_inflation_system: InflationSystem,
 	run_parliament_system: ParliamentSystem,
 	run_race_system: RaceSystem,
-	run_political_trust_system: PoliticalTrustSystem,
 	run_draft_bill_system: DraftBillSystem,
 	run_vote_system: VoteSystem,
 	run_event_system: EventSystem,
@@ -53,7 +51,6 @@ func setup(
 	inflation_system = run_inflation_system
 	parliament_system = run_parliament_system
 	race_system = run_race_system
-	political_trust_system = run_political_trust_system
 	draft_bill_system = run_draft_bill_system
 	vote_system = run_vote_system
 	event_system = run_event_system

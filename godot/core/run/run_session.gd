@@ -7,10 +7,8 @@ class_name RunSession
 @export_group("游戏内容")
 @export var race_definitions: Array[RaceDefinition] = []
 @export var interest_groups: Array[InterestGroupDefinition] = []
+@export var seat_definitions: Array[SeatDefinition] = []
 @export var constitution_articles: Array[ConstitutionArticleDefinition] = []
-
-@export_group("流程")
-@export var automatic_draw_count: int = 3
 
 var state: RunState
 var context: RunContext
@@ -22,7 +20,6 @@ var policy_system: PolicySystem
 var inflation_system: InflationSystem
 var parliament_system: ParliamentSystem
 var race_system: RaceSystem
-var political_trust_system: PoliticalTrustSystem
 var draft_bill_system: DraftBillSystem
 var vote_system: VoteSystem
 var event_system: EventSystem
@@ -35,10 +32,12 @@ var flow_controller: FlowController
 func configure_content(
 	races: Array[RaceDefinition],
 	groups: Array[InterestGroupDefinition],
+	seats: Array[SeatDefinition],
 	articles: Array[ConstitutionArticleDefinition] = []
 ) -> void:
 	race_definitions = races
 	interest_groups = groups
+	seat_definitions = seats
 	constitution_articles = articles
 
 
@@ -51,6 +50,9 @@ func start_new_run() -> void:
 		return
 	if interest_groups.is_empty():
 		push_error("RunSession requires interest group definitions.")
+		return
+	if seat_definitions.is_empty():
+		push_error("RunSession requires seat definitions.")
 		return
 	state = RunState.new()
 	time_system = TimeSystem.new()
@@ -65,7 +67,6 @@ func start_new_run() -> void:
 
 	parliament_system = ParliamentSystem.new()
 	race_system = RaceSystem.new()
-	political_trust_system = PoliticalTrustSystem.new()
 	draft_bill_system = DraftBillSystem.new()
 	vote_system = VoteSystem.new()
 	event_system = EventSystem.new()
@@ -85,7 +86,6 @@ func start_new_run() -> void:
 		inflation_system,
 		parliament_system,
 		race_system,
-		political_trust_system,
 		draft_bill_system,
 		vote_system,
 		event_system,
@@ -95,16 +95,17 @@ func start_new_run() -> void:
 	)
 	context.race_definitions = race_definitions
 	context.interest_groups = interest_groups
+	context.seat_definitions = seat_definitions
 	context.constitution_articles = constitution_articles
-	context.automatic_draw_count = automatic_draw_count
-	constitution_system.initialize(state, constitution_articles)
-	race_system.initialize_races(state, race_definitions, balance, inflation_system)
-	if not race_system.allocate_seats(state, balance, constitution_system, random_system):
+	race_system.initialize_races(state, race_definitions, balance)
+	parliament_system.initialize_seats(state, seat_definitions)
+	constitution_system.initialize(context)
+	if not race_system.allocate_seats(context):
 		push_error("Failed to allocate initial race seats.")
 		return
-	var groups := constitution_system.get_effective_groups(state, interest_groups)
-	parliament_system.rebuild_all_rows(state, groups)
-	constitution_system.apply_annual_influence_rules(context)
+	parliament_system.initialize_base_groups(state, interest_groups)
+	constitution_system.activate_initial_articles(context)
+	constitution_system.apply_influence_rules(context)
 
 	flow_controller = FlowController.new()
 	flow_controller.setup(context)
@@ -124,3 +125,15 @@ func submit_draft() -> VoteResultState:
 
 func revise_constitution(article: ConstitutionArticleDefinition) -> bool:
 	return constitution_system.revise(context, article)
+
+
+func use_petition() -> bool:
+	return parliament_system.use_petition(context)
+
+
+func accept_proposal_trait(proposal: ProposalInstance) -> bool:
+	return proposal_system.resolve_bonus_choice(state, proposal, true)
+
+
+func convert_proposal_trait_to_donation(proposal: ProposalInstance) -> bool:
+	return proposal_system.resolve_bonus_choice(state, proposal, false)
