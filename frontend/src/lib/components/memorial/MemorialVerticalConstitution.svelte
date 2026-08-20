@@ -17,7 +17,7 @@
 
 <div class="flex items-start">
 	<MemorialVerticalCoverFrame>
-		<div class="flex h-full w-full items-center justify-center p-10">
+		<div class="box-border flex h-full w-full items-center justify-center p-10">
 			<MemorialTitleStrip text={title} vertical />
 		</div>
 	</MemorialVerticalCoverFrame>
