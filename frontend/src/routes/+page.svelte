@@ -12,7 +12,7 @@
 		MetricText,
 		MetricSymbol,
 		type MemorialConstitutionContentData,
-		type MemorialMetricData
+		type MemorialMetricData,
 		type MemorialPolicyContentData,
 		type MemorialProposalContentData
 	} from '$lib/components/memorial/memorial';
