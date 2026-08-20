@@ -71,6 +71,7 @@ const lineHeight = {
 	28: '28px',
 	30: '30px',
 	36: '36px',
+	40: '40px',
 	45: '45px',
 	58: '58px'
 };
@@ -185,6 +186,10 @@ export default defineConfig({
 
 		'typo-dialogue-body': typo('document', 'light', 48),
 		'typo-dialogue-speaker-vertical': typo('archival', 'normal', 48, 36, 'negative-20'),
+		'typo-control-heading': typo('policy', 'medium', 48, 40),
+		'typo-filter-context-label': typo('document', 'light', 30),
+		'typo-filter-marker': typo('archival', 'normal', 24),
+		'typo-filter-option': typo('document', 'light', 24),
 
 		'typo-proposal-sponsor-group-default': typo('archival', 'normal', 32),
 		'typo-proposal-sponsor-group-compact': typo('archival', 'normal', 32, 'auto', 'negative-20'),
