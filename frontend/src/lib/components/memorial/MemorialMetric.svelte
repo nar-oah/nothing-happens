@@ -8,6 +8,7 @@
 	};
 	let { metric, isBottom = false, isColumn = false, showValue = true }: Props = $props();
 	let { isReverse, symbol, text, value }: MemorialMetricData = $derived(metric);
+	let valueCharacters = $derived(Array.from(String(value)));
 </script>
 
 {#if isColumn && isBottom}
@@ -31,9 +32,15 @@
 						<div
 							class:text-accent-amber-deep={isReverse}
 							class:text-ink-secondary={!isReverse}
-							class="typo-data-metric-value-tight w-max whitespace-nowrap text-center [word-break:break-word]"
+							class="flex w-max items-center justify-center whitespace-nowrap font-document text-24 font-light leading-auto"
 						>
-							{value}
+							{#each valueCharacters as character, index (`${character}-${index}`)}
+								<span
+									style:margin-right={index < valueCharacters.length - 1 ? '-10.8px' : undefined}
+								>
+									{character}
+								</span>
+							{/each}
 						</div>
 					</div>
 				</div>
