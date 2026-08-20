@@ -14,4 +14,4 @@ func modify_vote(vote_context) -> void:
 	if not vote_context.run_context.random_system.chance(probability):
 		return
 	vote_context.vote.breakdown[&"nanke_asleep"] = 1.0
-	vote_context.position_override = SeatVoteState.Position.ABSENT
+	vote_context.locked_position = SeatVoteState.Position.ABSENT

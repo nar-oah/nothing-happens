@@ -9,6 +9,7 @@ var projected_metrics: MetricValues
 var vote: SeatVoteState
 var resolve_randomness: bool = false
 var position_override: int = -1
+var locked_position: int = -1
 
 
 func _init(

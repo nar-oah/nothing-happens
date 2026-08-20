@@ -48,7 +48,7 @@ class_name GameBalanceDefinition
 @export_range(0.0, 100.0, 0.5) var event_failure_collapse: float = 1.0
 @export_range(0.0, 1.0, 0.01) var event_pause_satisfaction_threshold: float = 0.8
 @export_range(0.0, 1.0, 0.01) var event_relief_satisfaction_threshold: float = 1.0
-@export_range(0.0, 1.0, 0.01) var event_relief_progress_per_month: float = 0.05
+@export_range(0.0, 1.0, 0.01) var event_relief_progress_per_month: float = 0.50
 
 @export_group("年度议会")
 @export_range(0.0, 100.0, 0.1) var race_seat_base_weight: float = 1.0

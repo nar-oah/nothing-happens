@@ -98,11 +98,12 @@ func _calculate_seat_vote(
 	)
 	race.definition.modify_vote(vote_context)
 	context.constitution_system.modify_vote(vote_context)
-	vote.position = (
-		_position_from_score(vote.score, context.balance.support_threshold)
-		if vote_context.position_override < 0
-		else vote_context.position_override as SeatVoteState.Position
-	)
+	if vote_context.locked_position >= 0:
+		vote.position = vote_context.locked_position as SeatVoteState.Position
+	elif vote_context.position_override >= 0:
+		vote.position = vote_context.position_override as SeatVoteState.Position
+	else:
+		vote.position = _position_from_score(vote.score, context.balance.support_threshold)
 	return vote
 
 
