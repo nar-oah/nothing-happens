@@ -22,7 +22,7 @@ func add_policy(state: RunState, policy: PolicyDefinition) -> bool:
 	if policy == null:
 		return false
 	for current in state.draft_bill.policies:
-		if current == policy or current.id == policy.id:
+		if current == policy:
 			return false
 	state.draft_bill.policies.append(policy)
 	return true
@@ -35,12 +35,12 @@ func remove_policy(state: RunState, draft_index: int) -> bool:
 	return true
 
 
-func add_unlocked_policy(context: RunContext, policy: PolicyDefinition) -> bool:
+func add_available_policy(context: RunContext, policy: PolicyDefinition) -> bool:
 	if policy == null:
 		return false
-	var unlocked := context.constitution_system.get_unlocked_policies(context.state)
-	for candidate in unlocked:
-		if candidate.id == policy.id:
+	var available := context.constitution_system.get_available_policies(context)
+	for candidate in available:
+		if candidate == policy:
 			return add_policy(context.state, policy)
 	return false
 
