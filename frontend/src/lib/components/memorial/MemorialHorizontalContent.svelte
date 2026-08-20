@@ -3,11 +3,10 @@
 
 	type Props = {
 		title?: string;
-		body?: string;
+		body: string;
 	};
 
-	let { title = '自由贸易', body = '蓬莱与大明相约通商，所有货物一体适用同一税则。' }: Props =
-		$props();
+	let { title, body }: Props = $props();
 </script>
 
 <div

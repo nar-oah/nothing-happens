@@ -2,7 +2,7 @@
 	import type { MemorialConstitutionRowData } from './memorial';
 
 	type Props = MemorialConstitutionRowData;
-	let { text, number, selected = false }: Props = $props();
+	let { text, number, selected }: Props = $props();
 </script>
 
 <div class="flex w-[99px] flex-col items-end overflow-hidden">

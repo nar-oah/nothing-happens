@@ -24,5 +24,5 @@ export type MemorialMetricData = {
 export type MemorialConstitutionRowData = {
 	text: string;
 	number: string | number;
-	selected?: boolean;
+	selected: boolean;
 };

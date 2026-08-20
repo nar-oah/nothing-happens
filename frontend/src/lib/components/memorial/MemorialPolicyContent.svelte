@@ -2,11 +2,11 @@
 	import MarkSeal from '../mark/MarkSeal.svelte';
 
 	type Props = {
-		title?: string;
-		body?: string;
+		title: string;
+		body: string;
 	};
 
-	let { title = '以工代赈', body = '税课低于商贸时，按两者落差降低物价。' }: Props = $props();
+	let { title, body }: Props = $props();
 </script>
 
 <div
