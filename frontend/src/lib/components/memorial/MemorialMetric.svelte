@@ -11,7 +11,7 @@
 </script>
 
 {#if isColumn && isBottom}
-	<div class="flex h-58 w-116 items-center">
+	<div class="flex h-58 w-116 items-center justify-center">
 		<div
 			class:-mr-25={showValue}
 			class:text-accent-amber-deep={isReverse}
