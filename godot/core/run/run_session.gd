@@ -57,7 +57,6 @@ func start_new_run() -> void:
 	state = RunState.new()
 	time_system = TimeSystem.new()
 	random_system = RandomSystem.new()
-	random_system.set_seed(12345)
 	proposal_system = ProposalSystem.new()
 	market_system = MarketSystem.new()
 	policy_system = PolicySystem.new()
