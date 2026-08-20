@@ -103,8 +103,8 @@ func start_new_run() -> void:
 		push_error("Failed to allocate initial race seats.")
 		return
 	parliament_system.initialize_base_groups(state, interest_groups)
-	constitution_system.activate_initial_articles(context)
 	constitution_system.apply_influence_rules(context)
+	constitution_system.activate_initial_articles(context)
 
 	flow_controller = FlowController.new()
 	flow_controller.setup(context)

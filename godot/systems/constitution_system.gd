@@ -57,6 +57,7 @@ func revise(context: RunContext, definition: ConstitutionArticleDefinition) -> b
 	if previous != null:
 		previous.on_deactivate(context)
 	_restore_constitution_base_groups(context)
+	apply_influence_rules(context)
 	refresh_runtime(context)
 	context.state.constitution.clicked_articles[definition] = true
 	context.state.constitution.revision_available = false
@@ -64,7 +65,6 @@ func revise(context: RunContext, definition: ConstitutionArticleDefinition) -> b
 		context, &"constitution_revision", context.balance.constitution_revision_pressure
 	)
 	definition.on_activate(context)
-	apply_influence_rules(context)
 	return true
 
 
