@@ -8,6 +8,7 @@ func run(t: BackendTestContext) -> void:
 	_test_direct_prerequisite_and_clicked_history(t)
 	_test_policy_union_and_resource_deduplication(t)
 	_test_influence_rule_modes(t)
+	_test_revision_preserves_annual_group_layer(t)
 	_test_local_autonomy_runtime_resources(t)
 	_test_human_petition_runtime_and_anchor_safety(t)
 
@@ -174,9 +175,11 @@ func _test_local_autonomy_runtime_resources(t: BackendTestContext) -> void:
 	article.display_name = "local autonomy"
 	article.race = race
 	article.is_initial = true
+	var replacement := t.make_article(race, false)
+	replacement.display_name = "centralized"
 	var definitions := t.make_seats(3, "location")
 	var session := t.make_session(
-		[race], [t.make_group("base")], definitions, [article]
+		[race], [t.make_group("base")], definitions, [article, replacement]
 	)
 	var locals := session.state.constitution.local_interest_groups
 	t.check_equal(locals.size(), definitions.size(), "one runtime local group per SeatDefinition")
@@ -201,6 +204,40 @@ func _test_local_autonomy_runtime_resources(t: BackendTestContext) -> void:
 			session.state.constitution.local_interest_groups[definition] == remembered[definition],
 			"repeated activation preserves runtime Resource identity"
 		)
+	t.check(session.revise_constitution(replacement), "local autonomy can be deactivated")
+	var effective := session.constitution_system.get_effective_groups(session.context)
+	for seat in session.state.seats:
+		t.check(
+			seat.actual_group == seat.annual_group,
+			"deactivation restores the underlying annual group"
+		)
+		t.check(
+			not effective.has(remembered[seat.definition]),
+			"inactive historical local groups do not leak into effective content"
+		)
+	session.free()
+
+
+func _test_revision_preserves_annual_group_layer(t: BackendTestContext) -> void:
+	var race_a := t.make_race("merger race")
+	var race_b := t.make_race("revised race")
+	var weak := t.make_group("weak")
+	var strong := t.make_group("strong")
+	var article_a := t.make_article(race_a)
+	var article_b := t.make_article(race_b)
+	var next_b := t.make_article(race_b, false)
+	var session := t.make_session(
+		[race_a, race_b], [weak, strong], t.make_seats(4, "annual layer"),
+		[article_a, article_b, next_b]
+	)
+	for seat in session.state.seats:
+		seat.annual_group = weak
+		seat.actual_group = strong
+	session.state.constitution.group_mergers[weak] = strong
+	t.check(session.revise_constitution(next_b), "unrelated article revision succeeds")
+	for seat in session.state.seats:
+		t.check(seat.annual_group == weak, "revision preserves raw annual coloring")
+		t.check(seat.actual_group == strong, "revision reapplies active merger to annual coloring")
 	session.free()
 
 

@@ -23,11 +23,132 @@ class TrackingArticleDefinition:
 		context.state.petition_limit = 8
 
 
+class FlowCallLog:
+	extends RefCounted
+	var entries: Array[StringName] = []
+
+	func record(entry: StringName) -> void:
+		entries.append(entry)
+
+
+class FlowRaceDefinition:
+	extends RaceDefinition
+	var call_log: FlowCallLog
+
+	func _init(source_log: FlowCallLog = null) -> void:
+		call_log = source_log
+
+	func on_month_start(_context, _race_state) -> void:
+		call_log.record(&"race")
+
+
+class FlowArticleDefinition:
+	extends ConstitutionArticleDefinition
+	var call_log: FlowCallLog
+
+	func _init(source_log: FlowCallLog = null) -> void:
+		call_log = source_log
+
+	func on_month_start(_context) -> void:
+		call_log.record(&"article")
+
+
+class FlowMarketSystem:
+	extends MarketSystem
+	var call_log: FlowCallLog
+
+	func _init(source_log: FlowCallLog = null) -> void:
+		call_log = source_log
+
+	func settle_month(_context: RunContext) -> void:
+		call_log.record(&"market")
+
+
+class FlowPolicySystem:
+	extends PolicySystem
+	var call_log: FlowCallLog
+
+	func _init(source_log: FlowCallLog = null) -> void:
+		call_log = source_log
+
+	func resolve_policy_chain(_state: RunState) -> void:
+		call_log.record(&"policy")
+
+
+class FlowEventSystem:
+	extends EventSystem
+	var call_log: FlowCallLog
+
+	func _init(source_log: FlowCallLog = null) -> void:
+		call_log = source_log
+
+	func try_generate_month(_context: RunContext) -> Array[EventState]:
+		call_log.record(&"event_generate")
+		var result: Array[EventState] = []
+		return result
+
+	func settle_month(_context: RunContext) -> void:
+		call_log.record(&"event_settle")
+
+	func update_information(_context: RunContext) -> void:
+		call_log.record(&"event_information")
+
+
+class FlowCollapseSystem:
+	extends CollapseSystem
+	var call_log: FlowCallLog
+
+	func _init(source_log: FlowCallLog = null) -> void:
+		call_log = source_log
+
+	func settle_month(_context: RunContext) -> void:
+		call_log.record(&"collapse")
+
+
+class FlowProposalSystem:
+	extends ProposalSystem
+	var call_log: FlowCallLog
+
+	func _init(source_log: FlowCallLog = null) -> void:
+		call_log = source_log
+
+	func draw_automatic_proposals(_context: RunContext) -> void:
+		call_log.record(&"proposal_draw")
+
+	func resolve_active_visits(_context: RunContext) -> Array[ProposalInstance]:
+		call_log.record(&"proposal_visit")
+		var result: Array[ProposalInstance] = []
+		return result
+
+
+class FlowAnnualSettlementSystem:
+	extends AnnualSettlementSystem
+	var call_log: FlowCallLog
+
+	func _init(source_log: FlowCallLog = null) -> void:
+		call_log = source_log
+
+	func settle_year(_context: RunContext) -> void:
+		call_log.record(&"annual")
+
+
+class FlowTimeSystem:
+	extends TimeSystem
+	var call_log: FlowCallLog
+
+	func _init(source_log: FlowCallLog = null) -> void:
+		call_log = source_log
+
+	func advance_month(_state: RunState) -> void:
+		call_log.record(&"time")
+
+
 func run(t: BackendTestContext) -> void:
 	_test_recursive_expectation_growth(t)
 	_test_zero_growth_still_allows_gap_event(t)
 	_test_biyi_adjustment_is_proportional(t)
 	_test_month_hook_order(t)
+	_test_complete_month_flow_order(t)
 	_test_balance_controls_automatic_draw_count(t)
 
 
@@ -132,6 +253,44 @@ func _test_month_hook_order(t: BackendTestContext) -> void:
 	t.check_equal(article.observed_race_value, 7, "race hook runs before article hook")
 	t.check_equal(session.state.petition_limit, 8, "article hook result remains in runtime state")
 	t.check_equal(session.state.month, 2, "month advances after lifecycle and systems")
+	session.free()
+
+
+func _test_complete_month_flow_order(t: BackendTestContext) -> void:
+	var call_log := FlowCallLog.new()
+	var race := FlowRaceDefinition.new(call_log)
+	race.display_name = "flow race"
+	var article := FlowArticleDefinition.new(call_log)
+	article.display_name = "flow article"
+	article.race = race
+	article.is_initial = true
+	var session := t.make_session(
+		[race], [t.make_group("flow group")], t.make_seats(1, "flow"), [article]
+	)
+	session.context.market_system = FlowMarketSystem.new(call_log)
+	session.context.policy_system = FlowPolicySystem.new(call_log)
+	session.context.event_system = FlowEventSystem.new(call_log)
+	session.context.collapse_system = FlowCollapseSystem.new(call_log)
+	session.context.proposal_system = FlowProposalSystem.new(call_log)
+	session.context.annual_settlement_system = FlowAnnualSettlementSystem.new(call_log)
+	session.context.time_system = FlowTimeSystem.new(call_log)
+	session.state.month = 12
+	session.advance_month()
+	var expected: Array[StringName] = [
+		&"race",
+		&"article",
+		&"market",
+		&"policy",
+		&"event_generate",
+		&"event_settle",
+		&"event_information",
+		&"collapse",
+		&"proposal_draw",
+		&"proposal_visit",
+		&"annual",
+		&"time",
+	]
+	t.check_equal(call_log.entries, expected, "monthly flow order is stable through annual settlement")
 	session.free()
 
 

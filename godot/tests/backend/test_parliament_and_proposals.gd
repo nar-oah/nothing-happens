@@ -131,6 +131,22 @@ func _test_merge_uses_group_resource_identity(t: BackendTestContext) -> void:
 	t.check_equal(merged.base_effect.tax, 7, "merge keeps selected negative base")
 	t.check_equal(merged.positive_effect.wage, 14, "discarded trait converts by balance ratio")
 
+	var pending := t.make_proposal(group)
+	pending.positive_effect.wage = 5
+	pending.bonus_choice_resolved = false
+	pending.positive_trait_accepted = false
+	var plain_a := t.make_proposal(group)
+	var plain_b := t.make_proposal(group)
+	var pending_state := RunState.new()
+	pending_state.proposal_hand = [pending, plain_a, plain_b]
+	t.check(
+		ProposalSystem.new().merge_three(
+			pending_state, [pending, plain_a, plain_b], plain_a, balance, pending
+		) == null,
+		"merge cannot consume an unresolved positive choice"
+	)
+	t.check_equal(pending_state.proposal_hand.size(), 3, "rejected merge keeps every mother")
+
 
 func _test_pending_choice_blocks_submission(t: BackendTestContext) -> void:
 	var race := t.make_race("pending choice")
