@@ -1,5 +1,8 @@
 export const FOLD_WIDTH = 230;
 export const FOLD_HEIGHT = 82;
+export const VERTICAL_FOLD_WIDTH = 123;
+export const VERTICAL_FOLD_HEIGHT = 345;
+export const VERTICAL_FOLD_SKEW = 9.25;
 
 export enum MetricText {
 	Tax = '税課',
