@@ -15,7 +15,7 @@
 </script>
 
 <div
-	class="memorial-fold-position absolute left-0 top-0 h-[var(--height)] w-[var(--width)] will-change-transform"
+	class="memorial-fold-position absolute left-0 top-0 h-$height w-$width will-change-transform"
 	aria-hidden={!open && index !== 0}
 	style:--width={`${FOLD_WIDTH}px`}
 	style:--height={`${FOLD_HEIGHT}px`}
@@ -30,7 +30,7 @@
 		style:transform={`skewX(${open ? skew : 0}deg)`}
 		style:transition-delay={`${open ? 0 : 620}ms`}
 	>
-		<div class="box-border h-full w-full px-[12px] py-[10px]">
+		<div class="box-border h-full w-full px-12 py-10">
 			{@render children()}
 		</div>
 	</div>
