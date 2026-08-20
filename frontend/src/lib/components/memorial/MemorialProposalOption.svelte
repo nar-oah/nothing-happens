@@ -1,0 +1,50 @@
+<script lang="ts">
+	import MemorialClosedFrame from './MemorialClosedFrame.svelte';
+	import MemorialMetric from './MemorialMetric.svelte';
+	import { MetricText, type MemorialMetricData } from './memorial';
+
+	type Props = {
+		option: string;
+		lag: number;
+		metrics: MemorialMetricData[];
+	};
+
+	let { option, lag, metrics }: Props = $props();
+	let optionCharacters = $derived(Array.from(option));
+	let leadingMetrics = $derived(metrics.filter((metric) => !metric.isReverse));
+	let trailingMetrics = $derived(metrics.filter((metric) => metric.isReverse));
+	let lagMetric: MemorialMetricData = $derived({
+		text: MetricText.Lag,
+		value: lag
+	});
+</script>
+
+<MemorialClosedFrame>
+	<div class="flex h-full w-full items-center">
+		<div class="flex min-w-0 flex-1 justify-between">
+			{#each leadingMetrics as metric, index (metric)}
+				<div style:z-index={leadingMetrics.length - index}>
+					<MemorialMetric {metric} />
+				</div>
+			{/each}
+		</div>
+		<div
+			class="flex w-40 shrink-0 flex-col items-center justify-center self-stretch overflow-hidden bg-accent-amber-deep"
+		>
+			{#each optionCharacters as character, index (`${character}-${index}`)}
+				<span
+					class="flex w-40 items-center justify-center font-archival text-48 font-normal leading-auto text-ink-primary"
+				>
+					{character}
+				</span>
+			{/each}
+		</div>
+		<div class="flex min-w-0 flex-1 justify-between">
+			{#each [...trailingMetrics, lagMetric] as metric, index (metric)}
+				<div style:z-index={trailingMetrics.length + 1 - index}>
+					<MemorialMetric {metric} />
+				</div>
+			{/each}
+		</div>
+	</div>
+</MemorialClosedFrame>

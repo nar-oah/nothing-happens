@@ -1,8 +1,9 @@
 <script lang="ts">
+	import MemorialClosedFrame from './MemorialClosedFrame.svelte';
 	import MemorialLag from './MemorialLag.svelte';
 	import MemorialMetric from './MemorialMetric.svelte';
 	import MemorialTitle from './MemorialTitle.svelte';
-	import { FOLD_HEIGHT, FOLD_WIDTH, type MemorialMetricData } from './memorial';
+	import type { MemorialMetricData } from './memorial';
 
 	type Props = {
 		title: string;
@@ -13,12 +14,8 @@
 	let { title, lag, metrics }: Props = $props();
 </script>
 
-<div class="flex flex-col items-center">
-	<div
-		class="flex h-$height w-$width items-start justify-between overflow-hidden bg-surface-indigo"
-		style:--width={`${FOLD_WIDTH}px`}
-		style:--height={`${FOLD_HEIGHT}px`}
-	>
+<MemorialClosedFrame>
+	<div class="flex h-full w-full items-start justify-between">
 		<div class="flex min-w-0">
 			{#each metrics as metric, index (metric)}
 				<div class="-mr-10" style:z-index={metrics.length - index}>
@@ -31,5 +28,4 @@
 			<MemorialLag time={lag} />
 		</div>
 	</div>
-	<div class="h-4 w-$width bg-shadow-deep" style:--width={`${FOLD_WIDTH - 10}px`}></div>
-</div>
+</MemorialClosedFrame>

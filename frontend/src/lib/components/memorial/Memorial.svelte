@@ -1,29 +1,24 @@
 <script lang="ts">
-	import { onDestroy } from 'svelte';
-	import MemorialClosed from './MemorialClosed.svelte';
+	import { onDestroy, type Snippet } from 'svelte';
 	import MemorialFold from './MemorialFold.svelte';
 	import MemorialHorizontalContent from './MemorialHorizontalContent.svelte';
-	import { FOLD_HEIGHT, FOLD_WIDTH, type MemorialMetricData } from './memorial';
+	import { FOLD_HEIGHT, FOLD_WIDTH } from './memorial';
 
 	type Props = {
 		open?: boolean;
 		count: number;
-		title: string;
 		contentTitle?: string;
 		contentBody: string;
-		lag: number;
-		metrics: MemorialMetricData[];
+		closed: Snippet;
 		onOpenChange?: (open: boolean) => void;
 	};
 
 	let {
 		open = $bindable(false),
 		count,
-		title,
 		contentTitle,
 		contentBody,
-		lag,
-		metrics,
+		closed,
 		onOpenChange
 	}: Props = $props();
 	let showClosed = $state(!open);
@@ -99,7 +94,7 @@
 	{/each}
 	{#if showClosed}
 		<div class="absolute left-0 top-0 z-100">
-			<MemorialClosed {title} {lag} {metrics} />
+			{@render closed()}
 		</div>
 	{/if}
 </button>

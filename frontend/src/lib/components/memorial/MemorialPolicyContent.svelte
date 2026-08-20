@@ -1,10 +1,6 @@
 <script lang="ts">
 	import MarkSeal from '../mark/MarkSeal.svelte';
-
-	type Props = {
-		title: string;
-		body: string;
-	};
+	import type { MemorialPolicyContentData as Props } from './memorial';
 
 	let { title, body }: Props = $props();
 </script>

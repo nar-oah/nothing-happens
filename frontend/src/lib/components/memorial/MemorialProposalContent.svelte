@@ -1,8 +1,5 @@
 <script lang="ts">
-	type Props = {
-		title: string;
-		body: string;
-	};
+	import type { MemorialProposalContentData as Props } from './memorial';
 
 	let { title, body }: Props = $props();
 </script>
