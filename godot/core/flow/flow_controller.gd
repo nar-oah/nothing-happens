@@ -11,19 +11,19 @@ func setup(run_context: RunContext) -> void:
 func advance_month() -> void:
 	if context.state.run_failed or context.state.ending_id != &"":
 		return
+	for definition in context.race_definitions:
+		var race_state := context.state.get_race(definition)
+		if race_state != null:
+			definition.on_month_start(context, race_state)
+	context.constitution_system.on_month_start(context)
 	context.market_system.settle_month(context)
 	context.policy_system.resolve_policy_chain(context.state)
 	context.event_system.try_generate_month(context)
 	context.event_system.settle_month(context)
-	context.collapse_system.settle_month(context.state)
 	context.event_system.update_information(context)
-	var groups := context.constitution_system.get_effective_groups(
-		context.state, context.interest_groups
-	)
-	context.proposal_system.draw_automatic_proposals(
-		groups, context.automatic_draw_count, context
-	)
-	context.proposal_system.resolve_active_visits(groups, context)
+	context.collapse_system.settle_month(context)
+	context.proposal_system.draw_automatic_proposals(context)
+	context.proposal_system.resolve_active_visits(context)
 	if context.state.month == 12:
 		context.annual_settlement_system.settle_year(context)
 	context.time_system.advance_month(context.state)
@@ -48,7 +48,9 @@ func submit_draft(draft: DraftBillState) -> VoteResultState:
 	if draft == null or draft.is_empty():
 		return result
 	context.collapse_system.record_intervention(
-		context.state, &"bill_submission", float(draft.slot_count())
+		context,
+		&"bill_submission",
+		float(draft.slot_count()) * context.balance.bill_submission_pressure_per_slot
 	)
 	result = context.vote_system.calculate_vote(draft, context, true)
 	result.submitted = true
