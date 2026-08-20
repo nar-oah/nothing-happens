@@ -36,8 +36,10 @@ func modify_vote(vote_context) -> void:
 		return
 	if not nanke_state.strike_extends_to_group and vote_context.seat.race != race:
 		return
-	var projected_wage := vote_context.projected_metrics.get_value(Metric.Id.WAGE)
-	var year_start_wage := vote_context.run_context.state.year_start_metrics.get_value(Metric.Id.WAGE)
+	var projected_wage: int = vote_context.projected_metrics.get_value(Metric.Id.WAGE)
+	var year_start_wage: int = (
+		vote_context.run_context.state.year_start_metrics.get_value(Metric.Id.WAGE)
+	)
 	if projected_wage >= year_start_wage:
 		return
 	vote_context.vote.breakdown[&"nanke_strike"] = 1.0

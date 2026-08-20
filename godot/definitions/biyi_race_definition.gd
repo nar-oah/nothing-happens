@@ -45,7 +45,9 @@ func get_effective_expectation(
 	var direction := get_stance(metric)
 	if month_sign == 0 or direction == Metric.Direction.NONE:
 		return base_target
-	var adjustment := float(direction) * float(month_sign) * race_state.yin_yang_adjustment_rate
+	var adjustment: float = (
+		float(direction) * float(month_sign) * float(race_state.yin_yang_adjustment_rate)
+	)
 	return roundi(float(base_target) * (1.0 + adjustment))
 
 
