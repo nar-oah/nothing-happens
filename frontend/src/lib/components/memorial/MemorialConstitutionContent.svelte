@@ -29,13 +29,13 @@
 			class="flex w-full flex-col items-center justify-center bg-ink-primary font-document text-[60px] font-light leading-[48px] text-surface-amber"
 			aria-label={`解锁要求 ${props.requirement}`}
 		>
-			{#each Array(6) as _}
+			{#each [0, 1, 2, 3, 4, 5] as row (row)}
 				<span>{props.requirement}</span>
 			{/each}
 		</div>
 	{:else}
 		<div class="flex flex-col gap-[20px]">
-			{#each props.rows as row}
+			{#each props.rows as row (row)}
 				<MemorialConstitutionRow {...row} />
 			{/each}
 		</div>

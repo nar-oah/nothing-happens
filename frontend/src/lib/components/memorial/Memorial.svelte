@@ -92,7 +92,7 @@
 	aria-label={open ? '收起奏折' : '展开奏折'}
 	onclick={() => setOpen(!open)}
 >
-	{#each skews as skew, index}
+	{#each skews as skew, index (index)}
 		<MemorialFold x={getFoldX(skews.slice(0, index))} {open} {index} count={skews.length} {skew}>
 			<MemorialHorizontalContent title={index === 0 ? contentTitle : ''} body={contentBody} />
 		</MemorialFold>
