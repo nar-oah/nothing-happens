@@ -119,12 +119,9 @@ func on_year_settlement(context: RunContext) -> void:
 
 
 func modify_vote(vote_context: VoteContext) -> void:
-	if vote_context == null or vote_context.race_state == null:
+	if vote_context == null:
 		return
-	var article := vote_context.run_context.state.constitution.get_active_article(
-		vote_context.race_state.definition
-	)
-	if article != null:
+	for article in get_active_articles(vote_context.run_context):
 		article.modify_vote(vote_context)
 
 
