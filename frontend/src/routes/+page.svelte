@@ -8,6 +8,10 @@
 	import MemorialVerticalConstitution from '$lib/components/memorial/MemorialVerticalConstitution.svelte';
 	import MemorialVerticalPolicy from '$lib/components/memorial/MemorialVerticalPolicy.svelte';
 	import Mark from '$lib/components/mark/Mark.svelte';
+	import ChoreFilter from '$lib/components/chore/ChoreFilter.svelte';
+	import ChoreItem from '$lib/components/chore/ChoreItem.svelte';
+	import ChoreSelect from '$lib/components/chore/ChoreSelect.svelte';
+	import ChoreSwitch from '$lib/components/chore/ChoreSwitch.svelte';
 	import {
 		MetricText,
 		MetricSymbol,
@@ -56,6 +60,8 @@
 	let direction = $state<'up' | 'down'>('up');
 	let directionb = $state<'up' | 'down'>('up');
 	let newspaperOpened = $state(false);
+	let choreSwitch = $state(false);
+	let choreSelect = $state(true);
 </script>
 
 <svelte:head>
@@ -137,5 +143,20 @@
 				}}
 			/>
 		</div>
+	</section>
+
+	<section class="flex flex-col gap-[20px]">
+		<h2 class="m-0 font-policy text-30 font-medium text-ink-primary">杂项控件</h2>
+		<div class="flex flex-wrap items-start gap-[36px]">
+			<ChoreItem text="政治献金" value={20} limit={24} />
+			<ChoreItem text="政治献金" value={8} isRate={false} />
+			<ChoreItem text="政治献金" value={20} isRate={false} isRow />
+			<ChoreItem text="政治献金" context="限制说明" isRate={false} isRow isContext />
+		</div>
+		<div class="flex flex-wrap items-start gap-[36px]">
+			<ChoreSwitch bind:isSwitch={choreSwitch} left="种族" right="利益集团" />
+			<ChoreSelect bind:isSelect={choreSelect} text="约法" />
+		</div>
+		<ChoreFilter />
 	</section>
 </main>
