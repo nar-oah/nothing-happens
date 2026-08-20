@@ -85,6 +85,11 @@ func _test_positive_trait_and_donation_choice(t: BackendTestContext) -> void:
 	)
 	t.check_approx(accepted.donation_offer, 22.0, "offer derives from positive magnitude")
 	var accepted_state := RunState.new()
+	accepted_state.proposal_hand.append(accepted)
+	t.check(
+		not DraftBillSystem.new().move_proposal_from_hand(accepted_state, 0),
+		"unresolved positive choice cannot enter a draft"
+	)
 	t.check(system.resolve_bonus_choice(accepted_state, accepted, true), "trait can be accepted")
 	t.check(accepted.has_positive_trait(), "accepting preserves the positive trait")
 	t.check_approx(accepted_state.political_donation_pool, 0.0, "accepting grants no donation")
@@ -96,6 +101,7 @@ func _test_positive_trait_and_donation_choice(t: BackendTestContext) -> void:
 	var converted := ProposalInstance.new()
 	system.add_positive_trait(converted, 2, inflation, balance, random)
 	var converted_state := RunState.new()
+	converted_state.proposal_hand.append(converted)
 	t.check(system.resolve_bonus_choice(converted_state, converted, false), "trait can be converted")
 	t.check(not converted.has_positive_trait(), "conversion clears the trait")
 	t.check_approx(converted_state.political_donation_pool, 22.0, "conversion funds the pool")
