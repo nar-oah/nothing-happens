@@ -20,10 +20,10 @@
 </script>
 
 <MemorialClosedFrame>
-	<div class="flex h-full w-full items-center justify-between gap-10">
-		<div class="flex min-w-0 flex-1 justify-start">
+	<div class="flex h-full w-full items-center">
+		<div class="flex min-w-0 flex-1 justify-between">
 			{#each leadingMetrics as metric, index (metric)}
-				<div class="-mr-10" style:z-index={leadingMetrics.length - index}>
+				<div style:z-index={leadingMetrics.length - index}>
 					<MemorialMetric {metric} />
 				</div>
 			{/each}
@@ -39,9 +39,9 @@
 				</span>
 			{/each}
 		</div>
-		<div class="flex min-w-0 flex-1 justify-end">
+		<div class="flex min-w-0 flex-1 justify-between">
 			{#each [...trailingMetrics, lagMetric] as metric, index (metric)}
-				<div class="-mr-10" style:z-index={trailingMetrics.length + 1 - index}>
+				<div style:z-index={trailingMetrics.length + 1 - index}>
 					<MemorialMetric {metric} />
 				</div>
 			{/each}
