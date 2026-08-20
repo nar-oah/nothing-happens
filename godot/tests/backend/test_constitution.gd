@@ -171,15 +171,24 @@ func _test_influence_rule_modes(t: BackendTestContext) -> void:
 
 func _test_local_autonomy_runtime_resources(t: BackendTestContext) -> void:
 	var race := t.make_race("local race")
+	var other_race := t.make_race("other race")
+	var base_group := t.make_group("base")
+	var rule_group := t.make_group("ordinary rule")
 	var article := LocalAutonomyConstitutionArticleDefinition.new()
 	article.display_name = "local autonomy"
 	article.race = race
 	article.is_initial = true
+	article.influence_rules = [
+		t.make_rule(ConstitutionInfluenceRule.Mode.TARGET, rule_group, 1.0)
+	]
 	var replacement := t.make_article(race, false)
 	replacement.display_name = "centralized"
-	var definitions := t.make_seats(3, "location")
+	var other_initial := t.make_article(other_race)
+	var other_next := t.make_article(other_race, false)
+	var definitions := t.make_seats(4, "location")
 	var session := t.make_session(
-		[race], [t.make_group("base")], definitions, [article, replacement]
+		[race, other_race], [base_group, rule_group], definitions,
+		[article, replacement, other_initial, other_next]
 	)
 	var locals := session.state.constitution.local_interest_groups
 	t.check_equal(locals.size(), definitions.size(), "one runtime local group per SeatDefinition")
@@ -204,6 +213,24 @@ func _test_local_autonomy_runtime_resources(t: BackendTestContext) -> void:
 			session.state.constitution.local_interest_groups[definition] == remembered[definition],
 			"repeated activation preserves runtime Resource identity"
 		)
+	for seat in session.state.seats:
+		t.check(
+			seat.actual_group == remembered[seat.definition],
+			"special local overlay wins over ordinary influence rules at startup"
+		)
+	session.annual_settlement_system.settle_year(session.context)
+	for seat in session.state.seats:
+		t.check(
+			seat.actual_group == remembered[seat.definition],
+			"special local overlay keeps the same precedence at annual settlement"
+		)
+	t.check(session.revise_constitution(other_next), "another race can revise while local autonomy stays active")
+	for seat in session.state.seats:
+		t.check(
+			seat.actual_group == remembered[seat.definition],
+			"unrelated revision preserves the active local overlay"
+		)
+	session.state.constitution.revision_available = true
 	t.check(session.revise_constitution(replacement), "local autonomy can be deactivated")
 	var effective := session.constitution_system.get_effective_groups(session.context)
 	for seat in session.state.seats:
