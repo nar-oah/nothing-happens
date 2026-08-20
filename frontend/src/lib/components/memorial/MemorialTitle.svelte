@@ -5,9 +5,7 @@
 	let { text }: Props = $props();
 </script>
 
-<div
-	class="relative h-30 w-100 border-3 border-solid border-surface-amber bg-accent-amber-deep"
->
+<div class="relative h-30 w-100 border-3 border-solid border-surface-amber bg-accent-amber-deep">
 	{#if text.length <= 3}
 		<div
 			class="typo-proposal-sponsor-group-default absolute left-47 top-12 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap text-center text-ink-secondary"

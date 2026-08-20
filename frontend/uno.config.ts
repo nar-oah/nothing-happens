@@ -187,13 +187,7 @@ export default defineConfig({
 		'typo-dialogue-speaker-vertical': typo('archival', 'normal', 48, 36, 'negative-20'),
 
 		'typo-proposal-sponsor-group-default': typo('archival', 'normal', 32),
-		'typo-proposal-sponsor-group-compact': typo(
-			'archival',
-			'normal',
-			32,
-			'auto',
-			'negative-20'
-		),
+		'typo-proposal-sponsor-group-compact': typo('archival', 'normal', 32, 'auto', 'negative-20'),
 		'typo-proposal-sponsor-group-tight': typo('archival', 'normal', 32, 'auto', 'negative-30'),
 
 		'typo-seal-policy-name': typo('policy', 'medium', 36),
