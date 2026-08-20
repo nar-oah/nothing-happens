@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Memorial from '$lib/components/memorial/Memorial.svelte';
+	import MemorialProposalClosed from '$lib/components/memorial/MemorialProposalClosed.svelte';
 	import Mark from '$lib/components/mark/Mark.svelte';
 	import {
 		MetricText,
@@ -28,12 +29,13 @@
 <main class="flex flex-col gap-lg box-border min-h-screen bg-surface-indigo-muted p-[80px]">
 	<Memorial
 		count={4}
-		title="造身公所"
 		contentTitle="自由贸易"
 		contentBody="蓬莱与大明相约通商，所有货物一体适用同一税则。"
-		lag={12}
-		{metrics}
-	/>
+	>
+		{#snippet closed()}
+			<MemorialProposalClosed title="造身公所" lag={12} {metrics} />
+		{/snippet}
+	</Memorial>
 	<Mark
 		bind:direction
 		policyName="以工代赈"
