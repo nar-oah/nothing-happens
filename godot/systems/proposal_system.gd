@@ -97,6 +97,7 @@ func add_positive_trait(
 	proposal.positive_effect.set_value(metric, magnitude * Metric.favorable_sign(metric))
 	proposal.donation_offer = float(absi(magnitude)) * balance.donation_per_positive_point
 	proposal.bonus_choice_resolved = false
+	proposal.positive_trait_accepted = false
 
 
 func resolve_bonus_choice(
@@ -105,6 +106,7 @@ func resolve_bonus_choice(
 	if proposal == null or proposal.bonus_choice_resolved or not proposal.has_positive_trait():
 		return false
 	proposal.bonus_choice_resolved = true
+	proposal.positive_trait_accepted = accept_trait
 	if not accept_trait:
 		proposal.positive_effect = MetricVector.new()
 		state.political_donation_pool += proposal.donation_offer
@@ -241,6 +243,9 @@ func merge_three(
 		return null
 	var result := negative_base.copy()
 	result.positive_effect = MetricVector.new()
+	result.donation_offer = 0.0
+	result.bonus_choice_resolved = true
+	result.positive_trait_accepted = true
 	if selected_positive != null:
 		var metric_value := selected_positive.get_positive_metric()
 		var metric := metric_value as Metric.Id
@@ -256,6 +261,9 @@ func merge_three(
 			pow(float(selected_magnitude) + converted, balance.merge_upgrade_exponent)
 		)
 		result.positive_effect.set_value(metric, upgraded * Metric.favorable_sign(metric))
+		result.donation_offer = float(upgraded) * balance.donation_per_positive_point
+		result.bonus_choice_resolved = selected_positive.bonus_choice_resolved
+		result.positive_trait_accepted = selected_positive.positive_trait_accepted
 	for mother in mothers:
 		state.proposal_hand.erase(mother)
 	state.proposal_hand.append(result)

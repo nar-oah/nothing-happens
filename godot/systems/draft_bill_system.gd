@@ -5,6 +5,8 @@ class_name DraftBillSystem
 func move_proposal_from_hand(state: RunState, hand_index: int) -> bool:
 	if hand_index < 0 or hand_index >= state.proposal_hand.size():
 		return false
+	if state.proposal_hand[hand_index].is_bonus_choice_pending():
+		return false
 	var proposal: ProposalInstance = state.proposal_hand.pop_at(hand_index)
 	state.draft_bill.proposals.append(proposal)
 	return true

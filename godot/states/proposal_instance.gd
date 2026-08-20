@@ -7,7 +7,8 @@ var positive_effect: MetricVector
 var digestion_speed: float = 1.0
 var collapse_impact: float = 0.0
 var donation_offer: float = 0.0
-var bonus_choice_resolved: bool = false
+var bonus_choice_resolved: bool = true
+var positive_trait_accepted: bool = true
 
 
 func _init() -> void:
@@ -17,12 +18,17 @@ func _init() -> void:
 
 func get_total_effect() -> MetricVector:
 	var result := base_effect.copy()
-	result.add(positive_effect)
+	if positive_trait_accepted:
+		result.add(positive_effect)
 	return result
 
 
 func has_positive_trait() -> bool:
 	return not positive_effect.is_zero()
+
+
+func is_bonus_choice_pending() -> bool:
+	return has_positive_trait() and not bonus_choice_resolved
 
 
 func get_positive_metric() -> int:
@@ -39,4 +45,5 @@ func copy() -> ProposalInstance:
 	result.collapse_impact = collapse_impact
 	result.donation_offer = donation_offer
 	result.bonus_choice_resolved = bonus_choice_resolved
+	result.positive_trait_accepted = positive_trait_accepted
 	return result
