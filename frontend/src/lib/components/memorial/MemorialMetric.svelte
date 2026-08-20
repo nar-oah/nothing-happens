@@ -4,37 +4,41 @@
 		metric: MemorialMetricData;
 		isBottom?: boolean;
 		isColumn?: boolean;
+		showValue?: boolean;
 	};
-	let { metric, isBottom = false, isColumn = false }: Props = $props();
+	let { metric, isBottom = false, isColumn = false, showValue = true }: Props = $props();
 	let { isReverse, symbol, text, value }: MemorialMetricData = $derived(metric);
 </script>
 
 {#if isColumn && isBottom}
 	<div class="flex h-58 w-116 items-center">
 		<div
+			class:-mr-25={showValue}
 			class:text-accent-amber-deep={isReverse}
 			class:text-ink-secondary={!isReverse}
-			class="typo-data-metric-label-large -mr-25 flex w-58 shrink-0 flex-col justify-center text-center [word-break:break-word]"
+			class="typo-data-metric-label-large flex w-58 shrink-0 flex-col justify-center text-center [word-break:break-word]"
 		>
 			{text}
 		</div>
-		<div class="flex h-24 w-25 shrink-0 items-center justify-center">
-			<div class="rotate-90">
-				<div
-					class:bg-ink-secondary={isReverse}
-					class:bg-accent-amber-deep={!isReverse}
-					class="flex items-center justify-center"
-				>
+		{#if showValue}
+			<div class="flex h-24 w-25 shrink-0 items-center justify-center">
+				<div class="rotate-90">
 					<div
-						class:text-accent-amber-deep={isReverse}
-						class:text-ink-secondary={!isReverse}
-						class="typo-data-metric-value-tight whitespace-nowrap text-center [word-break:break-word]"
+						class:bg-ink-secondary={isReverse}
+						class:bg-accent-amber-deep={!isReverse}
+						class="flex items-center justify-center"
 					>
-						{value}
+						<div
+							class:text-accent-amber-deep={isReverse}
+							class:text-ink-secondary={!isReverse}
+							class="typo-data-metric-value-tight whitespace-nowrap text-center [word-break:break-word]"
+						>
+							{value}
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
+		{/if}
 	</div>
 {:else if isBottom}
 	<div class:justify-end={isReverse} class="flex flex-col items-center">

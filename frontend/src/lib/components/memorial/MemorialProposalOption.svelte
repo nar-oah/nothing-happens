@@ -28,13 +28,13 @@
 			{/each}
 		</div>
 		<div
-			class="flex w-40 shrink-0 items-center justify-center self-stretch overflow-hidden bg-accent-amber-deep"
+			class="flex w-40 shrink-0 flex-col items-center justify-center self-stretch overflow-hidden bg-accent-amber-deep"
 		>
-			<p
-				class="m-0 w-full text-center font-archival text-48 font-normal leading-auto text-ink-primary [word-break:break-word]"
+			<div
+				class="flex w-full flex-col justify-center text-center font-archival text-48 font-normal leading-0 text-ink-primary [word-break:break-all]"
 			>
-				{option}
-			</p>
+				<p class="m-0 leading-auto">{option}</p>
+			</div>
 		</div>
 		<div class="flex min-w-0">
 			{#each [...trailingMetrics, lagMetric] as metric, index (metric)}
