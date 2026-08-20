@@ -91,7 +91,7 @@
 					<MemorialConstitutionClosed title="蓬莱约法" />
 				{/snippet}
 			</Memorial>
-			<MemorialProposalOption option="确认" lag={5} {metrics} />
+			<MemorialProposalOption option="確認" lag={5} {metrics} />
 		</div>
 	</section>
 
