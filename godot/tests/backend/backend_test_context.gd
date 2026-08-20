@@ -1,5 +1,4 @@
 extends RefCounted
-class_name BackendTestContext
 
 var failures: int = 0
 var assertions: int = 0

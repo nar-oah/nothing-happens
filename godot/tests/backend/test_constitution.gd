@@ -1,5 +1,7 @@
 extends RefCounted
 
+const BackendTestContext = preload("res://tests/backend/backend_test_context.gd")
+
 
 func run(t: BackendTestContext) -> void:
 	_test_three_seat_condition_scopes(t)

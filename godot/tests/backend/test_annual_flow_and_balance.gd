@@ -1,5 +1,7 @@
 extends RefCounted
 
+const BackendTestContext = preload("res://tests/backend/backend_test_context.gd")
+
 
 class TrackingRaceDefinition:
 	extends RaceDefinition
