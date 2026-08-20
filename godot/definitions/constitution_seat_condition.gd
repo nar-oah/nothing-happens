@@ -18,7 +18,7 @@ func is_met(context) -> bool:
 			eligible_count += 1
 			matching_count += 1 if seat.race == race else 0
 		elif race == null:
-			if seat.actual_group == null:
+			if seat.base_group == null and seat.actual_group == null:
 				continue
 			eligible_count += 1
 			matching_count += 1 if seat.actual_group == interest_group else 0
