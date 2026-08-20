@@ -2,15 +2,28 @@ extends RefCounted
 class_name ParliamentSystem
 
 
-func initialize_seats(state: RunState, definitions: Array[SeatDefinition]) -> void:
+func initialize_seats(
+	state: RunState,
+	definitions: Array[SeatDefinition],
+	races: Array[RaceDefinition]
+) -> bool:
 	state.seats.clear()
 	var seen: Dictionary[SeatDefinition, bool] = {}
+	var anchor_races: Dictionary[RaceDefinition, bool] = {}
 	for definition in definitions:
 		if definition == null or seen.has(definition):
 			push_error("Seat definitions must be unique non-null Resources.")
-			continue
+			return false
 		seen[definition] = true
+		if definition.anchor_race == null:
+			continue
+		if definition.anchor_race not in races or anchor_races.has(definition.anchor_race):
+			push_error("Each content race can own at most one anchor seat.")
+			return false
+		anchor_races[definition.anchor_race] = true
+	for definition in definitions:
 		state.seats.append(SeatState.new(definition))
+	return true
 
 
 func get_race_seat_count(state: RunState, race: RaceDefinition) -> int:
@@ -77,6 +90,7 @@ func allocate_base_columns(
 	for group in groups:
 		if group == null or allocation.has(group) or group.base_column_weight <= 0:
 			push_error("Interest groups must be unique and have positive column weight.")
+			allocation.clear()
 			return allocation
 		allocation[group] = 0
 		total_weight += group.base_column_weight
@@ -106,18 +120,25 @@ func allocate_base_columns(
 
 func initialize_base_groups(
 	state: RunState, groups: Array[InterestGroupDefinition]
-) -> void:
+) -> bool:
 	var allocation := allocate_base_columns(state.seats.size(), groups)
+	var allocated_count := 0
+	for count in allocation.values():
+		allocated_count += int(count)
+	if allocated_count != state.seats.size():
+		push_error("Interest-group columns did not fill the permanent seat pool.")
+		return false
 	var seat_index := 0
 	for group in groups:
 		var count: int = allocation.get(group, 0)
 		for index in range(count):
 			if seat_index >= state.seats.size():
-				return
+				return false
 			state.seats[seat_index].base_group = group
 			state.seats[seat_index].annual_group = group
 			state.seats[seat_index].actual_group = group
 			seat_index += 1
+	return seat_index == state.seats.size()
 
 
 func assign_race_distribution(

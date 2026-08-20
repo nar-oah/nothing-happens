@@ -6,18 +6,20 @@ func initialize_races(
 	state: RunState,
 	definitions: Array[RaceDefinition],
 	balance: GameBalanceDefinition
-) -> void:
+) -> bool:
 	state.races.clear()
 	var seen: Dictionary[RaceDefinition, bool] = {}
 	for definition in definitions:
 		if definition == null or seen.has(definition):
 			push_error("Race definitions must be unique non-null Resources.")
-			continue
+			state.races.clear()
+			return false
 		seen[definition] = true
 		var race := RaceState.new(definition)
 		for metric in definition.get_stance_metrics():
 			race.expectation_targets[metric] = balance.initial_metric_value
 		state.races.append(race)
+	return true
 
 
 func advance_expectations(state: RunState) -> void:

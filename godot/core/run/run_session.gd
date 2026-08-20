@@ -96,13 +96,17 @@ func start_new_run() -> void:
 	context.interest_groups = interest_groups
 	context.seat_definitions = seat_definitions
 	context.constitution_articles = constitution_articles
-	race_system.initialize_races(state, race_definitions, balance)
-	parliament_system.initialize_seats(state, seat_definitions)
-	constitution_system.initialize(context)
+	if not race_system.initialize_races(state, race_definitions, balance):
+		return
+	if not parliament_system.initialize_seats(state, seat_definitions, race_definitions):
+		return
+	if not constitution_system.initialize(context):
+		return
 	if not race_system.allocate_seats(context):
 		push_error("Failed to allocate initial race seats.")
 		return
-	parliament_system.initialize_base_groups(state, interest_groups)
+	if not parliament_system.initialize_base_groups(state, interest_groups):
+		return
 	constitution_system.apply_influence_rules(context)
 	constitution_system.activate_initial_articles(context)
 

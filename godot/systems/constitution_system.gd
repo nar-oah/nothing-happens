@@ -2,8 +2,19 @@ extends RefCounted
 class_name ConstitutionSystem
 
 
-func initialize(context: RunContext) -> void:
+func initialize(context: RunContext) -> bool:
 	context.state.constitution = ConstitutionState.new()
+	var seen: Dictionary[ConstitutionArticleDefinition, bool] = {}
+	for definition in context.constitution_articles:
+		if (
+			definition == null
+			or seen.has(definition)
+			or definition.race == null
+			or definition.race not in context.race_definitions
+		):
+			push_error("Constitution articles must be unique Resources owned by a content race.")
+			return false
+		seen[definition] = true
 	for race in context.race_definitions:
 		var initial: ConstitutionArticleDefinition
 		for definition in context.constitution_articles:
@@ -11,12 +22,13 @@ func initialize(context: RunContext) -> void:
 				continue
 			if initial != null:
 				push_error("A race can have at most one initial constitution article.")
-				continue
+				return false
 			initial = definition
 		if initial != null:
 			context.state.constitution.active_articles[race] = initial
 			context.state.constitution.clicked_articles[initial] = true
 	refresh_runtime(context)
+	return true
 
 
 func activate_initial_articles(context: RunContext) -> void:
