@@ -1,23 +1,15 @@
 extends RefCounted
 class_name ConstitutionState
 
-var active_articles: Dictionary[StringName, ConstitutionArticleDefinition] = {}
+var active_articles: Dictionary[RaceDefinition, ConstitutionArticleDefinition] = {}
+var clicked_articles: Dictionary[ConstitutionArticleDefinition, bool] = {}
 var revision_available: bool = true
-var terminal_article_id: StringName
-var annual_petition_count: int = 0
-var pending_group_seat_targets: Dictionary[StringName, int] = {}
-var group_mergers: Dictionary[StringName, StringName] = {}
+var group_mergers: Dictionary[InterestGroupDefinition, InterestGroupDefinition] = {}
+var local_interest_groups: Dictionary[SeatDefinition, InterestGroupDefinition] = {}
 
 
-func has_flag(flag: StringName) -> bool:
-	for article in active_articles.values():
-		if article != null and flag in article.flags:
-			return true
-	return false
-
-
-func get_active_article(axis_id: StringName) -> ConstitutionArticleDefinition:
-	return active_articles.get(axis_id)
+func get_active_article(race: RaceDefinition) -> ConstitutionArticleDefinition:
+	return active_articles.get(race)
 
 
 func get_influence_rules() -> Array[ConstitutionInfluenceRule]:
@@ -29,8 +21,5 @@ func get_influence_rules() -> Array[ConstitutionInfluenceRule]:
 	return result
 
 
-func has_article(article_id: StringName) -> bool:
-	for article in active_articles.values():
-		if article != null and article.id == article_id:
-			return true
-	return false
+func was_clicked(article: ConstitutionArticleDefinition) -> bool:
+	return article != null and clicked_articles.has(article)

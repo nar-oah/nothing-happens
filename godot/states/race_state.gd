@@ -2,28 +2,21 @@ extends RefCounted
 class_name RaceState
 
 var definition: RaceDefinition
-var political_trust: float = 0.0
-var seat_count: int = 0
 var expectation_targets: Dictionary[int, int] = {}
-var pending_trust_delta: float = 0.0
-var expectation_gap_months: Dictionary[int, int] = {}
+var expectation_growth_rate: float = 0.0
+var visit_probability: float = 0.0
 var resolved_events_this_year: int = 0
-var erupted_events_this_year: int = 0
-var promises_kept_this_year: int = 0
-var promises_broken_this_year: int = 0
-var last_year_trust_delta: float = 0.0
 var last_year_resolved_events: int = 0
-var last_year_erupted_events: int = 0
-var last_year_promises_kept: int = 0
-var last_year_promises_broken: int = 0
+var absence_probability: float = 0.0
+var yin_active: bool = true
+var yin_yang_adjustment_rate: float = 0.0
+var strike_enabled: bool = false
+var strike_group: InterestGroupDefinition
+var strike_extends_to_group: bool = false
 
 
 func _init(source_definition: RaceDefinition = null) -> void:
 	definition = source_definition
-
-
-func get_id() -> StringName:
-	return &"" if definition == null else definition.id
 
 
 func get_expectation(metric: Metric.Id, fallback: int = 0) -> int:
@@ -32,10 +25,4 @@ func get_expectation(metric: Metric.Id, fallback: int = 0) -> int:
 
 func archive_annual_results() -> void:
 	last_year_resolved_events = resolved_events_this_year
-	last_year_erupted_events = erupted_events_this_year
-	last_year_promises_kept = promises_kept_this_year
-	last_year_promises_broken = promises_broken_this_year
 	resolved_events_this_year = 0
-	erupted_events_this_year = 0
-	promises_kept_this_year = 0
-	promises_broken_this_year = 0

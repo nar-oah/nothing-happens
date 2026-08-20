@@ -8,7 +8,7 @@ enum Position {
 	SUPPORT,
 }
 
-var seat_id: int = -1
+var seat: SeatState
 var score: float = 0.0
 var position: Position = Position.ABSTAIN
 var breakdown: Dictionary[StringName, float] = {}
