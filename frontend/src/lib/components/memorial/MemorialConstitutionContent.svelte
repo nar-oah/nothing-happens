@@ -1,20 +1,6 @@
 <script lang="ts">
 	import MemorialConstitutionRow from './MemorialConstitutionRow.svelte';
-	import type { MemorialConstitutionRowData } from './memorial';
-
-	type Props =
-		| {
-				title: string;
-				locked: true;
-				requirement: string | number;
-				rows?: never;
-		  }
-		| {
-				title: string;
-				locked: false;
-				requirement?: never;
-				rows: MemorialConstitutionRowData[];
-		  };
+	import type { MemorialConstitutionContentData as Props } from './memorial';
 
 	let props: Props = $props();
 </script>
