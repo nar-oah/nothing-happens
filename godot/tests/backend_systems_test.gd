@@ -1,6 +1,6 @@
 extends SceneTree
 
-const BackendTestContext = preload("res://tests/backend/backend_test_context.gd")
+const TestContextScript = preload("res://tests/backend/backend_test_context.gd")
 const ParliamentAndProposalTests = preload("res://tests/backend/test_parliament_and_proposals.gd")
 const EventTests = preload("res://tests/backend/test_events.gd")
 const ConstitutionTests = preload("res://tests/backend/test_constitution.gd")
@@ -15,7 +15,7 @@ func _init() -> void:
 
 
 func _run() -> void:
-	var t = BackendTestContext.new()
+	var t := TestContextScript.new()
 	var suites := [
 		ParliamentAndProposalTests.new(),
 		EventTests.new(),

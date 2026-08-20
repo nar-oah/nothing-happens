@@ -111,17 +111,17 @@ func _test_hidden_growth_public_window_and_resolution(t) -> void:
 	t.check(event.growth_progress > 0.0, "hidden event still grows")
 	t.check(not event.known, "satisfying a hidden event does not reveal it")
 	t.check_equal(event.phase, EventState.Phase.WORSENING, "hidden event cannot pause or relieve")
-	t.check_approx(event.relief_progress, 0.0, "hidden event gains no relief progress")
 
 	for index in range(8):
 		session.event_system.settle_month(session.context)
 	t.check_equal(event.months_alive, 9, "remaining-three window begins after nine months")
 	t.check_approx(event.growth_progress, 1.0, "remaining-three window forces full growth")
 	t.check(event.known and event.published, "remaining-three window forces publication")
-	t.check_equal(event.phase, EventState.Phase.RELIEVING, "known satisfied event begins relief")
-	t.check_approx(event.relief_progress, 0.5, "relief speed comes from balance")
 	session.event_system.settle_month(session.context)
-	t.check_equal(event.phase, EventState.Phase.RESOLVED, "known event resolves at full relief")
+	t.check_equal(event.phase, EventState.Phase.RELIEVING, "known event begins reducing demand")
+	t.check_approx(event.growth_progress, 0.5, "relief speed reduces demand progress")
+	session.event_system.settle_month(session.context)
+	t.check_equal(event.phase, EventState.Phase.RESOLVED, "known event resolves at zero demand")
 	t.check_equal(
 		session.state.get_race(race).resolved_events_this_year, 1,
 		"resolution increments the annual race result"
@@ -151,7 +151,7 @@ func _test_pause_relief_and_early_reveal(t) -> void:
 	session.state.metrics.trade = 50
 	session.event_system.settle_month(session.context)
 	t.check_equal(event.phase, EventState.Phase.PAUSED, "middle satisfaction pauses a known event")
-	t.check_approx(event.relief_progress, 0.0, "pause does not invent relief")
+	t.check_approx(event.growth_progress, 1.0, "pause holds demand growth")
 	session.state.metrics.trade = 100
 	session.event_system.settle_month(session.context)
 	t.check_equal(event.phase, EventState.Phase.RESOLVED, "relief threshold resolves by progress")
