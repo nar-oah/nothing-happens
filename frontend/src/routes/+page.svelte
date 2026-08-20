@@ -26,7 +26,14 @@
 </svelte:head>
 
 <main class="flex flex-col gap-lg box-border min-h-screen bg-surface-indigo-muted p-[80px]">
-	<Memorial count={4} title="造身公所" lag={12} {metrics} />
+	<Memorial
+		count={4}
+		title="造身公所"
+		contentTitle="自由贸易"
+		contentBody="蓬莱与大明相约通商，所有货物一体适用同一税则。"
+		lag={12}
+		{metrics}
+	/>
 	<Mark
 		bind:direction
 		policyName="以工代赈"

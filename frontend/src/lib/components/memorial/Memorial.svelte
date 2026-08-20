@@ -9,12 +9,23 @@
 		open?: boolean;
 		count: number;
 		title: string;
+		contentTitle?: string;
+		contentBody: string;
 		lag: number;
 		metrics: MemorialMetricData[];
 		onOpenChange?: (open: boolean) => void;
 	};
 
-	let { open = $bindable(false), count, title, lag, metrics, onOpenChange }: Props = $props();
+	let {
+		open = $bindable(false),
+		count,
+		title,
+		contentTitle,
+		contentBody,
+		lag,
+		metrics,
+		onOpenChange
+	}: Props = $props();
 	let showClosed = $state(!open);
 	let closeTimer: ReturnType<typeof setTimeout> | undefined;
 	const skews = $derived(createFoldSkews(count));
@@ -83,7 +94,7 @@
 >
 	{#each skews as skew, index}
 		<MemorialFold x={getFoldX(skews.slice(0, index))} {open} {index} count={skews.length} {skew}>
-			<MemorialHorizontalContent title={index === 0 ? '自由贸易' : ''} />
+			<MemorialHorizontalContent title={index === 0 ? contentTitle : ''} body={contentBody} />
 		</MemorialFold>
 	{/each}
 	{#if showClosed}
