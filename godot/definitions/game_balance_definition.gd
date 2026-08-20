@@ -27,7 +27,7 @@ class_name GameBalanceDefinition
 @export_range(0.0, 1.0, 0.01) var digestion_progress_min: float = 0.08
 @export_range(0.0, 1.0, 0.01) var digestion_progress_max: float = 0.16
 @export_range(0.0, 100.0, 0.01) var market_response_ratio: float = 0.35
-@export_range(0.0, 100.0, 0.01) var noise_ratio: float = 1.10
+@export_range(0.0, 100.0, 0.01) var market_noise_ratio: float = 1.10
 
 @export_group("投票与政治献金")
 @export_range(0.0, 100.0, 0.5) var race_expectation_score: float = 6.0

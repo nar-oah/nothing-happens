@@ -21,6 +21,17 @@ func on_month_start(context, race_state) -> void:
 		race_state.yin_active = _is_yin_month(context)
 
 
+func modify_vote(vote_context) -> void:
+	if vote_context == null or vote_context.vote == null or vote_context.seat == null:
+		return
+	var relation: float = (
+		vote_context.seat.odd_month_relation
+		if _is_yin_month(vote_context.run_context)
+		else vote_context.seat.even_month_relation
+	)
+	vote_context.vote.add_reason(&"biyi_half_relation", relation)
+
+
 func is_vote_metric_active(metric: Metric.Id, context) -> bool:
 	return is_yin_metric(metric) if _is_yin_month(context) else is_yang_metric(metric)
 
