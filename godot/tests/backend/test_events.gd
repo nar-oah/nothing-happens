@@ -119,6 +119,7 @@ func _test_hidden_growth_public_window_and_resolution(t: BackendTestContext) -> 
 	t.check_equal(event.months_alive, 9, "remaining-three window begins after nine months")
 	t.check_approx(event.growth_progress, 1.0, "remaining-three window forces full growth")
 	t.check(event.known and event.published, "remaining-three window forces publication")
+	t.check(event.full_growth_forced, "public-window force is recorded exactly once")
 	session.event_system.settle_month(session.context)
 	t.check_equal(event.phase, EventState.Phase.RELIEVING, "known event begins reducing demand")
 	t.check_approx(event.growth_progress, 0.5, "relief speed reduces demand progress")
@@ -136,15 +137,15 @@ func _test_pause_relief_and_early_reveal(t: BackendTestContext) -> void:
 	race.increase_trade = true
 	var balance := _event_balance()
 	var session := t.make_session(
-		[race], [t.make_group("group")], t.make_seats(1, "intel"), [], balance
+		[race], [t.make_group("group")], t.make_seats(2, "intel"), [], balance
 	)
 	session.state.metrics.trade = 0
 	var event := session.event_system.spawn_event(session.context, race, Metric.Id.TRADE)
 	session.event_system.update_information(session.context)
 	t.check(not event.known, "zero reveal probability keeps event hidden")
-	balance.event_early_reveal_probability_per_seat = 1.0
+	balance.event_early_reveal_probability_per_seat = 0.5
 	session.event_system.update_information(session.context)
-	t.check(event.known and event.published, "per-seat probability one reveals the event")
+	t.check(event.known and event.published, "two seats multiply per-seat reveal probability to one")
 
 	event.growth_progress = 1.0
 	balance.event_pause_satisfaction_threshold = 0.4
@@ -164,9 +165,8 @@ func _test_deadline_failure(t: BackendTestContext) -> void:
 	var race := t.make_race("failure")
 	race.increase_employment = true
 	var balance := _event_balance()
-	balance.event_lifetime_months = 3
-	balance.event_public_remaining_months = 1
-	balance.event_failure_collapse = 2.5
+	t.check_equal(balance.event_lifetime_months, 12, "default event deadline is twelve months")
+	t.check_approx(balance.event_failure_collapse, 1.0, "default event failure collapse is one")
 	var session := t.make_session(
 		[race], [t.make_group("group")], t.make_seats(1, "failure"), [], balance
 	)
@@ -174,12 +174,12 @@ func _test_deadline_failure(t: BackendTestContext) -> void:
 	var event := session.event_system.spawn_event(
 		session.context, race, Metric.Id.EMPLOYMENT
 	)
-	for index in range(3):
+	for index in range(12):
 		session.event_system.settle_month(session.context)
-	t.check_equal(event.months_alive, 3, "deadline uses configured lifetime")
+	t.check_equal(event.months_alive, 12, "event fails at its twelve-month deadline")
 	t.check_equal(event.phase, EventState.Phase.FAILED, "unresolved event fails at deadline")
 	t.check(event.known and event.published, "failed event is public")
-	t.check_approx(session.state.pending_collapse_delta, 2.5, "failure adds exact configured collapse")
+	t.check_approx(session.state.pending_collapse_delta, 1.0, "failure adds exactly one collapse")
 	t.check_equal(
 		session.state.get_race(race).resolved_events_this_year, 0,
 		"failure does not count as resolution"

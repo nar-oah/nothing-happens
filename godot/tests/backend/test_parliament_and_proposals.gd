@@ -7,6 +7,7 @@ func run(t: BackendTestContext) -> void:
 	_test_resource_identity(t)
 	_test_group_stance_and_generated_proposal(t)
 	_test_positive_trait_and_donation_choice(t)
+	_test_pending_choice_blocks_submission(t)
 	_test_merge_uses_group_resource_identity(t)
 	_test_resource_keyed_annual_sources_and_stable_order(t)
 	_test_failed_draft_does_not_record_sources(t)
@@ -129,6 +130,26 @@ func _test_merge_uses_group_resource_identity(t: BackendTestContext) -> void:
 	t.check(merged.source_group == group, "merged proposal keeps source Resource")
 	t.check_equal(merged.base_effect.tax, 7, "merge keeps selected negative base")
 	t.check_equal(merged.positive_effect.wage, 14, "discarded trait converts by balance ratio")
+
+
+func _test_pending_choice_blocks_submission(t: BackendTestContext) -> void:
+	var race := t.make_race("pending choice")
+	var group := t.make_group("pending source")
+	var session := t.make_session([race], [group], t.make_seats(1, "pending"))
+	var proposal := t.make_proposal(group)
+	proposal.positive_effect.tax = -5
+	proposal.donation_offer = 5.0
+	proposal.bonus_choice_resolved = false
+	proposal.positive_trait_accepted = false
+	session.state.draft_bill.proposals.append(proposal)
+	t.check(
+		not session.draft_bill_system.is_ready_to_submit(session.context, session.state.draft_bill),
+		"draft with unresolved positive choice is not ready"
+	)
+	var result := session.submit_draft()
+	t.check(not result.submitted, "unresolved positive choice cannot be submitted")
+	t.check(not session.state.has_intervened, "rejected pending choice records no intervention")
+	session.free()
 
 
 func _test_resource_keyed_annual_sources_and_stable_order(t: BackendTestContext) -> void:
