@@ -228,7 +228,13 @@ func apply_annual_coloring(context: RunContext) -> void:
 func can_reassign_seat(
 	context: RunContext, seat: SeatState, target: RaceDefinition
 ) -> bool:
-	if seat == null or target == null or seat not in context.state.seats or seat.race == target:
+	if (
+		seat == null
+		or target == null
+		or target not in context.race_definitions
+		or seat not in context.state.seats
+		or seat.race == target
+	):
 		return false
 	var target_constraint := context.constitution_system.get_race_seat_constraint(
 		context, target

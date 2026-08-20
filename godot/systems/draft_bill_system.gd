@@ -20,7 +20,7 @@ func return_proposal_to_hand(state: RunState, draft_index: int) -> bool:
 	return true
 
 
-func add_policy(state: RunState, policy: PolicyDefinition) -> bool:
+func _add_policy(state: RunState, policy: PolicyDefinition) -> bool:
 	if policy == null:
 		return false
 	for current in state.draft_bill.policies:
@@ -43,7 +43,7 @@ func add_available_policy(context: RunContext, policy: PolicyDefinition) -> bool
 	var available := context.constitution_system.get_available_policies(context)
 	for candidate in available:
 		if candidate == policy:
-			return add_policy(context.state, policy)
+			return _add_policy(context.state, policy)
 	return false
 
 

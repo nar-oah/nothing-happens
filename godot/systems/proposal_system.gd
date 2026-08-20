@@ -292,6 +292,8 @@ func _can_merge(
 	for mother in mothers:
 		if mother == null or mother not in state.proposal_hand:
 			return false
+		if mother.is_bonus_choice_pending():
+			return false
 		if mother.source_group != source_group or seen.has(mother.get_instance_id()):
 			return false
 		seen[mother.get_instance_id()] = true
