@@ -77,7 +77,7 @@ func get_effective_expectation(
 	if race == null or race.definition == null:
 		return context.balance.initial_metric_value
 	var base := race.get_expectation(metric, context.balance.initial_metric_value)
-	return race.definition.get_effective_expectation(metric, base, context, race)
+	return race.definition.get_effective_expectation(base, metric, context, race)
 
 
 func get_annual_weight(race: RaceState, balance: GameBalanceDefinition) -> float:
