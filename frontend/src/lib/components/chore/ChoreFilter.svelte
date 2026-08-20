@@ -103,14 +103,14 @@
 		{:else}
 			<button
 				type="button"
-				class="cursor-pointer border-0 bg-transparent p-0 font-document text-24 font-light leading-auto text-surface-amber"
+				class="typo-filter-option cursor-pointer border-0 bg-transparent p-0 text-surface-amber"
 				onclick={() => setFilter('archives')}
 			>
 				{archiveCount}案牍
 			</button>
 			<button
 				type="button"
-				class="cursor-pointer border-0 bg-transparent p-0 font-document text-24 font-light leading-auto text-surface-amber"
+				class="typo-filter-option cursor-pointer border-0 bg-transparent p-0 text-surface-amber"
 				onclick={() => setFilter('metric')}
 			>
 				{metricCount}指标

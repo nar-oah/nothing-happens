@@ -23,12 +23,8 @@
 	aria-pressed={isSelect}
 	onclick={toggle}
 >
-	<span
-		class:font-archival={!isDirection}
-		class:font-document={isDirection}
-		class="text-24 leading-auto"
-	>
+	<span class:typo-filter-marker={!isDirection} class:typo-filter-option={isDirection}>
 		{isDirection ? (isSelect ? '↑' : '↓') : isSelect ? '◆' : '◇'}
 	</span>
-	<span class="font-document text-24 font-light leading-auto">{text}</span>
+	<span class="typo-filter-option">{text}</span>
 </button>
