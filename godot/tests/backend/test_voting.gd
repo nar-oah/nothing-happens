@@ -1,7 +1,7 @@
 extends RefCounted
 
 
-func run(t) -> void:
+func run(t: BackendTestContext) -> void:
 	_test_fixed_proposal_source_support(t)
 	_test_donation_pool_spending_and_detection(t)
 	_test_zhushui_intrinsic_support(t)
@@ -10,7 +10,7 @@ func run(t) -> void:
 	_test_biyi_relation_switch(t)
 
 
-func _test_fixed_proposal_source_support(t) -> void:
+func _test_fixed_proposal_source_support(t: BackendTestContext) -> void:
 	var race := t.make_race("neutral")
 	var group := t.make_group("source")
 	var session := t.make_session([race], [group], t.make_seats(1, "support"))
@@ -25,7 +25,7 @@ func _test_fixed_proposal_source_support(t) -> void:
 	session.free()
 
 
-func _test_donation_pool_spending_and_detection(t) -> void:
+func _test_donation_pool_spending_and_detection(t: BackendTestContext) -> void:
 	var race := t.make_race("donation")
 	var group := t.make_group("group")
 	var balance := GameBalanceDefinition.new()
@@ -63,7 +63,7 @@ func _test_donation_pool_spending_and_detection(t) -> void:
 	session.free()
 
 
-func _test_zhushui_intrinsic_support(t) -> void:
+func _test_zhushui_intrinsic_support(t: BackendTestContext) -> void:
 	var race := ZhushuiRaceDefinition.new()
 	race.display_name = "zhushui"
 	var session := t.make_session(
@@ -76,7 +76,7 @@ func _test_zhushui_intrinsic_support(t) -> void:
 	session.free()
 
 
-func _test_nanke_absence_is_submit_only(t) -> void:
+func _test_nanke_absence_is_submit_only(t: BackendTestContext) -> void:
 	var race := NankeRaceDefinition.new()
 	race.display_name = "nanke"
 	var article := NankeConstitutionArticleDefinition.new()
@@ -110,7 +110,7 @@ func _test_nanke_absence_is_submit_only(t) -> void:
 	session.free()
 
 
-func _test_nanke_constitution_strike_hook(t) -> void:
+func _test_nanke_constitution_strike_hook(t: BackendTestContext) -> void:
 	var race := NankeRaceDefinition.new()
 	race.display_name = "nanke workers"
 	race.increase_wage = true
@@ -137,7 +137,7 @@ func _test_nanke_constitution_strike_hook(t) -> void:
 	session.free()
 
 
-func _test_biyi_relation_switch(t) -> void:
+func _test_biyi_relation_switch(t: BackendTestContext) -> void:
 	var race := BiyiRaceDefinition.new()
 	race.display_name = "biyi"
 	var article := BiyiConstitutionArticleDefinition.new()

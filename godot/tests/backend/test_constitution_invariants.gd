@@ -1,14 +1,14 @@
 extends RefCounted
 
 
-func run(t) -> void:
+func run(t: BackendTestContext) -> void:
 	_test_permanent_seats_survive_annual_allocation(t)
 	_test_anchor_and_zero_max_constraints(t)
 	_test_resolved_events_are_the_only_dynamic_race_weight(t)
 	_test_annual_group_coloring_and_archives(t)
 
 
-func _test_permanent_seats_survive_annual_allocation(t) -> void:
+func _test_permanent_seats_survive_annual_allocation(t: BackendTestContext) -> void:
 	var race_a := t.make_race("annual a")
 	var race_b := t.make_race("annual b")
 	var definitions := t.make_seats(10, "permanent")
@@ -38,7 +38,7 @@ func _test_permanent_seats_survive_annual_allocation(t) -> void:
 	session.free()
 
 
-func _test_anchor_and_zero_max_constraints(t) -> void:
+func _test_anchor_and_zero_max_constraints(t: BackendTestContext) -> void:
 	var anchored := t.make_race("anchored")
 	var removable := t.make_race("removable")
 	var filler := t.make_race("filler")
@@ -66,7 +66,7 @@ func _test_anchor_and_zero_max_constraints(t) -> void:
 	session.free()
 
 
-func _test_resolved_events_are_the_only_dynamic_race_weight(t) -> void:
+func _test_resolved_events_are_the_only_dynamic_race_weight(t: BackendTestContext) -> void:
 	var race_a := t.make_race("weighted")
 	var race_b := t.make_race("neutral")
 	var balance := GameBalanceDefinition.new()
@@ -102,7 +102,7 @@ func _test_resolved_events_are_the_only_dynamic_race_weight(t) -> void:
 	session.free()
 
 
-func _test_annual_group_coloring_and_archives(t) -> void:
+func _test_annual_group_coloring_and_archives(t: BackendTestContext) -> void:
 	var race := t.make_race("coloring")
 	var first := t.make_group("first")
 	var source := t.make_group("source")

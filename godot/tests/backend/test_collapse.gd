@@ -1,14 +1,16 @@
 extends RefCounted
 
 
-func run(t) -> void:
+func run(t: BackendTestContext) -> void:
 	_test_configurable_collapse_routes(t)
 	_test_pressure_decay_and_negative_metric(t)
 	_test_bill_digestion_and_market_movement(t)
 	_test_policy_trigger_chain(t)
 
 
-func _make_collapse_session(t, balance: GameBalanceDefinition) -> RunSession:
+func _make_collapse_session(
+	t: BackendTestContext, balance: GameBalanceDefinition
+) -> RunSession:
 	return t.make_session(
 		[t.make_race("collapse")],
 		[t.make_group("group")],
@@ -18,7 +20,7 @@ func _make_collapse_session(t, balance: GameBalanceDefinition) -> RunSession:
 	)
 
 
-func _test_configurable_collapse_routes(t) -> void:
+func _test_configurable_collapse_routes(t: BackendTestContext) -> void:
 	var balance := GameBalanceDefinition.new()
 	balance.automatic_draw_count = 0
 	balance.event_spawn_count_min = 0
@@ -46,7 +48,7 @@ func _test_configurable_collapse_routes(t) -> void:
 	failed.free()
 
 
-func _test_pressure_decay_and_negative_metric(t) -> void:
+func _test_pressure_decay_and_negative_metric(t: BackendTestContext) -> void:
 	var balance := GameBalanceDefinition.new()
 	balance.automatic_draw_count = 0
 	balance.event_spawn_count_min = 0
@@ -71,7 +73,7 @@ func _test_pressure_decay_and_negative_metric(t) -> void:
 	session.free()
 
 
-func _test_bill_digestion_and_market_movement(t) -> void:
+func _test_bill_digestion_and_market_movement(t: BackendTestContext) -> void:
 	var race := t.make_race("market")
 	var group := t.make_group("source")
 	var balance := GameBalanceDefinition.new()
@@ -104,7 +106,7 @@ func _test_bill_digestion_and_market_movement(t) -> void:
 	session.free()
 
 
-func _test_policy_trigger_chain(t) -> void:
+func _test_policy_trigger_chain(t: BackendTestContext) -> void:
 	var first := PolicyDefinition.new()
 	first.display_name = "first"
 	first.collapse_impact = 1.0

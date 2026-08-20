@@ -21,7 +21,7 @@ class TrackingArticleDefinition:
 		context.state.petition_limit = 8
 
 
-func run(t) -> void:
+func run(t: BackendTestContext) -> void:
 	_test_recursive_expectation_growth(t)
 	_test_zero_growth_still_allows_gap_event(t)
 	_test_biyi_adjustment_is_proportional(t)
@@ -29,7 +29,7 @@ func run(t) -> void:
 	_test_balance_controls_automatic_draw_count(t)
 
 
-func _test_recursive_expectation_growth(t) -> void:
+func _test_recursive_expectation_growth(t: BackendTestContext) -> void:
 	var higher := t.make_race("higher")
 	higher.increase_trade = true
 	var higher_article := t.make_article(higher, true, 0.10)
@@ -66,7 +66,7 @@ func _test_recursive_expectation_growth(t) -> void:
 	)
 
 
-func _test_zero_growth_still_allows_gap_event(t) -> void:
+func _test_zero_growth_still_allows_gap_event(t: BackendTestContext) -> void:
 	var race := t.make_race("stable expectation")
 	race.increase_wage = true
 	var article := t.make_article(race, true, 0.0)
@@ -82,7 +82,7 @@ func _test_zero_growth_still_allows_gap_event(t) -> void:
 	session.free()
 
 
-func _test_biyi_adjustment_is_proportional(t) -> void:
+func _test_biyi_adjustment_is_proportional(t: BackendTestContext) -> void:
 	var race := BiyiRaceDefinition.new()
 	race.display_name = "biyi"
 	race.decrease_tax = true
@@ -114,7 +114,7 @@ func _test_biyi_adjustment_is_proportional(t) -> void:
 	session.free()
 
 
-func _test_month_hook_order(t) -> void:
+func _test_month_hook_order(t: BackendTestContext) -> void:
 	var race := TrackingRaceDefinition.new()
 	race.display_name = "tracking"
 	var article := TrackingArticleDefinition.new()
@@ -133,7 +133,7 @@ func _test_month_hook_order(t) -> void:
 	session.free()
 
 
-func _test_balance_controls_automatic_draw_count(t) -> void:
+func _test_balance_controls_automatic_draw_count(t: BackendTestContext) -> void:
 	var race := t.make_race("draw")
 	var group := t.make_group("draw group")
 	group.decrease_price = true
