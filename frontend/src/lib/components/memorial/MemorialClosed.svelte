@@ -20,7 +20,7 @@
 		style:--height={`${FOLD_HEIGHT}px`}
 	>
 		<div class="flex min-w-0">
-			{#each metrics as metric, index}
+			{#each metrics as metric, index (metric)}
 				<div class="-mr-10" style:z-index={metrics.length - index}>
 					<MemorialMetric {metric} />
 				</div>

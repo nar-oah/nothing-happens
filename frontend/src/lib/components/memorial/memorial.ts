@@ -20,3 +20,9 @@ export type MemorialMetricData = {
 	value: number;
 	isReverse?: boolean;
 };
+
+export type MemorialConstitutionRowData = {
+	text: string;
+	number: string | number;
+	selected: boolean;
+};

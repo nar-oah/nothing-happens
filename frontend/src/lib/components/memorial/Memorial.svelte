@@ -2,18 +2,30 @@
 	import { onDestroy } from 'svelte';
 	import MemorialClosed from './MemorialClosed.svelte';
 	import MemorialFold from './MemorialFold.svelte';
+	import MemorialHorizontalContent from './MemorialHorizontalContent.svelte';
 	import { FOLD_HEIGHT, FOLD_WIDTH, type MemorialMetricData } from './memorial';
 
 	type Props = {
 		open?: boolean;
 		count: number;
 		title: string;
+		contentTitle?: string;
+		contentBody: string;
 		lag: number;
 		metrics: MemorialMetricData[];
 		onOpenChange?: (open: boolean) => void;
 	};
 
-	let { open = $bindable(false), count, title, lag, metrics, onOpenChange }: Props = $props();
+	let {
+		open = $bindable(false),
+		count,
+		title,
+		contentTitle,
+		contentBody,
+		lag,
+		metrics,
+		onOpenChange
+	}: Props = $props();
 	let showClosed = $state(!open);
 	let closeTimer: ReturnType<typeof setTimeout> | undefined;
 	const skews = $derived(createFoldSkews(count));
@@ -80,18 +92,9 @@
 	aria-label={open ? '收起奏折' : '展开奏折'}
 	onclick={() => setOpen(!open)}
 >
-	{#each skews as skew, index}
+	{#each skews as skew, index (index)}
 		<MemorialFold x={getFoldX(skews.slice(0, index))} {open} {index} count={skews.length} {skew}>
-			<div class="flex h-full flex-col justify-between">
-				<div>
-					<div class="typo-document-kicker opacity-70">提案／{title}</div>
-					<div class="typo-document-section-heading mt-2">扩充行身机件统采案</div>
-				</div>
-				<div class="typo-document-metadata flex items-center justify-between">
-					<span>消化／中等</span>
-					<span>{title}提供本案政治支持</span>
-				</div>
-			</div>
+			<MemorialHorizontalContent title={index === 0 ? contentTitle : ''} body={contentBody} />
 		</MemorialFold>
 	{/each}
 	{#if showClosed}
