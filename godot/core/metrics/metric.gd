@@ -9,6 +9,12 @@ enum Id {
 	TRADE,
 }
 
+enum Direction {
+	LOWER = -1,
+	NONE = 0,
+	HIGHER = 1,
+}
+
 
 static func display_name(metric: Id) -> String:
 	match metric:

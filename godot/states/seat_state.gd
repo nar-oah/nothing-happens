@@ -1,23 +1,24 @@
 extends RefCounted
 class_name SeatState
 
-var seat_id: int = -1
-var race_id: StringName
-var base_group_id: StringName
-var actual_group_id: StringName
+var definition: SeatDefinition
+var race: RaceDefinition
+var base_group: InterestGroupDefinition
+var annual_group: InterestGroupDefinition
+var actual_group: InterestGroupDefinition
 var personal_relation: float = 0.0
 var odd_month_relation: float = 0.0
 var even_month_relation: float = 0.0
-var influence_priority: int = 5
 
 
 func _init(
-	new_seat_id: int = -1,
-	new_race_id: StringName = &"",
-	new_base_group_id: StringName = &"",
-	new_actual_group_id: StringName = &""
+	source_definition: SeatDefinition = null,
+	source_race: RaceDefinition = null,
+	source_base_group: InterestGroupDefinition = null,
+	source_actual_group: InterestGroupDefinition = null
 ) -> void:
-	seat_id = new_seat_id
-	race_id = new_race_id
-	base_group_id = new_base_group_id
-	actual_group_id = new_actual_group_id
+	definition = source_definition
+	race = source_race
+	base_group = source_base_group
+	annual_group = source_base_group if source_actual_group == null else source_actual_group
+	actual_group = annual_group

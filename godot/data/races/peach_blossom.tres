@@ -4,9 +4,7 @@
 
 [resource]
 script = ExtResource("2_v6x64")
-id = &"peach_blossom"
 display_name = "桃花妖"
 decrease_tax = true
 decrease_price = true
 decrease_trade = true
-metadata/_custom_type_script = "uid://britky0yedt0q"

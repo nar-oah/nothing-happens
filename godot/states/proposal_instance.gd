@@ -1,13 +1,14 @@
 extends RefCounted
 class_name ProposalInstance
 
-var definition_id: StringName
-var source_group_id: StringName
+var source_group: InterestGroupDefinition
 var base_effect: MetricVector
 var positive_effect: MetricVector
 var digestion_speed: float = 1.0
-var political_support: float = 8.0
 var collapse_impact: float = 0.0
+var donation_offer: float = 0.0
+var bonus_choice_resolved: bool = true
+var positive_trait_accepted: bool = true
 
 
 func _init() -> void:
@@ -17,12 +18,17 @@ func _init() -> void:
 
 func get_total_effect() -> MetricVector:
 	var result := base_effect.copy()
-	result.add(positive_effect)
+	if positive_trait_accepted:
+		result.add(positive_effect)
 	return result
 
 
 func has_positive_trait() -> bool:
 	return not positive_effect.is_zero()
+
+
+func is_bonus_choice_pending() -> bool:
+	return has_positive_trait() and not bonus_choice_resolved
 
 
 func get_positive_metric() -> int:
@@ -32,11 +38,12 @@ func get_positive_metric() -> int:
 
 func copy() -> ProposalInstance:
 	var result := ProposalInstance.new()
-	result.definition_id = definition_id
-	result.source_group_id = source_group_id
+	result.source_group = source_group
 	result.base_effect = base_effect.copy()
 	result.positive_effect = positive_effect.copy()
 	result.digestion_speed = digestion_speed
-	result.political_support = political_support
 	result.collapse_impact = collapse_impact
+	result.donation_offer = donation_offer
+	result.bonus_choice_resolved = bonus_choice_resolved
+	result.positive_trait_accepted = positive_trait_accepted
 	return result

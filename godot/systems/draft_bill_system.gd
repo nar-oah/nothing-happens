@@ -5,6 +5,8 @@ class_name DraftBillSystem
 func move_proposal_from_hand(state: RunState, hand_index: int) -> bool:
 	if hand_index < 0 or hand_index >= state.proposal_hand.size():
 		return false
+	if state.proposal_hand[hand_index].is_bonus_choice_pending():
+		return false
 	var proposal: ProposalInstance = state.proposal_hand.pop_at(hand_index)
 	state.draft_bill.proposals.append(proposal)
 	return true
@@ -18,11 +20,11 @@ func return_proposal_to_hand(state: RunState, draft_index: int) -> bool:
 	return true
 
 
-func add_policy(state: RunState, policy: PolicyDefinition) -> bool:
+func _add_policy(state: RunState, policy: PolicyDefinition) -> bool:
 	if policy == null:
 		return false
 	for current in state.draft_bill.policies:
-		if current == policy or current.id == policy.id:
+		if current == policy:
 			return false
 	state.draft_bill.policies.append(policy)
 	return true
@@ -35,14 +37,27 @@ func remove_policy(state: RunState, draft_index: int) -> bool:
 	return true
 
 
-func add_unlocked_policy(context: RunContext, policy: PolicyDefinition) -> bool:
+func add_available_policy(context: RunContext, policy: PolicyDefinition) -> bool:
 	if policy == null:
 		return false
-	var unlocked := context.constitution_system.get_unlocked_policies(context.state)
-	for candidate in unlocked:
-		if candidate.id == policy.id:
-			return add_policy(context.state, policy)
+	var available := context.constitution_system.get_available_policies(context)
+	for candidate in available:
+		if candidate == policy:
+			return _add_policy(context.state, policy)
 	return false
+
+
+func is_ready_to_submit(context: RunContext, draft: DraftBillState) -> bool:
+	if context == null or draft == null or draft.is_empty():
+		return false
+	var available := context.constitution_system.get_available_policies(context)
+	for policy in draft.policies:
+		if policy == null or policy not in available:
+			return false
+	for proposal in draft.proposals:
+		if proposal == null or proposal.is_bonus_choice_pending():
+			return false
+	return true
 
 
 func reorder_proposal(state: RunState, from_index: int, to_index: int) -> bool:

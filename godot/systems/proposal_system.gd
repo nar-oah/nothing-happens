@@ -1,21 +1,6 @@
 extends RefCounted
 class_name ProposalSystem
 
-const DEV_DRAW_BASE_WEIGHT: float = 1.0
-const DEV_DRAW_REVERSE_FACTOR: float = 3.0
-const DEV_DRAW_MIN_WEIGHT: float = 0.5
-const DEV_DRAW_MAX_WEIGHT: float = 2.0
-const DEV_DIGESTION_SPEED_MIN: float = 0.8
-const DEV_DIGESTION_SPEED_MAX: float = 1.2
-const DEV_POSITIVE_MAGNITUDE_MIN: int = 5
-const DEV_POSITIVE_MAGNITUDE_MAX: int = 8
-const DEV_VISIT_BASE_PROBABILITY: float = 0.05
-const DEV_VISIT_REVERSE_FACTOR: float = 0.3
-const DEV_VISIT_MIN_PROBABILITY: float = 0.02
-const DEV_VISIT_MAX_PROBABILITY: float = 0.18
-const MERGE_CONVERSION_RATIO: float = 0.5
-const MERGE_UPGRADE_EXPONENT: float = 1.0
-
 
 func calculate_total_effect(proposals: Array[ProposalInstance]) -> MetricVector:
 	var total := MetricVector.new()
@@ -69,24 +54,24 @@ func calculate_digested_anchor(bill: ActiveBillState) -> MetricValues:
 	return result
 
 
-func generate_automatic_proposal(
-	definition: ProposalDefinition,
+func generate_proposal(
+	source_group: InterestGroupDefinition,
 	state: RunState,
 	inflation_system: InflationSystem,
 	balance: GameBalanceDefinition,
 	random_system: RandomSystem
 ) -> ProposalInstance:
+	if source_group == null or source_group.get_stance_metrics().is_empty():
+		return null
 	var proposal := ProposalInstance.new()
-	proposal.definition_id = definition.id
-	proposal.source_group_id = definition.source_group_id
+	proposal.source_group = source_group
 	proposal.base_effect = inflation_system.generate_negative_effect(
-		definition, state.year, balance, random_system
+		source_group, state.year, balance, random_system
 	)
 	proposal.digestion_speed = random_system.random_float(
-		DEV_DIGESTION_SPEED_MIN, DEV_DIGESTION_SPEED_MAX
+		balance.proposal_digestion_speed_min, balance.proposal_digestion_speed_max
 	)
-	proposal.political_support = definition.political_support
-	proposal.collapse_impact = definition.collapse_impact
+	proposal.collapse_impact = balance.proposal_collapse_impact
 	return proposal
 
 
@@ -100,14 +85,37 @@ func add_positive_trait(
 	if proposal == null:
 		return
 	proposal.positive_effect = MetricVector.new()
-	var metric := Metric.all_ids()[random_system.random_int(0, Metric.all_ids().size() - 1)]
+	var metrics := Metric.all_ids()
+	var metric := metrics[random_system.random_int(0, metrics.size() - 1)]
 	var base_magnitude := random_system.random_int(
-		DEV_POSITIVE_MAGNITUDE_MIN, DEV_POSITIVE_MAGNITUDE_MAX
+		balance.proposal_positive_magnitude_min, balance.proposal_positive_magnitude_max
 	)
-	var magnitude := maxi(
-		1, roundi(base_magnitude * inflation_system.get_era_multiplier(year, balance))
+	var magnitude := roundi(
+		float(base_magnitude)
+		* inflation_system.get_proposal_magnitude_multiplier(year, balance)
 	)
 	proposal.positive_effect.set_value(metric, magnitude * Metric.favorable_sign(metric))
+	proposal.donation_offer = float(absi(magnitude)) * balance.donation_per_positive_point
+	proposal.bonus_choice_resolved = false
+	proposal.positive_trait_accepted = false
+
+
+func resolve_bonus_choice(
+	state: RunState, proposal: ProposalInstance, accept_trait: bool
+) -> bool:
+	if (
+		proposal == null
+		or proposal not in state.proposal_hand
+		or proposal.bonus_choice_resolved
+		or not proposal.has_positive_trait()
+	):
+		return false
+	proposal.bonus_choice_resolved = true
+	proposal.positive_trait_accepted = accept_trait
+	if not accept_trait:
+		proposal.positive_effect = MetricVector.new()
+		state.political_donation_pool += proposal.donation_offer
+	return true
 
 
 func add_to_hand(state: RunState, proposal: ProposalInstance) -> void:
@@ -117,33 +125,25 @@ func add_to_hand(state: RunState, proposal: ProposalInstance) -> void:
 	state.proposal_hand.append(proposal)
 
 
-func calculate_automatic_draw_weight(current_influence: float, baseline_influence: float) -> float:
-	return clampf(
-		DEV_DRAW_BASE_WEIGHT + DEV_DRAW_REVERSE_FACTOR * (baseline_influence - current_influence),
-		DEV_DRAW_MIN_WEIGHT,
-		DEV_DRAW_MAX_WEIGHT
-	)
-
-
-func calculate_visit_probability(current_influence: float, baseline_influence: float) -> float:
+func calculate_automatic_draw_weight(
+	current_influence: float,
+	baseline_influence: float,
+	balance: GameBalanceDefinition
+) -> float:
 	return clampf(
 		(
-			DEV_VISIT_BASE_PROBABILITY
-			+ DEV_VISIT_REVERSE_FACTOR * (baseline_influence - current_influence)
+			balance.proposal_draw_base_weight
+			+ balance.proposal_draw_reverse_factor * (baseline_influence - current_influence)
 		),
-		DEV_VISIT_MIN_PROBABILITY,
-		DEV_VISIT_MAX_PROBABILITY
+		balance.proposal_draw_min_weight,
+		balance.proposal_draw_max_weight
 	)
 
 
-func choose_automatic_source(
-	groups: Array[InterestGroupDefinition], context: RunContext
-) -> InterestGroupDefinition:
+func choose_automatic_source(context: RunContext) -> InterestGroupDefinition:
 	var candidates: Array[InterestGroupDefinition] = []
-	for group in groups:
-		if group == null:
-			continue
-		if group.proposal_definition == null:
+	for group in context.constitution_system.get_effective_groups(context):
+		if group == null or group.get_stance_metrics().is_empty():
 			continue
 		candidates.append(group)
 	if candidates.is_empty():
@@ -152,23 +152,23 @@ func choose_automatic_source(
 	var weights: Array[float] = []
 	for group in candidates:
 		var current_influence := context.parliament_system.get_group_influence_rate(
-			context.state, group.id
+			context.state, group
 		)
-		weights.append(calculate_automatic_draw_weight(current_influence, baseline_influence))
+		weights.append(
+			calculate_automatic_draw_weight(current_influence, baseline_influence, context.balance)
+		)
 	var selected_index := context.random_system.weighted_index(weights)
 	if selected_index < 0:
 		return null
 	return candidates[selected_index]
 
 
-func draw_automatic_proposal(
-	groups: Array[InterestGroupDefinition], context: RunContext
-) -> ProposalInstance:
-	var source := choose_automatic_source(groups, context)
+func draw_automatic_proposal(context: RunContext) -> ProposalInstance:
+	var source := choose_automatic_source(context)
 	if source == null:
 		return null
-	return generate_automatic_proposal(
-		source.proposal_definition,
+	return generate_proposal(
+		source,
 		context.state,
 		context.inflation_system,
 		context.balance,
@@ -176,34 +176,30 @@ func draw_automatic_proposal(
 	)
 
 
-func draw_automatic_proposals(
-	groups: Array[InterestGroupDefinition], count: int, context: RunContext
-) -> void:
-	for i in range(maxi(count, 0)):
-		var proposal := draw_automatic_proposal(groups, context)
+func draw_automatic_proposals(context: RunContext) -> void:
+	for index in range(context.balance.automatic_draw_count):
+		var proposal := draw_automatic_proposal(context)
 		if proposal == null:
 			continue
 		add_to_hand(context.state, proposal)
 
 
-func resolve_active_visits(
-	groups: Array[InterestGroupDefinition], context: RunContext
-) -> Array[ProposalInstance]:
+func resolve_active_visits(context: RunContext) -> Array[ProposalInstance]:
 	var result: Array[ProposalInstance] = []
-	var candidates: Array[InterestGroupDefinition] = []
-	for group in groups:
-		if group != null and group.proposal_definition != null:
-			candidates.append(group)
-	if candidates.is_empty():
-		return result
-	var baseline_influence := 1.0 / float(candidates.size())
-	for group in candidates:
-		var influence := context.parliament_system.get_group_influence_rate(context.state, group.id)
-		var probability := calculate_visit_probability(influence, baseline_influence)
-		if not context.random_system.chance(probability):
+	for race_definition in context.race_definitions:
+		var seats := context.parliament_system.get_race_seats(
+			context.state, race_definition
+		)
+		if seats.is_empty():
 			continue
-		var proposal := generate_automatic_proposal(
-			group.proposal_definition,
+		var race_state := context.state.get_race(race_definition)
+		if race_state == null or not context.random_system.chance(race_state.visit_probability):
+			continue
+		var source := _choose_visit_source(seats, context.random_system)
+		if source == null:
+			continue
+		var proposal := generate_proposal(
+			source,
 			context.state,
 			context.inflation_system,
 			context.balance,
@@ -221,16 +217,40 @@ func resolve_active_visits(
 	return result
 
 
+func _choose_visit_source(
+	seats: Array[SeatState], random_system: RandomSystem
+) -> InterestGroupDefinition:
+	var candidates: Array[InterestGroupDefinition] = []
+	var counts: Dictionary[InterestGroupDefinition, int] = {}
+	for seat in seats:
+		var group := seat.actual_group
+		if group == null or group.get_stance_metrics().is_empty():
+			continue
+		if not counts.has(group):
+			candidates.append(group)
+			counts[group] = 0
+		counts[group] += 1
+	var weights: Array[float] = []
+	for group in candidates:
+		weights.append(float(counts[group]))
+	var selected_index := random_system.weighted_index(weights)
+	return null if selected_index < 0 else candidates[selected_index]
+
+
 func merge_three(
 	state: RunState,
 	mothers: Array[ProposalInstance],
 	negative_base: ProposalInstance,
+	balance: GameBalanceDefinition,
 	selected_positive: ProposalInstance = null
 ) -> ProposalInstance:
 	if not _can_merge(state, mothers, negative_base, selected_positive):
 		return null
 	var result := negative_base.copy()
 	result.positive_effect = MetricVector.new()
+	result.donation_offer = 0.0
+	result.bonus_choice_resolved = true
+	result.positive_trait_accepted = true
 	if selected_positive != null:
 		var metric_value := selected_positive.get_positive_metric()
 		var metric := metric_value as Metric.Id
@@ -241,11 +261,14 @@ func merge_three(
 				continue
 			var discarded_metric := mother.get_positive_metric() as Metric.Id
 			discarded_magnitude += absi(mother.positive_effect.get_value(discarded_metric))
-		var converted := float(discarded_magnitude) * MERGE_CONVERSION_RATIO
-		var upgraded := maxi(
-			1, roundi(pow(float(selected_magnitude) + converted, MERGE_UPGRADE_EXPONENT))
+		var converted := float(discarded_magnitude) * balance.merge_conversion_ratio
+		var upgraded := roundi(
+			pow(float(selected_magnitude) + converted, balance.merge_upgrade_exponent)
 		)
 		result.positive_effect.set_value(metric, upgraded * Metric.favorable_sign(metric))
+		result.donation_offer = float(upgraded) * balance.donation_per_positive_point
+		result.bonus_choice_resolved = selected_positive.bonus_choice_resolved
+		result.positive_trait_accepted = selected_positive.positive_trait_accepted
 	for mother in mothers:
 		state.proposal_hand.erase(mother)
 	state.proposal_hand.append(result)
@@ -263,11 +286,15 @@ func _can_merge(
 	if mothers[0] == null:
 		return false
 	var seen: Dictionary[int, bool] = {}
-	var group_id: StringName = mothers[0].source_group_id
+	var source_group := mothers[0].source_group
+	if source_group == null:
+		return false
 	for mother in mothers:
 		if mother == null or mother not in state.proposal_hand:
 			return false
-		if mother.source_group_id != group_id or seen.has(mother.get_instance_id()):
+		if mother.is_bonus_choice_pending():
+			return false
+		if mother.source_group != source_group or seen.has(mother.get_instance_id()):
 			return false
 		seen[mother.get_instance_id()] = true
 	if selected_positive == null:

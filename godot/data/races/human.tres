@@ -4,9 +4,7 @@
 
 [resource]
 script = ExtResource("2_uck63")
-id = &"human"
 display_name = "人类"
 increase_trade = true
 decrease_tax = true
 decrease_wage = true
-metadata/_custom_type_script = "uid://britky0yedt0q"

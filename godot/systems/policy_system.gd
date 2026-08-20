@@ -42,7 +42,7 @@ func _find_triggered_batch(bill: ActiveBillState, values: MetricValues) -> Array
 			push_error("PolicyState has no PolicyDefinition.")
 			continue
 		if definition.condition == null:
-			push_error("Policy has no condition: %s" % definition.id)
+			push_error("Policy has no condition: %s" % definition.display_name)
 			continue
 		if definition.condition.is_met(values):
 			result.append(policy_state)

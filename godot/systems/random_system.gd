@@ -6,6 +6,7 @@ var rng: RandomNumberGenerator
 
 func _init() -> void:
 	rng = RandomNumberGenerator.new()
+	rng.randomize()
 
 
 func set_seed(seed_value: int) -> void:

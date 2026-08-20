@@ -1,21 +1,56 @@
 extends RefCounted
 class_name VoteSystem
 
-const RACE_EXPECTATION_SCORE: float = 6.0
-const GROUP_STANCE_SCORE: float = 4.0
-const SUPPORT_THRESHOLD: float = 1.0
-
 
 func preview_vote(draft: DraftBillState, context: RunContext) -> VoteResultState:
 	return calculate_vote(draft, context, false)
 
 
 func calculate_vote(
-	draft: DraftBillState, context: RunContext, resolve_absence: bool = true
+	draft: DraftBillState, context: RunContext, resolve_randomness: bool = true
 ) -> VoteResultState:
 	var result := VoteResultState.new()
 	if draft == null:
 		return result
+	var projected := _calculate_projected_metrics(draft, context)
+	for seat in context.state.seats:
+		var vote := _calculate_seat_vote(
+			seat, draft, projected, context, resolve_randomness
+		)
+		result.seat_votes.append(vote)
+		_count_position(result, vote.position)
+	result.passed = result.present_count() > 0 and result.support_count * 2 > result.present_count()
+	return result
+
+
+func set_donation(context: RunContext, seat: SeatState, support_amount: float) -> bool:
+	if (
+		seat == null
+		or seat.definition == null
+		or seat not in context.state.seats
+		or support_amount <= 0.0
+	):
+		return false
+	var previous: float = context.state.vote_donations.get(seat.definition, 0.0)
+	var additional := support_amount - previous
+	if additional > context.state.political_donation_pool:
+		return false
+	context.state.political_donation_pool -= additional
+	context.state.vote_donations[seat.definition] = support_amount
+	if additional > 0.0 and context.random_system.chance(
+		context.state.donation_detection_probability
+	):
+		context.state.pending_collapse_delta += context.balance.donation_detection_collapse
+	return true
+
+
+func clear_donations(state: RunState) -> void:
+	state.vote_donations.clear()
+
+
+func _calculate_projected_metrics(
+	draft: DraftBillState, context: RunContext
+) -> MetricValues:
 	var projected := context.proposal_system.calculate_pure_target(
 		context.state.metrics, draft.proposals
 	)
@@ -25,64 +60,11 @@ func calculate_vote(
 	for metric in Metric.all_ids():
 		projected.set_value(
 			metric,
-			(
-				projected.get_value(metric)
-				+ immediate.get_value(metric)
-				- context.state.metrics.get_value(metric)
-			)
+			projected.get_value(metric)
+			+ immediate.get_value(metric)
+			- context.state.metrics.get_value(metric)
 		)
-	for seat in context.state.seats:
-		var vote := _calculate_seat_vote(seat, draft, projected, context, resolve_absence)
-		result.seat_votes.append(vote)
-		_count_position(result, vote.position)
-	result.passed = result.present_count() > 0 and result.support_count * 2 > result.present_count()
-	return result
-
-
-func set_donation(context: RunContext, seat_id: int, support_amount: float) -> bool:
-	if support_amount <= 0.0:
-		return false
-	for seat in context.state.seats:
-		if seat.seat_id == seat_id:
-			context.state.vote_donations[seat_id] = support_amount
-			var detection_probability := 0.25
-			if context.state.constitution.has_flag(&"transparent_government"):
-				detection_probability = 0.65
-			elif context.state.constitution.has_flag(&"unregulated_donations"):
-				detection_probability = 0.0
-			if context.random_system.chance(detection_probability):
-				context.state.pending_collapse_delta += 5.0
-			return true
-	return false
-
-
-func clear_donations(state: RunState) -> void:
-	state.vote_donations.clear()
-
-
-func _is_striking(
-	seat: SeatState, race: RaceState, draft: DraftBillState, context: RunContext
-) -> bool:
-	var nanke := context.state.get_race(Race.NANKE)
-	if nanke == null:
-		return false
-	if context.state.constitution.has_flag(&"nanke_mutual_aid"):
-		return false
-	var cooperative := context.state.constitution.has_flag(&"nanke_cooperative")
-	var labor_group_id := context.constitution_system.get_minimum_group_for_race(
-		context.state, Race.NANKE
-	)
-	if labor_group_id == &"":
-		return false
-	var affected_by_labor_group := seat.actual_group_id == labor_group_id
-	if not affected_by_labor_group:
-		return false
-	if not cooperative and race.get_id() != Race.NANKE:
-		return false
-	var pure_target := context.proposal_system.calculate_pure_target(
-		context.state.metrics, draft.proposals
-	)
-	return pure_target.wage < context.state.year_start_metrics.wage
+	return projected
 
 
 func _calculate_seat_vote(
@@ -90,57 +72,38 @@ func _calculate_seat_vote(
 	draft: DraftBillState,
 	projected: MetricValues,
 	context: RunContext,
-	resolve_absence: bool
+	resolve_randomness: bool
 ) -> SeatVoteState:
 	var vote := SeatVoteState.new()
-	vote.seat_id = seat.seat_id
-	var race := context.state.get_race(seat.race_id)
+	vote.seat = seat
+	var race := context.state.get_race(seat.race)
 	if race == null or race.definition == null:
 		vote.position = SeatVoteState.Position.ABSTAIN
 		return vote
-	if race.definition.id == Race.ZHUSHUI:
-		vote.add_reason(&"zhushui_governing_seat", 1000.0)
-		vote.position = SeatVoteState.Position.SUPPORT
-		return vote
-	if _is_striking(seat, race, draft, context):
-		vote.position = SeatVoteState.Position.OPPOSE
-		vote.breakdown[&"nanke_strike"] = 1.0
-		return vote
-	if resolve_absence and _is_absent(seat, race, context):
-		vote.position = SeatVoteState.Position.ABSENT
-		vote.breakdown[&"special_absence"] = 1.0
-		return vote
-	var attitude_race := race
-	if context.state.constitution.has_flag(&"trust_established"):
-		var shared_human := context.state.get_race(Race.HUMAN)
-		if shared_human != null:
-			attitude_race = shared_human
-	vote.add_reason(&"race_expectation", _race_expectation_score(attitude_race, projected, context))
-	var use_human_attitude := (
-		context.state.constitution.has_flag(&"free_trade")
-		and _is_transport_group(seat.actual_group_id, context)
-	)
-	if use_human_attitude:
-		var human_race := context.state.get_race(Race.HUMAN)
-		if human_race != null:
-			vote.add_reason(
-				&"transport_human_attitude", _race_expectation_score(human_race, projected, context)
-			)
-	else:
-		vote.add_reason(&"group_stance", _group_stance_score(seat.actual_group_id, draft, context))
-		vote.add_reason(&"proposal_source", _proposal_source_score(seat.actual_group_id, draft))
 	vote.add_reason(
-		&"constitution",
-		context.constitution_system.get_race_support_modifier(context.state, seat.race_id)
+		&"race_expectation", _race_expectation_score(race, projected, context)
 	)
-	var relation := seat.personal_relation
-	if race.definition.id == Race.BIYI:
-		relation += (
-			seat.odd_month_relation if context.state.month % 2 == 1 else seat.even_month_relation
-		)
-	vote.add_reason(&"personal_relation", relation)
-	vote.add_reason(&"political_donation", context.state.vote_donations.get(seat.seat_id, 0.0))
-	vote.position = _position_from_score(vote.score)
+	vote.add_reason(
+		&"group_stance", _group_stance_score(seat.actual_group, draft, context)
+	)
+	vote.add_reason(
+		&"proposal_source", _proposal_source_score(seat.actual_group, draft, context.balance)
+	)
+	vote.add_reason(&"personal_relation", seat.personal_relation)
+	vote.add_reason(
+		&"political_donation", context.state.vote_donations.get(seat.definition, 0.0)
+	)
+	var vote_context := VoteContext.new(
+		context, seat, race, draft, projected, vote, resolve_randomness
+	)
+	race.definition.modify_vote(vote_context)
+	context.constitution_system.modify_vote(vote_context)
+	if vote_context.locked_position >= 0:
+		vote.position = vote_context.locked_position as SeatVoteState.Position
+	elif vote_context.position_override >= 0:
+		vote.position = vote_context.position_override as SeatVoteState.Position
+	else:
+		vote.position = _position_from_score(vote.score, context.balance.support_threshold)
 	return vote
 
 
@@ -149,92 +112,55 @@ func _race_expectation_score(
 ) -> float:
 	var score := 0.0
 	for metric in race.definition.get_stance_metrics():
-		if (
-			race.get_id() == Race.BIYI
-			and not context.balance.is_biyi_vote_metric_active(metric, context.state.month)
-		):
+		if not race.definition.is_vote_metric_active(metric, context):
 			continue
 		var target := context.race_system.get_effective_expectation(race, metric, context)
 		var before_distance := absf(float(context.state.metrics.get_value(metric) - target))
 		var after_distance := absf(float(projected.get_value(metric) - target))
 		if after_distance < before_distance:
-			score += RACE_EXPECTATION_SCORE
+			score += context.balance.race_expectation_score
 		elif after_distance > before_distance:
-			score -= RACE_EXPECTATION_SCORE
+			score -= context.balance.race_expectation_score
 	return score
 
 
-func _group_stance_score(group_id: StringName, draft: DraftBillState, context: RunContext) -> float:
-	var group := _find_group(group_id, context.interest_groups)
+func _group_stance_score(
+	group: InterestGroupDefinition, draft: DraftBillState, context: RunContext
+) -> float:
 	if group == null:
 		return 0.0
 	var effect := context.proposal_system.calculate_total_effect(draft.proposals)
-	var score := group.base_support_modifier
+	var score := 0.0
 	for metric in effect.non_zero_metrics():
 		var stance := group.get_stance(metric)
-		if stance == MetricStanceDefinition.Direction.NONE:
+		if stance == Metric.Direction.NONE:
 			continue
 		score += (
-			GROUP_STANCE_SCORE if effect.get_value(metric) * stance > 0 else -GROUP_STANCE_SCORE
+			context.balance.group_stance_score
+			if effect.get_value(metric) * int(stance) > 0
+			else -context.balance.group_stance_score
 		)
 	return score
 
 
-func _proposal_source_score(group_id: StringName, draft: DraftBillState) -> float:
+func _proposal_source_score(
+	group: InterestGroupDefinition,
+	draft: DraftBillState,
+	balance: GameBalanceDefinition
+) -> float:
+	if group == null:
+		return 0.0
 	var score := 0.0
 	for proposal in draft.proposals:
-		if proposal.source_group_id == group_id:
-			score += proposal.political_support
+		if proposal.source_group == group:
+			score += balance.proposal_support
 	return score
 
 
-func _is_absent(seat: SeatState, race: RaceState, context: RunContext) -> bool:
-	var nanke := context.state.get_race(Race.NANKE)
-	if nanke == null:
-		return false
-	var is_nanke := race.definition.id == Race.NANKE
-	var cooperative := context.state.constitution.has_flag(&"nanke_cooperative")
-	var labor_group_id := context.constitution_system.get_minimum_group_for_race(
-		context.state, Race.NANKE
-	)
-	var protected := (
-		labor_group_id != &""
-		and seat.actual_group_id == labor_group_id
-		and (
-			(is_nanke and not context.state.constitution.has_flag(&"nanke_mutual_aid"))
-			or cooperative
-		)
-	)
-	var probability := (
-		context.balance.nanke_protected_absence_probability
-		if protected
-		else context.balance.nanke_normal_absence_probability
-	)
-	if not is_nanke and not protected:
-		return false
-	return context.random_system.chance(probability)
-
-
-func _is_transport_group(group_id: StringName, context: RunContext) -> bool:
-	var transport_group_id := context.constitution_system.get_fixed_group_for_race(
-		context.state, Race.HUMAN
-	)
-	return transport_group_id != &"" and transport_group_id == group_id
-
-
-func _find_group(
-	group_id: StringName, groups: Array[InterestGroupDefinition]
-) -> InterestGroupDefinition:
-	for group in groups:
-		if group != null and group.id == group_id:
-			return group
-	return null
-
-
-func _position_from_score(score: float) -> SeatVoteState.Position:
-	if score >= SUPPORT_THRESHOLD:
+func _position_from_score(score: float, threshold: float) -> SeatVoteState.Position:
+	if score >= threshold:
 		return SeatVoteState.Position.SUPPORT
-	if score <= -SUPPORT_THRESHOLD:
+	if score <= -threshold:
 		return SeatVoteState.Position.OPPOSE
 	return SeatVoteState.Position.ABSTAIN
 

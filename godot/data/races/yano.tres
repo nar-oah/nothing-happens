@@ -4,9 +4,7 @@
 
 [resource]
 script = ExtResource("2_qanow")
-id = &"yano"
 display_name = "偃偶"
 increase_trade = true
 decrease_price = true
 decrease_employment = true
-metadata/_custom_type_script = "uid://britky0yedt0q"

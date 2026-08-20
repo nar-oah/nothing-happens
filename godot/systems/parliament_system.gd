@@ -1,240 +1,347 @@
 extends RefCounted
 class_name ParliamentSystem
 
-const ANNUAL_COLORING_RATE: float = 0.65
+
+func initialize_seats(
+	state: RunState,
+	definitions: Array[SeatDefinition],
+	races: Array[RaceDefinition]
+) -> bool:
+	state.seats.clear()
+	var seen: Dictionary[SeatDefinition, bool] = {}
+	var anchor_races: Dictionary[RaceDefinition, bool] = {}
+	for definition in definitions:
+		if definition == null or seen.has(definition):
+			push_error("Seat definitions must be unique non-null Resources.")
+			return false
+		seen[definition] = true
+		if definition.anchor_race == null:
+			continue
+		if definition.anchor_race not in races or anchor_races.has(definition.anchor_race):
+			push_error("Each content race can own at most one anchor seat.")
+			return false
+		anchor_races[definition.anchor_race] = true
+	for definition in definitions:
+		state.seats.append(SeatState.new(definition))
+	return true
 
 
-func get_group_influence_count(state: RunState, group_id: StringName) -> int:
+func get_race_seat_count(state: RunState, race: RaceDefinition) -> int:
 	var count := 0
 	for seat in state.seats:
-		if seat.actual_group_id == group_id:
+		if seat.race == race:
 			count += 1
 	return count
 
 
-func get_group_influence_rate(state: RunState, group_id: StringName) -> float:
-	var assigned_seat_count := 0
+func get_race_seats(state: RunState, race: RaceDefinition) -> Array[SeatState]:
+	var result: Array[SeatState] = []
 	for seat in state.seats:
-		if seat.actual_group_id != &"":
-			assigned_seat_count += 1
-	if assigned_seat_count == 0:
+		if seat.race == race:
+			result.append(seat)
+	return result
+
+
+func get_race_seat_rate(state: RunState, race: RaceDefinition) -> float:
+	if state.seats.is_empty():
 		return 0.0
-	var influence_count := get_group_influence_count(state, group_id)
-	return float(influence_count) / float(assigned_seat_count)
+	return float(get_race_seat_count(state, race)) / float(state.seats.size())
 
 
-func get_race_seat_rate(state: RunState, race_id: StringName) -> float:
-	var variable_count := 0
-	var race_count := 0
+func get_influenceable_seats(
+	state: RunState, race: RaceDefinition = null
+) -> Array[SeatState]:
+	var result: Array[SeatState] = []
 	for seat in state.seats:
-		if seat.race_id == Race.ZHUSHUI:
+		if seat.base_group == null and seat.actual_group == null:
 			continue
-		variable_count += 1
-		if seat.race_id == race_id:
-			race_count += 1
-	if variable_count == 0:
+		if race == null or seat.race == race:
+			result.append(seat)
+	return result
+
+
+func get_group_influence_count(
+	state: RunState, group: InterestGroupDefinition, race: RaceDefinition = null
+) -> int:
+	var count := 0
+	for seat in get_influenceable_seats(state, race):
+		if seat.actual_group == group:
+			count += 1
+	return count
+
+
+func get_group_influence_rate(
+	state: RunState, group: InterestGroupDefinition, race: RaceDefinition = null
+) -> float:
+	var seats := get_influenceable_seats(state, race)
+	if seats.is_empty():
 		return 0.0
-	return float(race_count) / float(variable_count)
-
-
-func _validate_base_groups(groups: Array[InterestGroupDefinition]) -> bool:
-	var ids: Dictionary[StringName, bool] = {}
-	var sort_orders: Dictionary[int, bool] = {}
-	for group in groups:
-		if group == null:
-			push_error("Base group list contains null.")
-			return false
-		if group.id == &"":
-			push_error("Interest group has an empty id.")
-			return false
-		if group.base_column_weight <= 0:
-			push_error("Interest group %s must have a positive base column weight." % group.id)
-			return false
-		if ids.has(group.id):
-			push_error("Duplicate interest group id: %s" % group.id)
-			return false
-		if sort_orders.has(group.fixed_sort_order):
-			push_error("Duplicate interest group fixed_sort_order: %s" % group.fixed_sort_order)
-			return false
-		ids[group.id] = true
-		sort_orders[group.fixed_sort_order] = true
-	return true
+	return float(get_group_influence_count(state, group, race)) / float(seats.size())
 
 
 func allocate_base_columns(
 	seat_count: int, groups: Array[InterestGroupDefinition]
-) -> Dictionary[StringName, int]:
-	var allocation: Dictionary[StringName, int] = {}
-	if seat_count < 0:
-		push_error("Seat count cannot be negative.")
-		return allocation
-	if groups.is_empty():
-		if seat_count > 0:
-			push_error("Cannot allocate seats without interest groups.")
-		return allocation
-	if not _validate_base_groups(groups):
+) -> Dictionary[InterestGroupDefinition, int]:
+	var allocation: Dictionary[InterestGroupDefinition, int] = {}
+	if seat_count < 0 or (seat_count > 0 and groups.is_empty()):
+		push_error("Cannot allocate base columns for the supplied content.")
 		return allocation
 	var total_weight := 0
 	for group in groups:
+		if group == null or allocation.has(group) or group.base_column_weight <= 0:
+			push_error("Interest groups must be unique and have positive column weight.")
+			allocation.clear()
+			return allocation
+		allocation[group] = 0
 		total_weight += group.base_column_weight
-		allocation[group.id] = 0
-	var remainders: Dictionary[StringName, float] = {}
-	var assigned_seats := 0
+	var remainders: Dictionary[InterestGroupDefinition, float] = {}
+	var assigned := 0
 	for group in groups:
-		var exact_quota := float(seat_count) * float(group.base_column_weight) / float(total_weight)
-		var integer_part := floori(exact_quota)
-		allocation[group.id] = integer_part
-		remainders[group.id] = (exact_quota - float(integer_part))
-		assigned_seats += integer_part
-	var remaining_seats := seat_count - assigned_seats
-	while remaining_seats > 0:
-		var best_group: InterestGroupDefinition = null
+		var exact := float(seat_count) * float(group.base_column_weight) / float(total_weight)
+		var whole := floori(exact)
+		allocation[group] = whole
+		remainders[group] = exact - float(whole)
+		assigned += whole
+	while assigned < seat_count:
+		var best: InterestGroupDefinition
 		var best_remainder := -1.0
 		for group in groups:
-			var remainder := remainders[group.id]
-			if remainder < 0.0:
-				continue
-			if best_group == null:
-				best_group = group
+			var remainder: float = remainders[group]
+			if remainder > best_remainder:
+				best = group
 				best_remainder = remainder
-				continue
-			if remainder > best_remainder + 0.000001:
-				best_group = group
-				best_remainder = remainder
-				continue
-			if (
-				absf(remainder - best_remainder) <= 0.000001
-				and group.fixed_sort_order < best_group.fixed_sort_order
-			):
-				best_group = group
-				best_remainder = remainder
-		if best_group == null:
-			push_error("Failed to allocate remaining base seats.")
+		if best == null:
 			break
-		allocation[best_group.id] += 1
-		remainders[best_group.id] = -1.0
-		remaining_seats -= 1
+		allocation[best] += 1
+		remainders[best] = -1.0
+		assigned += 1
 	return allocation
 
 
-func _sort_group_by_fixed_order(a: InterestGroupDefinition, b: InterestGroupDefinition) -> bool:
-	return a.fixed_sort_order < b.fixed_sort_order
+func initialize_base_groups(
+	state: RunState, groups: Array[InterestGroupDefinition]
+) -> bool:
+	var allocation := allocate_base_columns(state.seats.size(), groups)
+	var allocated_count := 0
+	for count in allocation.values():
+		allocated_count += int(count)
+	if allocated_count != state.seats.size():
+		push_error("Interest-group columns did not fill the permanent seat pool.")
+		return false
+	var seat_index := 0
+	for group in groups:
+		var count: int = allocation.get(group, 0)
+		for index in range(count):
+			if seat_index >= state.seats.size():
+				return false
+			state.seats[seat_index].base_group = group
+			state.seats[seat_index].annual_group = group
+			state.seats[seat_index].actual_group = group
+			seat_index += 1
+	return seat_index == state.seats.size()
 
 
-func create_base_row(
-	race_id: StringName,
-	seat_count: int,
-	groups: Array[InterestGroupDefinition],
-	first_seat_id: int = 0
-) -> Array[SeatState]:
-	var result: Array[SeatState] = []
-	var allocation := allocate_base_columns(seat_count, groups)
-	if seat_count > 0 and allocation.is_empty():
-		return result
-	var ordered_groups := groups.duplicate()
-	ordered_groups.sort_custom(_sort_group_by_fixed_order)
-	var next_seat_id := first_seat_id
-	for group in ordered_groups:
-		var group_seat_count: int = allocation.get(group.id, 0)
-		for i in range(group_seat_count):
-			var seat := SeatState.new(next_seat_id, race_id, group.id, group.id)
-			result.append(seat)
-			next_seat_id += 1
-	return result
-
-
-func create_full_parliament(
-	races: Array[RaceState], groups: Array[InterestGroupDefinition]
-) -> Array[SeatState]:
-	var result: Array[SeatState] = []
-	var next_seat_id := 0
-	for race in races:
-		if race == null or race.definition == null:
-			continue
-		if race.get_id() == Race.ZHUSHUI:
-			for i in range(race.seat_count):
-				var seat := SeatState.new(next_seat_id, Race.ZHUSHUI, &"", &"")
-				result.append(seat)
-				next_seat_id += 1
-			continue
-		var row := create_base_row(race.get_id(), race.seat_count, groups, next_seat_id)
-		result.append_array(row)
-		next_seat_id += row.size()
-	return result
-
-
-func rebuild_all_rows(state: RunState, groups: Array[InterestGroupDefinition]) -> void:
-	state.seats = create_full_parliament(state.races, groups)
-
-
-func replace_race_row(
-	state: RunState, race: RaceState, groups: Array[InterestGroupDefinition]
-) -> void:
-	var existing_by_race: Dictionary[StringName, Array] = {}
+func assign_race_distribution(
+	state: RunState,
+	races: Array[RaceDefinition],
+	target_counts: Dictionary[RaceDefinition, int]
+) -> bool:
+	var remaining := target_counts.duplicate()
+	var reserved: Dictionary[SeatState, bool] = {}
 	for seat in state.seats:
-		if not existing_by_race.has(seat.race_id):
-			existing_by_race[seat.race_id] = []
-		existing_by_race[seat.race_id].append(seat)
-	var result: Array[SeatState] = []
-	for row_race in state.races:
-		if row_race.get_id() == race.get_id():
-			result.append_array(create_base_row(race.get_id(), race.seat_count, groups))
-		else:
-			for seat in existing_by_race.get(row_race.get_id(), []):
-				result.append(seat)
-	for i in range(result.size()):
-		result[i].seat_id = i
-	state.seats = result
-
-
-func record_authorized_proposal_slots(state: RunState, proposals: Array[ProposalInstance]) -> void:
-	for proposal in proposals:
-		if proposal == null or proposal.source_group_id == &"":
+		var anchor := seat.definition.anchor_race
+		if anchor != null and int(remaining.get(anchor, 0)) > 0:
+			seat.race = anchor
+			remaining[anchor] = int(remaining[anchor]) - 1
+			reserved[seat] = true
+	for seat in state.seats:
+		if reserved.has(seat):
 			continue
-		state.annual_proposal_slot_counts[proposal.source_group_id] = (
-			state.annual_proposal_slot_counts.get(proposal.source_group_id, 0) + 1
+		if seat.race != null and int(remaining.get(seat.race, 0)) > 0:
+			remaining[seat.race] = int(remaining[seat.race]) - 1
+			reserved[seat] = true
+	for seat in state.seats:
+		if reserved.has(seat):
+			continue
+		seat.race = null
+		for race in races:
+			if int(remaining.get(race, 0)) <= 0:
+				continue
+			seat.race = race
+			remaining[race] = int(remaining[race]) - 1
+			break
+		if seat.race == null:
+			push_error("Race distribution did not fill every permanent seat.")
+			return false
+	for race in races:
+		if int(remaining.get(race, 0)) != 0:
+			push_error("Race distribution has an unassigned quota.")
+			return false
+	return validate_anchor_invariants(state, races)
+
+
+func validate_anchor_invariants(
+	state: RunState, races: Array[RaceDefinition]
+) -> bool:
+	for race in races:
+		var count := get_race_seat_count(state, race)
+		if count != 1:
+			continue
+		var anchor := _get_anchor_seat(state, race)
+		if anchor != null and anchor.race != race:
+			push_error("A race's final seat must occupy its anchor.")
+			return false
+	return true
+
+
+func record_authorized_proposal_slots(
+	state: RunState, proposals: Array[ProposalInstance]
+) -> void:
+	for proposal in proposals:
+		if proposal == null or proposal.source_group == null:
+			continue
+		state.annual_proposal_slot_counts[proposal.source_group] = (
+			int(state.annual_proposal_slot_counts.get(proposal.source_group, 0)) + 1
 		)
 
 
-func get_annual_source_shares(state: RunState) -> Dictionary[StringName, float]:
-	var result: Dictionary[StringName, float] = {}
+func get_annual_source_shares(
+	state: RunState
+) -> Dictionary[InterestGroupDefinition, float]:
+	var result: Dictionary[InterestGroupDefinition, float] = {}
 	var total := 0
 	for count in state.annual_proposal_slot_counts.values():
 		total += maxi(int(count), 0)
 	if total <= 0:
 		return result
-	for group_id in state.annual_proposal_slot_counts:
-		var count: int = state.annual_proposal_slot_counts[group_id]
+	for group in state.annual_proposal_slot_counts:
+		var count: int = state.annual_proposal_slot_counts[group]
 		if count > 0:
-			result[group_id] = float(count) / float(total)
+			result[group] = float(count) / float(total)
 	return result
 
 
-func apply_annual_coloring(
-	state: RunState,
-	groups: Array[InterestGroupDefinition],
-	random_system: RandomSystem,
-	coloring_rate: float = ANNUAL_COLORING_RATE
-) -> void:
-	for seat in state.seats:
-		seat.actual_group_id = seat.base_group_id
-		seat.influence_priority = 5
-	var shares := get_annual_source_shares(state)
+func apply_annual_coloring(context: RunContext) -> void:
+	for seat in context.state.seats:
+		seat.annual_group = seat.base_group
+		seat.actual_group = _resolve_group(context.state, seat.annual_group)
+	var shares := get_annual_source_shares(context.state)
 	if shares.is_empty():
 		return
-	var source_ids: Array[StringName] = []
+	var groups := _get_stable_groups(context)
+	var sources: Array[InterestGroupDefinition] = []
 	var weights: Array[float] = []
 	for group in groups:
-		if group != null and shares.has(group.id):
-			source_ids.append(group.id)
-			weights.append(shares[group.id])
-	if source_ids.is_empty():
-		return
-	for seat in state.seats:
-		if seat.race_id == Race.ZHUSHUI:
+		if shares.has(group):
+			sources.append(group)
+			weights.append(shares[group])
+	for seat in get_influenceable_seats(context.state):
+		if sources.is_empty() or not context.random_system.chance(
+			context.balance.annual_group_coloring_rate
+		):
 			continue
-		if not random_system.chance(coloring_rate):
-			continue
-		var index := random_system.weighted_index(weights)
+		var index := context.random_system.weighted_index(weights)
 		if index >= 0:
-			seat.actual_group_id = source_ids[index]
+			seat.annual_group = sources[index]
+			seat.actual_group = _resolve_group(context.state, seat.annual_group)
+
+
+func can_reassign_seat(
+	context: RunContext, seat: SeatState, target: RaceDefinition
+) -> bool:
+	if (
+		seat == null
+		or target == null
+		or target not in context.race_definitions
+		or seat not in context.state.seats
+		or seat.race == target
+	):
+		return false
+	var target_constraint := context.constitution_system.get_race_seat_constraint(
+		context, target
+	)
+	var target_count := get_race_seat_count(context.state, target)
+	if target_constraint.maximum_count >= 0 and target_count >= target_constraint.maximum_count:
+		return false
+	var target_anchor := _get_anchor_seat(context.state, target)
+	if target_count == 0 and target_anchor != null and seat != target_anchor:
+		return false
+	var donor := seat.race
+	if donor == null:
+		return true
+	var donor_constraint := context.constitution_system.get_race_seat_constraint(context, donor)
+	var donor_count := get_race_seat_count(context.state, donor)
+	if donor_count - 1 < donor_constraint.minimum_count:
+		return false
+	if donor_count - 1 == 1:
+		var anchor := _get_anchor_seat(context.state, donor)
+		if anchor != null and (anchor == seat or anchor.race != donor):
+			return false
+	return true
+
+
+func reassign_seat(
+	context: RunContext, seat: SeatState, target: RaceDefinition
+) -> bool:
+	if not can_reassign_seat(context, seat, target):
+		return false
+	var previous := seat.race
+	seat.race = target
+	if validate_anchor_invariants(context.state, context.race_definitions):
+		return true
+	seat.race = previous
+	return false
+
+
+func use_petition(context: RunContext) -> bool:
+	var state := context.state
+	if state.petition_race == null or state.petition_used_this_year >= state.petition_limit:
+		return false
+	var candidates: Array[SeatState] = []
+	for seat in state.seats:
+		if can_reassign_seat(context, seat, state.petition_race):
+			candidates.append(seat)
+	if candidates.is_empty():
+		return false
+	var selected := candidates[context.random_system.random_int(0, candidates.size() - 1)]
+	if not reassign_seat(context, selected, state.petition_race):
+		return false
+	state.petition_used_this_year += 1
+	context.collapse_system.record_intervention(
+		context, &"imperial_petition", context.balance.petition_intervention_pressure
+	)
+	return true
+
+
+func _get_anchor_seat(state: RunState, race: RaceDefinition) -> SeatState:
+	for seat in state.seats:
+		if seat.definition.anchor_race == race:
+			return seat
+	return null
+
+
+func _resolve_group(
+	state: RunState, group: InterestGroupDefinition
+) -> InterestGroupDefinition:
+	var current := group
+	var visited: Dictionary[InterestGroupDefinition, bool] = {}
+	while current != null and state.constitution.group_mergers.has(current):
+		if visited.has(current):
+			break
+		visited[current] = true
+		current = state.constitution.group_mergers[current]
+	return current
+
+
+func _get_stable_groups(context: RunContext) -> Array[InterestGroupDefinition]:
+	var result: Array[InterestGroupDefinition] = []
+	for group in context.interest_groups:
+		if group != null and group not in result:
+			result.append(group)
+	for seat in context.state.seats:
+		var local: InterestGroupDefinition = context.state.constitution.local_interest_groups.get(
+			seat.definition
+		)
+		if local != null and local not in result:
+			result.append(local)
+	return result

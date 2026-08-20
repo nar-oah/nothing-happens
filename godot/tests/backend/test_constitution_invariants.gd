@@ -1,118 +1,140 @@
 extends RefCounted
 
-
-func run(t) -> void:
-	_test_group_threshold_excludes_zhushui(t)
-	_test_pending_group_target_capacity_excludes_zhushui(t)
-	_test_province_does_not_rebuild_race_rows(t)
+const BackendTestContext = preload("res://tests/backend/backend_test_context.gd")
 
 
-func _test_group_threshold_excludes_zhushui(t) -> void:
-	var zhushui := t.make_race(Race.ZHUSHUI)
-	var human := t.make_race(Race.HUMAN)
+func run(t: BackendTestContext) -> void:
+	_test_permanent_seats_survive_annual_allocation(t)
+	_test_anchor_and_zero_max_constraints(t)
+	_test_resolved_events_are_the_only_dynamic_race_weight(t)
+	_test_annual_group_coloring_and_archives(t)
 
-	var initial := ConstitutionArticleDefinition.new()
-	initial.id = &"center"
-	initial.axis_id = &"group_axis"
-	initial.is_initial = true
 
-	var next := ConstitutionArticleDefinition.new()
-	next.id = &"group_threshold"
-	next.axis_id = &"group_axis"
-	next.level = 1
-	next.prerequisite_id = &"center"
-	next.threshold_kind = ConstitutionArticleDefinition.ThresholdKind.GROUP_INFLUENCE_RATE
-	next.threshold_target_id = &"target"
-	next.threshold_rate = 1.0
+func _test_permanent_seats_survive_annual_allocation(t: BackendTestContext) -> void:
+	var race_a := t.make_race("annual a")
+	var race_b := t.make_race("annual b")
+	var definitions := t.make_seats(10, "permanent")
+	definitions[0].anchor_race = race_a
+	definitions[1].anchor_race = race_b
+	var session := t.make_session(
+		[race_a, race_b], [t.make_group("group")], definitions
+	)
+	var before: Array[SeatState] = session.state.seats.duplicate()
+	for index in range(before.size()):
+		before[index].personal_relation = float(index + 1)
+	session.state.get_race(race_a).resolved_events_this_year = 4
+	session.annual_settlement_system.settle_year(session.context)
 
-	var races: Array[RaceDefinition] = [zhushui, human]
-	var groups: Array[InterestGroupDefinition] = [t.make_group(&"target", 1, 0)]
-	var articles: Array[ConstitutionArticleDefinition] = [initial, next]
-	var session := t.make_session(races, groups, articles, 4)
+	t.check_equal(session.state.seats.size(), definitions.size(), "annual settlement keeps seat count")
+	for index in range(before.size()):
+		t.check(session.state.seats[index] == before[index], "annual settlement keeps SeatState identity")
+		t.check(
+			session.state.seats[index].definition == definitions[index],
+			"annual settlement keeps SeatDefinition identity"
+		)
+		t.check_approx(
+			session.state.seats[index].personal_relation,
+			float(index + 1),
+			"annual settlement preserves seat runtime relation"
+		)
+	session.free()
 
+
+func _test_anchor_and_zero_max_constraints(t: BackendTestContext) -> void:
+	var anchored := t.make_race("anchored")
+	var removable := t.make_race("removable")
+	var filler := t.make_race("filler")
+	var anchored_article := t.make_article(anchored)
+	anchored_article.race_max_seat_rate = 0.0
+	var removable_article := t.make_article(removable)
+	removable_article.race_max_seat_rate = 0.0
+	var filler_article := t.make_article(filler)
+	var definitions := t.make_seats(5, "anchor")
+	definitions[0].anchor_race = anchored
+	var session := t.make_session(
+		[anchored, removable, filler],
+		[t.make_group("group")],
+		definitions,
+		[anchored_article, removable_article, filler_article]
+	)
+	t.check_equal(t.count_race_seats(session.state, anchored), 1, "anchor survives max rate zero")
+	t.check(session.state.seats[0].race == anchored, "last anchored seat occupies its location")
+	t.check_equal(t.count_race_seats(session.state, removable), 0, "unanchored max zero disappears")
+	t.check_equal(t.count_race_seats(session.state, filler), 4, "remaining race fills permanent pool")
 	t.check(
-		session.constitution_system.can_revise(session.state, next),
-		"group influence threshold excludes fixed Zhushui governing seat"
+		session.parliament_system.validate_anchor_invariants(session.state, [anchored, removable, filler]),
+		"allocated parliament satisfies anchor invariant"
 	)
 	session.free()
 
 
-func _test_pending_group_target_capacity_excludes_zhushui(t) -> void:
-	var zhushui := t.make_race(Race.ZHUSHUI)
-	var human := t.make_race(Race.HUMAN)
-	var races: Array[RaceDefinition] = [zhushui, human]
-	var groups: Array[InterestGroupDefinition] = [t.make_group(&"base", 1, 0)]
-	var session := t.make_session(races, groups, [], 4)
-
-	var accepted := session.constitution_system.add_next_year_group_target(
-		session.state, &"new_group", 5
+func _test_resolved_events_are_the_only_dynamic_race_weight(t: BackendTestContext) -> void:
+	var race_a := t.make_race("weighted")
+	var race_b := t.make_race("neutral")
+	var balance := GameBalanceDefinition.new()
+	balance.automatic_draw_count = 0
+	balance.event_spawn_count_min = 0
+	balance.event_spawn_count_max = 0
+	balance.race_seat_base_weight = 1.0
+	balance.race_resolved_event_weight = 1.0
+	var session := t.make_session(
+		[race_a, race_b], [t.make_group("group")], t.make_seats(10, "weights"), [], balance
 	)
-	t.check(not accepted, "pending group target capacity excludes fixed Zhushui governing seat")
+	t.check_equal(t.count_race_seats(session.state, race_a), 5, "neutral base weights split seats")
+	session.state.get_race(race_a).resolved_events_this_year = 4
+	t.check_approx(
+		session.race_system.get_annual_weight(session.state.get_race(race_a), balance),
+		5.0,
+		"resolved event count directly raises annual weight"
+	)
+	session.annual_settlement_system.settle_year(session.context)
+	t.check_equal(t.count_race_seats(session.state, race_a), 8, "resolved race gains annual seats")
+	t.check_equal(t.count_race_seats(session.state, race_b), 2, "fixed pool adjusts other race share")
+	t.check_equal(
+		session.state.get_race(race_a).last_year_resolved_events, 4,
+		"annual result is archived"
+	)
+	t.check_equal(
+		session.state.get_race(race_a).resolved_events_this_year, 0,
+		"annual dynamic counter resets"
+	)
+	session.annual_settlement_system.settle_year(session.context)
+	t.check_equal(t.count_race_seats(session.state, race_a), 5, "no persistent score survives next year")
+	t.check_equal(t.count_race_seats(session.state, race_b), 5, "neutral weights restore neutral split")
 	session.free()
 
 
-func _test_province_does_not_rebuild_race_rows(t) -> void:
-	var yano := t.make_race(Race.YANO)
-	var human := t.make_race(Race.HUMAN)
-
-	var initial := ConstitutionArticleDefinition.new()
-	initial.id = &"center"
-	initial.axis_id = &"foreign"
-	initial.is_initial = true
-
-	var province := ConstitutionArticleDefinition.new()
-	province.id = ConstitutionSystem.ARTICLE_PROVINCE
-	province.axis_id = &"foreign"
-	province.level = 1
-	province.prerequisite_id = &"center"
-
-	var races: Array[RaceDefinition] = [yano, human]
-	var groups: Array[InterestGroupDefinition] = [
-		t.make_group(&"a", 1, 0),
-		t.make_group(&"b", 1, 1),
-	]
-	var articles: Array[ConstitutionArticleDefinition] = [initial, province]
-	var session := t.make_session(races, groups, articles, 4)
-
-	var marked_seat: SeatState = null
-	for seat in session.state.seats:
-		if seat.race_id == Race.YANO:
-			marked_seat = seat
-			break
-
-	t.check(marked_seat != null, "province preservation test has a Yano seat")
-	if marked_seat == null:
-		session.free()
-		return
-
-	marked_seat.actual_group_id = &"marker"
-	marked_seat.personal_relation = 7.0
-	var yano_count_before := session.state.get_race(Race.YANO).seat_count
-	var human_count_before := session.state.get_race(Race.HUMAN).seat_count
-
-	t.check(session.revise_constitution(province), "province revision succeeds")
+func _test_annual_group_coloring_and_archives(t: BackendTestContext) -> void:
+	var race := t.make_race("coloring")
+	var first := t.make_group("first")
+	var source := t.make_group("source")
+	var balance := GameBalanceDefinition.new()
+	balance.automatic_draw_count = 0
+	balance.event_spawn_count_min = 0
+	balance.event_spawn_count_max = 0
+	balance.annual_group_coloring_rate = 1.0
+	var session := t.make_session(
+		[race], [first, source], t.make_seats(4, "coloring"), [], balance
+	)
+	var proposal := t.make_proposal(source)
+	session.parliament_system.record_authorized_proposal_slots(session.state, [proposal, proposal])
+	session.parliament_system.apply_annual_coloring(session.context)
+	t.check_equal(t.count_group_seats(session.state, source), 4, "coloring rate one uses enacted source")
+	session.state.petition_used_this_year = 2
+	session.annual_settlement_system.settle_year(session.context)
 	t.check_equal(
-		session.state.get_race(Race.YANO).seat_count,
-		yano_count_before,
-		"province preserves Yano seat count"
+		session.state.last_annual_proposal_slot_counts[source], 2,
+		"annual archive keeps group Resource key"
 	)
-	t.check_equal(
-		session.state.get_race(Race.HUMAN).seat_count,
-		human_count_before,
-		"province preserves Human seat count"
+	t.check_approx(
+		session.state.last_annual_source_shares[source], 1.0,
+		"annual archive keeps source share"
 	)
-
-	var preserved := false
-	for seat in session.state.seats:
-		if (
-			seat.race_id == Race.YANO
-			and seat.actual_group_id == &"marker"
-			and is_equal_approx(seat.personal_relation, 7.0)
-		):
-			preserved = true
-			break
-
-	t.check(
-		preserved, "province does not rebuild parliament rows when seat constraints are unchanged"
-	)
+	t.check(session.state.annual_proposal_slot_counts.is_empty(), "new annual source ledger is empty")
+	t.check_equal(session.state.petition_used_this_year, 0, "annual settlement resets petition use")
+	t.check(session.state.constitution.revision_available, "annual settlement opens revision window")
+	balance.annual_group_coloring_rate = 0.0
+	session.parliament_system.apply_annual_coloring(session.context)
+	t.check_equal(t.count_group_seats(session.state, first), 2, "zero coloring restores base groups")
+	t.check_equal(t.count_group_seats(session.state, source), 2, "base group distribution remains stable")
 	session.free()

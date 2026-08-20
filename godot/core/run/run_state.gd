@@ -12,10 +12,16 @@ var seats: Array[SeatState] = []
 var races: Array[RaceState] = []
 var events: Array[EventState] = []
 var constitution: ConstitutionState
-var annual_proposal_slot_counts: Dictionary[StringName, int] = {}
-var last_annual_proposal_slot_counts: Dictionary[StringName, int] = {}
-var last_annual_source_shares: Dictionary[StringName, float] = {}
-var vote_donations: Dictionary[int, float] = {}
+var annual_proposal_slot_counts: Dictionary[InterestGroupDefinition, int] = {}
+var last_annual_proposal_slot_counts: Dictionary[InterestGroupDefinition, int] = {}
+var last_annual_source_shares: Dictionary[InterestGroupDefinition, float] = {}
+var vote_donations: Dictionary[SeatDefinition, float] = {}
+var political_donation_pool: float = 0.0
+var petition_race: RaceDefinition
+var petition_limit: int = 0
+var petition_used_this_year: int = 0
+var donation_detection_probability: float = 0.0
+var event_early_reveal_bonus_probability: float = 0.0
 var intervention_records: Array[InterventionRecordState] = []
 var collapse_level: float = 0.0
 var regulation_pressure: float = 0.0
@@ -33,9 +39,9 @@ func _init() -> void:
 	constitution = ConstitutionState.new()
 
 
-func get_race(race_id: StringName) -> RaceState:
+func get_race(definition: RaceDefinition) -> RaceState:
 	for race in races:
-		if race.get_id() == race_id:
+		if race.definition == definition:
 			return race
 	return null
 
