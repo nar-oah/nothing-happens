@@ -12,14 +12,5 @@ func get_active_article(race: RaceDefinition) -> ConstitutionArticleDefinition:
 	return active_articles.get(race)
 
 
-func get_influence_rules() -> Array[ConstitutionInfluenceRule]:
-	var result: Array[ConstitutionInfluenceRule] = []
-	for article in active_articles.values():
-		if article == null:
-			continue
-		result.append_array(article.influence_rules)
-	return result
-
-
 func was_clicked(article: ConstitutionArticleDefinition) -> bool:
 	return article != null and clicked_articles.has(article)
