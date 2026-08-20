@@ -1,7 +1,7 @@
 extends RefCounted
 
 
-func run(t) -> void:
+func run(t: BackendTestContext) -> void:
 	_test_generation_count_and_pair_identity(t)
 	_test_zero_seat_race_is_ineligible(t)
 	_test_hidden_growth_public_window_and_resolution(t)
@@ -23,7 +23,7 @@ func _event_balance() -> GameBalanceDefinition:
 	return balance
 
 
-func _test_generation_count_and_pair_identity(t) -> void:
+func _test_generation_count_and_pair_identity(t: BackendTestContext) -> void:
 	var race := t.make_race("many concerns")
 	race.increase_tax = true
 	race.increase_price = true
@@ -64,7 +64,7 @@ func _test_generation_count_and_pair_identity(t) -> void:
 	session.free()
 
 
-func _test_zero_seat_race_is_ineligible(t) -> void:
+func _test_zero_seat_race_is_ineligible(t: BackendTestContext) -> void:
 	var seated := t.make_race("seated")
 	seated.increase_tax = true
 	var absent := t.make_race("zero seat")
@@ -95,7 +95,7 @@ func _test_zero_seat_race_is_ineligible(t) -> void:
 	session.free()
 
 
-func _test_hidden_growth_public_window_and_resolution(t) -> void:
+func _test_hidden_growth_public_window_and_resolution(t: BackendTestContext) -> void:
 	var race := t.make_race("deadline")
 	race.increase_wage = true
 	var balance := _event_balance()
@@ -129,7 +129,7 @@ func _test_hidden_growth_public_window_and_resolution(t) -> void:
 	session.free()
 
 
-func _test_pause_relief_and_early_reveal(t) -> void:
+func _test_pause_relief_and_early_reveal(t: BackendTestContext) -> void:
 	var race := t.make_race("information")
 	race.increase_trade = true
 	var balance := _event_balance()
@@ -158,7 +158,7 @@ func _test_pause_relief_and_early_reveal(t) -> void:
 	session.free()
 
 
-func _test_deadline_failure(t) -> void:
+func _test_deadline_failure(t: BackendTestContext) -> void:
 	var race := t.make_race("failure")
 	race.increase_employment = true
 	var balance := _event_balance()

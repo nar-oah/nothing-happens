@@ -1,7 +1,7 @@
 extends RefCounted
 
 
-func run(t) -> void:
+func run(t: BackendTestContext) -> void:
 	_test_three_seat_condition_scopes(t)
 	_test_direct_prerequisite_and_clicked_history(t)
 	_test_policy_union_and_resource_deduplication(t)
@@ -10,7 +10,7 @@ func run(t) -> void:
 	_test_human_petition_runtime_and_anchor_safety(t)
 
 
-func _test_three_seat_condition_scopes(t) -> void:
+func _test_three_seat_condition_scopes(t: BackendTestContext) -> void:
 	var race_a := t.make_race("race a")
 	var race_b := t.make_race("race b")
 	var group_a := t.make_group("group a")
@@ -48,7 +48,7 @@ func _test_three_seat_condition_scopes(t) -> void:
 	session.free()
 
 
-func _test_direct_prerequisite_and_clicked_history(t) -> void:
+func _test_direct_prerequisite_and_clicked_history(t: BackendTestContext) -> void:
 	var race := t.make_race("history")
 	var initial := t.make_article(race)
 	initial.display_name = "initial"
@@ -84,7 +84,7 @@ func _test_direct_prerequisite_and_clicked_history(t) -> void:
 	session.free()
 
 
-func _test_policy_union_and_resource_deduplication(t) -> void:
+func _test_policy_union_and_resource_deduplication(t: BackendTestContext) -> void:
 	var race_a := t.make_race("policy a")
 	var race_b := t.make_race("policy b")
 	var shared := PolicyDefinition.new()
@@ -123,7 +123,7 @@ func _test_policy_union_and_resource_deduplication(t) -> void:
 	session.free()
 
 
-func _test_influence_rule_modes(t) -> void:
+func _test_influence_rule_modes(t: BackendTestContext) -> void:
 	var race_a := t.make_race("influence a")
 	var race_b := t.make_race("influence b")
 	var base := t.make_group("base")
@@ -166,7 +166,7 @@ func _test_influence_rule_modes(t) -> void:
 	session.free()
 
 
-func _test_local_autonomy_runtime_resources(t) -> void:
+func _test_local_autonomy_runtime_resources(t: BackendTestContext) -> void:
 	var race := t.make_race("local race")
 	var article := LocalAutonomyConstitutionArticleDefinition.new()
 	article.display_name = "local autonomy"
@@ -202,7 +202,7 @@ func _test_local_autonomy_runtime_resources(t) -> void:
 	session.free()
 
 
-func _test_human_petition_runtime_and_anchor_safety(t) -> void:
+func _test_human_petition_runtime_and_anchor_safety(t: BackendTestContext) -> void:
 	var human := t.make_race("human")
 	var donor := t.make_race("anchored donor")
 	var filler := t.make_race("filler")

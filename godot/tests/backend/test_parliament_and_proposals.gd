@@ -1,7 +1,7 @@
 extends RefCounted
 
 
-func run(t) -> void:
+func run(t: BackendTestContext) -> void:
 	_test_resource_identity(t)
 	_test_group_stance_and_generated_proposal(t)
 	_test_positive_trait_and_donation_choice(t)
@@ -11,7 +11,7 @@ func run(t) -> void:
 	_test_visit_probability_comes_from_race_state(t)
 
 
-func _test_resource_identity(t) -> void:
+func _test_resource_identity(t: BackendTestContext) -> void:
 	var race := t.make_race("same name")
 	var other_resource := t.make_race("same name")
 	var group := t.make_group("group")
@@ -32,7 +32,7 @@ func _test_resource_identity(t) -> void:
 	session.free()
 
 
-func _test_group_stance_and_generated_proposal(t) -> void:
+func _test_group_stance_and_generated_proposal(t: BackendTestContext) -> void:
 	var group := t.make_group("guild")
 	group.decrease_tax = true
 	group.decrease_wage = true
@@ -63,7 +63,7 @@ func _test_group_stance_and_generated_proposal(t) -> void:
 	t.check_approx(proposal.digestion_speed, 0.75, "digestion range is balance-driven")
 
 
-func _test_positive_trait_and_donation_choice(t) -> void:
+func _test_positive_trait_and_donation_choice(t: BackendTestContext) -> void:
 	var system := ProposalSystem.new()
 	var inflation := InflationSystem.new()
 	var balance := GameBalanceDefinition.new()
@@ -99,7 +99,7 @@ func _test_positive_trait_and_donation_choice(t) -> void:
 	t.check_approx(converted_state.political_donation_pool, 22.0, "conversion funds the pool")
 
 
-func _test_merge_uses_group_resource_identity(t) -> void:
+func _test_merge_uses_group_resource_identity(t: BackendTestContext) -> void:
 	var group := t.make_group("guild")
 	var base := t.make_proposal(group)
 	base.base_effect.tax = 7
@@ -123,7 +123,7 @@ func _test_merge_uses_group_resource_identity(t) -> void:
 	t.check_equal(merged.positive_effect.wage, 14, "discarded trait converts by balance ratio")
 
 
-func _test_resource_keyed_annual_sources_and_stable_order(t) -> void:
+func _test_resource_keyed_annual_sources_and_stable_order(t: BackendTestContext) -> void:
 	var first := t.make_group("same", 1)
 	var second := t.make_group("same", 1)
 	var parliament := ParliamentSystem.new()
@@ -142,7 +142,7 @@ func _test_resource_keyed_annual_sources_and_stable_order(t) -> void:
 	t.check_approx(parliament.get_annual_source_shares(state)[second], 1.0, "share keeps key")
 
 
-func _test_failed_draft_does_not_record_sources(t) -> void:
+func _test_failed_draft_does_not_record_sources(t: BackendTestContext) -> void:
 	var race := t.make_race("neutral")
 	var seated := t.make_group("seated")
 	var source := t.make_group("source")
@@ -162,7 +162,7 @@ func _test_failed_draft_does_not_record_sources(t) -> void:
 	session.free()
 
 
-func _test_visit_probability_comes_from_race_state(t) -> void:
+func _test_visit_probability_comes_from_race_state(t: BackendTestContext) -> void:
 	var race := t.make_race("visitor")
 	var group := t.make_group("visiting group")
 	group.decrease_price = true
