@@ -2,6 +2,7 @@
 	import { onDestroy } from 'svelte';
 	import MemorialClosed from './MemorialClosed.svelte';
 	import MemorialFold from './MemorialFold.svelte';
+	import MemorialHorizontalContent from './MemorialHorizontalContent.svelte';
 	import { FOLD_HEIGHT, FOLD_WIDTH, type MemorialMetricData } from './memorial';
 
 	type Props = {
@@ -82,16 +83,7 @@
 >
 	{#each skews as skew, index}
 		<MemorialFold x={getFoldX(skews.slice(0, index))} {open} {index} count={skews.length} {skew}>
-			<div class="flex h-full flex-col justify-between">
-				<div>
-					<div class="typo-document-kicker opacity-70">提案／{title}</div>
-					<div class="typo-document-section-heading mt-2">扩充行身机件统采案</div>
-				</div>
-				<div class="typo-document-metadata flex items-center justify-between">
-					<span>消化／中等</span>
-					<span>{title}提供本案政治支持</span>
-				</div>
-			</div>
+			<MemorialHorizontalContent title={index === 0 ? '自由贸易' : ''} />
 		</MemorialFold>
 	{/each}
 	{#if showClosed}

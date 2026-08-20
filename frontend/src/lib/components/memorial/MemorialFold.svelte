@@ -30,9 +30,7 @@
 		style:transform={`skewX(${open ? skew : 0}deg)`}
 		style:transition-delay={`${open ? 0 : 620}ms`}
 	>
-		<div class="box-border h-full w-full px-12 py-10">
-			{@render children()}
-		</div>
+		{@render children()}
 	</div>
 </div>
 
