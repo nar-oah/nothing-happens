@@ -25,9 +25,7 @@
 			class="flex w-[29px] rotate-90 flex-col justify-center text-center font-document text-40 font-light leading-0 text-ink-secondary [word-break:break-all]"
 			style:height={`${horizontalWidth}px`}
 		>
-			<p
-				class="m-0 leading-[32px]"
-			>
+			<p class="m-0 leading-[32px]">
 				{text}
 			</p>
 		</div>
