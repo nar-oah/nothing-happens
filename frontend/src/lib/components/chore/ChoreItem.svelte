@@ -46,7 +46,7 @@
 	class="flex"
 >
 	{#if isRow}
-		<div class="z-2 -mb-[10px] bg-shadow-deep text-center">
+		<div class="-mb-[10px] bg-shadow-deep text-center">
 			<p
 				class="m-0 whitespace-nowrap font-policy text-48 font-medium leading-[40px] text-surface-amber"
 			>
