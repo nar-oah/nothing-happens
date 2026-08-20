@@ -1,11 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import MemorialVerticalFold from './MemorialVerticalFold.svelte';
-	import {
-		VERTICAL_FOLD_HEIGHT,
-		VERTICAL_FOLD_SKEW,
-		VERTICAL_FOLD_WIDTH
-	} from './memorial';
+	import { VERTICAL_FOLD_HEIGHT, VERTICAL_FOLD_SKEW, VERTICAL_FOLD_WIDTH } from './memorial';
 
 	type Props = {
 		count: number;
@@ -22,10 +18,7 @@
 		skews.map((_, index) =>
 			skews
 				.slice(0, index)
-				.reduce(
-					(y, skew) => y + VERTICAL_FOLD_WIDTH * Math.tan((skew * Math.PI) / 180),
-					0
-				)
+				.reduce((y, skew) => y + VERTICAL_FOLD_WIDTH * Math.tan((skew * Math.PI) / 180), 0)
 		)
 	);
 	let minY = $derived(Math.min(0, ...positions));

@@ -4,10 +4,7 @@
 	import MemorialTitleStrip from './MemorialTitleStrip.svelte';
 	import MemorialVertical from './MemorialVertical.svelte';
 	import MemorialVerticalCoverFrame from './MemorialVerticalCoverFrame.svelte';
-	import type {
-		MemorialConstitutionContentData,
-		MemorialProposalContentData
-	} from './memorial';
+	import type { MemorialConstitutionContentData, MemorialProposalContentData } from './memorial';
 
 	type Props = {
 		title: string;
