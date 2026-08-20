@@ -77,7 +77,7 @@ func allocate_base_columns(
 	for group in groups:
 		if group == null or allocation.has(group) or group.base_column_weight <= 0:
 			push_error("Interest groups must be unique and have positive column weight.")
-			return {}
+			return allocation
 		allocation[group] = 0
 		total_weight += group.base_column_weight
 	var remainders: Dictionary[InterestGroupDefinition, float] = {}
@@ -233,6 +233,9 @@ func can_reassign_seat(
 	var target_count := get_race_seat_count(context.state, target)
 	if target_constraint.maximum_count >= 0 and target_count >= target_constraint.maximum_count:
 		return false
+	var target_anchor := _get_anchor_seat(context.state, target)
+	if target_count == 0 and target_anchor != null and seat != target_anchor:
+		return false
 	var donor := seat.race
 	if donor == null:
 		return true
@@ -252,8 +255,12 @@ func reassign_seat(
 ) -> bool:
 	if not can_reassign_seat(context, seat, target):
 		return false
+	var previous := seat.race
 	seat.race = target
-	return validate_anchor_invariants(context.state, context.race_definitions)
+	if validate_anchor_invariants(context.state, context.race_definitions):
+		return true
+	seat.race = previous
+	return false
 
 
 func use_petition(context: RunContext) -> bool:

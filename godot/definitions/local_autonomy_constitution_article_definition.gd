@@ -16,8 +16,6 @@ func on_activate(context) -> void:
 		group.decrease_tax = true
 		context.state.constitution.local_interest_groups[seat_definition] = group
 	for seat in context.state.seats:
-		if race != null and seat.race != race:
-			continue
 		var local: InterestGroupDefinition = (
 			context.state.constitution.local_interest_groups.get(seat.definition)
 		)

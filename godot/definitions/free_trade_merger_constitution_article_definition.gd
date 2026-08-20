@@ -5,6 +5,10 @@ class_name FreeTradeMergerConstitutionArticleDefinition
 @export_range(0.0, 1.0, 0.01) var weak_group_rate: float = 0.05
 
 
+func on_deactivate(context) -> void:
+	context.state.constitution.group_mergers.clear()
+
+
 func on_year_settlement(context) -> void:
 	var counts: Dictionary[InterestGroupDefinition, int] = {}
 	var influenced_seat_count := 0

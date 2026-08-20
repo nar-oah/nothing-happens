@@ -40,6 +40,10 @@ func on_activate(_context) -> void:
 	pass
 
 
+func on_deactivate(_context) -> void:
+	pass
+
+
 func on_month_start(_context) -> void:
 	pass
 

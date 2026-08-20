@@ -56,9 +56,11 @@ func settle_month(context: RunContext) -> void:
 		if event == null or not event.is_active():
 			continue
 		event.months_alive += 1
-		_update_growth_and_publication(event, context.balance)
-		if event.known:
+		var forced_public := _force_public_window(event, context.balance)
+		if not forced_public and event.known:
 			_update_known_event(event, context)
+		elif not forced_public:
+			_advance_growth(event, context.balance)
 		if event.is_active() and event.months_alive >= context.balance.event_lifetime_months:
 			_fail(event, context)
 
@@ -72,8 +74,7 @@ func update_information(context: RunContext) -> void:
 		if event.known:
 			event.published = true
 			continue
-		_update_growth_and_publication(event, context.balance)
-		if event.known:
+		if _force_public_window(event, context.balance):
 			continue
 		var probability: float = (
 			float(_get_race_seat_count(context.state, event.race))
@@ -155,21 +156,29 @@ func _get_race_seat_count(state: RunState, race: RaceDefinition) -> int:
 	return result
 
 
-func _update_growth_and_publication(
+func _force_public_window(
 	event: EventState, balance: GameBalanceDefinition
-) -> void:
+) -> bool:
 	var lifetime := maxi(balance.event_lifetime_months, 1)
 	var public_remaining := clampi(balance.event_public_remaining_months, 0, lifetime)
 	var remaining := maxi(lifetime - event.months_alive, 0)
-	if remaining <= public_remaining:
+	if remaining <= public_remaining and not event.full_growth_forced:
 		event.growth_progress = 1.0
 		event.known = true
 		event.published = true
-		return
+		event.full_growth_forced = true
+		return true
+	return false
+
+
+func _advance_growth(event: EventState, balance: GameBalanceDefinition) -> void:
+	var lifetime := maxi(balance.event_lifetime_months, 1)
+	var public_remaining := clampi(balance.event_public_remaining_months, 0, lifetime)
 	var growth_months := maxi(lifetime - public_remaining, 1)
-	event.growth_progress = maxf(
-		event.growth_progress,
-		clampf(float(event.months_alive) / float(growth_months), 0.0, 1.0)
+	event.growth_progress = clampf(
+		event.growth_progress + 1.0 / float(growth_months),
+		0.0,
+		1.0
 	)
 
 
@@ -177,16 +186,17 @@ func _update_known_event(event: EventState, context: RunContext) -> void:
 	event.satisfaction_rate = _calculate_satisfaction(event, context.state)
 	if event.satisfaction_rate < context.balance.event_pause_satisfaction_threshold:
 		event.phase = EventState.Phase.WORSENING
-		event.relief_progress = 0.0
+		_advance_growth(event, context.balance)
 		return
 	if event.satisfaction_rate < context.balance.event_relief_satisfaction_threshold:
 		event.phase = EventState.Phase.PAUSED
 		return
 	event.phase = EventState.Phase.RELIEVING
-	event.relief_progress = minf(
-		1.0, event.relief_progress + context.balance.event_relief_progress_per_month
+	event.growth_progress = maxf(
+		0.0,
+		event.growth_progress - context.balance.event_relief_progress_per_month
 	)
-	if event.relief_progress >= 1.0:
+	if is_zero_approx(event.growth_progress):
 		_resolve(event, context.state)
 
 
@@ -194,7 +204,9 @@ func _calculate_satisfaction(event: EventState, state: RunState) -> float:
 	var requirement := get_current_requirement(event)
 	var required_change := absf(float(requirement - event.baseline_value))
 	if is_zero_approx(required_change):
-		return 1.0
+		required_change = absf(float(event.full_target - event.baseline_value))
+	if is_zero_approx(required_change):
+		return 0.0
 	var current := state.metrics.get_value(event.metric)
 	var direction := 1.0 if event.full_target > event.baseline_value else -1.0
 	var achieved_change := maxf(float(current - event.baseline_value) * direction, 0.0)

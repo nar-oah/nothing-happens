@@ -103,7 +103,12 @@ func add_positive_trait(
 func resolve_bonus_choice(
 	state: RunState, proposal: ProposalInstance, accept_trait: bool
 ) -> bool:
-	if proposal == null or proposal.bonus_choice_resolved or not proposal.has_positive_trait():
+	if (
+		proposal == null
+		or proposal not in state.proposal_hand
+		or proposal.bonus_choice_resolved
+		or not proposal.has_positive_trait()
+	):
 		return false
 	proposal.bonus_choice_resolved = true
 	proposal.positive_trait_accepted = accept_trait

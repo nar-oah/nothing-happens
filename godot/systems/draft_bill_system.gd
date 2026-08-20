@@ -47,6 +47,19 @@ func add_available_policy(context: RunContext, policy: PolicyDefinition) -> bool
 	return false
 
 
+func is_ready_to_submit(context: RunContext, draft: DraftBillState) -> bool:
+	if context == null or draft == null or draft.is_empty():
+		return false
+	var available := context.constitution_system.get_available_policies(context)
+	for policy in draft.policies:
+		if policy == null or policy not in available:
+			return false
+	for proposal in draft.proposals:
+		if proposal == null or proposal.is_bonus_choice_pending():
+			return false
+	return true
+
+
 func reorder_proposal(state: RunState, from_index: int, to_index: int) -> bool:
 	if (
 		from_index < 0

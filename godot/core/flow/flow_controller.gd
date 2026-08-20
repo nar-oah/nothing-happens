@@ -22,6 +22,8 @@ func advance_month() -> void:
 	context.event_system.settle_month(context)
 	context.event_system.update_information(context)
 	context.collapse_system.settle_month(context)
+	if context.state.run_failed or context.state.ending_id != &"":
+		return
 	context.proposal_system.draw_automatic_proposals(context)
 	context.proposal_system.resolve_active_visits(context)
 	if context.state.month == 12:
@@ -30,8 +32,8 @@ func advance_month() -> void:
 
 
 func enact_bill(draft: DraftBillState) -> void:
-	if draft == null:
-		push_error("Cannot enact a null draft.")
+	if not context.draft_bill_system.is_ready_to_submit(context, draft):
+		push_error("Cannot enact an unavailable or unresolved draft.")
 		return
 	var new_bill := _build_active_bill(draft)
 	context.state.active_bill = new_bill
@@ -45,7 +47,7 @@ func enact_bill(draft: DraftBillState) -> void:
 
 func submit_draft(draft: DraftBillState) -> VoteResultState:
 	var result := VoteResultState.new()
-	if draft == null or draft.is_empty():
+	if not context.draft_bill_system.is_ready_to_submit(context, draft):
 		return result
 	context.collapse_system.record_intervention(
 		context,

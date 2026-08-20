@@ -30,6 +30,7 @@ func can_revise(context: RunContext, definition: ConstitutionArticleDefinition) 
 		or definition.race == null
 		or not context.state.constitution.revision_available
 		or definition.race not in context.race_definitions
+		or definition not in context.constitution_articles
 		or context.state.constitution.get_active_article(definition.race) == definition
 	):
 		return false
@@ -40,15 +41,22 @@ func revise(context: RunContext, definition: ConstitutionArticleDefinition) -> b
 	if not can_revise(context, definition):
 		return false
 	var previous := context.state.constitution.get_active_article(definition.race)
+	var previous_races: Dictionary[SeatState, RaceDefinition] = {}
+	for seat in context.state.seats:
+		previous_races[seat] = seat.race
 	context.state.constitution.active_articles[definition.race] = definition
 	refresh_runtime(context)
 	if not context.race_system.allocate_seats(context):
+		for seat in previous_races:
+			seat.race = previous_races[seat]
 		if previous == null:
 			context.state.constitution.active_articles.erase(definition.race)
 		else:
 			context.state.constitution.active_articles[definition.race] = previous
 		refresh_runtime(context)
 		return false
+	if previous != null:
+		previous.on_deactivate(context)
 	context.state.constitution.clicked_articles[definition] = true
 	context.state.constitution.revision_available = false
 	for seat in context.state.seats:
@@ -67,7 +75,6 @@ func refresh_runtime(context: RunContext) -> void:
 	state.petition_limit = 0
 	state.donation_detection_probability = context.balance.donation_detection_probability
 	state.event_early_reveal_bonus_probability = 0.0
-	state.constitution.group_mergers.clear()
 	for race in state.races:
 		race.expectation_growth_rate = 0.0
 		race.visit_probability = 0.0
@@ -200,8 +207,9 @@ func _fallback_group(
 	seat: SeatState,
 	excluded: InterestGroupDefinition
 ) -> InterestGroupDefinition:
-	if seat.base_group != null and seat.base_group != excluded:
-		return seat.base_group
+	var base := _resolve_merger(context.state, seat.base_group)
+	if base != null and base != excluded:
+		return base
 	for group in get_effective_groups(context):
 		if group != excluded:
 			return group
@@ -233,6 +241,6 @@ func _resolve_merger(
 
 func _has_anchor(context: RunContext, race: RaceDefinition) -> bool:
 	for definition in context.seat_definitions:
-		if definition.anchor_race == race:
+		if definition != null and definition.anchor_race == race:
 			return true
 	return false
