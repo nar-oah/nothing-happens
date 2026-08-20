@@ -61,7 +61,7 @@
 				{/each}
 			</div>
 			{#if isTitle}
-				<div class="absolute left-15 top-15">
+				<div class="absolute left-[15px] top-[15px]">
 					<MemorialTitleStrip text={title} vertical />
 				</div>
 			{/if}

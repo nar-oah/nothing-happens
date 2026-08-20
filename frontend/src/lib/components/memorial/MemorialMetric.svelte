@@ -22,16 +22,16 @@
 		</div>
 		{#if showValue}
 			<div class="flex h-24 w-25 shrink-0 items-center justify-center">
-				<div class="rotate-90">
+				<div class="flex-none rotate-90">
 					<div
 						class:bg-ink-secondary={isReverse}
 						class:bg-accent-amber-deep={!isReverse}
-						class="flex items-center justify-center"
+						class="flex w-max items-center justify-center"
 					>
 						<div
 							class:text-accent-amber-deep={isReverse}
 							class:text-ink-secondary={!isReverse}
-							class="typo-data-metric-value-tight whitespace-nowrap text-center [word-break:break-word]"
+							class="typo-data-metric-value-tight w-max whitespace-nowrap text-center [word-break:break-word]"
 						>
 							{value}
 						</div>
