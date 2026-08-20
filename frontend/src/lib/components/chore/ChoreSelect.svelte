@@ -6,12 +6,7 @@
 		onSelectChange?: (isSelect: boolean) => void;
 	};
 
-	let {
-		text,
-		isDirection = false,
-		isSelect = $bindable(true),
-		onSelectChange
-	}: Props = $props();
+	let { text, isDirection = false, isSelect = $bindable(true), onSelectChange }: Props = $props();
 
 	function toggle() {
 		isSelect = !isSelect;
@@ -28,7 +23,11 @@
 	aria-pressed={isSelect}
 	onclick={toggle}
 >
-	<span class:font-archival={!isDirection} class:font-document={isDirection} class="text-24 leading-auto">
+	<span
+		class:font-archival={!isDirection}
+		class:font-document={isDirection}
+		class="text-24 leading-auto"
+	>
 		{isDirection ? (isSelect ? '↑' : '↓') : isSelect ? '◆' : '◇'}
 	</span>
 	<span class="font-document text-24 font-light leading-auto">{text}</span>

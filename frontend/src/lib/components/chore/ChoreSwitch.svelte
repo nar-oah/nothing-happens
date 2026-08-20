@@ -6,12 +6,7 @@
 		onSwitchChange?: (isSwitch: boolean) => void;
 	};
 
-	let {
-		left,
-		right,
-		isSwitch = $bindable(false),
-		onSwitchChange
-	}: Props = $props();
+	let { left, right, isSwitch = $bindable(false), onSwitchChange }: Props = $props();
 
 	function toggle() {
 		isSwitch = !isSwitch;
