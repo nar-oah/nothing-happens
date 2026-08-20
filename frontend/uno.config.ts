@@ -60,6 +60,7 @@ const fontSize = {
 };
 
 const lineHeight = {
+	0: '0',
 	auto: 'normal',
 	16: '16px',
 	18: '18px',
@@ -94,6 +95,9 @@ const spacing = {
 	12: '12px',
 	17: '17px',
 	25: '25px',
+	30: '30px',
+	47: '47px',
+	'47.5': '47.5px',
 	80: '80px'
 };
 

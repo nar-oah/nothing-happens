@@ -72,7 +72,7 @@
 </script>
 
 <button
-	class="relative w-[var(--width)] h-[var(--height)] overflow-visible border-0 bg-transparent p-0 text-left"
+	class="relative h-$height w-$width overflow-visible border-0 bg-transparent p-0 text-left"
 	style:--width={`${FOLD_WIDTH}px`}
 	style:--height={`${open ? count * FOLD_HEIGHT : FOLD_HEIGHT}px`}
 	type="button"
@@ -85,7 +85,7 @@
 			<div class="flex h-full flex-col justify-between">
 				<div>
 					<div class="typo-document-kicker opacity-70">提案／{title}</div>
-					<div class="typo-document-section-heading mt-[2px]">扩充行身机件统采案</div>
+					<div class="typo-document-section-heading mt-2">扩充行身机件统采案</div>
 				</div>
 				<div class="typo-document-metadata flex items-center justify-between">
 					<span>消化／中等</span>
@@ -95,7 +95,7 @@
 		</MemorialFold>
 	{/each}
 	{#if showClosed}
-		<div class="absolute left-0 top-0 z-[100]">
+		<div class="absolute left-0 top-0 z-100">
 			<MemorialClosed {title} {lag} {metrics} />
 		</div>
 	{/if}

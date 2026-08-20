@@ -35,7 +35,7 @@
 
 <button
 	type="button"
-	class="relative block h-[var(--mark-height)] w-[var(--mark-width)] cursor-pointer overflow-hidden border-0 bg-transparent p-0 text-left disabled:cursor-default"
+	class="relative block h-$mark-height w-$mark-width cursor-pointer overflow-hidden border-0 bg-transparent p-0 text-left disabled:cursor-default"
 	style:--mark-width={`${geometry.width}px`}
 	style:--mark-height={`${geometry.height}px`}
 	aria-label={direction === 'up' ? '查看政策效果' : '查看政策条件'}
@@ -43,7 +43,7 @@
 	onclick={toggleDirection}
 >
 	<div
-		class="absolute left-0 top-0 h-[var(--face-height)] w-[var(--front-width)] origin-top-left overflow-hidden"
+		class="absolute left-0 top-0 h-$face-height w-$front-width origin-top-left overflow-hidden"
 		style:--face-height={`${geometry.requirement.height}px`}
 		style:--front-width={`${geometry.frontWidth}px`}
 		style:transform={geometry.requirement.transform}
@@ -56,7 +56,7 @@
 	</div>
 
 	<div
-		class="absolute left-0 top-0 h-[var(--face-height)] w-[var(--front-width)] origin-top-left overflow-hidden"
+		class="absolute left-0 top-0 h-$face-height w-$front-width origin-top-left overflow-hidden"
 		style:--face-height={`${geometry.effect.height}px`}
 		style:--front-width={`${geometry.frontWidth}px`}
 		style:transform={geometry.effect.transform}
@@ -65,7 +65,7 @@
 	</div>
 
 	<div
-		class="absolute left-0 top-0 h-[var(--seal-size)] w-[var(--seal-size)] origin-top-left overflow-hidden"
+		class="absolute left-0 top-0 h-$seal-size w-$seal-size origin-top-left overflow-hidden"
 		style:--seal-size={`${MARK_SEAL_SOURCE_SIZE}px`}
 		style:transform={geometry.sealTransform}
 	>
