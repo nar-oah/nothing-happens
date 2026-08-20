@@ -162,11 +162,12 @@ func _force_public_window(
 	var lifetime := maxi(balance.event_lifetime_months, 1)
 	var public_remaining := clampi(balance.event_public_remaining_months, 0, lifetime)
 	var remaining := maxi(lifetime - event.months_alive, 0)
-	if remaining <= public_remaining and not event.full_growth_forced:
+	if remaining <= public_remaining and not event.public_window_entered:
 		event.growth_progress = 1.0
 		event.known = true
 		event.published = true
-		event.full_growth_forced = true
+		event.public_window_entered = true
+		event.phase = EventState.Phase.WORSENING
 		return true
 	return false
 

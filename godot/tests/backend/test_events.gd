@@ -119,7 +119,7 @@ func _test_hidden_growth_public_window_and_resolution(t: BackendTestContext) -> 
 	t.check_equal(event.months_alive, 9, "remaining-three window begins after nine months")
 	t.check_approx(event.growth_progress, 1.0, "remaining-three window forces full growth")
 	t.check(event.known and event.published, "remaining-three window forces publication")
-	t.check(event.full_growth_forced, "public-window force is recorded exactly once")
+	t.check(event.public_window_entered, "public-window entry is recorded exactly once")
 	session.event_system.settle_month(session.context)
 	t.check_equal(event.phase, EventState.Phase.RELIEVING, "known event begins reducing demand")
 	t.check_approx(event.growth_progress, 0.5, "relief speed reduces demand progress")
