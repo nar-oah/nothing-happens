@@ -51,6 +51,8 @@ func revise(context: RunContext, definition: ConstitutionArticleDefinition) -> b
 		return false
 	context.state.constitution.clicked_articles[definition] = true
 	context.state.constitution.revision_available = false
+	for seat in context.state.seats:
+		seat.actual_group = seat.base_group
 	context.collapse_system.record_intervention(
 		context, &"constitution_revision", context.balance.constitution_revision_pressure
 	)
