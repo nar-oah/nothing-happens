@@ -21,7 +21,7 @@
 <MemorialClosedFrame>
 	<div class="relative box-border flex h-full w-full flex-col items-end p-10">
 		<div class="absolute inset-0 flex items-end justify-end overflow-hidden">
-			{#each [...metrics, lagMetric] as metric, index (metric)}
+			{#each [lagMetric, ...metrics.slice().reverse()] as metric, index (metric)}
 				<div class="-mr-5" style:z-index={metrics.length + 1 - index}>
 					<MemorialMetric {metric} isBottom />
 				</div>

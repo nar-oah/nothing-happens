@@ -23,12 +23,12 @@
 			<span>邸</span><span>報</span>
 		</div>
 		<div
-			class="relative flex h-65 w-[252px] flex-col items-center overflow-hidden bg-accent-amber-deep"
+			class="relative flex h-[64px] w-[252px] flex-col items-center overflow-hidden bg-accent-amber-deep"
 		>
-			<div class="flex h-32 items-end">
-				<span class="font-policy text-48 font-medium leading-40">第</span>
-				<span class="font-document text-40 font-light leading-32">{term}</span>
-				<span class="font-policy text-48 font-medium leading-40">任</span>
+			<div class="flex h-[32px] shrink-0 items-end">
+				<span class="font-policy text-48 font-medium leading-[40px]">第</span>
+				<span class="font-document text-40 font-light leading-[32px]">{term}</span>
+				<span class="font-policy text-48 font-medium leading-[40px]">任</span>
 			</div>
 			<div class="flex items-center justify-center gap-5">
 				<span class="typo-timing-lag-value">{year}</span>

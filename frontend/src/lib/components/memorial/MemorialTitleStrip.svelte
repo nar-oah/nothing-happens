@@ -15,8 +15,14 @@
 	</div>
 {:else}
 	<div
-		class="flex h-[29px] w-[128px] shrink-0 items-center justify-center overflow-hidden bg-accent-amber-deep font-document text-40 font-light leading-32 text-ink-secondary"
+		class="flex h-[29px] w-[128px] shrink-0 items-center justify-center overflow-hidden bg-accent-amber-deep"
 	>
-		<p class="m-0 whitespace-nowrap text-center">{text}</p>
+		<div class="rotate-90">
+			<p
+				class="m-0 w-[29px] text-center font-document text-40 font-light leading-[32px] text-ink-secondary [word-break:break-word]"
+			>
+				{text}
+			</p>
+		</div>
 	</div>
 {/if}
