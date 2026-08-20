@@ -75,7 +75,7 @@ func update_information(context: RunContext) -> void:
 		_update_growth_and_publication(event, context.balance)
 		if event.known:
 			continue
-		var probability := (
+		var probability: float = (
 			float(_get_race_seat_count(context.state, event.race))
 			* context.balance.event_early_reveal_probability_per_seat
 			+ context.state.event_early_reveal_bonus_probability
