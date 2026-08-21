@@ -40,8 +40,8 @@
 			{/each}
 		</div>
 		<div class="flex min-w-0 flex-1 justify-between">
-			{#each [...trailingMetrics, lagMetric] as metric, index (metric)}
-				<div style:z-index={trailingMetrics.length + 1 - index}>
+			{#each [...trailingMetrics, lagMetric] as metric}
+				<div>
 					<MemorialMetric {metric} />
 				</div>
 			{/each}
