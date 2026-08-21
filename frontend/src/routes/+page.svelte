@@ -12,6 +12,8 @@
 	import ChoreItem from '$lib/components/chore/ChoreItem.svelte';
 	import ChoreSelect from '$lib/components/chore/ChoreSelect.svelte';
 	import ChoreSwitch from '$lib/components/chore/ChoreSwitch.svelte';
+	import Dialog from '$lib/components/dialog/Dialog.svelte';
+	import TopDialog from '$lib/components/dialog/TopDialog.svelte';
 	import {
 		MetricText,
 		MetricSymbol,
@@ -62,6 +64,7 @@
 	let newspaperOpened = $state(false);
 	let choreSwitch = $state(false);
 	let choreSelect = $state(true);
+	var dialogText = '如果每个人都要求现在回答，\n那么“迟一点”本身就会成为一种罪。';
 </script>
 
 <svelte:head>
@@ -76,6 +79,14 @@
 			{#if newspaperOpened}
 				<p class="m-0 font-document text-16 text-ink-primary" aria-live="polite">邸报按钮已触发</p>
 			{/if}
+		</div>
+	</section>
+
+	<section class="flex flex-col gap-[20px]">
+		<h2 class="m-0 font-policy text-30 font-medium text-ink-primary">对话框</h2>
+		<div class="flex flex-col items-start gap-[32px]">
+			<Dialog text={dialogText} />
+			<TopDialog text={dialogText} />
 		</div>
 	</section>
 
