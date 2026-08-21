@@ -16,7 +16,7 @@
 >
 	{#if title}
 		<div class="flex flex-col gap-2 pb-[6px] pt-8">
-			<p class="m-0 h-20 w-full font-policy text-[22px] font-medium leading-20">{title}</p>
+			<p class="m-0 w-full font-policy text-[22px] font-medium leading-20">{title}</p>
 			<p class="typo-document-body-compact m-0 h-[52px] w-full overflow-hidden">{body}</p>
 		</div>
 	{:else}

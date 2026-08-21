@@ -2,26 +2,14 @@
 	type Props = {
 		text: string;
 		value?: string | number;
-		limit?: string | number;
-		context?: string;
-		isRate?: boolean;
+		limit?: number;
 		isRow?: boolean;
-		isContext?: boolean;
+		isCenter?: boolean;
 	};
 
-	let {
-		text,
-		value,
-		limit,
-		context,
-		isRate = true,
-		isRow = false,
-		isContext = false
-	}: Props = $props();
-
-	let rowWithContext = $derived(!isRate && isRow && isContext);
-	let rowWithValue = $derived(!isRate && isRow && !isContext);
-	let columnWithValue = $derived(!isRate && !isRow && !isContext);
+	let { text, value, limit = 0, isRow = false, isCenter = true }: Props = $props();
+	let rowWithValue = $derived(!limit && isRow);
+	let columnWithValue = $derived(!limit && !isRow);
 	let valueCharacters = $derived(Array.from(String(value ?? '')));
 	let limitCharacters = $derived(Array.from(String(limit ?? '')));
 </script>
@@ -38,8 +26,8 @@
 
 <div
 	class:flex-col={isRow}
-	class:items-start={rowWithContext}
-	class:items-center={!rowWithContext}
+	class:items-start={!isCenter}
+	class:items-center={isCenter}
 	class:justify-center={rowWithValue}
 	class:justify-end={!isRow}
 	class:isolate={!isRow}
@@ -55,12 +43,12 @@
 		</div>
 	{/if}
 
-	{#if rowWithContext}
+	{#if !isCenter}
 		<div class="z-1 flex items-center justify-center bg-ink-secondary">
 			<p
 				class="m-0 max-w-[500px] whitespace-nowrap font-document text-30 font-light leading-auto text-accent-amber-deep"
 			>
-				{context}
+				{value}
 			</p>
 		</div>
 	{:else if rowWithValue}
@@ -72,7 +60,7 @@
 			</p>
 		</div>
 	{:else if !isRow}
-		{#if isRate}
+		{#if limit}
 			<div
 				class="z-2 -mr-[10px] flex h-[55px] w-[30px] flex-col items-center justify-center bg-accent-amber-deep font-document text-30 font-light leading-auto text-shadow-deep"
 			>
