@@ -8,11 +8,11 @@
 
 	type Props = {
 		title: string;
-		proposal: MemorialProposalContentData;
+		proposals: MemorialProposalContentData[];
 		articles: MemorialConstitutionContentData[];
 	};
 
-	let { title, proposal, articles }: Props = $props();
+	let { title, proposals, articles }: Props = $props();
 </script>
 
 <div class="flex items-start">
@@ -21,12 +21,12 @@
 			<MemorialTitleStrip text={title} vertical />
 		</div>
 	</MemorialVerticalCoverFrame>
-	<MemorialVertical count={articles.length + 1}>
+	<MemorialVertical count={proposals.length + articles.length}>
 		{#snippet page(index: number)}
-			{#if index === 0}
-				<MemorialProposalContent {...proposal} />
-			{:else if articles[index - 1]}
-				<MemorialConstitutionContent {...articles[index - 1]} />
+			{#if proposals[index]}
+				<MemorialProposalContent {...proposals[index]} />
+			{:else if articles[index - proposals.length]}
+				<MemorialConstitutionContent {...articles[index - proposals.length]} />
 			{/if}
 		{/snippet}
 	</MemorialVertical>

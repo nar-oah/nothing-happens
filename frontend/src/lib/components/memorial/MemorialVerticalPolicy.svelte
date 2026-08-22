@@ -17,7 +17,7 @@
 		title: string;
 		lag: number;
 		metrics: MemorialMetricData[];
-		proposal: MemorialProposalContentData;
+		proposals: MemorialProposalContentData[];
 		policies: MemorialPolicyContentData[];
 		onTitleChange?: (isTitle: boolean) => void;
 	};
@@ -27,7 +27,7 @@
 		title,
 		lag,
 		metrics,
-		proposal,
+		proposals,
 		policies,
 		onTitleChange
 	}: Props = $props();
@@ -67,12 +67,12 @@
 			{/if}
 		</button>
 	</MemorialVerticalCoverFrame>
-	<MemorialVertical count={policies.length + 1}>
+	<MemorialVertical count={proposals.length + policies.length}>
 		{#snippet page(index: number)}
-			{#if index === 0}
-				<MemorialProposalContent {...proposal} />
-			{:else if policies[index - 1]}
-				<MemorialPolicyContent {...policies[index - 1]} />
+			{#if proposals[index]}
+				<MemorialProposalContent {...proposals[index]} />
+			{:else if policies[index - proposals.length]}
+				<MemorialPolicyContent {...policies[index - proposals.length]} />
 			{/if}
 		{/snippet}
 	</MemorialVertical>

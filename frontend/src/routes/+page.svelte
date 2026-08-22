@@ -119,10 +119,10 @@
 				title="大而美法案"
 				lag={6}
 				metrics={policyMetrics}
-				{proposal}
+				proposals={[proposal]}
 				{policies}
 			/>
-			<MemorialVerticalConstitution title="蓬莱约法" {proposal} {articles} />
+			<MemorialVerticalConstitution title="蓬莱约法" proposals={[proposal]} {articles} />
 		</div>
 	</section>
 
