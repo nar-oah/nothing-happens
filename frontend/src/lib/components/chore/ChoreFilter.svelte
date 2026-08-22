@@ -1,132 +1,106 @@
 <script lang="ts">
 	import ChoreSelect from './ChoreSelect.svelte';
 	import ChoreSwitch from './ChoreSwitch.svelte';
-	import {
-		CHORE_ARCHIVE_OPTIONS,
-		CHORE_METRIC_OPTIONS,
-		createChoreArchiveState,
-		createChoreMetricState,
-		type ChoreArchiveKey,
-		type ChoreArchiveState,
-		type ChoreFilterMode,
-		type ChoreMetricKey,
-		type ChoreMetricState
-	} from './chore';
 
+	type ChoreFilterValue = string[] | boolean;
 	type Props = {
-		filter?: ChoreFilterMode;
-		archives?: ChoreArchiveState;
-		metrics?: ChoreMetricState;
-		timeAscending?: boolean;
-		valueAscending?: boolean;
-		onFilterChange?: (filter: ChoreFilterMode) => void;
-		onArchivesChange?: (archives: ChoreArchiveState) => void;
-		onMetricsChange?: (metrics: ChoreMetricState) => void;
-		onTimeDirectionChange?: (ascending: boolean) => void;
-		onValueDirectionChange?: (ascending: boolean) => void;
+		filters?: Record<string, ChoreFilterValue>;
+		onFiltersChange?: (filters: Record<string, ChoreFilterValue>) => void;
 	};
 
 	let {
-		filter = $bindable<ChoreFilterMode>('default'),
-		archives = $bindable<ChoreArchiveState>(createChoreArchiveState()),
-		metrics = $bindable<ChoreMetricState>(createChoreMetricState()),
-		timeAscending = $bindable(true),
-		valueAscending = $bindable(false),
-		onFilterChange,
-		onArchivesChange,
-		onMetricsChange,
-		onTimeDirectionChange,
-		onValueDirectionChange
+		filters = $bindable<Record<string, ChoreFilterValue>>({}),
+		onFiltersChange
 	}: Props = $props();
 
-	let archiveCount = $derived(Object.values(archives).filter(Boolean).length);
-	let metricCount = $derived(Object.values(metrics).filter(Boolean).length);
+	let options = $state<Record<string, string[]>>({});
+	let activeFilter = $state<string>();
+	let quickFilter = $state<string>();
+	let filterEntries = $derived(Object.entries(filters));
 
-	function setFilter(next: ChoreFilterMode) {
-		if (filter === next) return;
-		filter = next;
-		onFilterChange?.(next);
+	$effect(() => {
+		const arrayFilters = filterEntries.filter((entry): entry is [string, string[]] =>
+			Array.isArray(entry[1])
+		);
+
+		for (const [name, values] of arrayFilters) options[name] ??= [...values];
+		if (!quickFilter || !arrayFilters.some(([name]) => name === quickFilter)) {
+			quickFilter = arrayFilters[0]?.[0];
+		}
+	});
+
+	function setFilter(name: string, value: ChoreFilterValue) {
+		filters = { ...filters, [name]: value };
+		onFiltersChange?.(filters);
 	}
 
-	function setArchive(key: ChoreArchiveKey, selected: boolean) {
-		archives = { ...archives, [key]: selected };
-		onArchivesChange?.(archives);
+	function setOption(name: string, option: string, selected: boolean) {
+		const selectedOptions = filters[name] as string[];
+		const next = selected
+			? options[name].filter((value) => value === option || selectedOptions.includes(value))
+			: selectedOptions.filter((value) => value !== option);
+		setFilter(name, next);
 	}
 
-	function setMetric(key: ChoreMetricKey, selected: boolean) {
-		metrics = { ...metrics, [key]: selected };
-		onMetricsChange?.(metrics);
+	function openFilter(name: string) {
+		quickFilter = name;
+		activeFilter = name;
 	}
 
-	function setTimeDirection(ascending: boolean) {
-		timeAscending = ascending;
-		onTimeDirectionChange?.(ascending);
-	}
-
-	function setValueDirection(ascending: boolean) {
-		valueAscending = ascending;
-		onValueDirectionChange?.(ascending);
+	function toggleView() {
+		if (activeFilter) {
+			quickFilter = activeFilter;
+			activeFilter = undefined;
+			return;
+		}
+		activeFilter = quickFilter;
 	}
 </script>
 
 <div class="flex flex-col items-start overflow-hidden">
-	<div class="-mb-[5px] shrink-0">
-		<ChoreSwitch
-			left={filter === 'metric' ? '指标' : '案牍'}
-			right="筛选条件"
-			isSwitch={filter === 'default'}
-			onSwitchChange={() => setFilter(filter === 'default' ? 'archives' : 'default')}
-		/>
-	</div>
+	{#if quickFilter}
+		<div class="-mb-[5px] shrink-0">
+			<ChoreSwitch
+				left={quickFilter}
+				right="筛选条件"
+				isSwitch={!activeFilter}
+				onSwitchChange={toggleView}
+			/>
+		</div>
+	{/if}
 
 	<div
-		class:bg-ink-primary={filter === 'default'}
-		class:bg-shadow-deep={filter !== 'default'}
+		class:bg-ink-primary={!activeFilter}
+		class:bg-shadow-deep={!!activeFilter}
 		class="flex shrink-0 items-start gap-8 overflow-hidden whitespace-nowrap text-surface-amber"
 	>
-		{#if filter === 'archives'}
-			{#each CHORE_ARCHIVE_OPTIONS as option (option.key)}
+		{#if activeFilter}
+			{#each options[activeFilter] as option (option)}
 				<ChoreSelect
-					text={option.text}
-					isSelect={archives[option.key]}
-					onSelectChange={(selected) => setArchive(option.key, selected)}
-				/>
-			{/each}
-		{:else if filter === 'metric'}
-			{#each CHORE_METRIC_OPTIONS as option (option.key)}
-				<ChoreSelect
-					text={option.text}
-					isSelect={metrics[option.key]}
-					onSelectChange={(selected) => setMetric(option.key, selected)}
+					text={option}
+					isSelect={(filters[activeFilter] as string[]).includes(option)}
+					onSelectChange={(selected) => setOption(activeFilter, option, selected)}
 				/>
 			{/each}
 		{:else}
-			<button
-				type="button"
-				class="typo-filter-option cursor-pointer border-0 bg-transparent p-0 text-surface-amber"
-				onclick={() => setFilter('archives')}
-			>
-				{archiveCount}案牍
-			</button>
-			<button
-				type="button"
-				class="typo-filter-option cursor-pointer border-0 bg-transparent p-0 text-surface-amber"
-				onclick={() => setFilter('metric')}
-			>
-				{metricCount}指标
-			</button>
-			<ChoreSelect
-				text="时间"
-				isDirection
-				isSelect={timeAscending}
-				onSelectChange={setTimeDirection}
-			/>
-			<ChoreSelect
-				text="数值"
-				isDirection
-				isSelect={valueAscending}
-				onSelectChange={setValueDirection}
-			/>
+			{#each filterEntries as [name, value] (name)}
+				{#if Array.isArray(value)}
+					<button
+						type="button"
+						class="typo-filter-option cursor-pointer border-0 bg-transparent p-0 text-surface-amber"
+						onclick={() => openFilter(name)}
+					>
+						{value.length}{name}
+					</button>
+				{:else}
+					<ChoreSelect
+						text={name}
+						isDirection
+						isSelect={value}
+						onSelectChange={(selected) => setFilter(name, selected)}
+					/>
+				{/if}
+			{/each}
 		{/if}
 	</div>
 </div>
