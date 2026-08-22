@@ -1,7 +1,7 @@
 <script lang="ts">
 	import MemorialClosedFrame from './MemorialClosedFrame.svelte';
-	import MemorialMetric from './MemorialMetric.svelte';
-	import { MetricText, type MemorialMetricData } from './memorial';
+	import MemorialMetric from '../shared/MemorialMetric.svelte';
+	import { MetricText, type MemorialMetricData } from '../types';
 
 	type Props = {
 		option: string;
