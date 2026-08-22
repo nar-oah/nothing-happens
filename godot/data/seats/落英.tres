@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="SeatDefinition" format=3 uid="uid://bl6q3gwyjdwqs"]
+
+[ext_resource type="Script" uid="uid://of78ek0nhty6" path="res://definitions/seat_definition.gd" id="1_qxpgu"]
+
+[resource]
+script = ExtResource("1_qxpgu")
+display_name = "落英"
+metadata/_custom_type_script = "uid://of78ek0nhty6"
