@@ -65,6 +65,12 @@
 	let choreSwitch = $state(false);
 	let choreSelect = $state(true);
 	var dialogText = '如果每个人都要求现在回答，\n那么“迟一点”本身就会成为一种罪。';
+	var filters = {
+		案牍: ['约法', '法案', '提案', '政策'],
+		指标: ['税课', '物价', '工钱', '用工', '商贸'],
+		时间: false,
+		数值: false
+	};
 </script>
 
 <svelte:head>
@@ -168,6 +174,6 @@
 			<ChoreSwitch bind:isSwitch={choreSwitch} left="种族" right="利益集团" />
 			<ChoreSelect bind:isSelect={choreSelect} text="约法" />
 		</div>
-		<ChoreFilter />
+		<ChoreFilter {filters} />
 	</section>
 </main>

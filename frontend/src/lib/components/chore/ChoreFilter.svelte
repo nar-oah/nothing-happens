@@ -4,7 +4,7 @@
 
 	type ChoreFilterValue = string[] | boolean;
 	type Props = {
-		filters?: Record<string, ChoreFilterValue>;
+		filters: Record<string, ChoreFilterValue>;
 		onFiltersChange?: (filters: Record<string, ChoreFilterValue>) => void;
 	};
 
@@ -54,7 +54,7 @@
 
 <div class="flex flex-col items-start overflow-hidden">
 	{#if shownQuickFilter}
-		<div class="-mb-[5px] shrink-0">
+		<div>
 			<ChoreSwitch
 				left={shownQuickFilter}
 				right="筛选条件"
