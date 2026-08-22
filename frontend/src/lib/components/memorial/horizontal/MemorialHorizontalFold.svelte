@@ -1,6 +1,6 @@
-<script lang="ts">
+	<script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { FOLD_HEIGHT, FOLD_WIDTH } from './memorial';
+	import { HORIZONTAL_FOLD_HEIGHT, HORIZONTAL_FOLD_WIDTH } from '../constants';
 
 	type Props = {
 		x: number;
@@ -17,9 +17,9 @@
 <div
 	class="memorial-fold-position absolute left-0 top-0 h-$height w-$width will-change-transform"
 	aria-hidden={!open && index !== 0}
-	style:--width={`${FOLD_WIDTH}px`}
-	style:--height={`${FOLD_HEIGHT}px`}
-	style:transform={`translate3d(${open ? x : 0}px, ${open ? index * FOLD_HEIGHT : 0}px, 0)`}
+	style:--width={`${HORIZONTAL_FOLD_WIDTH}px`}
+	style:--height={`${HORIZONTAL_FOLD_HEIGHT}px`}
+	style:transform={`translate3d(${open ? x : 0}px, ${open ? index * HORIZONTAL_FOLD_HEIGHT : 0}px, 0)`}
 	style:z-index={count - index}
 	style:transition-delay={`${open ? (count - index - 1) * 24 : index * 32}ms`}
 >
