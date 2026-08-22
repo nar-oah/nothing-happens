@@ -1,16 +1,16 @@
 <script lang="ts">
-	import MemorialMetric from './MemorialMetric.svelte';
-	import MemorialPolicyContent from './MemorialPolicyContent.svelte';
-	import MemorialProposalContent from './MemorialProposalContent.svelte';
-	import MemorialTitleStrip from './MemorialTitleStrip.svelte';
+	import MemorialPolicyContent from '../content/MemorialPolicyContent.svelte';
+	import MemorialProposalContent from '../content/MemorialProposalContent.svelte';
+	import MemorialMetric from '../shared/MemorialMetric.svelte';
+	import MemorialTitleStrip from '../shared/MemorialTitleStrip.svelte';
 	import MemorialVertical from './MemorialVertical.svelte';
-	import MemorialVerticalCoverFrame from './MemorialVerticalCoverFrame.svelte';
+	import MemorialVerticalCover from './MemorialVerticalCover.svelte';
 	import {
 		MetricText,
 		type MemorialMetricData,
 		type MemorialPolicyContentData,
 		type MemorialProposalContentData
-	} from './memorial';
+	} from '../types';
 
 	type Props = {
 		isTitle?: boolean;
@@ -43,7 +43,7 @@
 </script>
 
 <div class="flex items-start">
-	<MemorialVerticalCoverFrame>
+	<MemorialVerticalCover>
 		<button
 			class="relative h-full w-full border-0 bg-transparent p-0 text-left"
 			type="button"
@@ -66,7 +66,7 @@
 				</div>
 			{/if}
 		</button>
-	</MemorialVerticalCoverFrame>
+	</MemorialVerticalCover>
 	<MemorialVertical count={proposals.length + policies.length}>
 		{#snippet page(index: number)}
 			{#if proposals[index]}
