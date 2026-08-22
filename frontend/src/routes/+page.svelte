@@ -13,7 +13,8 @@
 		type MemorialConstitutionData,
 		type MemorialMetricData,
 		type MemorialPolicyContentData,
-		type MemorialProposalContentData
+		type MemorialProposalContentData,
+		type MemorialHorizontalContentData
 	} from '$lib/components/memorial';
 	import Mark from '$lib/components/mark/Mark.svelte';
 	import ChoreFilter from '$lib/components/chore/ChoreFilter.svelte';
@@ -39,6 +40,16 @@
 		{ text: MetricText.Wage, value: 3 },
 		{ text: MetricText.Price, value: 4 },
 		{ text: MetricText.Tax, value: 1 }
+	];
+	var contents: MemorialHorizontalContentData[] = [
+		{
+			title: '通商章程',
+			body: '蓬莱与大明相约通商，所有货物一体适用同一税则。蓬莱与大明相约通商，所有货物一体适用同一税则。蓬莱与大明相约通商，所有货物一体适用同一税则。蓬莱与大明相约通商，所有货物一体适用同一税则。蓬莱与大明相约通商，所有货物一体适用同一税则。蓬莱与大明相约通商，所有货物一体适用同一税则。蓬莱与大明相约通商，所有货物一体适用同一税则。'
+		},
+		{
+			title: '通商章程',
+			body: '蓬莱与大明相约通商，所有货物一体适用同一税则。'
+		}
 	];
 	var proposal: MemorialProposalContentData = {
 		proposalTitle: '自由贸易',
@@ -118,12 +129,12 @@
 	<section class="flex flex-col gap-[20px]">
 		<h2 class="m-0 font-policy text-30 font-medium text-ink-primary">横向奏折</h2>
 		<div class="flex flex-wrap items-start gap-[32px]">
-			<MemorialHorizontal contents={[proposal.content]}>
+			<MemorialHorizontal {contents}>
 				{#snippet closed()}
 					<MemorialProposalClosed title="造身公所" lag={12} {metrics} />
 				{/snippet}
 			</MemorialHorizontal>
-			<MemorialHorizontal contents={[proposal.content]}>
+			<MemorialHorizontal {contents}>
 				{#snippet closed()}
 					<MemorialPolicyClosed title="大而美法案" lag={6} metrics={policyMetrics} />
 				{/snippet}
