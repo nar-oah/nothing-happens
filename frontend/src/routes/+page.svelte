@@ -1,12 +1,21 @@
 <script lang="ts">
-	import Memorial from '$lib/components/memorial/Memorial.svelte';
-	import MemorialConstitutionClosed from '$lib/components/memorial/MemorialConstitutionClosed.svelte';
-	import MemorialNewspaper from '$lib/components/memorial/MemorialNewspaper.svelte';
-	import MemorialPolicyClosed from '$lib/components/memorial/MemorialPolicyClosed.svelte';
-	import MemorialProposalClosed from '$lib/components/memorial/MemorialProposalClosed.svelte';
-	import MemorialProposalOption from '$lib/components/memorial/MemorialProposalOption.svelte';
-	import MemorialVerticalConstitution from '$lib/components/memorial/MemorialVerticalConstitution.svelte';
-	import MemorialVerticalPolicy from '$lib/components/memorial/MemorialVerticalPolicy.svelte';
+	import {
+		MemorialConstitutionClosed,
+		MemorialHorizontal,
+		MemorialNewspaper,
+		MemorialPolicyClosed,
+		MemorialProposalClosed,
+		MemorialProposalOption,
+		MemorialVerticalConstitution,
+		MemorialVerticalPolicy,
+		MetricText,
+		MetricSymbol,
+		type MemorialConstitutionData,
+		type MemorialMetricData,
+		type MemorialPolicyContentData,
+		type MemorialProposalContentData,
+		type MemorialHorizontalContentData
+	} from '$lib/components/memorial';
 	import Mark from '$lib/components/mark/Mark.svelte';
 	import ChoreFilter from '$lib/components/chore/ChoreFilter.svelte';
 	import ChoreItem from '$lib/components/chore/ChoreItem.svelte';
@@ -14,14 +23,6 @@
 	import ChoreSwitch from '$lib/components/chore/ChoreSwitch.svelte';
 	import Dialog from '$lib/components/dialog/Dialog.svelte';
 	import TopDialog from '$lib/components/dialog/TopDialog.svelte';
-	import {
-		MetricText,
-		MetricSymbol,
-		type MemorialConstitutionContentData,
-		type MemorialMetricData,
-		type MemorialPolicyContentData,
-		type MemorialProposalContentData
-	} from '$lib/components/memorial/memorial';
 
 	var metrics: MemorialMetricData[] = [
 		{
@@ -40,31 +41,66 @@
 		{ text: MetricText.Price, value: 4 },
 		{ text: MetricText.Tax, value: 1 }
 	];
+	var contents: MemorialHorizontalContentData[] = [
+		{
+			title: '通商章程',
+			body: '蓬莱与大明相约通商，所有货物一体适用同一税则。蓬莱与大明相约通商，所有货物一体适用同一税则。蓬莱与大明相约通商，所有货物一体适用同一税则。蓬莱与大明相约通商，所有货物一体适用同一税则。蓬莱与大明相约通商，所有货物一体适用同一税则。蓬莱与大明相约通商，所有货物一体适用同一税则。蓬莱与大明相约通商，所有货物一体适用同一税则。'
+		},
+		{
+			title: '通商章程',
+			body: '蓬莱与大明相约通商，所有货物一体适用同一税则。'
+		}
+	];
 	var proposal: MemorialProposalContentData = {
-		title: '自由贸易',
-		body: '蓬莱与大明相约通商，所有货物一体适用同一税则。'
+		proposalTitle: '自由贸易',
+		content: {
+			title: '通商章程',
+			body: '蓬莱与大明相约通商，所有货物一体适用同一税则。'
+		}
 	};
 	var policies: MemorialPolicyContentData[] = [
-		{ title: '商', body: '商船按新税则通行，不得另设关卡。' },
-		{ title: '税', body: '同类货物适用相同税率。' }
-	];
-	var articles: MemorialConstitutionContentData[] = [
 		{
-			title: '公所议事',
-			locked: false,
-			rows: [
-				{ text: '商会', number: 40, selected: true },
-				{ text: '工所', number: 35, selected: false }
-			]
+			policyTitle: '商',
+			content: { title: '商船通行', body: '商船按新税则通行，不得另设关卡。' }
 		},
-		{ title: '地方自治', locked: true, requirement: 3 }
+		{ policyTitle: '税', content: { body: '同类货物适用相同税率。' } }
 	];
+	var constitution: MemorialConstitutionData = {
+		公所议事: [
+			{
+				text: '商会',
+				number: 40,
+				selected: true,
+				selectable: true,
+				contents: [
+					{ title: '商会席位', body: '商会推举代表参与公所议事。' },
+					{ body: '席位依本地商户名册核定。' }
+				],
+				policies: [policies[0]]
+			},
+			{
+				text: '工所',
+				number: 35,
+				selected: false,
+				selectable: false,
+				contents: [{ body: '工所推举代表陈述工匠事务。' }],
+				policies: [policies[1]]
+			}
+		],
+		地方自治: 3
+	};
 	let direction = $state<'up' | 'down'>('up');
 	let directionb = $state<'up' | 'down'>('up');
 	let newspaperOpened = $state(false);
 	let choreSwitch = $state(false);
 	let choreSelect = $state(true);
 	var dialogText = '如果每个人都要求现在回答，\n那么“迟一点”本身就会成为一种罪。';
+	var filters = {
+		案牍: ['约法', '法案', '提案', '政策'],
+		指标: ['税课', '物价', '工钱', '用工', '商贸'],
+		时间: false,
+		数值: false
+	};
 </script>
 
 <svelte:head>
@@ -93,21 +129,21 @@
 	<section class="flex flex-col gap-[20px]">
 		<h2 class="m-0 font-policy text-30 font-medium text-ink-primary">横向奏折</h2>
 		<div class="flex flex-wrap items-start gap-[32px]">
-			<Memorial count={4} contentTitle={proposal.title} contentBody={proposal.body}>
+			<MemorialHorizontal {contents}>
 				{#snippet closed()}
 					<MemorialProposalClosed title="造身公所" lag={12} {metrics} />
 				{/snippet}
-			</Memorial>
-			<Memorial count={2} contentTitle={proposal.title} contentBody={proposal.body}>
+			</MemorialHorizontal>
+			<MemorialHorizontal {contents}>
 				{#snippet closed()}
 					<MemorialPolicyClosed title="大而美法案" lag={6} metrics={policyMetrics} />
 				{/snippet}
-			</Memorial>
-			<Memorial count={2} contentTitle="公所议事" contentBody="公所依席位表决本地事务。">
+			</MemorialHorizontal>
+			<MemorialHorizontal contents={[{ title: '公所议事', body: '公所依席位表决本地事务。' }]}>
 				{#snippet closed()}
 					<MemorialConstitutionClosed title="蓬莱约法" />
 				{/snippet}
-			</Memorial>
+			</MemorialHorizontal>
 			<MemorialProposalOption option="確認" lag={5} {metrics} />
 		</div>
 	</section>
@@ -119,10 +155,10 @@
 				title="大而美法案"
 				lag={6}
 				metrics={policyMetrics}
-				{proposal}
+				proposals={[proposal]}
 				{policies}
 			/>
-			<MemorialVerticalConstitution title="蓬莱约法" {proposal} {articles} />
+			<MemorialVerticalConstitution title="蓬莱约法" {constitution} />
 		</div>
 	</section>
 
@@ -168,6 +204,6 @@
 			<ChoreSwitch bind:isSwitch={choreSwitch} left="种族" right="利益集团" />
 			<ChoreSelect bind:isSelect={choreSelect} text="约法" />
 		</div>
-		<ChoreFilter />
+		<ChoreFilter {filters} />
 	</section>
 </main>

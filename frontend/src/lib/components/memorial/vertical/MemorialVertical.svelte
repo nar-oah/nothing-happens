@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import MemorialVerticalFold from './MemorialVerticalFold.svelte';
-	import { VERTICAL_FOLD_HEIGHT, VERTICAL_FOLD_SKEW, VERTICAL_FOLD_WIDTH } from './memorial';
+	import { VERTICAL_FOLD_HEIGHT, VERTICAL_FOLD_SKEW, VERTICAL_FOLD_WIDTH } from '../constants';
 
 	type Props = {
 		count: number;

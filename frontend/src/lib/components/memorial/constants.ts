@@ -1,0 +1,9 @@
+export const HORIZONTAL_FOLD_WIDTH = 230;
+export const HORIZONTAL_FOLD_HEIGHT = 82;
+export const VERTICAL_FOLD_WIDTH = 123;
+export const VERTICAL_FOLD_HEIGHT = 345;
+export const VERTICAL_FOLD_SKEW = 9.25;
+
+export const MEMORIAL_LINE_WIDTH = 15;
+export const TITLED_PAGE_BODY_LINES = 2;
+export const UNTITLED_PAGE_BODY_LINES = 4;

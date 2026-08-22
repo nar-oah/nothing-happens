@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { MemorialMetricData } from './memorial';
+	import type { MemorialMetricData } from '../types';
 	type Props = {
 		metric: MemorialMetricData;
 		isBottom?: boolean;

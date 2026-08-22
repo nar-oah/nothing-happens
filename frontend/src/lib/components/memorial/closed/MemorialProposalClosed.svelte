@@ -1,9 +1,9 @@
 <script lang="ts">
 	import MemorialClosedFrame from './MemorialClosedFrame.svelte';
-	import MemorialLag from './MemorialLag.svelte';
-	import MemorialMetric from './MemorialMetric.svelte';
-	import MemorialTitle from './MemorialTitle.svelte';
-	import type { MemorialMetricData } from './memorial';
+	import MemorialLag from '../shared/MemorialLag.svelte';
+	import MemorialMetric from '../shared/MemorialMetric.svelte';
+	import MemorialTitle from '../shared/MemorialTitle.svelte';
+	import type { MemorialMetricData } from '../types';
 
 	type Props = {
 		title: string;

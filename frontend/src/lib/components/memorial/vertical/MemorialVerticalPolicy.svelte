@@ -1,23 +1,23 @@
 <script lang="ts">
-	import MemorialMetric from './MemorialMetric.svelte';
-	import MemorialPolicyContent from './MemorialPolicyContent.svelte';
-	import MemorialProposalContent from './MemorialProposalContent.svelte';
-	import MemorialTitleStrip from './MemorialTitleStrip.svelte';
+	import MemorialPolicyContent from '../content/MemorialPolicyContent.svelte';
+	import MemorialProposalContent from '../content/MemorialProposalContent.svelte';
+	import MemorialMetric from '../shared/MemorialMetric.svelte';
+	import MemorialTitleStrip from '../shared/MemorialTitleStrip.svelte';
 	import MemorialVertical from './MemorialVertical.svelte';
-	import MemorialVerticalCoverFrame from './MemorialVerticalCoverFrame.svelte';
+	import MemorialVerticalCover from './MemorialVerticalCover.svelte';
 	import {
 		MetricText,
 		type MemorialMetricData,
 		type MemorialPolicyContentData,
 		type MemorialProposalContentData
-	} from './memorial';
+	} from '../types';
 
 	type Props = {
 		isTitle?: boolean;
 		title: string;
 		lag: number;
 		metrics: MemorialMetricData[];
-		proposal: MemorialProposalContentData;
+		proposals: MemorialProposalContentData[];
 		policies: MemorialPolicyContentData[];
 		onTitleChange?: (isTitle: boolean) => void;
 	};
@@ -27,7 +27,7 @@
 		title,
 		lag,
 		metrics,
-		proposal,
+		proposals,
 		policies,
 		onTitleChange
 	}: Props = $props();
@@ -43,7 +43,7 @@
 </script>
 
 <div class="flex items-start">
-	<MemorialVerticalCoverFrame>
+	<MemorialVerticalCover>
 		<button
 			class="relative h-full w-full border-0 bg-transparent p-0 text-left"
 			type="button"
@@ -66,13 +66,13 @@
 				</div>
 			{/if}
 		</button>
-	</MemorialVerticalCoverFrame>
-	<MemorialVertical count={policies.length + 1}>
+	</MemorialVerticalCover>
+	<MemorialVertical count={proposals.length + policies.length}>
 		{#snippet page(index: number)}
-			{#if index === 0}
-				<MemorialProposalContent {...proposal} />
-			{:else if policies[index - 1]}
-				<MemorialPolicyContent {...policies[index - 1]} />
+			{#if proposals[index]}
+				<MemorialProposalContent {...proposals[index]} />
+			{:else if policies[index - proposals.length]}
+				<MemorialPolicyContent {...policies[index - proposals.length]} />
 			{/if}
 		{/snippet}
 	</MemorialVertical>

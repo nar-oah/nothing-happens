@@ -5,8 +5,8 @@
 	};
 
 	let { text, vertical = false }: Props = $props();
-	let characters = $derived(Array.from(text));
-	let horizontalWidth = $derived(characters.length * 32);
+	const characters = $derived(Array.from(text));
+	const horizontalWidth = $derived(characters.length * 32);
 </script>
 
 {#if vertical}

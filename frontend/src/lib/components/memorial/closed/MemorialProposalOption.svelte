@@ -1,7 +1,7 @@
 <script lang="ts">
 	import MemorialClosedFrame from './MemorialClosedFrame.svelte';
-	import MemorialMetric from './MemorialMetric.svelte';
-	import { MetricText, type MemorialMetricData } from './memorial';
+	import MemorialMetric from '../shared/MemorialMetric.svelte';
+	import { MetricText, type MemorialMetricData } from '../types';
 
 	type Props = {
 		option: string;
@@ -40,7 +40,7 @@
 			{/each}
 		</div>
 		<div class="flex min-w-0 flex-1 justify-between">
-			{#each [...trailingMetrics, lagMetric] as metric}
+			{#each [...trailingMetrics, lagMetric] as metric (metric)}
 				<div>
 					<MemorialMetric {metric} />
 				</div>
