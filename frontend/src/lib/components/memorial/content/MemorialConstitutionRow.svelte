@@ -1,11 +1,25 @@
 <script lang="ts">
-	import type { MemorialConstitutionRowData } from './memorial';
+	import type { MemorialConstitutionRowData } from '../types';
 
-	type Props = MemorialConstitutionRowData;
-	let { text, number, selected }: Props = $props();
+	type Props = MemorialConstitutionRowData & {
+		onclick?: () => void;
+	};
+
+	let { text, number, selected = $bindable(), selectable, onclick }: Props = $props();
+
+	function handleClick() {
+		if (selectable) selected = !selected;
+		onclick?.();
+	}
 </script>
 
-<div class="flex w-[99px] flex-col items-end overflow-hidden">
+<button
+	class="flex w-[99px] flex-col items-end overflow-hidden border-0 bg-transparent p-0 text-left"
+	type="button"
+	aria-pressed={selectable ? selected : undefined}
+	aria-label={`查看${text}`}
+	onclick={handleClick}
+>
 	<div
 		class:bg-ink-primary={selected}
 		class:text-surface-amber={selected}
@@ -27,4 +41,4 @@
 	>
 		<span>{number}</span><span>%</span>
 	</div>
-</div>
+</button>
