@@ -1,5 +1,5 @@
 <script lang="ts">
-	import MarkSeal from '../mark/MarkSeal.svelte';
+	import MarkSeal from '../../mark/MarkSeal.svelte';
 	import MemorialHorizontalContent from './MemorialHorizontalContent.svelte';
 	import type { MemorialPolicyContentData as Props } from '../types';
 
