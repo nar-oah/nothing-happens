@@ -65,7 +65,7 @@
 			content: { title: '商船通行', body: '商船按新税则通行，不得另设关卡。' }
 		},
 		{ policyTitle: '税', content: { body: '同类货物适用相同税率。' } }
-	];
+	]);
 	var constitution: MemorialConstitutionData = {
 		公所议事: [
 			{
