@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="InterestGroupDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+display_name = "蓬莱公所"
+base_column_weight = 5
+decrease_wage = true
+decrease_employment = true
+decrease_trade = true
