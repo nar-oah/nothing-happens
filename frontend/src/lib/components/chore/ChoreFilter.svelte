@@ -8,10 +8,8 @@
 		onFiltersChange?: (filters: Record<string, ChoreFilterValue>) => void;
 	};
 
-	let {
-		filters = $bindable<Record<string, ChoreFilterValue>>({}),
-		onFiltersChange
-	}: Props = $props();
+	let { filters = $bindable<Record<string, ChoreFilterValue>>({}), onFiltersChange }: Props =
+		$props();
 
 	let options = $state<Record<string, string[]>>({});
 	let activeFilter = $state<string>();
