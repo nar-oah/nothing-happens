@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="NankeConstitutionArticleDefinition" format=3]
+
+[ext_resource type="Script" path="res://definitions/nanke_constitution_article_definition.gd" id="1_article_script"]
+[ext_resource type="Script" path="res://definitions/policy_definition.gd" id="2_policy_script"]
+[ext_resource type="Resource" path="res://data/races/nanke.tres" id="3_race_nanke"]
+[ext_resource type="Resource" path="res://data/interest_groups/槐安公所.tres" id="4_group_1"]
+[ext_resource type="Script" path="res://definitions/constitution_influence_rule.gd" id="5_influence_rule_script"]
+[ext_resource type="Resource" path="res://data/policies/集体议价.tres" id="6_policy_1"]
+[ext_resource type="Resource" path="res://data/policies/轮班限制.tres" id="7_policy_2"]
+[ext_resource type="Resource" path="res://data/policies/生活津贴.tres" id="8_policy_3"]
+
+[sub_resource type="Resource" id="Resource_influence_1"]
+script = ExtResource("5_influence_rule_script")
+race = ExtResource("3_race_nanke")
+interest_group = ExtResource("4_group_1")
+mode = 0
+rate = 0.5
+
+[resource]
+script = ExtResource("1_article_script")
+display_name = "工会"
+race = ExtResource("3_race_nanke")
+is_initial = true
+absence_probability = 0.05
+strike_enabled = true
+strike_group = ExtResource("4_group_1")
+strike_extends_to_group = false
+policies = Array[ExtResource("2_policy_script")]([ExtResource("6_policy_1"), ExtResource("7_policy_2"), ExtResource("8_policy_3")])
+influence_rules = Array[ExtResource("5_influence_rule_script")]([SubResource("Resource_influence_1")])

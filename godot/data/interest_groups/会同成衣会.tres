@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="InterestGroupDefinition" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="InterestGroupDefinition" format=3 uid="uid://cm1s3iuqjrcx7"]
 
 [ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="1_script"]
 

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="RegulationConstitutionArticleDefinition" format=3]
+
+[ext_resource type="Script" path="res://definitions/regulation_constitution_article_definition.gd" id="1_article_script"]
+[ext_resource type="Script" path="res://definitions/policy_definition.gd" id="2_policy_script"]
+[ext_resource type="Resource" path="res://data/races/zhushui.tres" id="3_race_zhushui"]
+[ext_resource type="Resource" path="res://data/policies/稽核拨款.tres" id="4_policy_1"]
+[ext_resource type="Resource" path="res://data/policies/核价公示.tres" id="5_policy_2"]
+[ext_resource type="Resource" path="res://data/policies/案卷核薪.tres" id="6_policy_3"]
+
+[resource]
+script = ExtResource("1_article_script")
+display_name = "有限监管"
+race = ExtResource("3_race_zhushui")
+donation_detection_probability = 0.2
+event_early_reveal_bonus_probability = 0.0
+policies = Array[ExtResource("2_policy_script")]([ExtResource("4_policy_1"), ExtResource("5_policy_2"), ExtResource("6_policy_3")])

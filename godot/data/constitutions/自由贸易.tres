@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="FreeTradeMergerConstitutionArticleDefinition" format=3]
+
+[ext_resource type="Script" path="res://definitions/free_trade_merger_constitution_article_definition.gd" id="1_article_script"]
+[ext_resource type="Script" path="res://definitions/policy_definition.gd" id="2_policy_script"]
+[ext_resource type="Resource" path="res://data/races/human.tres" id="3_race_human"]
+[ext_resource type="Resource" path="res://data/constitutions/朝贡.tres" id="4_prereq"]
+[ext_resource type="Resource" path="res://data/interest_groups/永乐轮运局.tres" id="5_group_1"]
+[ext_resource type="Script" path="res://definitions/constitution_influence_rule.gd" id="6_influence_rule_script"]
+[ext_resource type="Resource" path="res://data/policies/竞价通商.tres" id="7_policy_1"]
+[ext_resource type="Resource" path="res://data/policies/裁撤关卡.tres" id="8_policy_2"]
+[ext_resource type="Resource" path="res://data/policies/航路套利.tres" id="9_policy_3"]
+
+[sub_resource type="Resource" id="Resource_influence_1"]
+script = ExtResource("6_influence_rule_script")
+race = ExtResource("3_race_human")
+interest_group = ExtResource("5_group_1")
+mode = 2
+rate = 1.0
+
+[resource]
+script = ExtResource("1_article_script")
+display_name = "自由贸易"
+race = ExtResource("3_race_human")
+prerequisite = ExtResource("4_prereq")
+race_min_seat_rate = 0.0
+race_max_seat_rate = 0.0
+strong_group_rate = 0.5
+weak_group_rate = 0.05
+policies = Array[ExtResource("2_policy_script")]([ExtResource("7_policy_1"), ExtResource("8_policy_2"), ExtResource("9_policy_3")])
+influence_rules = Array[ExtResource("6_influence_rule_script")]([SubResource("Resource_influence_1")])

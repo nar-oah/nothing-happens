@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="LocalAutonomyConstitutionArticleDefinition" format=3]
+
+[ext_resource type="Script" path="res://definitions/local_autonomy_constitution_article_definition.gd" id="1_article_script"]
+[ext_resource type="Script" path="res://definitions/policy_definition.gd" id="2_policy_script"]
+[ext_resource type="Resource" path="res://data/races/peach_blossom.tres" id="3_race_peach"]
+[ext_resource type="Resource" path="res://data/constitutions/封闭.tres" id="4_prereq"]
+[ext_resource type="Script" path="res://definitions/constitution_seat_condition.gd" id="5_seat_condition_script"]
+[ext_resource type="Resource" path="res://data/policies/一地一议.tres" id="6_policy_1"]
+[ext_resource type="Resource" path="res://data/policies/各地自给.tres" id="7_policy_2"]
+[ext_resource type="Resource" path="res://data/policies/地方平准.tres" id="8_policy_3"]
+
+[sub_resource type="Resource" id="Resource_seat_condition"]
+script = ExtResource("5_seat_condition_script")
+race = ExtResource("3_race_peach")
+required_rate = 0.9
+
+[resource]
+script = ExtResource("1_article_script")
+display_name = "地区自治"
+race = ExtResource("3_race_peach")
+prerequisite = ExtResource("4_prereq")
+seat_condition = SubResource("Resource_seat_condition")
+local_group_base_column_weight = 1
+policies = Array[ExtResource("2_policy_script")]([ExtResource("6_policy_1"), ExtResource("7_policy_2"), ExtResource("8_policy_3")])
