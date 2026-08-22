@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="SeatDefinition" format=3 uid="uid://q0sxh7k8miu5"]
+
+[ext_resource type="Resource" uid="uid://b4e7rdu770lrv" path="res://data/races/peach_blossom.tres" id="1_or4ty"]
+[ext_resource type="Script" uid="uid://of78ek0nhty6" path="res://definitions/seat_definition.gd" id="1_qxpgu"]
+
+[resource]
+script = ExtResource("1_qxpgu")
+display_name = "桃源"
+anchor_race = ExtResource("1_or4ty")
+metadata/_custom_type_script = "uid://of78ek0nhty6"

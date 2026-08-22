@@ -1,0 +1,35 @@
+[gd_resource type="Resource" script_class="PolicyDefinition" format=3 uid="uid://cq1ot5f7pmk3b"]
+
+[ext_resource type="Script" uid="uid://djwe47mhwecbs" path="res://definitions/policy_effect.gd" id="1_effect"]
+[ext_resource type="Script" uid="uid://bogqw2drp125w" path="res://definitions/metric_condition.gd" id="2_condition"]
+[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="3_definition"]
+
+[sub_resource type="Resource" id="Condition"]
+script = ExtResource("2_condition")
+left_metric = 3
+operator = 2
+right_metric = 1
+metadata/_custom_type_script = "uid://bogqw2drp125w"
+
+[sub_resource type="Resource" id="Effect_1"]
+script = ExtResource("1_effect")
+target_metric = 3
+source_a = 3
+source_b = 1
+multiplier = -0.35
+metadata/_custom_type_script = "uid://djwe47mhwecbs"
+
+[sub_resource type="Resource" id="Effect_2"]
+script = ExtResource("1_effect")
+target_metric = 1
+source_a = 3
+source_b = 1
+multiplier = -0.45
+metadata/_custom_type_script = "uid://djwe47mhwecbs"
+
+[resource]
+script = ExtResource("3_definition")
+display_name = "归田自给"
+condition = SubResource("Condition")
+effects = Array[ExtResource("1_effect")]([SubResource("Effect_1"), SubResource("Effect_2")])
+metadata/_custom_type_script = "uid://bjs57iwq17q3a"

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ConstitutionArticleDefinition" format=3]
+
+[ext_resource type="Script" path="res://definitions/constitution_article_definition.gd" id="1_article_script"]
+[ext_resource type="Script" path="res://definitions/policy_definition.gd" id="2_policy_script"]
+[ext_resource type="Resource" path="res://data/races/yano.tres" id="3_race_yano"]
+[ext_resource type="Resource" path="res://data/constitutions/有限.tres" id="4_prereq"]
+[ext_resource type="Resource" path="res://data/policies/统配行身.tres" id="5_policy_1"]
+[ext_resource type="Resource" path="res://data/policies/机谱统购.tres" id="6_policy_2"]
+[ext_resource type="Resource" path="res://data/policies/身契转租.tres" id="7_policy_3"]
+
+[resource]
+script = ExtResource("1_article_script")
+display_name = "否决"
+race = ExtResource("3_race_yano")
+prerequisite = ExtResource("4_prereq")
+policies = Array[ExtResource("2_policy_script")]([ExtResource("5_policy_1"), ExtResource("6_policy_2"), ExtResource("7_policy_3")])

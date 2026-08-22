@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="HumanConstitutionArticleDefinition" format=3]
+
+[ext_resource type="Script" path="res://definitions/human_constitution_article_definition.gd" id="1_article_script"]
+[ext_resource type="Script" path="res://definitions/policy_definition.gd" id="2_policy_script"]
+[ext_resource type="Resource" path="res://data/races/human.tres" id="3_race_human"]
+[ext_resource type="Resource" path="res://data/constitutions/外藩.tres" id="4_prereq"]
+[ext_resource type="Resource" path="res://data/policies/折贡为货.tres" id="5_policy_1"]
+[ext_resource type="Resource" path="res://data/policies/贡期缓征.tres" id="6_policy_2"]
+[ext_resource type="Resource" path="res://data/policies/海舶限贡.tres" id="7_policy_3"]
+
+[resource]
+script = ExtResource("1_article_script")
+display_name = "朝贡"
+race = ExtResource("3_race_human")
+prerequisite = ExtResource("4_prereq")
+petition_limit = 5
+policies = Array[ExtResource("2_policy_script")]([ExtResource("5_policy_1"), ExtResource("6_policy_2"), ExtResource("7_policy_3")])
