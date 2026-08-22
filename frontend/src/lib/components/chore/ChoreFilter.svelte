@@ -79,7 +79,7 @@
 				<ChoreSelect
 					text={option}
 					isSelect={(filters[activeFilter] as string[]).includes(option)}
-					onSelectChange={(selected) => setOption(activeFilter, option, selected)}
+					onSelectChange={(selected) => setOption(activeFilter!, option, selected)}
 				/>
 			{/each}
 		{:else}
