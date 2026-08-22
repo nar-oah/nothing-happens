@@ -58,7 +58,8 @@
 			body: '蓬莱与大明相约通商，所有货物一体适用同一税则。'
 		}
 	};
-	var policies: MemorialPolicyContentData[] = [
+	let proposals = $state<MemorialProposalContentData[]>([proposal]);
+	let policies = $state<MemorialPolicyContentData[]>([
 		{
 			policyTitle: '商',
 			content: { title: '商船通行', body: '商船按新税则通行，不得另设关卡。' }
@@ -95,12 +96,34 @@
 	let choreSwitch = $state(false);
 	let choreSelect = $state(true);
 	var dialogText = '如果每个人都要求现在回答，\n那么“迟一点”本身就会成为一种罪。';
-	var filters = {
-		案牍: ['约法', '法案', '提案', '政策'],
-		指标: ['税课', '物价', '工钱', '用工', '商贸'],
+	let leftFilters = $state({
+		案牍: {
+			options: ['约法', '法案', '提案', '政策'],
+			selected: ['约法', '法案', '提案', '政策'],
+			multiple: true
+		},
+		指标: {
+			options: ['税课', '物价', '工钱', '用工', '商贸'],
+			selected: ['税课'],
+			multiple: false
+		},
 		时间: false,
 		数值: false
-	};
+	});
+	let rightFilters = $state({
+		案牍: {
+			options: ['约法', '法案', '提案', '政策'],
+			selected: ['提案', '政策'],
+			multiple: true
+		},
+		指标: {
+			options: ['税课', '物价', '工钱', '用工', '商贸'],
+			selected: ['商贸'],
+			multiple: false
+		},
+		时间: true,
+		数值: true
+	});
 </script>
 
 <svelte:head>
@@ -155,8 +178,8 @@
 				title="大而美法案"
 				lag={6}
 				metrics={policyMetrics}
-				proposals={[proposal]}
-				{policies}
+				bind:proposals
+				bind:policies
 			/>
 			<MemorialVerticalConstitution title="蓬莱约法" {constitution} />
 		</div>
@@ -204,6 +227,11 @@
 			<ChoreSwitch bind:isSwitch={choreSwitch} left="种族" right="利益集团" />
 			<ChoreSelect bind:isSelect={choreSelect} text="约法" />
 		</div>
-		<ChoreFilter {filters} />
+		<ChoreFilter
+			left="种族"
+			right="利益集团"
+			bind:leftFilters
+			bind:rightFilters
+		/>
 	</section>
 </main>
