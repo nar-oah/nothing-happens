@@ -58,14 +58,16 @@
 			body: '蓬莱与大明相约通商，所有货物一体适用同一税则。'
 		}
 	};
+	const policyOne: MemorialPolicyContentData = {
+		policyTitle: '商',
+		content: { title: '商船通行', body: '商船按新税则通行，不得另设关卡。' }
+	};
+	const policyTwo: MemorialPolicyContentData = {
+		policyTitle: '税',
+		content: { body: '同类货物适用相同税率。' }
+	};
 	let proposals = $state<MemorialProposalContentData[]>([proposal]);
-	let policies = $state<MemorialPolicyContentData[]>([
-		{
-			policyTitle: '商',
-			content: { title: '商船通行', body: '商船按新税则通行，不得另设关卡。' }
-		},
-		{ policyTitle: '税', content: { body: '同类货物适用相同税率。' } }
-	]);
+	let policies = $state<MemorialPolicyContentData[]>([policyOne, policyTwo]);
 	var constitution: MemorialConstitutionData = {
 		公所议事: [
 			{
@@ -77,7 +79,7 @@
 					{ title: '商会席位', body: '商会推举代表参与公所议事。' },
 					{ body: '席位依本地商户名册核定。' }
 				],
-				policies: [policies[0]]
+				policies: [policyOne]
 			},
 			{
 				text: '工所',
@@ -85,7 +87,7 @@
 				selected: false,
 				selectable: false,
 				contents: [{ body: '工所推举代表陈述工匠事务。' }],
-				policies: [policies[1]]
+				policies: [policyTwo]
 			}
 		],
 		地方自治: 3
