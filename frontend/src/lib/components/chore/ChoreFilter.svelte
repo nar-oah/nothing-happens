@@ -12,15 +12,17 @@
 		$props();
 
 	let filterEntries = $derived(Object.entries(filters));
-	let options = $state<Record<string, string[]>>(
-		Object.fromEntries(
-			filterEntries
-				.filter((entry): entry is [string, string[]] => Array.isArray(entry[1]))
-				.map(([name, values]) => [name, [...values]])
-		)
-	);
+	let options = $state<Record<string, string[]>>({});
 	let activeFilter = $state<string>();
-	let quickFilter = $state(Object.keys(options)[0]);
+	let quickFilter = $state<string>();
+	let defaultFilter = $derived(filterEntries.find(([, value]) => Array.isArray(value))?.[0]);
+	let shownQuickFilter = $derived(quickFilter ?? defaultFilter);
+
+	$effect(() => {
+		for (const [name, values] of filterEntries) {
+			if (Array.isArray(values) && !options[name]) options[name] = [...values];
+		}
+	});
 
 	function setFilter(name: string, value: ChoreFilterValue) {
 		filters = { ...filters, [name]: value };
@@ -46,15 +48,15 @@
 			activeFilter = undefined;
 			return;
 		}
-		activeFilter = quickFilter;
+		activeFilter = shownQuickFilter;
 	}
 </script>
 
 <div class="flex flex-col items-start overflow-hidden">
-	{#if quickFilter}
+	{#if shownQuickFilter}
 		<div class="-mb-[5px] shrink-0">
 			<ChoreSwitch
-				left={quickFilter}
+				left={shownQuickFilter}
 				right="筛选条件"
 				isSwitch={!activeFilter}
 				onSwitchChange={toggleView}
