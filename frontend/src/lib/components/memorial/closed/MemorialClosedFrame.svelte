@@ -17,8 +17,5 @@
 	>
 		{@render children()}
 	</div>
-	<div
-		class="h-4 w-$width bg-shadow-deep"
-		style:--width={`${HORIZONTAL_FOLD_WIDTH - 10}px`}
-	></div>
+	<div class="h-4 w-$width bg-shadow-deep" style:--width={`${HORIZONTAL_FOLD_WIDTH - 10}px`}></div>
 </div>

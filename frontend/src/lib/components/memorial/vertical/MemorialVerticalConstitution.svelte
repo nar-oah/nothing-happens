@@ -44,9 +44,7 @@
 			return [
 				sectionPage,
 				{ type: 'detail', title: row.text, contents: row.contents },
-				...row.policies.map(
-					(policy): ConstitutionPage => ({ type: 'policy', content: policy })
-				)
+				...row.policies.map((policy): ConstitutionPage => ({ type: 'policy', content: policy }))
 			];
 		})
 	);

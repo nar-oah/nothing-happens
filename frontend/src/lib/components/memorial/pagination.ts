@@ -1,8 +1,4 @@
-import {
-	MEMORIAL_LINE_WIDTH,
-	TITLED_PAGE_BODY_LINES,
-	UNTITLED_PAGE_BODY_LINES
-} from './constants';
+import { MEMORIAL_LINE_WIDTH, TITLED_PAGE_BODY_LINES, UNTITLED_PAGE_BODY_LINES } from './constants';
 import type { MemorialHorizontalContentData } from './types';
 
 const isEnglishLetter = (character: string) => /^[A-Za-z]$/.test(character);
@@ -48,9 +44,7 @@ export function paginateMemorialContents(
 ): MemorialHorizontalContentData[] {
 	return contents.flatMap((content) => {
 		const lines = splitMemorialBodyIntoLines(content.body);
-		const firstPageLineCount = content.title
-			? TITLED_PAGE_BODY_LINES
-			: UNTITLED_PAGE_BODY_LINES;
+		const firstPageLineCount = content.title ? TITLED_PAGE_BODY_LINES : UNTITLED_PAGE_BODY_LINES;
 
 		if (lines.length === 0) return [{ ...content }];
 

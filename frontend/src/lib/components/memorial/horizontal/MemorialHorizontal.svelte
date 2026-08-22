@@ -1,9 +1,6 @@
-	<script lang="ts">
+<script lang="ts">
 	import { onDestroy, type Snippet } from 'svelte';
-	import {
-		HORIZONTAL_FOLD_HEIGHT,
-		HORIZONTAL_FOLD_WIDTH
-	} from '../constants';
+	import { HORIZONTAL_FOLD_HEIGHT, HORIZONTAL_FOLD_WIDTH } from '../constants';
 	import MemorialHorizontalContent from '../content/MemorialHorizontalContent.svelte';
 	import { paginateMemorialContents } from '../pagination';
 	import type { MemorialHorizontalContentData } from '../types';
