@@ -2,7 +2,7 @@
 	type Props = {
 		text: string;
 	};
-	let { text }: Props = $props();
+	const { text }: Props = $props();
 </script>
 
 <div class="relative h-30 w-100 border-3 border-solid border-surface-amber bg-accent-amber-deep">
