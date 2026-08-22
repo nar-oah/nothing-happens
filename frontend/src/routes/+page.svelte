@@ -229,11 +229,6 @@
 			<ChoreSwitch bind:isSwitch={choreSwitch} left="种族" right="利益集团" />
 			<ChoreSelect bind:isSelect={choreSelect} text="约法" />
 		</div>
-		<ChoreFilter
-			left="种族"
-			right="利益集团"
-			bind:leftFilters
-			bind:rightFilters
-		/>
+		<ChoreFilter left="种族" right="利益集团" bind:leftFilters bind:rightFilters />
 	</section>
 </main>

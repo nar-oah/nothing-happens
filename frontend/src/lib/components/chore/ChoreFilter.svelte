@@ -51,9 +51,7 @@
 		if (typeof filter === 'boolean') return;
 		const nextSelected = filter.multiple
 			? selected
-				? filter.options.filter(
-						(value) => value === option || filter.selected.includes(value)
-					)
+				? filter.options.filter((value) => value === option || filter.selected.includes(value))
 				: filter.selected.filter((value) => value !== option)
 			: [option];
 		setFilter(name, { ...filter, selected: nextSelected });
