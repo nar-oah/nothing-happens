@@ -1,24 +1,19 @@
-[gd_resource type="Resource" script_class="BiyiConstitutionArticleDefinition" format=3]
+[gd_resource type="Resource" script_class="BiyiConstitutionArticleDefinition" format=3 uid="uid://c7e0ktm2k2jge"]
 
-[ext_resource type="Script" path="res://definitions/biyi_constitution_article_definition.gd" id="1_article_script"]
-[ext_resource type="Script" path="res://definitions/policy_definition.gd" id="2_policy_script"]
-[ext_resource type="Resource" path="res://data/races/biyi.tres" id="3_race_biyi"]
-[ext_resource type="Resource" path="res://data/races/human.tres" id="4_race_human"]
-[ext_resource type="Resource" path="res://data/races/nanke.tres" id="5_race_nanke"]
-[ext_resource type="Resource" path="res://data/races/peach_blossom.tres" id="6_race_peach"]
-[ext_resource type="Resource" path="res://data/races/yano.tres" id="7_race_yano"]
-[ext_resource type="Resource" path="res://data/constitutions/国有化.tres" id="8_prereq"]
+[ext_resource type="Script" uid="uid://dtldpcolvfdl0" path="res://definitions/biyi_constitution_article_definition.gd" id="1_article_script"]
+[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
+[ext_resource type="Resource" uid="uid://bw162ei21njtt" path="res://data/races/biyi.tres" id="3_race_biyi"]
+[ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/human.tres" id="4_race_human"]
+[ext_resource type="Resource" uid="uid://bto7mkhf8cqca" path="res://data/races/nanke.tres" id="5_race_nanke"]
+[ext_resource type="Resource" uid="uid://b4e7rdu770lrv" path="res://data/races/peach_blossom.tres" id="6_race_peach"]
+[ext_resource type="Resource" uid="uid://c2eco18e42n34" path="res://data/races/yano.tres" id="7_race_yano"]
+[ext_resource type="Resource" uid="uid://do2fqf4b02kpc" path="res://data/constitutions/国有化.tres" id="8_prereq"]
 [ext_resource type="Resource" path="res://data/interest_groups/蓬莱公所.tres" id="9_group_1"]
-[ext_resource type="Script" path="res://definitions/constitution_seat_condition.gd" id="10_seat_condition_script"]
-[ext_resource type="Script" path="res://definitions/constitution_influence_rule.gd" id="11_influence_rule_script"]
-[ext_resource type="Resource" path="res://data/policies/统一配给.tres" id="12_policy_1"]
-[ext_resource type="Resource" path="res://data/policies/总量调配.tres" id="13_policy_2"]
-[ext_resource type="Resource" path="res://data/policies/集中征购.tres" id="14_policy_3"]
-
-[sub_resource type="Resource" id="Resource_seat_condition"]
-script = ExtResource("10_seat_condition_script")
-interest_group = ExtResource("9_group_1")
-required_rate = 0.9
+[ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="10_seat_condition_script"]
+[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="11_influence_rule_script"]
+[ext_resource type="Resource" uid="uid://chxghf2sqjvqh" path="res://data/policies/统一配给.tres" id="12_policy_1"]
+[ext_resource type="Resource" uid="uid://c7452f4lwguyl" path="res://data/policies/总量调配.tres" id="13_policy_2"]
+[ext_resource type="Resource" uid="uid://dc38kbujj2mej" path="res://data/policies/集中征购.tres" id="14_policy_3"]
 
 [sub_resource type="Resource" id="Resource_influence_1"]
 script = ExtResource("11_influence_rule_script")
@@ -55,12 +50,17 @@ interest_group = ExtResource("9_group_1")
 mode = 1
 rate = 0.2
 
+[sub_resource type="Resource" id="Resource_seat_condition"]
+script = ExtResource("10_seat_condition_script")
+interest_group = ExtResource("9_group_1")
+required_rate = 0.9
+
 [resource]
 script = ExtResource("1_article_script")
+yin_yang_adjustment_rate = 0.1
 display_name = "法团"
 race = ExtResource("3_race_biyi")
 prerequisite = ExtResource("8_prereq")
 seat_condition = SubResource("Resource_seat_condition")
-yin_yang_adjustment_rate = 0.1
 policies = Array[ExtResource("2_policy_script")]([ExtResource("12_policy_1"), ExtResource("13_policy_2"), ExtResource("14_policy_3")])
 influence_rules = Array[ExtResource("11_influence_rule_script")]([SubResource("Resource_influence_1"), SubResource("Resource_influence_2"), SubResource("Resource_influence_3"), SubResource("Resource_influence_4"), SubResource("Resource_influence_5")])

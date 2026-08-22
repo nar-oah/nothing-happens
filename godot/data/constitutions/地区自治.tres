@@ -1,13 +1,14 @@
-[gd_resource type="Resource" script_class="LocalAutonomyConstitutionArticleDefinition" format=3]
+[gd_resource type="Resource" script_class="LocalAutonomyConstitutionArticleDefinition" format=3 uid="uid://dce70h370cmcp"]
 
-[ext_resource type="Script" path="res://definitions/local_autonomy_constitution_article_definition.gd" id="1_article_script"]
-[ext_resource type="Script" path="res://definitions/policy_definition.gd" id="2_policy_script"]
-[ext_resource type="Resource" path="res://data/races/peach_blossom.tres" id="3_race_peach"]
-[ext_resource type="Resource" path="res://data/constitutions/封闭.tres" id="4_prereq"]
-[ext_resource type="Script" path="res://definitions/constitution_seat_condition.gd" id="5_seat_condition_script"]
-[ext_resource type="Resource" path="res://data/policies/一地一议.tres" id="6_policy_1"]
-[ext_resource type="Resource" path="res://data/policies/各地自给.tres" id="7_policy_2"]
-[ext_resource type="Resource" path="res://data/policies/地方平准.tres" id="8_policy_3"]
+[ext_resource type="Script" uid="uid://dv3eypbtseh1p" path="res://definitions/local_autonomy_constitution_article_definition.gd" id="1_article_script"]
+[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="1_imfq5"]
+[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
+[ext_resource type="Resource" uid="uid://b4e7rdu770lrv" path="res://data/races/peach_blossom.tres" id="3_race_peach"]
+[ext_resource type="Resource" uid="uid://bpw0qny2boax0" path="res://data/constitutions/封闭.tres" id="4_prereq"]
+[ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="5_seat_condition_script"]
+[ext_resource type="Resource" uid="uid://dee3tls8eebax" path="res://data/policies/一地一议.tres" id="6_policy_1"]
+[ext_resource type="Resource" uid="uid://cy6isbo6ilvjh" path="res://data/policies/各地自给.tres" id="7_policy_2"]
+[ext_resource type="Resource" uid="uid://b5w6n7hgkbbhi" path="res://data/policies/地方平准.tres" id="8_policy_3"]
 
 [sub_resource type="Resource" id="Resource_seat_condition"]
 script = ExtResource("5_seat_condition_script")
@@ -20,5 +21,4 @@ display_name = "地区自治"
 race = ExtResource("3_race_peach")
 prerequisite = ExtResource("4_prereq")
 seat_condition = SubResource("Resource_seat_condition")
-local_group_base_column_weight = 1
 policies = Array[ExtResource("2_policy_script")]([ExtResource("6_policy_1"), ExtResource("7_policy_2"), ExtResource("8_policy_3")])

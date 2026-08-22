@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="PolicyDefinition" format=3]
+[gd_resource type="Resource" script_class="PolicyDefinition" format=3 uid="uid://b43s8bgxrisa2"]
 
 [ext_resource type="Script" uid="uid://djwe47mhwecbs" path="res://definitions/policy_effect.gd" id="1_effect"]
 [ext_resource type="Script" uid="uid://bogqw2drp125w" path="res://definitions/metric_condition.gd" id="2_condition"]
@@ -14,7 +14,6 @@ metadata/_custom_type_script = "uid://bogqw2drp125w"
 [sub_resource type="Resource" id="Effect_1"]
 script = ExtResource("1_effect")
 target_metric = 2
-formula = 1
 source_a = 1
 source_b = 2
 multiplier = 0.4
@@ -22,8 +21,6 @@ metadata/_custom_type_script = "uid://djwe47mhwecbs"
 
 [sub_resource type="Resource" id="Effect_2"]
 script = ExtResource("1_effect")
-target_metric = 0
-formula = 1
 source_a = 1
 source_b = 2
 multiplier = 0.2

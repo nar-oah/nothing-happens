@@ -1,13 +1,14 @@
-[gd_resource type="Resource" script_class="ConstitutionArticleDefinition" format=3]
+[gd_resource type="Resource" script_class="ConstitutionArticleDefinition" format=3 uid="uid://bpw0qny2boax0"]
 
-[ext_resource type="Script" path="res://definitions/constitution_article_definition.gd" id="1_article_script"]
-[ext_resource type="Script" path="res://definitions/policy_definition.gd" id="2_policy_script"]
-[ext_resource type="Resource" path="res://data/races/peach_blossom.tres" id="3_race_peach"]
+[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="1_0qqdk"]
+[ext_resource type="Script" uid="uid://dajy5425i5dpq" path="res://definitions/constitution_article_definition.gd" id="1_article_script"]
+[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
+[ext_resource type="Resource" uid="uid://b4e7rdu770lrv" path="res://data/races/peach_blossom.tres" id="3_race_peach"]
 [ext_resource type="Resource" path="res://data/constitutions/自治.tres" id="4_prereq"]
-[ext_resource type="Script" path="res://definitions/constitution_seat_condition.gd" id="5_seat_condition_script"]
-[ext_resource type="Resource" path="res://data/policies/闭关减市.tres" id="6_policy_1"]
-[ext_resource type="Resource" path="res://data/policies/归田自给.tres" id="7_policy_2"]
-[ext_resource type="Resource" path="res://data/policies/族内免征.tres" id="8_policy_3"]
+[ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="5_seat_condition_script"]
+[ext_resource type="Resource" uid="uid://bnyvicjgl8uey" path="res://data/policies/闭关减市.tres" id="6_policy_1"]
+[ext_resource type="Resource" uid="uid://cq1ot5f7pmk3b" path="res://data/policies/归田自给.tres" id="7_policy_2"]
+[ext_resource type="Resource" uid="uid://cg0ej8imb83y3" path="res://data/policies/族内免征.tres" id="8_policy_3"]
 
 [sub_resource type="Resource" id="Resource_seat_condition"]
 script = ExtResource("5_seat_condition_script")

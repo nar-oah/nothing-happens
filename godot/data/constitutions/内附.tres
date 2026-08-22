@@ -1,13 +1,14 @@
-[gd_resource type="Resource" script_class="HumanConstitutionArticleDefinition" format=3]
+[gd_resource type="Resource" script_class="HumanConstitutionArticleDefinition" format=3 uid="uid://d2060urv5hhfb"]
 
-[ext_resource type="Script" path="res://definitions/human_constitution_article_definition.gd" id="1_article_script"]
-[ext_resource type="Script" path="res://definitions/policy_definition.gd" id="2_policy_script"]
-[ext_resource type="Resource" path="res://data/races/human.tres" id="3_race_human"]
+[ext_resource type="Script" uid="uid://tmkjsuwecnwg" path="res://definitions/human_constitution_article_definition.gd" id="1_article_script"]
+[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="1_hmahs"]
+[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
+[ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/human.tres" id="3_race_human"]
 [ext_resource type="Resource" path="res://data/constitutions/外藩.tres" id="4_prereq"]
-[ext_resource type="Script" path="res://definitions/constitution_seat_condition.gd" id="5_seat_condition_script"]
-[ext_resource type="Resource" path="res://data/policies/官运调拨.tres" id="6_policy_1"]
-[ext_resource type="Resource" path="res://data/policies/差役折银.tres" id="7_policy_2"]
-[ext_resource type="Resource" path="res://data/policies/官市优先.tres" id="8_policy_3"]
+[ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="5_seat_condition_script"]
+[ext_resource type="Resource" uid="uid://dsi8n5oqa2wbs" path="res://data/policies/官运调拨.tres" id="6_policy_1"]
+[ext_resource type="Resource" uid="uid://beqtc06vjai47" path="res://data/policies/差役折银.tres" id="7_policy_2"]
+[ext_resource type="Resource" uid="uid://cjjgw67nkrsnt" path="res://data/policies/官市优先.tres" id="8_policy_3"]
 
 [sub_resource type="Resource" id="Resource_seat_condition"]
 script = ExtResource("5_seat_condition_script")
@@ -16,10 +17,10 @@ required_rate = 0.5
 
 [resource]
 script = ExtResource("1_article_script")
+petition_limit = 5
 display_name = "内附"
 race = ExtResource("3_race_human")
 prerequisite = ExtResource("4_prereq")
 seat_condition = SubResource("Resource_seat_condition")
 race_min_seat_rate = 0.5
-petition_limit = 5
 policies = Array[ExtResource("2_policy_script")]([ExtResource("6_policy_1"), ExtResource("7_policy_2"), ExtResource("8_policy_3")])

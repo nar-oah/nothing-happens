@@ -1,13 +1,14 @@
-[gd_resource type="Resource" script_class="BiyiConstitutionArticleDefinition" format=3]
+[gd_resource type="Resource" script_class="BiyiConstitutionArticleDefinition" format=3 uid="uid://pdec6waifvom"]
 
-[ext_resource type="Script" path="res://definitions/biyi_constitution_article_definition.gd" id="1_article_script"]
-[ext_resource type="Script" path="res://definitions/policy_definition.gd" id="2_policy_script"]
-[ext_resource type="Resource" path="res://data/races/biyi.tres" id="3_race_biyi"]
+[ext_resource type="Script" uid="uid://dtldpcolvfdl0" path="res://definitions/biyi_constitution_article_definition.gd" id="1_article_script"]
+[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="1_pi8wa"]
+[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
+[ext_resource type="Resource" uid="uid://bw162ei21njtt" path="res://data/races/biyi.tres" id="3_race_biyi"]
 [ext_resource type="Resource" path="res://data/constitutions/包容.tres" id="4_prereq"]
-[ext_resource type="Script" path="res://definitions/constitution_seat_condition.gd" id="5_seat_condition_script"]
-[ext_resource type="Resource" path="res://data/policies/阴历平准.tres" id="6_policy_1"]
-[ext_resource type="Resource" path="res://data/policies/阳历分利.tres" id="7_policy_2"]
-[ext_resource type="Resource" path="res://data/policies/阴阳转录.tres" id="8_policy_3"]
+[ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="5_seat_condition_script"]
+[ext_resource type="Resource" uid="uid://cevrii67ltmsg" path="res://data/policies/阴历平准.tres" id="6_policy_1"]
+[ext_resource type="Resource" uid="uid://bpj8sxytmtoyp" path="res://data/policies/阳历分利.tres" id="7_policy_2"]
+[ext_resource type="Resource" uid="uid://dl3mgnbq5hgfp" path="res://data/policies/阴阳转录.tres" id="8_policy_3"]
 
 [sub_resource type="Resource" id="Resource_seat_condition"]
 script = ExtResource("5_seat_condition_script")
@@ -16,9 +17,9 @@ required_rate = 0.5
 
 [resource]
 script = ExtResource("1_article_script")
+yin_yang_adjustment_rate = 0.1
 display_name = "比翼化"
 race = ExtResource("3_race_biyi")
 prerequisite = ExtResource("4_prereq")
 seat_condition = SubResource("Resource_seat_condition")
-yin_yang_adjustment_rate = 0.1
 policies = Array[ExtResource("2_policy_script")]([ExtResource("6_policy_1"), ExtResource("7_policy_2"), ExtResource("8_policy_3")])
