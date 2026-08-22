@@ -16,7 +16,11 @@
 	let { open = $bindable(false), contents, closed, onOpenChange }: Props = $props();
 	let showClosed = $state(!open);
 	let closeTimer: ReturnType<typeof setTimeout> | undefined;
-	const pages = $derived(paginateMemorialContents(contents));
+	const pages = $derived.by(() => {
+		const paginatedPages = paginateMemorialContents(contents);
+		while (paginatedPages.length < 2) paginatedPages.push({ body: '' });
+		return paginatedPages;
+	});
 	const skews = $derived(createFoldSkews(pages.length));
 
 	function createFoldSkews(count: number): number[] {
