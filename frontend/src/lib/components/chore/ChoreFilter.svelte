@@ -11,21 +11,16 @@
 	let { filters = $bindable<Record<string, ChoreFilterValue>>({}), onFiltersChange }: Props =
 		$props();
 
-	let options = $state<Record<string, string[]>>({});
-	let activeFilter = $state<string>();
-	let quickFilter = $state<string>();
 	let filterEntries = $derived(Object.entries(filters));
-
-	$effect(() => {
-		const arrayFilters = filterEntries.filter((entry): entry is [string, string[]] =>
-			Array.isArray(entry[1])
-		);
-
-		for (const [name, values] of arrayFilters) options[name] ??= [...values];
-		if (!quickFilter || !arrayFilters.some(([name]) => name === quickFilter)) {
-			quickFilter = arrayFilters[0]?.[0];
-		}
-	});
+	let options = $state<Record<string, string[]>>(
+		Object.fromEntries(
+			filterEntries
+				.filter((entry): entry is [string, string[]] => Array.isArray(entry[1]))
+				.map(([name, values]) => [name, [...values]])
+		)
+	);
+	let activeFilter = $state<string>();
+	let quickFilter = $state(Object.keys(options)[0]);
 
 	function setFilter(name: string, value: ChoreFilterValue) {
 		filters = { ...filters, [name]: value };
