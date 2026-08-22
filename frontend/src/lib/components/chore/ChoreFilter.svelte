@@ -2,67 +2,76 @@
 	import ChoreSelect from './ChoreSelect.svelte';
 	import ChoreSwitch from './ChoreSwitch.svelte';
 
-	type ChoreFilterValue = string[] | boolean;
+	type ChoreFilterOptions = {
+		options: string[];
+		selected: string[];
+		multiple: boolean;
+	};
+	type ChoreFilterValue = ChoreFilterOptions | boolean;
+	type ChoreFilters = Record<string, ChoreFilterValue>;
 	type Props = {
-		filters: Record<string, ChoreFilterValue>;
-		onFiltersChange?: (filters: Record<string, ChoreFilterValue>) => void;
+		left: string;
+		right: string;
+		leftFilters: ChoreFilters;
+		rightFilters: ChoreFilters;
+		isSwitch?: boolean;
+		onLeftFiltersChange?: (filters: ChoreFilters) => void;
+		onRightFiltersChange?: (filters: ChoreFilters) => void;
+		onSwitchChange?: (isSwitch: boolean) => void;
 	};
 
-	let { filters = $bindable<Record<string, ChoreFilterValue>>({}), onFiltersChange }: Props =
-		$props();
+	let {
+		left,
+		right,
+		leftFilters = $bindable<ChoreFilters>(),
+		rightFilters = $bindable<ChoreFilters>(),
+		isSwitch = $bindable(false),
+		onLeftFiltersChange,
+		onRightFiltersChange,
+		onSwitchChange
+	}: Props = $props();
 
+	let filters = $derived(isSwitch ? rightFilters : leftFilters);
 	let filterEntries = $derived(Object.entries(filters));
-	let options = $state<Record<string, string[]>>({});
 	let activeFilter = $state<string>();
-	let quickFilter = $state<string>();
-	let defaultFilter = $derived(filterEntries.find(([, value]) => Array.isArray(value))?.[0]);
-	let shownQuickFilter = $derived(quickFilter ?? defaultFilter);
-
-	$effect(() => {
-		for (const [name, values] of filterEntries) {
-			if (Array.isArray(values) && !options[name]) options[name] = [...values];
-		}
-	});
 
 	function setFilter(name: string, value: ChoreFilterValue) {
-		filters = { ...filters, [name]: value };
-		onFiltersChange?.(filters);
+		const next = { ...filters, [name]: value };
+		if (isSwitch) {
+			rightFilters = next;
+			onRightFiltersChange?.(next);
+			return;
+		}
+		leftFilters = next;
+		onLeftFiltersChange?.(next);
 	}
 
 	function setOption(name: string, option: string, selected: boolean) {
-		const selectedOptions = filters[name] as string[];
-		const next = selected
-			? options[name].filter((value) => value === option || selectedOptions.includes(value))
-			: selectedOptions.filter((value) => value !== option);
-		setFilter(name, next);
+		const filter = filters[name];
+		if (typeof filter === 'boolean') return;
+		const nextSelected = filter.multiple
+			? selected
+				? filter.options.filter((value) => value === option || filter.selected.includes(value))
+				: filter.selected.filter((value) => value !== option)
+			: [option];
+		setFilter(name, { ...filter, selected: nextSelected });
 	}
 
 	function openFilter(name: string) {
-		quickFilter = name;
 		activeFilter = name;
 	}
 
-	function toggleView() {
-		if (activeFilter) {
-			quickFilter = activeFilter;
-			activeFilter = undefined;
-			return;
-		}
-		activeFilter = shownQuickFilter;
+	function setSwitch(next: boolean) {
+		isSwitch = next;
+		activeFilter = undefined;
+		onSwitchChange?.(next);
 	}
 </script>
 
 <div class="flex flex-col items-start overflow-hidden">
-	{#if shownQuickFilter}
-		<div>
-			<ChoreSwitch
-				left={shownQuickFilter}
-				right="筛选条件"
-				isSwitch={!activeFilter}
-				onSwitchChange={toggleView}
-			/>
-		</div>
-	{/if}
+	<div>
+		<ChoreSwitch {left} {right} {isSwitch} onSwitchChange={setSwitch} />
+	</div>
 
 	<div
 		class:bg-ink-primary={!activeFilter}
@@ -70,22 +79,27 @@
 		class="flex shrink-0 items-start gap-8 overflow-hidden whitespace-nowrap text-surface-amber"
 	>
 		{#if activeFilter}
-			{#each options[activeFilter] as option (option)}
-				<ChoreSelect
-					text={option}
-					isSelect={(filters[activeFilter] as string[]).includes(option)}
-					onSelectChange={(selected) => setOption(activeFilter!, option, selected)}
-				/>
-			{/each}
+			{@const filter = filters[activeFilter]}
+			{#if filter && typeof filter !== 'boolean'}
+				{#each filter.options as option (option)}
+					<ChoreSelect
+						text={option}
+						isSelect={filter.multiple
+							? filter.selected.includes(option)
+							: filter.selected[0] === option}
+						onSelectChange={(selected) => setOption(activeFilter!, option, selected)}
+					/>
+				{/each}
+			{/if}
 		{:else}
 			{#each filterEntries as [name, value] (name)}
-				{#if Array.isArray(value)}
+				{#if typeof value !== 'boolean'}
 					<button
 						type="button"
 						class="typo-filter-option cursor-pointer border-0 bg-transparent p-0 text-surface-amber"
 						onclick={() => openFilter(name)}
 					>
-						{value.length}{name}
+						{value.multiple ? `${value.selected.length}${name}` : (value.selected[0] ?? name)}
 					</button>
 				{:else}
 					<ChoreSelect

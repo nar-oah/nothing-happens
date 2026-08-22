@@ -20,6 +20,8 @@
 		proposals: MemorialProposalContentData[];
 		policies: MemorialPolicyContentData[];
 		onTitleChange?: (isTitle: boolean) => void;
+		onProposalsChange?: (proposals: MemorialProposalContentData[]) => void;
+		onPoliciesChange?: (policies: MemorialPolicyContentData[]) => void;
 	};
 
 	let {
@@ -27,9 +29,11 @@
 		title,
 		lag,
 		metrics,
-		proposals,
-		policies,
-		onTitleChange
+		proposals = $bindable<MemorialProposalContentData[]>(),
+		policies = $bindable<MemorialPolicyContentData[]>(),
+		onTitleChange,
+		onProposalsChange,
+		onPoliciesChange
 	}: Props = $props();
 	let coverMetrics: MemorialMetricData[] = $derived([
 		...metrics,
@@ -39,6 +43,19 @@
 	function toggleTitle() {
 		isTitle = !isTitle;
 		onTitleChange?.(isTitle);
+	}
+
+	function removePage(index: number) {
+		if (index < proposals.length) {
+			proposals = proposals.filter((_, proposalIndex) => proposalIndex !== index);
+			onProposalsChange?.(proposals);
+			return;
+		}
+
+		const policyIndex = index - proposals.length;
+		if (!policies[policyIndex]) return;
+		policies = policies.filter((_, index) => index !== policyIndex);
+		onPoliciesChange?.(policies);
 	}
 </script>
 
@@ -69,11 +86,18 @@
 	</MemorialVerticalCover>
 	<MemorialVertical count={proposals.length + policies.length}>
 		{#snippet page(index: number)}
-			{#if proposals[index]}
-				<MemorialProposalContent {...proposals[index]} />
-			{:else if policies[index - proposals.length]}
-				<MemorialPolicyContent {...policies[index - proposals.length]} />
-			{/if}
+			<button
+				class="h-full w-full cursor-pointer border-0 bg-transparent p-0 text-left"
+				type="button"
+				aria-label={`删除第${index + 1}页`}
+				onclick={() => removePage(index)}
+			>
+				{#if proposals[index]}
+					<MemorialProposalContent {...proposals[index]} />
+				{:else if policies[index - proposals.length]}
+					<MemorialPolicyContent {...policies[index - proposals.length]} />
+				{/if}
+			</button>
 		{/snippet}
 	</MemorialVertical>
 </div>
