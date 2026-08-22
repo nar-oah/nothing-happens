@@ -3,12 +3,23 @@
 
 	type Props = MemorialConstitutionRowData & {
 		onclick?: () => void;
+		onSelectedChange?: (selected: boolean) => void;
 	};
 
-	let { text, number, selected = $bindable(), selectable, onclick }: Props = $props();
+	let {
+		text,
+		number,
+		selected = $bindable(),
+		selectable,
+		onclick,
+		onSelectedChange
+	}: Props = $props();
 
 	function handleClick() {
-		if (selectable) selected = !selected;
+		if (selectable) {
+			selected = !selected;
+			onSelectedChange?.(selected);
+		}
 		onclick?.();
 	}
 </script>

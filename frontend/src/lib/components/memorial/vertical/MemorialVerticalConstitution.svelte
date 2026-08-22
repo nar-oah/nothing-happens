@@ -29,6 +29,7 @@
 
 	let { title, constitution }: Props = $props();
 	let expandedRow = $state<{ sectionTitle: string; rowIndex: number }>();
+	let selectedRows = $state<Record<string, boolean>>({});
 	let pages: ConstitutionPage[] = $derived.by(() =>
 		Object.entries(constitution).flatMap(([sectionTitle, content]) => {
 			const sectionPage: ConstitutionPage = { type: 'section', title: sectionTitle, content };
@@ -51,6 +52,22 @@
 
 	function openRow(sectionTitle: string, rowIndex: number) {
 		expandedRow = { sectionTitle, rowIndex };
+	}
+
+	function getRowKey(sectionTitle: string, rowIndex: number) {
+		return `${sectionTitle}-${rowIndex}`;
+	}
+
+	function getRowSelected(
+		sectionTitle: string,
+		rowIndex: number,
+		row: MemorialConstitutionRowContentData
+	) {
+		return selectedRows[getRowKey(sectionTitle, rowIndex)] ?? row.selected;
+	}
+
+	function setRowSelected(sectionTitle: string, rowIndex: number, selected: boolean) {
+		selectedRows[getRowKey(sectionTitle, rowIndex)] = selected;
 	}
 </script>
 
@@ -79,6 +96,9 @@
 							{#each currentPage.content as row, rowIndex (`${currentPage.title}-${row.text}-${rowIndex}`)}
 								<MemorialConstitutionRow
 									{...row}
+									selected={getRowSelected(currentPage.title, rowIndex, row)}
+									onSelectedChange={(selected) =>
+										setRowSelected(currentPage.title, rowIndex, selected)}
 									onclick={() => openRow(currentPage.title, rowIndex)}
 								/>
 							{/each}
