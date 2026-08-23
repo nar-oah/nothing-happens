@@ -56,6 +56,7 @@
 	$effect(() => {
 		if (constitution === appliedConstitution) return;
 		appliedConstitution = constitution;
+		expandedRow = undefined;
 		selectedRows = {};
 	});
 
