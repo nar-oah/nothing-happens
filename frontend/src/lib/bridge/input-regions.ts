@@ -26,8 +26,8 @@ export class InputRegionReporter {
 		this.targetWindow = options.targetWindow ?? window;
 		this.root = options.root ?? document;
 		this.sendRegions = sendRegions;
-		this.resizeObserver = new this.targetWindow.ResizeObserver(() => this.schedule());
-		this.mutationObserver = new this.targetWindow.MutationObserver(() => {
+		this.resizeObserver = new ResizeObserver(() => this.schedule());
+		this.mutationObserver = new MutationObserver(() => {
 			this.syncObservedElements();
 			this.schedule();
 		});

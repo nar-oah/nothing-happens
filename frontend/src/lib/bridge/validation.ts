@@ -185,8 +185,9 @@ function isCommandError(value: unknown): value is CommandErrorDto {
 	);
 }
 
-function isGameStatus(value: Record<string, unknown>): value is Record<string, unknown> & GameStatusDto {
+function isGameStatus(value: unknown): value is GameStatusDto {
 	return (
+		isRecord(value) &&
 		isNonnegativeInteger(value.year) &&
 		isNonnegativeInteger(value.month) &&
 		isMetricValues(value.metrics) &&
@@ -278,13 +279,14 @@ function isConstitutionArticle(value: unknown): value is ConstitutionArticleDto 
 }
 
 function isConstitutionArticleState(value: unknown): value is ConstitutionArticleStateDto {
+	const state = value as Record<string, unknown>;
 	return (
 		isConstitutionArticle(value) &&
-		typeof value.race_display_name === 'string' &&
-		typeof value.active === 'boolean' &&
-		typeof value.selected === 'boolean' &&
-		typeof value.clicked === 'boolean' &&
-		typeof value.eligible === 'boolean'
+		typeof state.race_display_name === 'string' &&
+		typeof state.active === 'boolean' &&
+		typeof state.selected === 'boolean' &&
+		typeof state.clicked === 'boolean' &&
+		typeof state.eligible === 'boolean'
 	);
 }
 
@@ -318,10 +320,11 @@ function isRaceSummary(value: unknown): value is RaceSummaryDto {
 }
 
 function isInterestGroupSummary(value: unknown): value is InterestGroupSummaryDto {
+	const summary = value as Record<string, unknown>;
 	return (
 		isInterestGroup(value) &&
-		isNonnegativeInteger(value.influence_count) &&
-		isNumber(value.influence_rate)
+		isNonnegativeInteger(summary.influence_count) &&
+		isNumber(summary.influence_rate)
 	);
 }
 
@@ -467,7 +470,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function isArrayOf<T>(value: unknown, predicate: (item: unknown) => item is T): value is T[] {
+function isArrayOf<T>(value: unknown, predicate: (item: unknown) => boolean): value is T[] {
 	return Array.isArray(value) && value.every(predicate);
 }
 

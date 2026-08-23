@@ -35,6 +35,8 @@ export function hasCefBridge(target: Window | undefined = currentWindow()): targ
 	);
 }
 
+export const isCefBridgeAvailable = hasCefBridge;
+
 export function createCefIpcClient(options: CefIpcClientOptions): CefIpcClient | null {
 	const target = currentWindow();
 	return hasCefBridge(target) ? new CefIpcClient(target, options) : null;
