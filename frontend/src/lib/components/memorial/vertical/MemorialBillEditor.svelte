@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tick } from 'svelte';
 	import { getBillLagMonths, type Bill, type PolicyDefinition, type Proposal } from '$lib/game';
 	import MemorialPolicyContent from '../content/MemorialPolicyContent.svelte';
 	import MemorialProposalContent from '../content/MemorialProposalContent.svelte';
@@ -16,7 +17,6 @@
 		onTitleChange?: (title: string) => void;
 		onRemoveProposal?: (proposal: Proposal, index: number) => void;
 		onRemovePolicy?: (policy: PolicyDefinition, index: number) => void;
-		onSubmit?: (bill: Bill) => void;
 		onCoverChange?: (isTitle: boolean) => void;
 	};
 
@@ -27,9 +27,11 @@
 		onTitleChange,
 		onRemoveProposal,
 		onRemovePolicy,
-		onSubmit,
 		onCoverChange
 	}: Props = $props();
+	let editingTitle = $state(false);
+	let titleDraft = $state(bill.title);
+	let titleInput: HTMLInputElement;
 	let lag = $derived(getBillLagMonths(bill.proposals));
 	let proposalPages = $derived(bill.proposals.map(proposalToMemorialContent));
 	let policyPages = $derived(bill.policies.map(policyToMemorialContent));
@@ -39,8 +41,31 @@
 	]);
 
 	function toggleCover() {
+		if (editingTitle) commitTitle();
 		isTitle = !isTitle;
 		onCoverChange?.(isTitle);
+	}
+
+	function beginTitleEdit(event: MouseEvent) {
+		event.stopPropagation();
+		titleDraft = bill.title;
+		editingTitle = true;
+		void tick().then(() => {
+			titleInput?.focus();
+			titleInput?.select();
+		});
+	}
+
+	function commitTitle() {
+		if (!editingTitle) return;
+		editingTitle = false;
+		onTitleChange?.(titleDraft);
+	}
+
+	function handleTitleKeydown(event: KeyboardEvent) {
+		if (event.key !== 'Enter') return;
+		event.preventDefault();
+		event.currentTarget.blur();
 	}
 
 	function removePage(index: number) {
@@ -51,33 +76,57 @@
 		const policyIndex = index - bill.proposals.length;
 		if (bill.policies[policyIndex]) onRemovePolicy?.(bill.policies[policyIndex], policyIndex);
 	}
+
+	$effect(() => {
+		if (!editingTitle) titleDraft = bill.title;
+	});
 </script>
 
-<section class="flex flex-col items-start gap-8" aria-label="法案编辑器">
+<section class="flex items-start" aria-label="法案编辑器">
 	<div class="flex items-start">
 		<MemorialVerticalCover>
-			<button
-				class="relative h-full w-full cursor-pointer border-0 bg-transparent p-0 text-left"
-				type="button"
-				aria-pressed={!isTitle}
-				aria-label={isTitle ? '显示法案预测指标' : '显示法案标题'}
-				onclick={toggleCover}
-			>
-				<div class="absolute inset-0 flex flex-col gap-2 overflow-hidden">
-					{#each coverMetrics as metric (`${metric.text}-${metric.value}`)}
-						<div class="flex h-58 w-116 items-center justify-center">
-							<div class="-rotate-90">
-								<MemorialMetric {metric} isBottom isColumn showValue={!isTitle} />
+			<div class="relative h-full w-full">
+				<button
+					class="relative h-full w-full cursor-pointer border-0 bg-transparent p-0 text-left"
+					type="button"
+					aria-pressed={!isTitle}
+					aria-label={isTitle ? '显示法案预测指标' : '显示法案标题'}
+					onclick={toggleCover}
+				>
+					<div class="absolute inset-0 flex flex-col gap-2 overflow-hidden">
+						{#each coverMetrics as metric (`${metric.text}-${metric.value}`)}
+							<div class="flex h-58 w-116 items-center justify-center">
+								<div class="-rotate-90">
+									<MemorialMetric {metric} isBottom isColumn showValue={!isTitle} />
+								</div>
 							</div>
-						</div>
-					{/each}
-				</div>
-				{#if isTitle}
-					<div class="absolute left-[15px] top-[15px]">
-						<MemorialTitleStrip text={bill.title} vertical />
+						{/each}
 					</div>
+				</button>
+				{#if isTitle}
+					{#if editingTitle}
+						<input
+							bind:this={titleInput}
+							class="absolute left-[15px] top-[15px] h-[315px] w-45 border-0 bg-accent-amber-deep p-0 font-document text-[60px] font-light leading-[48px] text-ink-secondary outline-none [text-orientation:upright] [writing-mode:vertical-rl]"
+							aria-label="法案名称"
+							value={titleDraft}
+							oninput={(event) => (titleDraft = event.currentTarget.value)}
+							onkeydown={handleTitleKeydown}
+							onblur={commitTitle}
+							onclick={(event) => event.stopPropagation()}
+						/>
+					{:else}
+						<button
+							type="button"
+							class="absolute left-[15px] top-[15px] cursor-pointer border-0 bg-transparent p-0"
+							aria-label="重命名法案"
+							onclick={beginTitleEdit}
+						>
+							<MemorialTitleStrip text={bill.title} vertical />
+						</button>
+					{/if}
 				{/if}
-			</button>
+			</div>
 		</MemorialVerticalCover>
 		<MemorialVertical count={proposalPages.length + policyPages.length}>
 			{#snippet page(index: number)}
@@ -95,22 +144,5 @@
 				</button>
 			{/snippet}
 		</MemorialVertical>
-	</div>
-
-	<div class="flex max-w-full items-center gap-8 bg-shadow-deep p-8">
-		<label class="font-policy text-20 text-surface-amber" for="bill-title">案名</label>
-		<input
-			id="bill-title"
-			class="min-w-0 flex-1 border-0 bg-surface-amber px-8 py-5 font-document text-20 text-ink-primary outline-none"
-			value={bill.title}
-			oninput={(event) => onTitleChange?.(event.currentTarget.value)}
-		/>
-		<button
-			type="button"
-			class="cursor-pointer border-0 bg-accent-amber-deep px-12 py-5 font-policy text-20 text-shadow-deep"
-			onclick={() => onSubmit?.(bill)}
-		>
-			提交法案
-		</button>
 	</div>
 </section>
