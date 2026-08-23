@@ -10,8 +10,8 @@ class_name GameBalanceDefinition
 @export_range(0, 999999, 1) var proposal_negative_magnitude_max: int = 12
 @export_range(0, 999999, 1) var proposal_positive_magnitude_min: int = 5
 @export_range(0, 999999, 1) var proposal_positive_magnitude_max: int = 8
-@export_range(0.0, 100.0, 0.05) var proposal_digestion_speed_min: float = 0.8
-@export_range(0.0, 100.0, 0.05) var proposal_digestion_speed_max: float = 1.2
+@export_range(1, 999, 1) var proposal_lag_months_min: int = 6
+@export_range(1, 999, 1) var proposal_lag_months_max: int = 12
 @export_range(0.0, 1.0, 0.01) var proposal_magnitude_growth_per_year: float = 0.10
 @export_range(0.0, 100.0, 0.5) var proposal_support: float = 1.0
 @export var proposal_collapse_impact: float = 0.0
@@ -24,8 +24,6 @@ class_name GameBalanceDefinition
 @export_range(0.0, 100.0, 0.05) var donation_per_positive_point: float = 1.0
 
 @export_group("市场")
-@export_range(0.0, 1.0, 0.01) var digestion_progress_min: float = 0.08
-@export_range(0.0, 1.0, 0.01) var digestion_progress_max: float = 0.16
 @export_range(0.0, 100.0, 0.01) var market_response_ratio: float = 0.35
 @export_range(0.0, 100.0, 0.01) var market_noise_ratio: float = 1.10
 

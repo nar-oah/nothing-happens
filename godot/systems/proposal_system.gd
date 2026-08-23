@@ -9,6 +9,49 @@ func calculate_total_effect(proposals: Array[ProposalInstance]) -> MetricVector:
 	return total
 
 
+func are_gameplay_equivalent(first: ProposalInstance, second: ProposalInstance) -> bool:
+	if first == null or second == null:
+		return first == second
+	if (
+		first.source_group != second.source_group
+		or not _metric_vectors_equal(first.base_effect, second.base_effect)
+		or first.lag_months != second.lag_months
+		or not is_equal_approx(first.collapse_impact, second.collapse_impact)
+	):
+		return false
+	var first_has_positive := first.has_positive_trait()
+	if first_has_positive != second.has_positive_trait():
+		return false
+	if not first_has_positive:
+		return true
+	if not _metric_vectors_equal(first.positive_effect, second.positive_effect):
+		return false
+	var first_pending := first.is_bonus_choice_pending()
+	if first_pending != second.is_bonus_choice_pending():
+		return false
+	if first_pending:
+		return is_equal_approx(first.donation_offer, second.donation_offer)
+	return first.positive_trait_accepted == second.positive_trait_accepted
+
+
+func match_equivalent_proposals(
+	required: Array[ProposalInstance], available: Array[ProposalInstance]
+) -> Array[ProposalInstance]:
+	var result: Array[ProposalInstance] = []
+	var used_instances: Dictionary[int, bool] = {}
+	for required_proposal in required:
+		var matched_proposal: ProposalInstance
+		for candidate in available:
+			if candidate == null or used_instances.has(candidate.get_instance_id()):
+				continue
+			if are_gameplay_equivalent(required_proposal, candidate):
+				matched_proposal = candidate
+				used_instances[candidate.get_instance_id()] = true
+				break
+		result.append(matched_proposal)
+	return result
+
+
 func calculate_pure_target(
 	start_values: MetricValues, proposals: Array[ProposalInstance]
 ) -> MetricValues:
@@ -35,7 +78,7 @@ func calculate_digested_anchor(bill: ActiveBillState) -> MetricValues:
 
 	for active_proposal in bill.proposals:
 		var effect := active_proposal.proposal.get_total_effect()
-		var progress := clampf(active_proposal.digestion_progress, 0.0, 1.0)
+		var progress := active_proposal.get_digestion_progress()
 
 		tax += effect.tax * progress
 		price += effect.price * progress
@@ -68,8 +111,8 @@ func generate_proposal(
 	proposal.base_effect = inflation_system.generate_negative_effect(
 		source_group, state.year, balance, random_system
 	)
-	proposal.digestion_speed = random_system.random_float(
-		balance.proposal_digestion_speed_min, balance.proposal_digestion_speed_max
+	proposal.lag_months = random_system.random_int(
+		balance.proposal_lag_months_min, balance.proposal_lag_months_max
 	)
 	proposal.collapse_impact = balance.proposal_collapse_impact
 	return proposal
@@ -122,7 +165,7 @@ func add_to_hand(state: RunState, proposal: ProposalInstance) -> void:
 	if proposal == null:
 		push_error("Cannot add null proposal to hand.")
 		return
-	state.proposal_hand.append(proposal)
+	state.add_proposal_to_hand(proposal)
 
 
 func calculate_automatic_draw_weight(
@@ -269,9 +312,8 @@ func merge_three(
 		result.donation_offer = float(upgraded) * balance.donation_per_positive_point
 		result.bonus_choice_resolved = selected_positive.bonus_choice_resolved
 		result.positive_trait_accepted = selected_positive.positive_trait_accepted
-	for mother in mothers:
-		state.proposal_hand.erase(mother)
-	state.proposal_hand.append(result)
+	state.consume_proposals(mothers)
+	state.add_proposal_to_hand(result)
 	return result
 
 
@@ -303,3 +345,12 @@ func _can_merge(
 				return false
 		return true
 	return selected_positive in mothers and selected_positive.has_positive_trait()
+
+
+func _metric_vectors_equal(first: MetricVector, second: MetricVector) -> bool:
+	if first == null or second == null:
+		return first == second
+	for metric in Metric.all_ids():
+		if first.get_value(metric) != second.get_value(metric):
+			return false
+	return true

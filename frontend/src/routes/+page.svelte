@@ -1,9 +1,9 @@
 <script lang="ts">
 	import {
+		MemorialBillClosed,
 		MemorialConstitutionClosed,
 		MemorialHorizontal,
 		MemorialNewspaper,
-		MemorialPolicyClosed,
 		MemorialProposalClosed,
 		MemorialProposalOption,
 		MemorialVerticalConstitution,
@@ -23,6 +23,15 @@
 	import ChoreSwitch from '$lib/components/chore/ChoreSwitch.svelte';
 	import Dialog from '$lib/components/dialog/Dialog.svelte';
 	import TopDialog from '$lib/components/dialog/TopDialog.svelte';
+	import {
+		Metric,
+		MetricConditionOperator,
+		PolicyEffectFormula,
+		type InterestGroupDefinition,
+		type MetricValues,
+		type PolicyDefinition,
+		type Proposal
+	} from '$lib/game';
 
 	var metrics: MemorialMetricData[] = [
 		{
@@ -41,6 +50,53 @@
 		{ text: MetricText.Price, value: 4 },
 		{ text: MetricText.Tax, value: 1 }
 	];
+	const guild: InterestGroupDefinition = {
+		display_name: '造身公所',
+		base_column_weight: 3,
+		decrease_tax: false,
+		decrease_price: false,
+		decrease_wage: false,
+		decrease_employment: true,
+		decrease_trade: false
+	};
+	const billProposals: Proposal[] = [
+		{
+			source_group: guild,
+			base_effect: { tax: 0, price: 0, wage: 0, employment: -8, trade: 0 },
+			positive_effect: { tax: -5, price: 0, wage: 0, employment: 0, trade: 0 },
+			lag_months: 6,
+			collapse_impact: 1,
+			donation_offer: 5,
+			bonus_choice_resolved: true,
+			positive_trait_accepted: true
+		}
+	];
+	const markPolicy: PolicyDefinition = {
+		display_name: '以工代賑',
+		condition: {
+			left_metric: Metric.EMPLOYMENT,
+			operator: MetricConditionOperator.LESS_THAN,
+			right_metric: Metric.TRADE,
+			right_multiplier: 0.6
+		},
+		effects: [
+			{
+				target_metric: Metric.EMPLOYMENT,
+				formula: PolicyEffectFormula.METRIC_VALUE,
+				source_a: Metric.TRADE,
+				source_b: Metric.EMPLOYMENT,
+				multiplier: 0.075
+			}
+		],
+		collapse_impact: 1
+	};
+	const markBaseline: MetricValues = {
+		tax: 100,
+		price: 100,
+		wage: 100,
+		employment: 42,
+		trade: 80
+	};
 	var contents: MemorialHorizontalContentData[] = [
 		{
 			title: '通商章程',
@@ -161,7 +217,11 @@
 			</MemorialHorizontal>
 			<MemorialHorizontal {contents}>
 				{#snippet closed()}
-					<MemorialPolicyClosed title="大而美法案" lag={6} metrics={policyMetrics} />
+					<MemorialBillClosed
+						title="大而美法案"
+						proposals={billProposals}
+						policies={[markPolicy]}
+					/>
 				{/snippet}
 			</MemorialHorizontal>
 			<MemorialHorizontal contents={[{ title: '公所议事', body: '公所依席位表决本地事务。' }]}>
@@ -190,30 +250,8 @@
 	<section class="flex flex-col gap-[20px]">
 		<h2 class="m-0 font-policy text-30 font-medium text-ink-primary">印章</h2>
 		<div class="flex flex-wrap gap-[32px]">
-			<Mark
-				bind:direction
-				policyName="以工代赈"
-				requirement={{
-					headline: '所需　用工＜商贸六成',
-					detail: '今数　42＜48　本批触发'
-				}}
-				effect={{
-					headline: '效用　用工补至商贸六成',
-					detail: '本批　用工＋6'
-				}}
-			/>
-			<Mark
-				bind:direction={directionb}
-				policyName="以工代赈"
-				requirement={{
-					headline: '所需　用工＜商贸六成',
-					detail: '今数　42＜48　本批触发'
-				}}
-				effect={{
-					headline: '效用　用工补至商贸六成',
-					detail: '本批　用工＋6'
-				}}
-			/>
+			<Mark bind:direction policy={markPolicy} baseline={markBaseline} />
+			<Mark bind:direction={directionb} policy={markPolicy} baseline={markBaseline} />
 		</div>
 	</section>
 

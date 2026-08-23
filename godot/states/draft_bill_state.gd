@@ -1,6 +1,7 @@
 extends RefCounted
 class_name DraftBillState
 
+var title: String = ""
 var proposals: Array[ProposalInstance] = []
 var policies: Array[PolicyDefinition] = []
 

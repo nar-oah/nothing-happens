@@ -3,14 +3,28 @@
 	import MemorialMetric from '../shared/MemorialMetric.svelte';
 	import MemorialTitleStrip from '../shared/MemorialTitleStrip.svelte';
 	import { MetricText, type MemorialMetricData } from '../types';
+	import {
+		METRIC_DISPLAY_NAMES,
+		getBillLagMonths,
+		getBillMetrics,
+		type PolicyDefinition,
+		type Proposal
+	} from '$lib/game';
 
 	type Props = {
 		title: string;
-		lag: number;
-		metrics: MemorialMetricData[];
+		proposals: Proposal[];
+		policies: PolicyDefinition[];
 	};
 
-	let { title, lag, metrics }: Props = $props();
+	let { title, proposals, policies }: Props = $props();
+	let lag = $derived(getBillLagMonths(proposals));
+	let metrics: MemorialMetricData[] = $derived(
+		getBillMetrics(proposals, policies).map((metric) => ({
+			text: METRIC_DISPLAY_NAMES[metric],
+			value: 0
+		}))
+	);
 	let lagMetric: MemorialMetricData = $derived({
 		text: MetricText.Lag,
 		value: lag,

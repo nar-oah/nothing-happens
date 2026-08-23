@@ -82,8 +82,6 @@ func _test_bill_digestion_and_market_movement(t: BackendTestContext) -> void:
 	balance.automatic_draw_count = 0
 	balance.event_spawn_count_min = 0
 	balance.event_spawn_count_max = 0
-	balance.digestion_progress_min = 0.5
-	balance.digestion_progress_max = 0.5
 	balance.market_response_ratio = 1.0
 	balance.market_noise_ratio = 0.0
 	var session := t.make_session(
@@ -91,19 +89,36 @@ func _test_bill_digestion_and_market_movement(t: BackendTestContext) -> void:
 	)
 	var proposal := t.make_proposal(group)
 	proposal.base_effect.tax = 20
-	proposal.digestion_speed = 1.0
+	proposal.lag_months = 4
 	var draft := DraftBillState.new()
+	draft.title = "four month bill"
 	draft.proposals.append(proposal)
 	session.enact_bill(draft)
+	t.check_equal(session.state.active_bill.title, draft.title, "active bill retains its title")
 	session.market_system.settle_month(session.context)
 	t.check_approx(
-		session.state.active_bill.proposals[0].digestion_progress,
-		0.5,
-		"bill digestion progress reads configured range"
+		session.state.active_bill.proposals[0].get_digestion_progress(),
+		0.25,
+		"a four-month lag digests one quarter per month"
 	)
-	t.check_equal(session.state.metrics.tax, 110, "market reaches half-digested anchor")
+	t.check_equal(session.state.metrics.tax, 105, "market reaches the one-quarter anchor")
 	session.market_system.settle_month(session.context)
-	t.check_approx(session.state.active_bill.proposals[0].digestion_progress, 1.0, "bill fully digests")
+	session.market_system.settle_month(session.context)
+	t.check(
+		not session.state.active_bill.proposals[0].is_fully_digested(),
+		"a four-month lag is incomplete after three months"
+	)
+	session.market_system.settle_month(session.context)
+	t.check_equal(
+		session.state.active_bill.proposals[0].digested_months,
+		4,
+		"the fourth month records complete digestion"
+	)
+	t.check_approx(
+		session.state.active_bill.proposals[0].get_digestion_progress(),
+		1.0,
+		"a four-month lag completes on the fourth month"
+	)
 	t.check_equal(session.state.metrics.tax, 120, "market reaches fully-digested anchor")
 	session.free()
 

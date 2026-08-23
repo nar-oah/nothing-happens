@@ -126,6 +126,18 @@ func submit_draft() -> VoteResultState:
 	return flow_controller.submit_draft(state.draft_bill)
 
 
+func start_new_bill(title: String = "") -> void:
+	draft_bill_system.start_new_bill(state, title)
+
+
+func edit_saved_bill(saved_index: int) -> bool:
+	return draft_bill_system.load_saved_bill_for_editing(context, saved_index)
+
+
+func cancel_bill_editing() -> void:
+	draft_bill_system.cancel_editing(state)
+
+
 func revise_constitution(article: ConstitutionArticleDefinition) -> bool:
 	return constitution_system.revise(context, article)
 

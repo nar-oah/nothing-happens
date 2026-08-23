@@ -92,12 +92,12 @@ func _test_policy_union_and_resource_deduplication(t: BackendTestContext) -> voi
 	var race_b := t.make_race("policy b")
 	var shared := PolicyDefinition.new()
 	shared.display_name = "same"
-	var distinct_same_name := PolicyDefinition.new()
-	distinct_same_name.display_name = "same"
+	var distinct := PolicyDefinition.new()
+	distinct.display_name = "distinct"
 	var unavailable := PolicyDefinition.new()
 	unavailable.display_name = "unavailable"
 	var article_a := t.make_article(race_a)
-	article_a.policies = [shared, distinct_same_name]
+	article_a.policies = [shared, distinct]
 	var article_b := t.make_article(race_b)
 	article_b.policies = [shared]
 	var session := t.make_session(
@@ -105,8 +105,8 @@ func _test_policy_union_and_resource_deduplication(t: BackendTestContext) -> voi
 		[article_a, article_b]
 	)
 	var available := session.constitution_system.get_available_policies(session.context)
-	t.check_equal(available.size(), 2, "active article policies form a Resource identity union")
-	t.check(shared in available and distinct_same_name in available, "same names remain distinct Resources")
+	t.check_equal(available.size(), 2, "active article policies form a Resource union")
+	t.check(shared in available and distinct in available, "unique policy names remain available")
 	t.check(
 		session.draft_bill_system.add_available_policy(session.context, shared),
 		"available policy enters draft"
@@ -116,8 +116,8 @@ func _test_policy_union_and_resource_deduplication(t: BackendTestContext) -> voi
 		"the same policy Resource cannot duplicate"
 	)
 	t.check(
-		session.draft_bill_system.add_available_policy(session.context, distinct_same_name),
-		"different same-name policy Resource is allowed"
+		session.draft_bill_system.add_available_policy_by_name(session.context, distinct.display_name),
+		"an available policy can be referenced by its unique display name"
 	)
 	t.check(
 		not session.draft_bill_system.add_available_policy(session.context, unavailable),

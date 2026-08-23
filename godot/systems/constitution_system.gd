@@ -116,6 +116,15 @@ func get_available_policies(context: RunContext) -> Array[PolicyDefinition]:
 	return result
 
 
+func get_available_policy(
+	context: RunContext, display_name: String
+) -> PolicyDefinition:
+	for policy in get_available_policies(context):
+		if policy.display_name == display_name:
+			return policy
+	return null
+
+
 func get_effective_groups(context: RunContext) -> Array[InterestGroupDefinition]:
 	var result: Array[InterestGroupDefinition] = []
 	for group in context.interest_groups:

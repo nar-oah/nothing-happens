@@ -4,7 +4,7 @@ class_name ProposalInstance
 var source_group: InterestGroupDefinition
 var base_effect: MetricVector
 var positive_effect: MetricVector
-var digestion_speed: float = 1.0
+var lag_months: int = 1
 var collapse_impact: float = 0.0
 var donation_offer: float = 0.0
 var bonus_choice_resolved: bool = true
@@ -41,7 +41,7 @@ func copy() -> ProposalInstance:
 	result.source_group = source_group
 	result.base_effect = base_effect.copy()
 	result.positive_effect = positive_effect.copy()
-	result.digestion_speed = digestion_speed
+	result.lag_months = lag_months
 	result.collapse_impact = collapse_impact
 	result.donation_offer = donation_offer
 	result.bonus_choice_resolved = bonus_choice_resolved
