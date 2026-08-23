@@ -8,6 +8,7 @@ func run(t: BackendTestContext) -> void:
 	_test_saved_bill_switch_preserves_hand_order(t)
 	_test_successful_submission_preserves_remaining_order(t)
 	_test_saved_bill_editing_is_isolated(t)
+	_test_mixed_saved_and_hand_proposal_sources(t)
 	_test_saved_policy_reconciles_with_constitution(t)
 
 
@@ -69,12 +70,20 @@ func _test_saved_bill_switch_preserves_hand_order(t: BackendTestContext) -> void
 	session.state.saved_bills = [first_bill, third_bill]
 
 	t.check(session.edit_saved_bill(0), "the first saved bill loads")
-	t.check_equal(session.state.proposal_hand, [second, third], "loading only reserves its match")
+	t.check_equal(
+		session.state.proposal_hand,
+		[first, second, third],
+		"loading a saved bill does not reserve a hand proposal"
+	)
+	t.check(
+		session.state.draft_bill.proposals[0] != first_bill.proposals[0],
+		"loading copies the saved proposal template"
+	)
 	t.check(session.edit_saved_bill(1), "switching to another saved bill succeeds")
 	t.check_equal(
 		session.state.proposal_hand,
-		[first, second],
-		"switching restores the old match before reserving the new one"
+		[first, second, third],
+		"switching saved bills leaves the hand unchanged"
 	)
 	session.cancel_bill_editing()
 	t.check_equal(
@@ -140,19 +149,25 @@ func _test_saved_bill_editing_is_isolated(t: BackendTestContext) -> void:
 	t.check_equal(saved.policies.size(), 1, "draft policy edits stay isolated")
 
 	session.cancel_bill_editing()
-	var replacement := saved.proposals[0].copy()
-	session.state.proposal_hand = [replacement]
+	var current_hand_proposal := t.make_proposal(group)
+	current_hand_proposal.lag_months = 9
+	session.state.proposal_hand = [current_hand_proposal]
 	t.check(session.edit_saved_bill(0), "a saved bill can be loaded for editing")
 	t.check_equal(
 		session.state.editing_saved_bill_index, 0, "editing tracks the saved bill index"
 	)
+	var loaded := session.state.draft_bill.proposals[0]
 	t.check(
-		session.state.draft_bill.proposals[0] == replacement,
-		"loading uses an equivalent current hand instance"
+		loaded != saved.proposals[0],
+		"loading creates a draft copy from the saved proposal template"
 	)
-	t.check_equal(session.state.proposal_hand.size(), 0, "the matched hand card is reserved")
+	t.check_equal(
+		session.state.proposal_hand,
+		[current_hand_proposal],
+		"loading does not require or reserve an equivalent hand proposal"
+	)
 	session.state.draft_bill.title = "edited"
-	replacement.base_effect.tax = 12
+	loaded.base_effect.tax = 12
 	session.draft_bill_system.save_draft(session.state)
 	t.check_equal(session.state.saved_bills.size(), 1, "editing overwrites instead of appending")
 	t.check_equal(session.state.saved_bills[0].title, "edited", "overwrite saves the new title")
@@ -161,7 +176,7 @@ func _test_saved_bill_editing_is_isolated(t: BackendTestContext) -> void:
 		12,
 		"overwrite saves edited proposal content"
 	)
-	replacement.base_effect.tax = 77
+	loaded.base_effect.tax = 77
 	session.cancel_bill_editing()
 	t.check_equal(
 		session.state.saved_bills[0].proposals[0].base_effect.tax,
@@ -173,6 +188,76 @@ func _test_saved_bill_editing_is_isolated(t: BackendTestContext) -> void:
 		session.state.editing_saved_bill_index,
 		RunState.NEW_BILL_INDEX,
 		"cancel returns to new-bill mode"
+	)
+	t.check_equal(
+		session.state.proposal_hand,
+		[current_hand_proposal],
+		"cancelling discards template copies without changing the hand"
+	)
+	session.free()
+
+
+func _test_mixed_saved_and_hand_proposal_sources(t: BackendTestContext) -> void:
+	var race := t.make_race("mixed saved bill")
+	var group := t.make_group("mixed saved source")
+	var session := t.make_session(
+		[race], [group], t.make_seats(1, "mixed saved bill")
+	)
+	var template := t.make_proposal(group)
+	template.base_effect.tax = 3
+	var saved := SavedBillState.new()
+	saved.proposals.append(template)
+	session.state.saved_bills = [saved]
+	var selected := t.make_proposal(group)
+	var remaining := t.make_proposal(group)
+	for proposal in [selected, remaining]:
+		session.proposal_system.add_to_hand(session.state, proposal)
+
+	t.check(session.edit_saved_bill(0), "the saved template loads without a hand match")
+	t.check(
+		session.draft_bill_system.move_proposal_from_hand(session.state, 0),
+		"a current hand proposal can be added after loading a saved bill"
+	)
+	t.check_equal(
+		session.state.draft_bill.hand_proposals,
+		[selected],
+		"the draft tracks only its hand-sourced proposal"
+	)
+	t.check(
+		session.draft_bill_system.return_proposal_to_hand(session.state, 0),
+		"the saved template can be removed from the draft"
+	)
+	t.check_equal(
+		session.state.proposal_hand,
+		[remaining],
+		"removing a template proposal does not restore anything to the hand"
+	)
+	session.cancel_bill_editing()
+	t.check_equal(
+		session.state.proposal_hand,
+		[selected, remaining],
+		"cancelling restores only the hand-sourced proposal"
+	)
+
+	t.check(session.edit_saved_bill(0), "the saved template can be loaded again")
+	session.draft_bill_system.move_proposal_from_hand(session.state, 0)
+	var result := session.submit_draft()
+	t.check(result.passed, "the mixed draft passes")
+	t.check_equal(
+		session.state.proposal_hand,
+		[remaining],
+		"passing consumes only the hand-sourced proposal"
+	)
+	t.check(session.edit_saved_bill(0), "the passed saved bill remains reusable")
+	t.check_equal(
+		session.state.draft_bill.proposals.size(),
+		2,
+		"reloading uses both proposals saved as reusable templates"
+	)
+	t.check_equal(
+		session.state.proposal_hand,
+		[remaining],
+		"reloading the passed bill still leaves the hand unchanged"
 	)
 	session.free()
 
