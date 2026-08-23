@@ -1,7 +1,6 @@
 # Nothing Happens frontend
 
-This package is a standalone Svelte UI shell. It currently uses view-layer mock data and does not
-connect to Godot or define an IPC protocol.
+This package provides the Svelte UI used by Godot CEF and a standalone browser demo.
 
 ## Development preview
 
@@ -11,6 +10,20 @@ pnpm dev
 
 The root page has a development-only selector for Office, Dialogue, Parliament, and Constitution.
 The standalone component gallery is available at `/components`.
+
+## Run with Godot
+
+1. Install [godot-cef v1.15.3](https://github.com/dsh0416/godot-cef/releases/tag/v1.15.3) so the addon is located at `../godot/addons/godot_cef`.
+2. Install dependencies and build the frontend into the Godot project:
+
+   ```sh
+   pnpm install
+   pnpm build:godot
+   ```
+
+3. Open `../godot/project.godot` in Godot and run the project.
+
+`pnpm build:godot` rebuilds the frontend, removes the previous `godot/web`, and copies `frontend/build` into it. The generated directory is ignored by Git.
 
 ## Verification
 

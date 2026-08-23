@@ -6,6 +6,7 @@
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
+		"build:godot": "node scripts/build-godot.mjs",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"test": "node --test src/lib/game/rules.test.ts src/lib/components/left/left.test.ts",

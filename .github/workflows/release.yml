@@ -12,7 +12,7 @@ env:
   GODOT_VERSION: 4.7.1-stable
   GODOT_CEF_VERSION: v1.15.3
   GODOT_DIR: godot
-  WEB_DIR: web
+  WEB_DIR: frontend
 
 jobs:
   export:
@@ -35,14 +35,14 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-          cache-dependency-path: web/pnpm-lock.yaml
+          cache-dependency-path: ${{ env.WEB_DIR }}/pnpm-lock.yaml
 
       - name: Install frontend dependencies
-        working-directory: web
+        working-directory: ${{ env.WEB_DIR }}
         run: pnpm install --frozen-lockfile
 
       - name: Build Svelte frontend
-        working-directory: web
+        working-directory: ${{ env.WEB_DIR }}
         run: pnpm build
 
       - name: Copy frontend build into Godot project
