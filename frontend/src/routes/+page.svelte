@@ -1,19 +1,21 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import DemoGame from '$lib/demo/DemoGame.svelte';
+	import type { Component } from 'svelte';
 	import { hasCefBridge } from '$lib/bridge/client';
-	import LiveGame from '$lib/game/state/LiveGame.svelte';
 
-	type RuntimeMode = 'detecting' | 'demo' | 'live';
+	let RuntimeGame = $state<Component>();
 
-	let runtimeMode = $state<RuntimeMode>('detecting');
 	onMount(() => {
-		runtimeMode = hasCefBridge() ? 'live' : 'demo';
+		void loadRuntime();
 	});
+
+	async function loadRuntime(): Promise<void> {
+		RuntimeGame = hasCefBridge()
+			? (await import('$lib/game/state/LiveGame.svelte')).default
+			: (await import('$lib/demo/DemoGame.svelte')).default;
+	}
 </script>
 
-{#if runtimeMode === 'live'}
-	<LiveGame />
-{:else if runtimeMode === 'demo'}
-	<DemoGame />
+{#if RuntimeGame}
+	<RuntimeGame />
 {/if}
