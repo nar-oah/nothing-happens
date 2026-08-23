@@ -1,0 +1,199 @@
+<script lang="ts">
+	import { resolve } from '$app/paths';
+	import { restoreProposalToHand, sortProposalItemsByTime } from '$lib/components/left/left';
+	import type { LeftItem, ProposalLeftItem } from '$lib/components/left/types';
+	import type { Bill, PolicyDefinition } from '$lib/game';
+	import ConstitutionView from '$lib/views/ConstitutionView.svelte';
+	import DialogueView from '$lib/views/DialogueView.svelte';
+	import OfficeView from '$lib/views/OfficeView.svelte';
+	import ParliamentView from '$lib/views/ParliamentView.svelte';
+	import {
+		getMockBillPreview,
+		mockArchiveItems,
+		mockBaseline,
+		mockConstitution,
+		mockConstitutionMemorial,
+		mockInterestGroupTopItems,
+		mockPolicies,
+		mockPolicyItems,
+		mockProposalItems,
+		mockRaceTopItems,
+		mockState
+	} from './mock';
+
+	type ViewName = 'Office' | 'Dialogue' | 'Parliament' | 'Constitution';
+	const views: ViewName[] = ['Office', 'Dialogue', 'Parliament', 'Constitution'];
+	const initialDraftProposal = mockProposalItems[0];
+	let activeView = $state<ViewName>('Office');
+	let stateVersion = $state(0);
+	let proposalHand = $state<ProposalLeftItem[]>(mockProposalItems.slice(1));
+	let draftProposalItems = $state<ProposalLeftItem[]>([initialDraftProposal]);
+	let editingSavedBillIndex = $state<number>();
+	let draft = $state<Bill>({
+		title: '勘合互市',
+		proposals: [initialDraftProposal.proposal],
+		policies: [mockPolicies[0]]
+	});
+	let items: LeftItem[] = $derived([...mockArchiveItems, ...proposalHand, ...mockPolicyItems]);
+	let preview = $derived(getMockBillPreview(draft));
+	let frame = $derived({
+		items,
+		baseline: mockBaseline,
+		raceItems: mockRaceTopItems,
+		interestGroupItems: mockInterestGroupTopItems,
+		gameState: mockState,
+		term: 2,
+		year: 3,
+		month: 7
+	});
+
+	function addProposal(handIndex: number) {
+		const item = proposalHand.find((current) => current.ref.index === handIndex);
+		if (!item) return;
+		proposalHand = proposalHand.filter((current) => current !== item);
+		draftProposalItems = [...draftProposalItems, item];
+		draft = { ...draft, proposals: [...draft.proposals, item.proposal] };
+		stateVersion += 1;
+	}
+
+	function removeProposal(draftIndex: number) {
+		const item = draftProposalItems[draftIndex];
+		if (item) proposalHand = restoreProposalToHand(proposalHand, item);
+		draftProposalItems = draftProposalItems.filter((_, index) => index !== draftIndex);
+		draft = { ...draft, proposals: draft.proposals.filter((_, index) => index !== draftIndex) };
+		stateVersion += 1;
+	}
+
+	function addPolicy(displayName: string) {
+		const policy = mockPolicies.find((current) => current.display_name === displayName);
+		if (!policy || draft.policies.some((current) => current.display_name === displayName)) return;
+		draft = { ...draft, policies: [...draft.policies, policy] };
+		stateVersion += 1;
+	}
+
+	function removePolicy(draftIndex: number) {
+		draft = { ...draft, policies: draft.policies.filter((_, index) => index !== draftIndex) };
+		stateVersion += 1;
+	}
+
+	function editSavedBill(savedBillIndex: number) {
+		const saved = mockArchiveItems.find(
+			(item) => item.kind === 'bill' && item.ref.index === savedBillIndex
+		);
+		if (!saved || saved.kind !== 'bill') return;
+		const available = sortProposalItemsByTime([...proposalHand, ...draftProposalItems], true);
+		const matched = saved.bill.proposals.flatMap((proposal) => {
+			const item = available.find((candidate) => candidate.proposal === proposal);
+			return item ? [item] : [];
+		});
+		proposalHand = available.filter((item) => !matched.includes(item));
+		draftProposalItems = matched;
+		draft = {
+			title: saved.bill.title,
+			proposals: matched.map((item) => item.proposal),
+			policies: saved.bill.policies.filter((policy) =>
+				mockPolicies.some((availablePolicy) => availablePolicy.display_name === policy.display_name)
+			)
+		};
+		editingSavedBillIndex = savedBillIndex;
+		stateVersion += 1;
+	}
+
+	function setTitle(title: string) {
+		draft = { ...draft, title };
+		stateVersion += 1;
+	}
+
+	function policyByName(displayName: string): PolicyDefinition | undefined {
+		return mockPolicies.find((policy) => policy.display_name === displayName);
+	}
+</script>
+
+<svelte:head>
+	<title>Nothing Happens · Frontend UI Demo</title>
+</svelte:head>
+
+<div class="demo-stage">
+	{#if activeView === 'Office'}
+		<OfficeView {...frame} onSynthesisConfirm={(result) => console.info('Office synthesis', result)} />
+	{:else if activeView === 'Dialogue'}
+		<DialogueView
+			{...frame}
+			dialogue={{
+				handIndex: 0,
+				groupName: '造身公所',
+				positiveEffect: '商貿+8',
+				donationOffer: '政治献金+5'
+			}}
+			onResolveBonus={(_, acceptTrait) =>
+				console.info('Dialogue choice', acceptTrait ? 'trait' : 'donation')}
+		/>
+	{:else if activeView === 'Parliament'}
+		<ParliamentView
+			{...frame}
+			{stateVersion}
+			{draft}
+			proposalHand={proposalHand.map((item) => item.proposal)}
+			availablePolicies={mockPolicies}
+			{editingSavedBillIndex}
+			{preview}
+			voteCanPass
+			onAddProposal={addProposal}
+			onRemoveProposal={removeProposal}
+			onAddPolicy={(name) => policyByName(name) && addPolicy(name)}
+			onRemovePolicy={removePolicy}
+			onTitleChange={setTitle}
+			onEditSavedBill={editSavedBill}
+			onSubmit={() => console.info('Submit bill', draft)}
+		/>
+	{:else}
+		<ConstitutionView
+			raceItems={mockRaceTopItems}
+			interestGroupItems={mockInterestGroupTopItems}
+			gameState={mockState}
+			title={mockConstitution.title}
+			constitution={mockConstitutionMemorial}
+		/>
+	{/if}
+
+	<nav class="view-selector" aria-label="开发界面切换">
+		{#each views as view (view)}
+			<button type="button" class:active={activeView === view} onclick={() => (activeView = view)}>
+				{view}
+			</button>
+		{/each}
+		<a href={resolve('/components')}>Components</a>
+	</nav>
+</div>
+
+<style>
+	.demo-stage {
+		min-height: 100vh;
+	}
+
+	.view-selector {
+		position: fixed;
+		z-index: 100;
+		left: 50%;
+		bottom: 8px;
+		display: flex;
+		gap: 2px;
+		transform: translateX(-50%);
+	}
+
+	.view-selector button,
+	.view-selector a {
+		cursor: pointer;
+		border: 0;
+		background: #344654;
+		padding: 6px 10px;
+		color: #efb836;
+		font: 300 14px 'RealTypeWriter';
+		text-decoration: none;
+	}
+
+	.view-selector button.active {
+		background: #efb836;
+		color: #1e2e3b;
+	}
+</style>
