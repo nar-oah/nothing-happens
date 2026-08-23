@@ -1,7 +1,18 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { areProposalsGameplayEquivalent, reconcileSavedBillProposals } from './rules.ts';
-import type { InterestGroupDefinition, Proposal } from './types.ts';
+import {
+	areProposalsGameplayEquivalent,
+	reconcileSavedBill,
+	reconcileSavedBillProposals
+} from './rules.ts';
+import {
+	Metric,
+	MetricConditionOperator,
+	PolicyEffectFormula,
+	type InterestGroupDefinition,
+	type PolicyDefinition,
+	type Proposal
+} from './types.ts';
 
 const sourceGroup: InterestGroupDefinition = {
 	display_name: 'source',
@@ -78,4 +89,40 @@ test('saved proposal reconciliation consumes each hand object at most once', () 
 	const secondReplacement = makeProposal();
 	const twoMatches = reconcileSavedBillProposals(saved, [replacement, secondReplacement]);
 	assert.deepEqual(twoMatches, [replacement, secondReplacement]);
+});
+
+test('saved bill reconciliation removes missing proposals and unavailable policies', () => {
+	const availableProposal = makeProposal();
+	const missingProposal = { ...makeProposal(), lag_months: 99 };
+	const availablePolicy: PolicyDefinition = {
+		display_name: '现行政策',
+		condition: {
+			left_metric: Metric.TAX,
+			operator: MetricConditionOperator.LESS_THAN,
+			right_metric: Metric.TRADE,
+			right_multiplier: 1
+		},
+		effects: [
+			{
+				target_metric: Metric.TRADE,
+				formula: PolicyEffectFormula.METRIC_VALUE,
+				source_a: Metric.TAX,
+				source_b: Metric.TAX,
+				multiplier: 0.1
+			}
+		],
+		collapse_impact: 1
+	};
+	const stalePolicy = { ...availablePolicy, display_name: '已失效政策' };
+	const reconciled = reconcileSavedBill(
+		{
+			title: '旧法案',
+			proposals: [availableProposal, missingProposal],
+			policies: [{ ...availablePolicy }, stalePolicy]
+		},
+		[{ ...availableProposal, source_group: { ...availableProposal.source_group } }],
+		[availablePolicy]
+	);
+	assert.equal(reconciled.proposals.length, 1);
+	assert.deepEqual(reconciled.policies, [availablePolicy]);
 });

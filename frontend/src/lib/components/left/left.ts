@@ -6,7 +6,7 @@ import {
 	getMetricValue,
 	getPolicyMetrics,
 	getProposalTotalEffect
-} from '$lib/game';
+} from '../../game/index.ts';
 import { MetricSymbol, type MemorialMetricData } from '../memorial/types';
 import type {
 	ArchiveFilterState,

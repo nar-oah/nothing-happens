@@ -5,7 +5,7 @@ import type {
 	MetricValues,
 	PolicyDefinition,
 	Proposal
-} from '$lib/game';
+} from '../../game/index.ts';
 
 export type LeftItemKind = 'constitution' | 'bill' | 'proposal' | 'policy';
 export type LeftCollection = 'constitutions' | 'bills' | 'proposals' | 'policies';
