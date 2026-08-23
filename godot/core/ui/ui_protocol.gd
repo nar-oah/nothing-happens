@@ -50,7 +50,9 @@ func decode(raw_message: String) -> Dictionary:
 	var request_id: Variant = message.get("request_id")
 	if request_id != null and not request_id is String:
 		return _failure("invalid_request_id", "request_id must be a string.")
-	var payload: Variant = message.get("payload", {})
+	if not message.has("payload"):
+		return _failure("missing_payload", "IPC message requires a payload object.")
+	var payload: Variant = message["payload"]
 	if not payload is Dictionary:
 		return _failure("invalid_payload", "payload must be an object.")
 	return {

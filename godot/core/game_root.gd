@@ -15,6 +15,8 @@ func _ready() -> void:
 	scene_manager.show_office()
 	var cef_texture := _create_cef_texture()
 	ui_bridge.setup(run_session, scene_manager, cef_texture)
+	ui_layer.add_child(cef_texture)
+	cef_texture.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	world_input_router.setup(scene_manager)
 	world_input_router.world_interaction.connect(ui_bridge.handle_world_interaction)
 
@@ -36,6 +38,4 @@ func _create_cef_texture() -> Control:
 		cef_texture.set("url", "res://web/index.html")
 		cef_texture.set("enable_accelerated_osr", true)
 		cef_texture.set("background_color", Color(0.0, 0.0, 0.0, 0.0))
-	ui_layer.add_child(cef_texture)
-	cef_texture.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	return cef_texture

@@ -481,7 +481,7 @@ func _append_mutation_error(
 	messages: Array[Dictionary], error_value: Dictionary, request_id: Variant
 ) -> void:
 	messages.append(
-		_error(error_value["code"], error_value["message"], request_id)
+		_error(error_value["code"], error_value["message"], request_id, true)
 	)
 	messages.append(_full_state(request_id))
 
@@ -504,10 +504,20 @@ func _full_state(request_id: Variant = null) -> Dictionary:
 	)
 
 
-func _error(code: String, detail: String, request_id: Variant = null) -> Dictionary:
+func _error(
+	code: String,
+	detail: String,
+	request_id: Variant = null,
+	recover_full_state: bool = false
+) -> Dictionary:
 	return _envelope(
 		"command.error",
-		{"code": code, "message": detail, "state_version": state_version},
+		{
+			"code": code,
+			"message": detail,
+			"state_version": state_version,
+			"recover_full_state": recover_full_state,
+		},
 		request_id
 	)
 
