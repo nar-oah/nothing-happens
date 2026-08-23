@@ -60,7 +60,7 @@ export type SynthesisFilterState = {
 };
 
 export type ProposalPreview = {
-	metrics: import('../memorial/types').MemorialMetricData[];
+	metrics: import('../memorial/types.ts').MemorialMetricData[];
 	reverseSource?: ProposalLeftItem;
 };
 

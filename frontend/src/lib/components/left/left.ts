@@ -7,7 +7,7 @@ import {
 	getPolicyMetrics,
 	getProposalTotalEffect
 } from '../../game/index.ts';
-import { MetricSymbol, type MemorialMetricData } from '../memorial/types';
+import { MetricSymbol, type MemorialMetricData } from '../memorial/types.ts';
 import type {
 	ArchiveFilterState,
 	LeftItem,
