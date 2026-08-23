@@ -16,6 +16,7 @@
 	type Props = {
 		title: string;
 		constitution: MemorialConstitutionData;
+		onArticleSelectionChange?: (articleRef: number, selected: boolean) => void;
 	};
 
 	type ConstitutionPage =
@@ -27,7 +28,7 @@
 		| { type: 'detail'; title: string; contents: MemorialHorizontalContentData[] }
 		| { type: 'policy'; content: MemorialPolicyContentData };
 
-	let { title, constitution }: Props = $props();
+	let { title, constitution, onArticleSelectionChange }: Props = $props();
 	let expandedRow = $state<{ sectionTitle: string; rowIndex: number }>();
 	let selectedRows = $state<Record<string, boolean>>({});
 	let pages: ConstitutionPage[] = $derived.by(() =>
@@ -66,8 +67,14 @@
 		return selectedRows[getRowKey(sectionTitle, rowIndex)] ?? row.selected;
 	}
 
-	function setRowSelected(sectionTitle: string, rowIndex: number, selected: boolean) {
+	function setRowSelected(
+		sectionTitle: string,
+		rowIndex: number,
+		row: MemorialConstitutionRowContentData,
+		selected: boolean
+	) {
 		selectedRows[getRowKey(sectionTitle, rowIndex)] = selected;
+		if (row.articleRef !== undefined) onArticleSelectionChange?.(row.articleRef, selected);
 	}
 </script>
 
@@ -98,7 +105,7 @@
 									{...row}
 									selected={getRowSelected(currentPage.title, rowIndex, row)}
 									onSelectedChange={(selected) =>
-										setRowSelected(currentPage.title, rowIndex, selected)}
+										setRowSelected(currentPage.title, rowIndex, row, selected)}
 									onclick={() => openRow(currentPage.title, rowIndex)}
 								/>
 							{/each}
