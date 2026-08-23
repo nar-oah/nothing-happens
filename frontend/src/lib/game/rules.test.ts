@@ -1,11 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {
-	arePoliciesGameplayEquivalent,
-	areProposalsGameplayEquivalent,
-	reconcileSavedBill,
-	reconcileSavedBillProposals
-} from './rules.ts';
+import { arePoliciesGameplayEquivalent, reconcileSavedBill } from './rules.ts';
 import {
 	Metric,
 	MetricConditionOperator,
@@ -41,63 +36,9 @@ function makeProposal(): Proposal {
 	};
 }
 
-test('settled historical bonus fields do not affect future gameplay equivalence', () => {
-	const ordinary = makeProposal();
-	const converted = {
-		...makeProposal(),
-		donation_offer: 20,
-		positive_trait_accepted: false
-	};
-	assert.equal(areProposalsGameplayEquivalent(ordinary, converted), true);
-	const staleChoiceFlag = { ...makeProposal(), bonus_choice_resolved: false };
-	assert.equal(areProposalsGameplayEquivalent(ordinary, staleChoiceFlag), true);
-});
-
-test('actionable bonus state remains part of gameplay equivalence', () => {
-	const pending = makeProposal();
-	pending.positive_effect.wage = 5;
-	pending.bonus_choice_resolved = false;
-	pending.positive_trait_accepted = false;
-	pending.donation_offer = 10;
-	const differentOffer = {
-		...pending,
-		positive_effect: { ...pending.positive_effect },
-		donation_offer: 11
-	};
-	assert.equal(areProposalsGameplayEquivalent(pending, differentOffer), false);
-
-	const accepted = { ...pending, bonus_choice_resolved: true, positive_trait_accepted: true };
-	const acceptedWithHistoricalOffer = { ...accepted, donation_offer: 99 };
-	assert.equal(areProposalsGameplayEquivalent(accepted, acceptedWithHistoricalOffer), true);
-});
-
-test('source groups match by serialized display name', () => {
-	const deserializedSourceGroup: InterestGroupDefinition = { ...sourceGroup };
-	const savedProposal = makeProposal();
-	const handProposal: Proposal = {
-		...makeProposal(),
-		source_group: deserializedSourceGroup
-	};
-
-	assert.notEqual(deserializedSourceGroup, sourceGroup);
-	assert.equal(areProposalsGameplayEquivalent(savedProposal, handProposal), true);
-	assert.deepEqual(reconcileSavedBillProposals([savedProposal], [handProposal]), [handProposal]);
-});
-
-test('saved proposal reconciliation consumes each hand object at most once', () => {
-	const saved = [makeProposal(), makeProposal()];
-	const replacement = makeProposal();
-	const oneMatch = reconcileSavedBillProposals(saved, [replacement]);
-	assert.deepEqual(oneMatch, [replacement, null]);
-
-	const secondReplacement = makeProposal();
-	const twoMatches = reconcileSavedBillProposals(saved, [replacement, secondReplacement]);
-	assert.deepEqual(twoMatches, [replacement, secondReplacement]);
-});
-
-test('saved bill reconciliation removes missing proposals and unavailable policies', () => {
-	const availableProposal = makeProposal();
-	const missingProposal = { ...makeProposal(), lag_months: 99 };
+test('saved bill reconciliation preserves proposals and removes unavailable policies', () => {
+	const firstProposal = makeProposal();
+	const secondProposal = { ...makeProposal(), lag_months: 99 };
 	const availablePolicy: PolicyDefinition = {
 		display_name: '现行政策',
 		condition: {
@@ -120,13 +61,12 @@ test('saved bill reconciliation removes missing proposals and unavailable polici
 	const reconciled = reconcileSavedBill(
 		{
 			title: '旧法案',
-			proposals: [availableProposal, missingProposal],
+			proposals: [firstProposal, secondProposal],
 			policies: [{ ...availablePolicy }, stalePolicy]
 		},
-		[{ ...availableProposal, source_group: { ...availableProposal.source_group } }],
 		[availablePolicy]
 	);
-	assert.equal(reconciled.proposals.length, 1);
+	assert.deepEqual(reconciled.proposals, [firstProposal, secondProposal]);
 	assert.deepEqual(reconciled.policies, [availablePolicy]);
 });
 
@@ -161,7 +101,7 @@ test('policy identity uses display_name only', () => {
 	};
 	assert.equal(arePoliciesGameplayEquivalent(first, second), true);
 	assert.deepEqual(
-		reconcileSavedBill({ title: '', proposals: [], policies: [first] }, [], [second]),
+		reconcileSavedBill({ title: '', proposals: [], policies: [first] }, [second]),
 		{
 			title: '',
 			proposals: [],
