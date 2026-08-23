@@ -1,22 +1,30 @@
-export enum Metric {
-	TAX = 0,
-	PRICE = 1,
-	WAGE = 2,
-	EMPLOYMENT = 3,
-	TRADE = 4
-}
+export const Metric = {
+	TAX: 0,
+	PRICE: 1,
+	WAGE: 2,
+	EMPLOYMENT: 3,
+	TRADE: 4
+} as const;
 
-export enum MetricConditionOperator {
-	LESS_THAN = 0,
-	LESS_THAN_OR_EQUAL = 1,
-	GREATER_THAN = 2,
-	GREATER_THAN_OR_EQUAL = 3
-}
+export type Metric = (typeof Metric)[keyof typeof Metric];
 
-export enum PolicyEffectFormula {
-	METRIC_VALUE = 0,
-	METRIC_GAP = 1
-}
+export const MetricConditionOperator = {
+	LESS_THAN: 0,
+	LESS_THAN_OR_EQUAL: 1,
+	GREATER_THAN: 2,
+	GREATER_THAN_OR_EQUAL: 3
+} as const;
+
+export type MetricConditionOperator =
+	(typeof MetricConditionOperator)[keyof typeof MetricConditionOperator];
+
+export const PolicyEffectFormula = {
+	METRIC_VALUE: 0,
+	METRIC_GAP: 1
+} as const;
+
+export type PolicyEffectFormula =
+	(typeof PolicyEffectFormula)[keyof typeof PolicyEffectFormula];
 
 export type MetricValues = {
 	tax: number;
