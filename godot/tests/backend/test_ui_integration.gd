@@ -14,6 +14,7 @@ func run(t: BackendTestContext) -> void:
 	_test_draft_preview(t)
 	_test_bonus_choice_sync(t)
 	_test_normalized_input_regions(t)
+	_test_game_root_shell(t)
 
 
 func _test_protocol_envelopes(t: BackendTestContext) -> void:
@@ -266,6 +267,22 @@ func _test_normalized_input_regions(t: BackendTestContext) -> void:
 	t.check(texture._has_point(Vector2(40.0, 30.0)), "point inside normalized blocker hits CEF")
 	t.check(not texture._has_point(Vector2(180.0, 80.0)), "point outside blockers passes to world")
 	texture.free()
+
+
+func _test_game_root_shell(t: BackendTestContext) -> void:
+	var root := load("res://core/game_root.tscn").instantiate()
+	Engine.get_main_loop().root.add_child(root)
+	t.check(root.has_node("RunSession"), "GameRoot owns RunSession")
+	t.check(root.has_node("SceneManager/World"), "GameRoot owns SceneManager World")
+	t.check(root.has_node("UiBridge"), "GameRoot owns one UiBridge")
+	t.check(root.has_node("WorldInputRouter"), "GameRoot owns WorldInputRouter")
+	t.check(root.has_node("UiLayer/CefTexture"), "GameRoot creates one full-screen CEF slot")
+	t.check_equal(root.get_node("UiLayer").get_child_count(), 1, "UiLayer owns one browser node")
+	var bridge: UiBridge = root.get_node("UiBridge")
+	var ready := bridge.receive_ipc_message(_message("ui.ready", {}))
+	t.check_equal(ready[0]["type"], "state.full", "production GameRoot completes handshake")
+	t.check_equal(ready[0]["payload"]["metrics"]["tax"], 100, "production snapshot uses RunState")
+	root.free()
 
 
 func _make_policy(display_name: String) -> PolicyDefinition:
