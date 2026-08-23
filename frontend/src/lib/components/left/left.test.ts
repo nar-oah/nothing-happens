@@ -12,13 +12,17 @@ import {
 	createProposalSynthesisPreview,
 	deriveSynthesisItems,
 	filterArchiveItems,
+	filterSelectionItems,
+	getLeftSecondaryMode,
 	getProposalGroupOptions,
 	moveSelectedProposalsFirst,
+	restoreProposalToHand,
 	sortProposalItemsByTime,
 	sortProposalItemsByValue,
 	toggleProposalSelection
 } from './left.ts';
 import type { LeftItem, ProposalLeftItem } from './types.ts';
+import { mockLeftItems, mockProposalItems } from '../../demo/mock.ts';
 
 const group = (display_name: string): InterestGroupDefinition => ({
 	display_name,
@@ -75,8 +79,7 @@ const policy: PolicyDefinition = {
 			source_b: Metric.TRADE,
 			multiplier: 0.1
 		}
-	],
-	collapse_impact: 1
+	]
 };
 
 const proposals = [
@@ -88,8 +91,11 @@ const proposals = [
 const items: LeftItem[] = [
 	{
 		kind: 'constitution',
-		ref: { collection: 'constitutions', index: 0 },
-		constitution: { title: '约法', policies: [policy] }
+		ref: { collection: 'constitution', index: 0 },
+		constitution: {
+			title: '约法',
+			active_articles: [{ display_name: '节点', content: '', policies: [policy] }]
+		}
 	},
 	{
 		kind: 'bill',
@@ -193,4 +199,59 @@ test('preview keeps only the largest reverse metric with stable ties', () => {
 	assert.equal(reverse[0].text, '税課');
 	assert.equal(reverse[0].value, 8);
 	assert.equal(preview.reverseSource, first);
+});
+
+test('Left secondary mode follows its scene', () => {
+	assert.equal(getLeftSecondaryMode('office'), 'synthesis');
+	assert.equal(getLeftSecondaryMode('parliament'), 'selection');
+	assert.equal(getLeftSecondaryMode('dialogue'), undefined);
+});
+
+test('selection hides selected ingredients and the editing saved bill', () => {
+	const selection = filterSelectionItems(items, {
+		proposalRefs: [proposals[0].ref],
+		policyDisplayNames: [policy.display_name],
+		editingSavedBillIndex: 0
+	});
+	assert.equal(selection.some((item) => item.kind === 'constitution'), false);
+	assert.equal(
+		selection.some((item) => item.kind === 'proposal' && item.ref.index === proposals[0].ref.index),
+		false
+	);
+	assert.equal(selection.some((item) => item.kind === 'policy'), false);
+	assert.equal(selection.some((item) => item.kind === 'bill' && item.ref.index === 0), false);
+});
+
+test('restoring a draft Proposal keeps acquisition ref order', () => {
+	const restored = restoreProposalToHand([proposals[1], proposals[0]], proposals[2]);
+	assert.deepEqual(
+		restored.map((item) => item.ref.index),
+		[2, 4, 9]
+	);
+});
+
+test('the Left mock contains one Constitution with active articles', () => {
+	const constitutions = mockLeftItems.filter((item) => item.kind === 'constitution');
+	assert.equal(constitutions.length, 1);
+	assert.equal(constitutions[0].constitution.title, '蓬莱约法');
+	assert.equal(constitutions[0].constitution.active_articles.length > 1, true);
+});
+
+test('Proposal mocks preserve each InterestGroup fixed base effect template', () => {
+	const expected: Record<string, Partial<Record<keyof Proposal['base_effect'], number>>> = {
+		造身公所: { price: 1, employment: -1 },
+		槐安公所: { wage: -1, price: 1 },
+		永乐轮运局: { price: 1, trade: -1 },
+		官药局: { tax: 1, price: 1 },
+		铅字报馆: { tax: 1, wage: -1 },
+		会同成衣会: { price: 1, wage: -1 }
+	};
+	for (const item of mockProposalItems) {
+		const template = expected[item.proposal.source_group.display_name];
+		const nonzero = Object.entries(item.proposal.base_effect).filter(([, value]) => value !== 0);
+		assert.deepEqual(
+			nonzero.map(([metric, value]) => [metric, Math.sign(value)]),
+			Object.entries(template)
+		);
+	}
 });
