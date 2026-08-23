@@ -2,7 +2,7 @@
 	import { resolve } from '$app/paths';
 	import { restoreProposalToHand, sortProposalItemsByTime } from '$lib/components/left/left';
 	import type { LeftItem, ProposalLeftItem } from '$lib/components/left/types';
-	import type { Bill, PolicyDefinition } from '$lib/game';
+	import type { Bill } from '$lib/game';
 	import ConstitutionView from '$lib/views/ConstitutionView.svelte';
 	import DialogueView from '$lib/views/DialogueView.svelte';
 	import OfficeView from '$lib/views/OfficeView.svelte';
@@ -104,9 +104,6 @@
 		stateVersion += 1;
 	}
 
-	function policyByName(displayName: string): PolicyDefinition | undefined {
-		return mockPolicies.find((policy) => policy.display_name === displayName);
-	}
 </script>
 
 <svelte:head>
@@ -140,7 +137,7 @@
 			voteCanPass
 			onAddProposal={addProposal}
 			onRemoveProposal={removeProposal}
-			onAddPolicy={(name) => policyByName(name) && addPolicy(name)}
+			onAddPolicy={addPolicy}
 			onRemovePolicy={removePolicy}
 			onTitleChange={setTitle}
 			onEditSavedBill={editSavedBill}
