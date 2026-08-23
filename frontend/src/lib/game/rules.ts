@@ -95,7 +95,8 @@ export function reconcileSavedBillProposals(
 	const used = new Set<Proposal>();
 	return savedProposals.map((savedProposal) => {
 		const matched = hand.find(
-			(candidate) => !used.has(candidate) && areProposalsGameplayEquivalent(savedProposal, candidate)
+			(candidate) =>
+				!used.has(candidate) && areProposalsGameplayEquivalent(savedProposal, candidate)
 		);
 		if (!matched) return null;
 		used.add(matched);
@@ -142,7 +143,9 @@ function addVectorMetrics(involved: Set<Metric>, values: MetricValues): void {
 }
 
 function areMetricVectorsEqual(first: MetricValues, second: MetricValues): boolean {
-	return METRICS.every((metric) => getMetricValue(first, metric) === getMetricValue(second, metric));
+	return METRICS.every(
+		(metric) => getMetricValue(first, metric) === getMetricValue(second, metric)
+	);
 }
 
 function isApproximatelyEqual(first: number, second: number): boolean {

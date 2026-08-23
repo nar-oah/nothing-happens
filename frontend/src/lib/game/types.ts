@@ -23,8 +23,7 @@ export const PolicyEffectFormula = {
 	METRIC_GAP: 1
 } as const;
 
-export type PolicyEffectFormula =
-	(typeof PolicyEffectFormula)[keyof typeof PolicyEffectFormula];
+export type PolicyEffectFormula = (typeof PolicyEffectFormula)[keyof typeof PolicyEffectFormula];
 
 export type MetricValues = {
 	tax: number;

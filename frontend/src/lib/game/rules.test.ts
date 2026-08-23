@@ -1,9 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {
-	areProposalsGameplayEquivalent,
-	reconcileSavedBillProposals
-} from './rules.ts';
+import { areProposalsGameplayEquivalent, reconcileSavedBillProposals } from './rules.ts';
 import type { InterestGroupDefinition, Proposal } from './types.ts';
 
 const sourceGroup: InterestGroupDefinition = {
