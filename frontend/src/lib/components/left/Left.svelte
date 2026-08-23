@@ -101,9 +101,10 @@
 	});
 
 	$effect(() => {
-		selectedProposals = selectedProposals.filter((selected) =>
+		const visible = selectedProposals.filter((selected) =>
 			availableSynthesisItems.some((item) => isSameLeftRef(item.ref, selected.ref))
 		);
+		if (visible.length !== selectedProposals.length) selectedProposals = visible;
 	});
 
 	function selectProposal(item: ProposalLeftItem) {
