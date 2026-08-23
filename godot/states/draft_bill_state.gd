@@ -3,7 +3,6 @@ class_name DraftBillState
 
 var title: String = ""
 var proposals: Array[ProposalInstance] = []
-var hand_proposals: Array[ProposalInstance] = []
 var policies: Array[PolicyDefinition] = []
 
 

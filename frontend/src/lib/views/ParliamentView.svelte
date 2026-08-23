@@ -32,7 +32,7 @@
 	const initialDraftProposal = mockProposalItems[0];
 	let activeLeftMode = $state<LeftMode>('archive');
 	let proposalHand = $state<ProposalLeftItem[]>(mockProposalItems.slice(1));
-	let draftProposalItems = $state<Array<ProposalLeftItem | null>>([initialDraftProposal]);
+	let draftProposalItems = $state<ProposalLeftItem[]>([initialDraftProposal]);
 	let editingSavedBillIndex = $state<number>();
 	let voteMode = $state(false);
 	let draft = $state<Bill>({
@@ -41,11 +41,8 @@
 		policies: [mockPolicies[0]]
 	});
 
-	let handDraftProposalItems = $derived(
-		draftProposalItems.filter((item): item is ProposalLeftItem => item !== null)
-	);
 	let allProposalItems = $derived(
-		sortProposalItemsByTime([...proposalHand, ...handDraftProposalItems], true)
+		sortProposalItemsByTime([...proposalHand, ...draftProposalItems], true)
 	);
 	let leftItems: LeftItem[] = $derived([
 		...mockArchiveItems,
@@ -53,7 +50,7 @@
 		...mockPolicyItems
 	]);
 	let selection = $derived({
-		proposalRefs: handDraftProposalItems.map((item) => item.ref),
+		proposalRefs: draftProposalItems.map((item) => item.ref),
 		policyDisplayNames: draft.policies.map((policy) => policy.display_name),
 		editingSavedBillIndex
 	});
@@ -67,7 +64,7 @@
 	}
 
 	function addProposal(item: ProposalLeftItem) {
-		if (handDraftProposalItems.some((current) => isSameLeftRef(current.ref, item.ref))) return;
+		if (draftProposalItems.some((current) => isSameLeftRef(current.ref, item.ref))) return;
 		proposalHand = proposalHand.filter((current) => !isSameLeftRef(current.ref, item.ref));
 		draftProposalItems = [...draftProposalItems, item];
 		draft = { ...draft, proposals: [...draft.proposals, item.proposal] };
@@ -80,12 +77,22 @@
 
 	function loadBill(savedItem: BillLeftItem) {
 		const availableProposalItems = sortProposalItemsByTime(
-			[...proposalHand, ...handDraftProposalItems],
+			[...proposalHand, ...draftProposalItems],
 			true
 		);
-		const reconciled = reconcileSavedBill(savedItem.bill, mockPolicies);
-		draftProposalItems = reconciled.proposals.map(() => null);
-		proposalHand = availableProposalItems;
+		const reconciled = reconcileSavedBill(
+			savedItem.bill,
+			availableProposalItems.map((item) => item.proposal),
+			mockPolicies
+		);
+		const matches = reconciled.proposals.flatMap((proposal) => {
+			const match = availableProposalItems.find((item) => item.proposal === proposal);
+			return match ? [match] : [];
+		});
+		draftProposalItems = matches;
+		proposalHand = availableProposalItems.filter(
+			(item) => !matches.some((match) => isSameLeftRef(item.ref, match.ref))
+		);
 		draft = reconciled;
 		editingSavedBillIndex = savedItem.ref.index;
 	}

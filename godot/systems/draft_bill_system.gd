@@ -9,7 +9,6 @@ func move_proposal_from_hand(state: RunState, hand_index: int) -> bool:
 		return false
 	var proposal := state.take_proposal_from_hand(hand_index)
 	state.draft_bill.proposals.append(proposal)
-	state.draft_bill.hand_proposals.append(proposal)
 	return true
 
 
@@ -17,9 +16,7 @@ func return_proposal_to_hand(state: RunState, draft_index: int) -> bool:
 	if draft_index < 0 or draft_index >= state.draft_bill.proposals.size():
 		return false
 	var proposal: ProposalInstance = state.draft_bill.proposals.pop_at(draft_index)
-	if proposal in state.draft_bill.hand_proposals:
-		state.draft_bill.hand_proposals.erase(proposal)
-		state.restore_proposal_to_hand(proposal)
+	state.restore_proposal_to_hand(proposal)
 	return true
 
 
@@ -95,7 +92,7 @@ func reorder_policy(state: RunState, from_index: int, to_index: int) -> bool:
 
 
 func clear_draft(state: RunState) -> void:
-	for proposal in state.draft_bill.hand_proposals:
+	for proposal in state.draft_bill.proposals:
 		state.restore_proposal_to_hand(proposal)
 	state.draft_bill = DraftBillState.new()
 	state.editing_saved_bill_index = RunState.NEW_BILL_INDEX
@@ -114,10 +111,14 @@ func load_saved_bill_for_editing(context: RunContext, saved_index: int) -> bool:
 	clear_draft(state)
 	state.draft_bill.title = saved.title
 	state.editing_saved_bill_index = saved_index
-	for saved_proposal in saved.proposals:
-		if saved_proposal == null:
+	var matches := context.proposal_system.match_equivalent_proposals(
+		saved.proposals, state.proposal_hand
+	)
+	for proposal in matches:
+		if proposal == null:
 			continue
-		state.draft_bill.proposals.append(saved_proposal.copy())
+		if state.reserve_proposal_from_hand(proposal):
+			state.draft_bill.proposals.append(proposal)
 	for saved_policy in saved.policies:
 		if saved_policy != null:
 			add_available_policy_by_name(context, saved_policy.display_name)
@@ -146,4 +147,4 @@ func cancel_editing(state: RunState) -> void:
 
 
 func consume_draft_proposals(state: RunState, draft: DraftBillState) -> void:
-	state.consume_proposals(draft.hand_proposals)
+	state.consume_proposals(draft.proposals)
