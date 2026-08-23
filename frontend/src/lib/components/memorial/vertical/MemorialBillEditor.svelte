@@ -30,8 +30,8 @@
 		onCoverChange
 	}: Props = $props();
 	let editingTitle = $state(false);
-	let titleDraft = $state(bill.title);
-	let titleInput: HTMLInputElement;
+	let titleDraft = $state('');
+	let titleInput = $state<HTMLInputElement>();
 	let lag = $derived(getBillLagMonths(bill.proposals));
 	let proposalPages = $derived(bill.proposals.map(proposalToMemorialContent));
 	let policyPages = $derived(bill.policies.map(policyToMemorialContent));
@@ -65,7 +65,7 @@
 	function handleTitleKeydown(event: KeyboardEvent) {
 		if (event.key !== 'Enter') return;
 		event.preventDefault();
-		event.currentTarget.blur();
+		(event.currentTarget as HTMLInputElement).blur();
 	}
 
 	function removePage(index: number) {

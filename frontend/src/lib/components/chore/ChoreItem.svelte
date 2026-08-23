@@ -32,6 +32,14 @@
 	</span>
 {/snippet}
 
+{#snippet rowTitle()}
+	<p
+		class="m-0 whitespace-nowrap font-policy text-48 font-medium leading-[40px] text-surface-amber"
+	>
+		{text}
+	</p>
+{/snippet}
+
 <div
 	class:flex-col={isRow}
 	class:items-start={!isCenter}
@@ -42,19 +50,19 @@
 	class="flex"
 >
 	{#if isRow}
-		<svelte:element
-			this={onTitleClick ? 'button' : 'div'}
-			type={onTitleClick ? 'button' : undefined}
-			class:cursor-pointer={onTitleClick}
-			class="-mb-[10px] border-0 bg-shadow-deep p-0 text-center"
-			onclick={onTitleClick}
-		>
-			<p
-				class="m-0 whitespace-nowrap font-policy text-48 font-medium leading-[40px] text-surface-amber"
+		{#if onTitleClick}
+			<button
+				type="button"
+				class="-mb-[10px] cursor-pointer border-0 bg-shadow-deep p-0 text-center"
+				onclick={onTitleClick}
 			>
-				{text}
-			</p>
-		</svelte:element>
+				{@render rowTitle()}
+			</button>
+		{:else}
+			<div class="-mb-[10px] bg-shadow-deep text-center">
+				{@render rowTitle()}
+			</div>
+		{/if}
 	{/if}
 
 	{#if !isCenter}

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { Metric } from '$lib/game';
 	import ChoreFilter from '../chore/ChoreFilter.svelte';
 	import type { ChoreFilters } from '../chore/chore';
@@ -65,7 +66,7 @@
 		数值: false
 	});
 	let secondaryFilters = $state<ChoreFilters>(
-		scene === 'office'
+		untrack(() => scene) === 'office'
 			? {
 					利益集团: { options: [], selected: [], multiple: false },
 					指标: {
@@ -393,4 +394,3 @@
 		}
 	}
 </style>
-
