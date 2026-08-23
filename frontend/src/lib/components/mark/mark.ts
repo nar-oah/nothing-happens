@@ -54,12 +54,12 @@ export function createPolicyMarkContent(
 	}
 	return {
 		requirement: {
-			headline: `所需　${leftName}${symbol}${rightName}${multiplier}`,
-			detail: `今數　${formatNumber(leftValue)}${symbol}${formatNumber(rightValue)}　${triggerText}`
+			headline: `所需\u3000${leftName}${symbol}${rightName}${multiplier}`,
+			detail: `今數\u3000${formatNumber(leftValue)}${symbol}${formatNumber(rightValue)}\u3000${triggerText}`
 		},
 		effect: {
-			headline: `效用　${effectRules.length > 0 ? effectRules.join('；') : '無指標效果'}`,
-			detail: `單次　${effectAmounts.length > 0 ? effectAmounts.join('；') : '無變化'}`
+			headline: `效用\u3000${effectRules.length > 0 ? effectRules.join('；') : '無指標效果'}`,
+			detail: `單次\u3000${effectAmounts.length > 0 ? effectAmounts.join('；') : '無變化'}`
 		}
 	};
 }
