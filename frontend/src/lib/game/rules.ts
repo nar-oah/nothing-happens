@@ -77,10 +77,7 @@ export function arePoliciesGameplayEquivalent(
 	return first.display_name === second.display_name;
 }
 
-export function reconcileSavedBill(
-	savedBill: Bill,
-	availablePolicies: PolicyDefinition[]
-): Bill {
+export function reconcileSavedBill(savedBill: Bill, availablePolicies: PolicyDefinition[]): Bill {
 	const policies = savedBill.policies.flatMap((savedPolicy) => {
 		const available = availablePolicies.find((policy) =>
 			arePoliciesGameplayEquivalent(savedPolicy, policy)
