@@ -4,10 +4,17 @@ import {
 	MetricConditionOperator,
 	PolicyEffectFormula,
 	getMetricValue,
+	getProposalTotalEffect,
+	type Bill,
+	type Constitution,
 	type PolicyDefinition,
 	type Proposal
 } from '../../game/index.ts';
-import type { MemorialPolicyContentData, MemorialProposalContentData } from './types';
+import type {
+	MemorialHorizontalContentData,
+	MemorialPolicyContentData,
+	MemorialProposalContentData
+} from './types';
 
 const CONDITION_SYMBOLS: Record<MetricConditionOperator, string> = {
 	[MetricConditionOperator.LESS_THAN]: '＜',
@@ -17,15 +24,51 @@ const CONDITION_SYMBOLS: Record<MetricConditionOperator, string> = {
 };
 
 export function proposalToMemorialContent(proposal: Proposal): MemorialProposalContentData {
-	const base = formatVector(proposal.base_effect);
-	const positive = formatVector(proposal.positive_effect);
 	return {
 		proposalTitle: proposal.source_group.display_name,
 		content: {
-			title: '提案效用',
-			body: [base || '无普通指标变化', positive ? `附加：${positive}` : '无附加项'].join('。')
+			title: '指标',
+			body: formatVector(getProposalTotalEffect(proposal))
 		}
 	};
+}
+
+export function proposalToHorizontalContents(proposal: Proposal): MemorialHorizontalContentData[] {
+	return [
+		{ title: proposal.source_group.display_name, body: '' },
+		{ title: '指标', body: formatVector(getProposalTotalEffect(proposal)) },
+		{
+			body: `\n\n如果你把该提案加入到法案中，${proposal.source_group.display_name}会很高兴。`
+		}
+	];
+}
+
+export function billToHorizontalContents(bill: Bill): MemorialHorizontalContentData[] {
+	return [
+		{ title: bill.title, body: '' },
+		{
+			title: '提案',
+			body: bill.proposals.map((proposal) => proposal.source_group.display_name).join('\n')
+		},
+		{
+			title: '政策',
+			body: bill.policies.map((policy) => policy.display_name).join('\n')
+		}
+	];
+}
+
+export function constitutionToHorizontalContents(
+	constitution: Constitution
+): MemorialHorizontalContentData[] {
+	return [
+		...constitution.active_articles.map((article) => ({
+			title: article.display_name,
+			body: article.content
+		})),
+		{
+			body: '\n\n这是为了保证蓬莱岛的运转，各族妥协出的结果，尽管真正满意的人很少。'
+		}
+	];
 }
 
 export function policyToMemorialContent(policy: PolicyDefinition): MemorialPolicyContentData {
@@ -53,6 +96,6 @@ function formatVector(values: Proposal['base_effect']): string {
 		const value = getMetricValue(values, metric);
 		return value === 0
 			? []
-			: [`${METRIC_DISPLAY_NAMES[metric]}${value > 0 ? '＋' : '－'}${Math.abs(value)}`];
-	}).join('；');
+			: [`${METRIC_DISPLAY_NAMES[metric]} ${value > 0 ? '+' : '-'}${Math.abs(value)}`];
+	}).join('\n');
 }

@@ -56,7 +56,6 @@ func _resolve_batch(batch: Array[PolicyState], state: RunState) -> void:
 	var total_delta := MetricVector.new()
 	for policy_state in batch:
 		var definition := policy_state.definition
-		state.pending_collapse_delta += definition.collapse_impact
 		for effect in definition.effects:
 			if effect == null:
 				continue

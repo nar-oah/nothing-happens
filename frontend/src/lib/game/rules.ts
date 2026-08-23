@@ -109,12 +109,7 @@ export function arePoliciesGameplayEquivalent(
 	first: PolicyDefinition,
 	second: PolicyDefinition
 ): boolean {
-	return (
-		first.display_name === second.display_name &&
-		first.collapse_impact === second.collapse_impact &&
-		JSON.stringify(first.condition) === JSON.stringify(second.condition) &&
-		JSON.stringify(first.effects) === JSON.stringify(second.effects)
-	);
+	return first.display_name === second.display_name;
 }
 
 export function reconcileSavedBill(

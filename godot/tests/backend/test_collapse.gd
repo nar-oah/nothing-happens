@@ -126,7 +126,6 @@ func _test_bill_digestion_and_market_movement(t: BackendTestContext) -> void:
 func _test_policy_trigger_chain(t: BackendTestContext) -> void:
 	var first := PolicyDefinition.new()
 	first.display_name = "first"
-	first.collapse_impact = 1.0
 	first.condition = MetricCondition.new()
 	first.condition.left_metric = Metric.Id.TAX
 	first.condition.operator = MetricCondition.Operator.GREATER_THAN
@@ -140,7 +139,6 @@ func _test_policy_trigger_chain(t: BackendTestContext) -> void:
 
 	var second := PolicyDefinition.new()
 	second.display_name = "second"
-	second.collapse_impact = 2.0
 	second.condition = MetricCondition.new()
 	second.condition.left_metric = Metric.Id.WAGE
 	second.condition.operator = MetricCondition.Operator.GREATER_THAN_OR_EQUAL
@@ -165,4 +163,4 @@ func _test_policy_trigger_chain(t: BackendTestContext) -> void:
 	t.check_equal(state.metrics.trade, 20, "second policy triggers from first policy result")
 	t.check(state.active_bill.policies[0].triggered, "first policy is marked triggered")
 	t.check(state.active_bill.policies[1].triggered, "second policy is marked triggered")
-	t.check_approx(state.pending_collapse_delta, 3.0, "policy collapse impacts accumulate")
+	t.check_approx(state.pending_collapse_delta, 0.0, "policies do not add collapse")

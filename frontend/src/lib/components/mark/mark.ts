@@ -49,9 +49,6 @@ export function createPolicyMarkContent(
 		const amount = calculatePolicyEffectAmount(effect, baseline);
 		return `${METRIC_DISPLAY_NAMES[effect.target_metric]}${formatSigned(amount)}`;
 	});
-	if (policy.collapse_impact !== 0) {
-		effectAmounts.push(`崩潰${formatSigned(policy.collapse_impact)}`);
-	}
 	return {
 		requirement: {
 			headline: `所需\u3000${leftName}${symbol}${rightName}${multiplier}`,
