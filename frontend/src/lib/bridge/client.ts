@@ -27,7 +27,9 @@ type PendingRequest = {
 	reject: (error: Error) => void;
 };
 
-export function hasCefBridge(target: Window | undefined = currentWindow()): target is CefBridgeWindow {
+export function hasCefBridge(
+	target: Window | undefined = currentWindow()
+): target is CefBridgeWindow {
 	return (
 		target !== undefined &&
 		typeof target.sendIpcMessage === 'function' &&
@@ -68,11 +70,7 @@ export class CefIpcClient {
 		this.send('ui.ready', {});
 	}
 
-	send<T extends OutboundType>(
-		type: T,
-		payload: OutboundPayloads[T],
-		requestId?: RequestId
-	): void {
+	send<T extends OutboundType>(type: T, payload: OutboundPayloads[T], requestId?: RequestId): void {
 		const message = { type, payload, ...(requestId ? { request_id: requestId } : {}) };
 		this.target.sendIpcMessage(encodeOutboundMessage(message as OutboundMessage));
 	}

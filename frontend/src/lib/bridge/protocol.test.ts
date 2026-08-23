@@ -68,7 +68,9 @@ test('CEF client installs its listener before ready and correlates request resul
 
 	const resultPromise = client.request('draft.title.set', { state_version: 1, title: '新草案' });
 	const requestId = JSON.parse(sent[1]).request_id as string;
-	listener?.(JSON.stringify({ type: 'draft.sync', request_id: requestId, payload: makeDraftSync(2) }));
+	listener?.(
+		JSON.stringify({ type: 'draft.sync', request_id: requestId, payload: makeDraftSync(2) })
+	);
 	assert.equal((await resultPromise).type, 'draft.sync');
 	assert.deepEqual(received, ['draft.sync']);
 
@@ -81,7 +83,10 @@ test('CEF client installs its listener before ready and correlates request resul
 			payload: { code: 'stale_command', message: '状态已变化', recover_full_state: true }
 		})
 	);
-	await assert.rejects(errorPromise, (error) => error instanceof CommandError && error.code === 'stale_command');
+	await assert.rejects(
+		errorPromise,
+		(error) => error instanceof CommandError && error.code === 'stale_command'
+	);
 
 	client.destroy();
 	assert.equal(removed, listener);

@@ -145,12 +145,7 @@ export function deriveDraftPreviewMetrics(
 			getMetricValue(preview.current_metrics, metric);
 		return {
 			text: METRIC_DISPLAY_NAMES[metric],
-			symbol:
-				change === 0
-					? undefined
-					: change > 0
-						? MetricSymbol.Increase
-						: MetricSymbol.Decrease,
+			symbol: change === 0 ? undefined : change > 0 ? MetricSymbol.Increase : MetricSymbol.Decrease,
 			value: Math.abs(change)
 		};
 	});
