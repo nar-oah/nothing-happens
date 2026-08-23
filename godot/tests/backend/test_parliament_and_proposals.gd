@@ -102,6 +102,37 @@ func _test_proposal_gameplay_equivalence(t: BackendTestContext) -> void:
 		not system.are_gameplay_equivalent(proposal, equivalent),
 		"metric effects participate in gameplay equivalence"
 	)
+	var ordinary := t.make_proposal(group)
+	ordinary.base_effect.tax = 8
+	ordinary.lag_months = 4
+	ordinary.collapse_impact = 2.0
+	var converted := ordinary.copy()
+	converted.donation_offer = 20.0
+	converted.positive_trait_accepted = false
+	t.check(
+		system.are_gameplay_equivalent(ordinary, converted),
+		"settled bonus bookkeeping does not change future gameplay"
+	)
+	var pending := ordinary.copy()
+	pending.positive_effect.wage = 5
+	pending.bonus_choice_resolved = false
+	pending.positive_trait_accepted = false
+	pending.donation_offer = 10.0
+	var different_offer := pending.copy()
+	different_offer.donation_offer = 11.0
+	t.check(
+		not system.are_gameplay_equivalent(pending, different_offer),
+		"an actionable donation choice participates in equivalence"
+	)
+	var accepted := pending.copy()
+	accepted.bonus_choice_resolved = true
+	accepted.positive_trait_accepted = true
+	var accepted_with_historical_offer := accepted.copy()
+	accepted_with_historical_offer.donation_offer = 99.0
+	t.check(
+		system.are_gameplay_equivalent(accepted, accepted_with_historical_offer),
+		"a resolved accepted trait ignores its historical donation offer"
+	)
 
 
 func _test_duplicate_equivalent_matching(t: BackendTestContext) -> void:

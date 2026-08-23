@@ -4,8 +4,102 @@ const BackendTestContext = preload("res://tests/backend/backend_test_context.gd"
 
 
 func run(t: BackendTestContext) -> void:
+	_test_draft_round_trip_preserves_hand_order(t)
+	_test_saved_bill_switch_preserves_hand_order(t)
+	_test_successful_submission_preserves_remaining_order(t)
 	_test_saved_bill_editing_is_isolated(t)
 	_test_saved_policy_reconciles_with_constitution(t)
+
+
+func _test_draft_round_trip_preserves_hand_order(t: BackendTestContext) -> void:
+	var group := t.make_group("ordered draft")
+	var first := t.make_proposal(group)
+	var second := t.make_proposal(group)
+	var third := t.make_proposal(group)
+	var state := RunState.new()
+	state.proposal_hand = [first, second, third]
+	var system := DraftBillSystem.new()
+	t.check(system.move_proposal_from_hand(state, 0), "the first proposal enters draft")
+	t.check(system.move_proposal_from_hand(state, 1), "the third proposal enters draft")
+	t.check(system.return_proposal_to_hand(state, 0), "the first proposal leaves draft")
+	t.check(system.return_proposal_to_hand(state, 0), "the third proposal leaves draft")
+	t.check_equal(
+		state.proposal_hand,
+		[first, second, third],
+		"returning proposals restores acquisition order"
+	)
+
+	t.check(system.move_proposal_from_hand(state, 0), "the first proposal re-enters draft")
+	t.check(system.move_proposal_from_hand(state, 1), "the third proposal re-enters draft")
+	system.cancel_editing(state)
+	t.check_equal(
+		state.proposal_hand,
+		[first, second, third],
+		"cancelling a draft restores acquisition order"
+	)
+
+
+func _test_saved_bill_switch_preserves_hand_order(t: BackendTestContext) -> void:
+	var race := t.make_race("saved order")
+	var group := t.make_group("saved order source")
+	var session := t.make_session(
+		[race], [group], t.make_seats(1, "saved order")
+	)
+	var first := t.make_proposal(group)
+	first.base_effect.tax = 1
+	var second := t.make_proposal(group)
+	second.base_effect.tax = 2
+	var third := t.make_proposal(group)
+	third.base_effect.tax = 3
+	for proposal in [first, second, third]:
+		session.proposal_system.add_to_hand(session.state, proposal)
+	var first_bill := SavedBillState.new()
+	first_bill.title = "first"
+	first_bill.proposals.append(first.copy())
+	var third_bill := SavedBillState.new()
+	third_bill.title = "third"
+	third_bill.proposals.append(third.copy())
+	session.state.saved_bills = [first_bill, third_bill]
+
+	t.check(session.edit_saved_bill(0), "the first saved bill loads")
+	t.check_equal(session.state.proposal_hand, [second, third], "loading only reserves its match")
+	t.check(session.edit_saved_bill(1), "switching to another saved bill succeeds")
+	t.check_equal(
+		session.state.proposal_hand,
+		[first, second],
+		"switching restores the old match before reserving the new one"
+	)
+	session.cancel_bill_editing()
+	t.check_equal(
+		session.state.proposal_hand,
+		[first, second, third],
+		"cancelling saved bill editing preserves the current hand order"
+	)
+	session.free()
+
+
+func _test_successful_submission_preserves_remaining_order(t: BackendTestContext) -> void:
+	var race := t.make_race("consumed order")
+	var group := t.make_group("consumed source")
+	var session := t.make_session(
+		[race], [group], t.make_seats(1, "consumed order")
+	)
+	var first := t.make_proposal(group)
+	var second := t.make_proposal(group)
+	var third := t.make_proposal(group)
+	var fourth := t.make_proposal(group)
+	for proposal in [first, second, third, fourth]:
+		session.proposal_system.add_to_hand(session.state, proposal)
+	session.draft_bill_system.move_proposal_from_hand(session.state, 0)
+	session.draft_bill_system.move_proposal_from_hand(session.state, 1)
+	var result := session.submit_draft()
+	t.check(result.passed, "the selected proposals are successfully consumed")
+	t.check_equal(
+		session.state.proposal_hand,
+		[second, fourth],
+		"successful consumption preserves the remaining relative order"
+	)
+	session.free()
 
 
 func _test_saved_bill_editing_is_isolated(t: BackendTestContext) -> void:
