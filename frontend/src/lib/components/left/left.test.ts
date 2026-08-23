@@ -250,8 +250,8 @@ test('Proposal mocks preserve each InterestGroup fixed base effect template', ()
 		const template = expected[item.proposal.source_group.display_name];
 		const nonzero = Object.entries(item.proposal.base_effect).filter(([, value]) => value !== 0);
 		assert.deepEqual(
-			nonzero.map(([metric, value]) => [metric, Math.sign(value)]),
-			Object.entries(template)
+			Object.fromEntries(nonzero.map(([metric, value]) => [metric, Math.sign(value)])),
+			template
 		);
 	}
 });
