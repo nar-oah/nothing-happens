@@ -18,18 +18,17 @@
 <style>
 	.newspaper {
 		position: fixed;
-		top: 0;
+		top: 35px;
 		left: 0;
 		z-index: 50;
-		transform: translate3d(-205px, -62px, 0) rotate(-45deg);
+		transform: translate3d(-120px, -62px, 0) rotate(-45deg);
 		transform-origin: center;
 		transition: transform 260ms ease-out;
-		filter: drop-shadow(0 10px 0 rgb(30 46 59 / 0.22));
 	}
 
 	.newspaper:hover,
 	.newspaper:focus-within {
-		transform: translate3d(18px, 50px, 0) rotate(-45deg);
+		transform: translate3d(-60px, -32px, 0) rotate(-45deg);
 	}
 
 	@media (prefers-reduced-motion: reduce) {
