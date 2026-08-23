@@ -113,6 +113,12 @@ func _test_proposal_gameplay_equivalence(t: BackendTestContext) -> void:
 		system.are_gameplay_equivalent(ordinary, converted),
 		"settled bonus bookkeeping does not change future gameplay"
 	)
+	var stale_choice_flag := ordinary.copy()
+	stale_choice_flag.bonus_choice_resolved = false
+	t.check(
+		system.are_gameplay_equivalent(ordinary, stale_choice_flag),
+		"a choice flag without a positive trait has no future gameplay effect"
+	)
 	var pending := ordinary.copy()
 	pending.positive_effect.wage = 5
 	pending.bonus_choice_resolved = false

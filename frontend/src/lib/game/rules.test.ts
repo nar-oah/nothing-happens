@@ -34,6 +34,8 @@ test('settled historical bonus fields do not affect future gameplay equivalence'
 		positive_trait_accepted: false
 	};
 	assert.equal(areProposalsGameplayEquivalent(ordinary, converted), true);
+	const staleChoiceFlag = { ...makeProposal(), bonus_choice_resolved: false };
+	assert.equal(areProposalsGameplayEquivalent(ordinary, staleChoiceFlag), true);
 });
 
 test('actionable bonus state remains part of gameplay equivalence', () => {

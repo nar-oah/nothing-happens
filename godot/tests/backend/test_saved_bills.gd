@@ -37,6 +37,13 @@ func _test_draft_round_trip_preserves_hand_order(t: BackendTestContext) -> void:
 		[first, second, third],
 		"cancelling a draft restores acquisition order"
 	)
+	var newest := t.make_proposal(group)
+	ProposalSystem.new().add_to_hand(state, newest)
+	t.check_equal(
+		state.proposal_hand,
+		[first, second, third, newest],
+		"a genuinely new proposal still enters at the hand tail"
+	)
 
 
 func _test_saved_bill_switch_preserves_hand_order(t: BackendTestContext) -> void:
