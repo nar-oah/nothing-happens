@@ -62,6 +62,7 @@
 		position: absolute;
 		bottom: 38px;
 		left: 3.581%;
+		z-index: 60;
 		width: 71.615%;
 	}
 

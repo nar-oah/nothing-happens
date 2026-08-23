@@ -328,18 +328,20 @@
 							<Mark policy={item.policy} {baseline} />
 						</div>
 					{:else}
-						<MemorialHorizontal
-							contents={item.kind === 'constitution'
-								? constitutionToHorizontalContents(item.constitution)
-								: item.kind === 'bill'
-									? billToHorizontalContents(item.bill)
-									: proposalToHorizontalContents(item.proposal)}
-							onOpenChange={() => onItemSelect?.(item, 'archive')}
-						>
-							{#snippet closed()}
-								{@render closedMemorial(item)}
-							{/snippet}
-						</MemorialHorizontal>
+						<div class="shrink-0">
+							<MemorialHorizontal
+								contents={item.kind === 'constitution'
+									? constitutionToHorizontalContents(item.constitution)
+									: item.kind === 'bill'
+										? billToHorizontalContents(item.bill)
+										: proposalToHorizontalContents(item.proposal)}
+								onOpenChange={() => onItemSelect?.(item, 'archive')}
+							>
+								{#snippet closed()}
+									{@render closedMemorial(item)}
+								{/snippet}
+							</MemorialHorizontal>
+						</div>
 					{/if}
 				{/each}
 			{/if}

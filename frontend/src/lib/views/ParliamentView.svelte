@@ -131,21 +131,23 @@
 	</div>
 	<div class="state-slot"><GameStateDisplay {...mockState} /></div>
 	<div class="editor-slot">
-		<div class="vote-switch">
-			<ChoreSwitch
-				left="草案"
-				right="投票(可通过)"
-				bind:isSwitch={voteMode}
-				onSwitchChange={submitDraft}
+		<div class="editor-content">
+			<div class="vote-switch">
+				<ChoreSwitch
+					left="草案"
+					right="投票(可通过)"
+					bind:isSwitch={voteMode}
+					onSwitchChange={submitDraft}
+				/>
+			</div>
+			<MemorialBillEditor
+				bill={draft}
+				{preview}
+				onTitleChange={(title) => (draft = { ...draft, title })}
+				onRemoveProposal={removeProposal}
+				onRemovePolicy={removePolicy}
 			/>
 		</div>
-		<MemorialBillEditor
-			bill={draft}
-			{preview}
-			onTitleChange={(title) => (draft = { ...draft, title })}
-			onRemoveProposal={removeProposal}
-			onRemovePolicy={removePolicy}
-		/>
 	</div>
 </main>
 
@@ -171,15 +173,21 @@
 	.editor-slot {
 		position: absolute;
 		bottom: 20px;
-		left: 5.208%;
+		left: 0;
+		z-index: 60;
 		display: flex;
-		width: 88.086%;
+		width: 100%;
+		justify-content: center;
+	}
+
+	.editor-content {
+		display: flex;
+		width: max-content;
 		flex-direction: column;
-		align-items: flex-start;
+		align-items: flex-end;
 	}
 
 	.vote-switch {
-		align-self: flex-end;
 		margin-bottom: 8px;
 	}
 </style>

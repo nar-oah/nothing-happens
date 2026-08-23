@@ -59,9 +59,9 @@
 	{/if}
 
 	{#if !isCenter}
-		<div class="z-1 flex items-center justify-center bg-ink-secondary">
+		<div class="z-1 flex max-w-[500px] items-center justify-center bg-ink-secondary">
 			<p
-				class="m-0 max-w-[500px] whitespace-nowrap font-document text-30 font-light leading-auto text-accent-amber-deep"
+				class="m-0 max-w-full whitespace-pre-line font-document text-30 font-light leading-auto text-accent-amber-deep [overflow-wrap:anywhere]"
 			>
 				{value}
 			</p>
