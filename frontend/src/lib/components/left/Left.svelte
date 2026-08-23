@@ -22,7 +22,6 @@
 	} from './left';
 	import type {
 		ArchiveFilterState,
-		LeftItem,
 		LeftItemKind,
 		LeftProps,
 		ProposalLeftItem,

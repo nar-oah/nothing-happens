@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import ConstitutionView from '$lib/views/ConstitutionView.svelte';
 	import DialogueView from '$lib/views/DialogueView.svelte';
 	import OfficeView from '$lib/views/OfficeView.svelte';
@@ -30,7 +31,7 @@
 				{view}
 			</button>
 		{/each}
-		<a href="/components">Components</a>
+		<a href={resolve('/components')}>Components</a>
 	</nav>
 </div>
 

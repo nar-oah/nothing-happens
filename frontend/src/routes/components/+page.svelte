@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import ChoreFilter from '$lib/components/chore/ChoreFilter.svelte';
 	import ChoreItem from '$lib/components/chore/ChoreItem.svelte';
 	import ContextDetail from '$lib/components/detail/ContextDetail.svelte';
@@ -26,7 +27,7 @@
 
 <main class="gallery">
 	<header>
-		<a href="/">← 返回四界面 Demo</a>
+		<a href={resolve('/')}>← 返回四界面 Demo</a>
 		<h1>基础与复合组件</h1>
 	</header>
 	<section>
