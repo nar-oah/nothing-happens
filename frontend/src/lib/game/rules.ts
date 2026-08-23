@@ -5,6 +5,7 @@ import {
 	type MetricCondition,
 	type MetricValues,
 	type MetricVector,
+	type Bill,
 	type PolicyDefinition,
 	type PolicyEffect,
 	type Proposal
@@ -104,6 +105,35 @@ export function reconcileSavedBillProposals(
 	});
 }
 
+export function arePoliciesGameplayEquivalent(
+	first: PolicyDefinition,
+	second: PolicyDefinition
+): boolean {
+	return (
+		first.display_name === second.display_name &&
+		first.collapse_impact === second.collapse_impact &&
+		JSON.stringify(first.condition) === JSON.stringify(second.condition) &&
+		JSON.stringify(first.effects) === JSON.stringify(second.effects)
+	);
+}
+
+export function reconcileSavedBill(
+	savedBill: Bill,
+	hand: Proposal[],
+	availablePolicies: PolicyDefinition[]
+): Bill {
+	const proposals = reconcileSavedBillProposals(savedBill.proposals, hand).filter(
+		(proposal): proposal is Proposal => proposal !== null
+	);
+	const policies = savedBill.policies.flatMap((savedPolicy) => {
+		const available = availablePolicies.find((policy) =>
+			arePoliciesGameplayEquivalent(savedPolicy, policy)
+		);
+		return available ? [available] : [];
+	});
+	return { title: savedBill.title, proposals, policies };
+}
+
 export function getProposalTotalEffect(proposal: Proposal): MetricVector {
 	const result: MetricVector = { ...proposal.base_effect };
 	if (!proposal.positive_trait_accepted) return result;
@@ -124,14 +154,19 @@ export function getBillMetrics(proposals: Proposal[], policies: PolicyDefinition
 		addVectorMetrics(involved, proposal.base_effect);
 		if (proposal.positive_trait_accepted) addVectorMetrics(involved, proposal.positive_effect);
 	}
-	for (const policy of policies) {
-		involved.add(policy.condition.left_metric);
-		involved.add(policy.condition.right_metric);
-		for (const effect of policy.effects) {
-			involved.add(effect.target_metric);
-			involved.add(effect.source_a);
-			if (effect.formula === PolicyEffectFormula.METRIC_GAP) involved.add(effect.source_b);
-		}
+	for (const policy of policies) getPolicyMetrics(policy).forEach((metric) => involved.add(metric));
+	return METRICS.filter((metric) => involved.has(metric));
+}
+
+export function getPolicyMetrics(policy: PolicyDefinition): Metric[] {
+	const involved = new Set<Metric>([
+		policy.condition.left_metric,
+		policy.condition.right_metric
+	]);
+	for (const effect of policy.effects) {
+		involved.add(effect.target_metric);
+		involved.add(effect.source_a);
+		if (effect.formula === PolicyEffectFormula.METRIC_GAP) involved.add(effect.source_b);
 	}
 	return METRICS.filter((metric) => involved.has(metric));
 }

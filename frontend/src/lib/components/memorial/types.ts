@@ -15,7 +15,7 @@ export enum MetricSymbol {
 export type MemorialMetricData = {
 	text: string;
 	symbol?: MetricSymbol;
-	value: number;
+	value: number | string;
 	isReverse?: boolean;
 };
 

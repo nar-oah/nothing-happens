@@ -85,3 +85,10 @@ export type Bill = {
 	proposals: Proposal[];
 	policies: PolicyDefinition[];
 };
+
+// The frontend only needs the enacted policies to derive Left metrics for now.
+// Annual resolution and unlock state remain authoritative Godot concerns.
+export type Constitution = {
+	title: string;
+	policies: PolicyDefinition[];
+};
