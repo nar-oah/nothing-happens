@@ -82,7 +82,7 @@
 	});
 </script>
 
-<section class="flex items-start" aria-label="法案编辑器">
+<section class="flex items-start" aria-label="法案编辑器" data-block-world-input>
 	<div class="flex items-start">
 		<MemorialVerticalCover>
 			<div class="relative h-full w-full">

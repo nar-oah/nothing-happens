@@ -19,6 +19,7 @@
 	class="flex cursor-pointer flex-col items-start border-0 bg-transparent p-0 text-left"
 	aria-label={`切换至${isSwitch ? left : right}`}
 	aria-pressed={isSwitch}
+	data-block-world-input
 	onclick={toggle}
 >
 	{#if isSwitch}
