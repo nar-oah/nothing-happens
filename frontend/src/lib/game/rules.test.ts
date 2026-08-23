@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+	arePoliciesGameplayEquivalent,
 	areProposalsGameplayEquivalent,
 	reconcileSavedBill,
 	reconcileSavedBillProposals
@@ -13,6 +14,9 @@ import {
 	type PolicyDefinition,
 	type Proposal
 } from './types.ts';
+
+type PolicyHasCollapseImpact = 'collapse_impact' extends keyof PolicyDefinition ? true : false;
+const policyHasCollapseImpact: PolicyHasCollapseImpact = false;
 
 const sourceGroup: InterestGroupDefinition = {
 	display_name: 'source',
@@ -110,8 +114,7 @@ test('saved bill reconciliation removes missing proposals and unavailable polici
 				source_b: Metric.TAX,
 				multiplier: 0.1
 			}
-		],
-		collapse_impact: 1
+		]
 	};
 	const stalePolicy = { ...availablePolicy, display_name: '已失效政策' };
 	const reconciled = reconcileSavedBill(
@@ -125,4 +128,45 @@ test('saved bill reconciliation removes missing proposals and unavailable polici
 	);
 	assert.equal(reconciled.proposals.length, 1);
 	assert.deepEqual(reconciled.policies, [availablePolicy]);
+});
+
+test('policy identity uses display_name only', () => {
+	const first: PolicyDefinition = {
+		display_name: '同名政策',
+		condition: {
+			left_metric: Metric.TAX,
+			operator: MetricConditionOperator.LESS_THAN,
+			right_metric: Metric.TRADE,
+			right_multiplier: 1
+		},
+		effects: []
+	};
+	const second: PolicyDefinition = {
+		display_name: '同名政策',
+		condition: {
+			left_metric: Metric.WAGE,
+			operator: MetricConditionOperator.GREATER_THAN,
+			right_metric: Metric.PRICE,
+			right_multiplier: 2
+		},
+		effects: [
+			{
+				target_metric: Metric.EMPLOYMENT,
+				formula: PolicyEffectFormula.METRIC_VALUE,
+				source_a: Metric.TRADE,
+				source_b: Metric.TAX,
+				multiplier: 0.5
+			}
+		]
+	};
+	assert.equal(arePoliciesGameplayEquivalent(first, second), true);
+	assert.deepEqual(reconcileSavedBill({ title: '', proposals: [], policies: [first] }, [], [second]), {
+		title: '',
+		proposals: [],
+		policies: [second]
+	});
+});
+
+test('PolicyDefinition has no collapse_impact field', () => {
+	assert.equal(policyHasCollapseImpact, false);
 });
