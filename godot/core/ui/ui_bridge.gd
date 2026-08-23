@@ -95,6 +95,14 @@ func set_ui_mode(mode: String, send_sync: bool = true) -> bool:
 	return true
 
 
+func handle_world_interaction(action: StringName, payload: Dictionary) -> void:
+	if action != &"ui.mode.set":
+		return
+	var mode: Variant = payload.get("mode")
+	if mode is String:
+		set_ui_mode(mode)
+
+
 func _on_ipc_message(raw_message: String) -> void:
 	receive_ipc_message(raw_message)
 
