@@ -147,6 +147,7 @@ export function makeLiveState(stateVersion = 1): LiveGameState {
 			current_metrics: current,
 			pure_proposal_target: { ...current, price: 108 },
 			immediate_policy_result: { ...current, price: 108, trade: 96 },
+			projected_metrics: { ...current, price: 116, trade: 96 },
 			vote
 		},
 		pending_dialogue: { hand_index: 0, proposal: testProposal }

@@ -32,7 +32,7 @@ export type GameStateDisplayProps = {
 };
 
 export type LiveConstitutionRow = MemorialConstitutionRowContentData & {
-	article_index: number;
+	articleRef: number;
 };
 
 export type LiveConstitutionMemorialData = Record<string, number | LiveConstitutionRow[]>;
@@ -137,11 +137,11 @@ export function deriveDraftPreviewMetrics(
 		: METRICS.filter(
 				(metric) =>
 					getMetricValue(preview.current_metrics, metric) !==
-					getMetricValue(preview.immediate_policy_result, metric)
+					getMetricValue(preview.projected_metrics, metric)
 			);
 	return metrics.map((metric) => {
 		const change =
-			getMetricValue(preview.immediate_policy_result, metric) -
+			getMetricValue(preview.projected_metrics, metric) -
 			getMetricValue(preview.current_metrics, metric);
 		return {
 			text: METRIC_DISPLAY_NAMES[metric],
@@ -190,7 +190,7 @@ export function deriveDialoguePresentation(
 
 function articleToMemorialRow(article: ConstitutionArticleStateDto): LiveConstitutionRow {
 	return {
-		article_index: article.article_index,
+		articleRef: article.article_index,
 		text: article.display_name,
 		number: '',
 		selected: article.selected,

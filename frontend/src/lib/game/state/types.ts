@@ -101,6 +101,7 @@ export type DraftPreviewDto = {
 	current_metrics: MetricValues;
 	pure_proposal_target: MetricValues;
 	immediate_policy_result: MetricValues;
+	projected_metrics: MetricValues;
 	vote: VoteResultDto;
 };
 

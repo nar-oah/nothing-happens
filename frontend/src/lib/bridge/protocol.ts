@@ -18,6 +18,7 @@ export type NormalizedRect = {
 export type CommandErrorDto = {
 	code: string;
 	message: string;
+	state_version?: number;
 	recover_full_state?: boolean;
 };
 

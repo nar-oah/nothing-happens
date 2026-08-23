@@ -180,6 +180,7 @@ function isCommandError(value: unknown): value is CommandErrorDto {
 		isRecord(value) &&
 		typeof value.code === 'string' &&
 		typeof value.message === 'string' &&
+		(value.state_version === undefined || isVersion(value.state_version)) &&
 		(value.recover_full_state === undefined || typeof value.recover_full_state === 'boolean')
 	);
 }
@@ -388,6 +389,7 @@ function isDraftPreview(value: unknown): value is DraftPreviewDto {
 		isMetricValues(value.current_metrics) &&
 		isMetricValues(value.pure_proposal_target) &&
 		isMetricValues(value.immediate_policy_result) &&
+		isMetricValues(value.projected_metrics) &&
 		isVoteResult(value.vote)
 	);
 }

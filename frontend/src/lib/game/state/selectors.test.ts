@@ -48,7 +48,7 @@ test('authoritative draft preview becomes existing Memorial metric props', () =>
 	assert.deepEqual(
 		preview.map(({ text, symbol, value }) => [text, symbol, value]),
 		[
-			['物價', '+', 8],
+			['物價', '+', 16],
 			['商貿', '-', 4]
 		]
 	);
@@ -58,7 +58,7 @@ test('constitution and dialogue presentation retain authoritative refs and value
 	const state = makeLiveState();
 	const constitution = deriveConstitutionMemorial(state);
 	const row = Array.isArray(constitution['人类']) ? constitution['人类'][0] : undefined;
-	assert.equal(row?.article_index, 0);
+	assert.equal(row?.articleRef, 0);
 	assert.equal(row?.selected, true);
 	assert.equal(row?.selectable, false);
 
