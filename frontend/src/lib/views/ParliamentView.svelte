@@ -27,14 +27,14 @@
 		mockTopItems
 	} from '$lib/demo/mock';
 
-	let proposalHand = $state<ProposalLeftItem[]>(mockProposalItems.slice());
-	let draftProposalItems = $state<ProposalLeftItem[]>([proposalHand[0]]);
+	const initialDraftProposal = mockProposalItems[0];
+	let proposalHand = $state<ProposalLeftItem[]>(mockProposalItems.slice(1));
+	let draftProposalItems = $state<ProposalLeftItem[]>([initialDraftProposal]);
 	let draft = $state<Bill>({
 		title: '新港通商案',
-		proposals: [proposalHand[0].proposal],
+		proposals: [initialDraftProposal.proposal],
 		policies: [mockPolicies[4]]
 	});
-	proposalHand = proposalHand.slice(1);
 	let nextProposalIndex = $state(20);
 	let notice = $state('点击 Left 中的提案、政策或已保存法案。');
 	let availablePolicyItems = $derived(
