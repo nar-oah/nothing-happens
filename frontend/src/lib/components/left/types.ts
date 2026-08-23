@@ -65,6 +65,7 @@ export type ProposalPreview = {
 export type SynthesisConfirmation = {
 	proposals: ProposalLeftItem[];
 	refs: LeftItemRef[];
+	negativeBaseRef: LeftItemRef;
 	reverseSource?: ProposalLeftItem;
 };
 

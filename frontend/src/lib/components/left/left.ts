@@ -17,6 +17,7 @@ import type {
 	LeftSelectionState,
 	ProposalLeftItem,
 	ProposalPreview,
+	SynthesisConfirmation,
 	SynthesisFilterState
 } from './types';
 
@@ -206,6 +207,18 @@ export function createProposalSynthesisPreview(selected: ProposalLeftItem[]): Pr
 	return {
 		metrics: [...ordinary, ...(reverse ? makeMetric(reverse.metric, reverse.raw, true) : [])],
 		reverseSource: reverse?.item
+	};
+}
+
+export function createSynthesisConfirmation(
+	selected: ProposalLeftItem[],
+	negativeBase: ProposalLeftItem
+): SynthesisConfirmation {
+	return {
+		proposals: selected,
+		refs: selected.map((item) => item.ref),
+		negativeBaseRef: negativeBase.ref,
+		reverseSource: createProposalSynthesisPreview(selected).reverseSource
 	};
 }
 

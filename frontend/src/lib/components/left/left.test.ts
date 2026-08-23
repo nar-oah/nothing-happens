@@ -10,6 +10,7 @@ import {
 } from '../../game/index.ts';
 import {
 	createProposalSynthesisPreview,
+	createSynthesisConfirmation,
 	deriveSynthesisItems,
 	filterArchiveItems,
 	filterSelectionItems,
@@ -213,6 +214,12 @@ test('preview keeps only the largest reverse metric with stable ties', () => {
 	assert.equal(reverse[0].text, '税課');
 	assert.equal(reverse[0].value, 8);
 	assert.equal(preview.reverseSource, first);
+});
+
+test('synthesis confirmation records the clicked negative base ref', () => {
+	const confirmation = createSynthesisConfirmation(proposals, proposals[1]);
+	assert.equal(confirmation.negativeBaseRef, proposals[1].ref);
+	assert.deepEqual(confirmation.refs, proposals.map((item) => item.ref));
 });
 
 test('Left secondary mode follows its scene', () => {

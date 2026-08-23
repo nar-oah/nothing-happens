@@ -18,6 +18,7 @@
 		LEFT_KIND_LABELS,
 		LEFT_METRIC_LABELS,
 		createProposalSynthesisPreview,
+		createSynthesisConfirmation,
 		deriveSynthesisItems,
 		filterArchiveItems,
 		filterSelectionItems,
@@ -167,13 +168,9 @@
 		selectedProposals = toggleProposalSelection(selectedProposals, item);
 	}
 
-	function confirmSynthesis() {
+	function confirmSynthesis(negativeBase: ProposalLeftItem) {
 		if (selectedProposals.length !== 3) return;
-		onSynthesisConfirm?.({
-			proposals: selectedProposals,
-			refs: selectedProposals.map((item) => item.ref),
-			reverseSource: synthesisPreview.reverseSource
-		});
+		onSynthesisConfirm?.(createSynthesisConfirmation(selectedProposals, negativeBase));
 		selectedProposals = [];
 	}
 
@@ -188,7 +185,7 @@
 			selectedProposals = [];
 			return;
 		}
-		confirmSynthesis();
+		confirmSynthesis(item);
 	}
 
 	function makeArchiveState(filters: ChoreFilters): ArchiveFilterState {
@@ -244,7 +241,7 @@
 	{/if}
 {/snippet}
 
-<aside class="left-hover-area" aria-label="左侧案牍">
+<aside class="left-hover-area" aria-label="左侧案牍" data-block-world-input>
 	<div class="left-content flex h-full w-[390px] flex-col items-start">
 		{#if secondaryMode}
 			<div class="filter-slot z-10 shrink-0">
