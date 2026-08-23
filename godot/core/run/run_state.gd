@@ -1,6 +1,8 @@
 extends RefCounted
 class_name RunState
 
+const NEW_BILL_INDEX: int = -1
+
 var year: int = 1
 var month: int = 1
 var metrics: MetricValues
@@ -8,6 +10,8 @@ var year_start_metrics: MetricValues
 var active_bill: ActiveBillState
 var proposal_hand: Array[ProposalInstance] = []
 var draft_bill: DraftBillState
+var saved_bills: Array[SavedBillState] = []
+var editing_saved_bill_index: int = NEW_BILL_INDEX
 var seats: Array[SeatState] = []
 var races: Array[RaceState] = []
 var events: Array[EventState] = []

@@ -1,6 +1,7 @@
 extends RefCounted
 class_name ActiveBillState
 
+var title: String = ""
 var start_values: MetricValues
 var pure_target: MetricValues
 var proposals: Array[ActiveProposalState] = []
