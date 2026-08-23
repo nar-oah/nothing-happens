@@ -4,14 +4,16 @@
 	import { hasCefBridge } from '$lib/bridge/client';
 	import LiveGame from '$lib/game/state/LiveGame.svelte';
 
-	let live = $state(false);
+	type RuntimeMode = 'detecting' | 'demo' | 'live';
+
+	let runtimeMode = $state<RuntimeMode>('detecting');
 	onMount(() => {
-		live = hasCefBridge();
+		runtimeMode = hasCefBridge() ? 'live' : 'demo';
 	});
 </script>
 
-{#if live}
+{#if runtimeMode === 'live'}
 	<LiveGame />
-{:else}
+{:else if runtimeMode === 'demo'}
 	<DemoGame />
 {/if}
