@@ -35,6 +35,8 @@ func _create_cef_texture() -> Control:
 	cef_texture.set_script(CefTextureInputScript)
 	cef_texture.mouse_filter = Control.MOUSE_FILTER_STOP
 	cef_texture.focus_mode = Control.FOCUS_ALL
+	if cef_texture is TextureRect:
+		cef_texture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	if has_cef:
 		cef_texture.set("url", "res://web/index.html")
 		cef_texture.set("enable_accelerated_osr", true)
