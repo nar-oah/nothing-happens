@@ -17,14 +17,14 @@ import type {
 	PolicyLeftItem,
 	ProposalLeftItem
 } from '$lib/components/left/types';
-import type {
-	MemorialConstitutionData,
-	MemorialMetricData
-} from '$lib/components/memorial/types';
+import type { MemorialConstitutionData, MemorialMetricData } from '$lib/components/memorial/types';
 import type { StateItem } from '$lib/components/state/GameStateDisplay.svelte';
 import type { TopItemData } from '$lib/components/top/top';
 
-const makeGroup = (display_name: string, decreases: Partial<Record<Metric, boolean>> = {}): InterestGroupDefinition => ({
+const makeGroup = (
+	display_name: string,
+	decreases: Partial<Record<Metric, boolean>> = {}
+): InterestGroupDefinition => ({
 	display_name,
 	base_column_weight: 1,
 	decrease_tax: decreases[Metric.TAX] ?? false,
@@ -105,14 +105,46 @@ export const mockPolicies: PolicyDefinition[] = [
 ];
 
 export const mockProposalItems: ProposalLeftItem[] = [
-	{ kind: 'proposal', ref: { collection: 'proposals', index: 0 }, proposal: makeProposal(merchants, { tax: -8, trade: 2 }, { trade: 8 }, 6) },
-	{ kind: 'proposal', ref: { collection: 'proposals', index: 1 }, proposal: makeProposal(workers, { wage: 7, employment: -4 }, { tax: -5 }, 3) },
-	{ kind: 'proposal', ref: { collection: 'proposals', index: 2 }, proposal: makeProposal(farmers, { price: -6, tax: 2 }, {}, 4) },
-	{ kind: 'proposal', ref: { collection: 'proposals', index: 3 }, proposal: makeProposal(merchants, { trade: 9, price: 3 }, { wage: 6 }, 2) },
-	{ kind: 'proposal', ref: { collection: 'proposals', index: 4 }, proposal: makeProposal(workers, { employment: 8, wage: -3 }, {}, 5) },
-	{ kind: 'proposal', ref: { collection: 'proposals', index: 5 }, proposal: makeProposal(farmers, { price: -10, trade: -2 }, { employment: 7 }, 7) },
-	{ kind: 'proposal', ref: { collection: 'proposals', index: 6 }, proposal: makeProposal(merchants, { tax: -4, trade: 5 }, {}, 1) },
-	{ kind: 'proposal', ref: { collection: 'proposals', index: 7 }, proposal: makeProposal(workers, { wage: 4, employment: 6 }, { price: -8 }, 4) }
+	{
+		kind: 'proposal',
+		ref: { collection: 'proposals', index: 0 },
+		proposal: makeProposal(merchants, { tax: -8, trade: 2 }, { trade: 8 }, 6)
+	},
+	{
+		kind: 'proposal',
+		ref: { collection: 'proposals', index: 1 },
+		proposal: makeProposal(workers, { wage: 7, employment: -4 }, { tax: -5 }, 3)
+	},
+	{
+		kind: 'proposal',
+		ref: { collection: 'proposals', index: 2 },
+		proposal: makeProposal(farmers, { price: -6, tax: 2 }, {}, 4)
+	},
+	{
+		kind: 'proposal',
+		ref: { collection: 'proposals', index: 3 },
+		proposal: makeProposal(merchants, { trade: 9, price: 3 }, { wage: 6 }, 2)
+	},
+	{
+		kind: 'proposal',
+		ref: { collection: 'proposals', index: 4 },
+		proposal: makeProposal(workers, { employment: 8, wage: -3 }, {}, 5)
+	},
+	{
+		kind: 'proposal',
+		ref: { collection: 'proposals', index: 5 },
+		proposal: makeProposal(farmers, { price: -10, trade: -2 }, { employment: 7 }, 7)
+	},
+	{
+		kind: 'proposal',
+		ref: { collection: 'proposals', index: 6 },
+		proposal: makeProposal(merchants, { tax: -4, trade: 5 }, {}, 1)
+	},
+	{
+		kind: 'proposal',
+		ref: { collection: 'proposals', index: 7 },
+		proposal: makeProposal(workers, { wage: 4, employment: 6 }, { price: -8 }, 4)
+	}
 ];
 
 export const mockPolicyItems: PolicyLeftItem[] = mockPolicies.map((policy, index) => ({
@@ -135,7 +167,10 @@ export const mockSavedBills: Bill[] = [
 	},
 	{
 		title: '旧港遗案',
-		proposals: [{ ...mockProposalItems[2].proposal, source_group: { ...farmers } }, missingProposal],
+		proposals: [
+			{ ...mockProposalItems[2].proposal, source_group: { ...farmers } },
+			missingProposal
+		],
 		policies: [mockPolicies[1], stalePolicy]
 	}
 ];
@@ -238,7 +273,9 @@ export const mockConstitution: MemorialConstitutionData = {
 				{ title: '商会席位', body: '商会推举代表参与公所议事。' },
 				{ body: '席位依本地商户名册核定。' }
 			],
-			policies: [{ policyTitle: '商', content: { title: '商船通行', body: '商船依统一税则通行。' } }]
+			policies: [
+				{ policyTitle: '商', content: { title: '商船通行', body: '商船依统一税则通行。' } }
+			]
 		},
 		{
 			text: '工所',

@@ -39,11 +39,7 @@ export type PolicyLeftItem = {
 	policy: PolicyDefinition;
 };
 
-export type LeftItem =
-	| ConstitutionLeftItem
-	| BillLeftItem
-	| ProposalLeftItem
-	| PolicyLeftItem;
+export type LeftItem = ConstitutionLeftItem | BillLeftItem | ProposalLeftItem | PolicyLeftItem;
 
 export type ArchiveFilterState = {
 	kinds: LeftItemKind[];

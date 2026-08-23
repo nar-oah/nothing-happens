@@ -156,11 +156,47 @@
 </main>
 
 <style>
-	.game-view { position: relative; height: 100vh; overflow: hidden; background: transparent; }
-	.left-slot { position: absolute; inset: 150px auto 20px 24px; }
-	.top-slot { position: absolute; top: 20px; right: 26px; }
-	.legislator { position: absolute; top: 210px; right: 26px; }
-	.state-slot { position: absolute; right: 26px; bottom: 26px; }
-	.editor-slot { position: absolute; left: 48%; bottom: 34px; transform: translateX(-50%) scale(0.88); transform-origin: bottom center; }
-	.notice { position: absolute; left: 50%; top: 18px; margin: 0; transform: translateX(-50%); background: #1e2e3b; padding: 5px 12px; color: #efb836; font: 300 16px "RealTypeWriter"; }
+	.game-view {
+		position: relative;
+		height: 100vh;
+		overflow: hidden;
+		background: transparent;
+	}
+	.left-slot {
+		position: absolute;
+		inset: 150px auto 20px 24px;
+	}
+	.top-slot {
+		position: absolute;
+		top: 20px;
+		right: 26px;
+	}
+	.legislator {
+		position: absolute;
+		top: 210px;
+		right: 26px;
+	}
+	.state-slot {
+		position: absolute;
+		right: 26px;
+		bottom: 26px;
+	}
+	.editor-slot {
+		position: absolute;
+		left: 48%;
+		bottom: 34px;
+		transform: translateX(-50%) scale(0.88);
+		transform-origin: bottom center;
+	}
+	.notice {
+		position: absolute;
+		left: 50%;
+		top: 18px;
+		margin: 0;
+		transform: translateX(-50%);
+		background: #1e2e3b;
+		padding: 5px 12px;
+		color: #efb836;
+		font: 300 16px 'RealTypeWriter';
+	}
 </style>

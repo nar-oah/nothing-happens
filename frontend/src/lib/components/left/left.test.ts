@@ -86,8 +86,16 @@ const proposals = [
 ];
 
 const items: LeftItem[] = [
-	{ kind: 'constitution', ref: { collection: 'constitutions', index: 0 }, constitution: { title: '约法', policies: [policy] } },
-	{ kind: 'bill', ref: { collection: 'bills', index: 0 }, bill: { title: '法案', proposals: [proposals[0].proposal], policies: [] } },
+	{
+		kind: 'constitution',
+		ref: { collection: 'constitutions', index: 0 },
+		constitution: { title: '约法', policies: [policy] }
+	},
+	{
+		kind: 'bill',
+		ref: { collection: 'bills', index: 0 },
+		bill: { title: '法案', proposals: [proposals[0].proposal], policies: [] }
+	},
 	...proposals,
 	{ kind: 'policy', ref: { collection: 'policies', index: 0 }, policy }
 ];
@@ -99,7 +107,10 @@ test('Left filters by discriminated kind without mutating input', () => {
 		timeAscending: false,
 		valueAscending: false
 	});
-	assert.deepEqual(filtered.map((item) => item.kind), ['bill', 'policy']);
+	assert.deepEqual(
+		filtered.map((item) => item.kind),
+		['bill', 'policy']
+	);
 	assert.equal(items.length, 6);
 });
 
@@ -110,7 +121,10 @@ test('Left metric filter matches any involved metric', () => {
 		timeAscending: false,
 		valueAscending: false
 	});
-	assert.deepEqual(filtered.map((item) => item.kind), ['constitution']);
+	assert.deepEqual(
+		filtered.map((item) => item.kind),
+		['constitution']
+	);
 });
 
 test('synthesis group options are dynamic, deduplicated, and value based', () => {
@@ -128,8 +142,14 @@ test('synthesis group options are dynamic, deduplicated, and value based', () =>
 });
 
 test('proposal time sort uses original collection index', () => {
-	assert.deepEqual(sortProposalItemsByTime(proposals, true).map((item) => item.ref.index), [2, 4, 9]);
-	assert.deepEqual(sortProposalItemsByTime(proposals, false).map((item) => item.ref.index), [9, 4, 2]);
+	assert.deepEqual(
+		sortProposalItemsByTime(proposals, true).map((item) => item.ref.index),
+		[2, 4, 9]
+	);
+	assert.deepEqual(
+		sortProposalItemsByTime(proposals, false).map((item) => item.ref.index),
+		[9, 4, 2]
+	);
 });
 
 test('proposal value sort uses selected effective metric', () => {
@@ -145,9 +165,15 @@ test('proposal selection is capped at three and selected refs move first unchang
 		(current, item) => toggleProposalSelection(current, item),
 		[] as ProposalLeftItem[]
 	);
-	assert.deepEqual(selected.map((item) => item.ref.index), [4, 9, 2]);
+	assert.deepEqual(
+		selected.map((item) => item.ref.index),
+		[4, 9, 2]
+	);
 	const moved = moveSelectedProposalsFirst([fourth, ...proposals], [proposals[2], proposals[0]]);
-	assert.deepEqual(moved.map((item) => item.ref.index), [2, 4, 12, 9]);
+	assert.deepEqual(
+		moved.map((item) => item.ref.index),
+		[2, 4, 12, 9]
+	);
 	assert.equal(moved[0].ref, proposals[2].ref);
 });
 

@@ -140,7 +140,9 @@ export function moveSelectedProposalsFirst(
 	return [...visibleSelected, ...rest];
 }
 
-export function proposalToMemorialMetrics(proposal: ProposalLeftItem['proposal']): MemorialMetricData[] {
+export function proposalToMemorialMetrics(
+	proposal: ProposalLeftItem['proposal']
+): MemorialMetricData[] {
 	const ordinary = METRICS.flatMap((metric) =>
 		makeMetric(metric, getMetricValue(proposal.base_effect, metric), false)
 	);
@@ -154,7 +156,9 @@ export function createProposalSynthesisPreview(selected: ProposalLeftItem[]): Pr
 	const ordinary = METRICS.flatMap((metric): MemorialMetricData[] => {
 		const values = selected.map((item) => getMetricValue(item.proposal.base_effect, metric));
 		if (values.every((value) => value === 0)) return [];
-		return [{ text: METRIC_DISPLAY_NAMES[metric], value: `${Math.min(...values)}~${Math.max(...values)}` }];
+		return [
+			{ text: METRIC_DISPLAY_NAMES[metric], value: `${Math.min(...values)}~${Math.max(...values)}` }
+		];
 	});
 	const reverseCandidates = selected.flatMap((item, selectionIndex) =>
 		METRICS.flatMap((metric) => {
@@ -163,16 +167,12 @@ export function createProposalSynthesisPreview(selected: ProposalLeftItem[]): Pr
 		})
 	);
 	reverseCandidates.sort(
-		(first, second) => Math.abs(second.raw) - Math.abs(first.raw) || first.selectionIndex - second.selectionIndex
+		(first, second) =>
+			Math.abs(second.raw) - Math.abs(first.raw) || first.selectionIndex - second.selectionIndex
 	);
 	const reverse = reverseCandidates[0];
 	return {
-		metrics: [
-			...ordinary,
-			...(reverse
-				? makeMetric(reverse.metric, reverse.raw, true)
-				: [])
-		],
+		metrics: [...ordinary, ...(reverse ? makeMetric(reverse.metric, reverse.raw, true) : [])],
 		reverseSource: reverse?.item
 	};
 }
@@ -207,12 +207,14 @@ function compareProposalValues(
 function makeMetric(metric: Metric, raw: number, isReverse: boolean): MemorialMetricData[] {
 	return raw === 0
 		? []
-		: [{
-				text: METRIC_DISPLAY_NAMES[metric],
-				symbol: raw > 0 ? MetricSymbol.Increase : MetricSymbol.Decrease,
-				value: Math.abs(raw),
-				isReverse
-			}];
+		: [
+				{
+					text: METRIC_DISPLAY_NAMES[metric],
+					symbol: raw > 0 ? MetricSymbol.Increase : MetricSymbol.Decrease,
+					value: Math.abs(raw),
+					isReverse
+				}
+			];
 }
 
 function compare(first: number, second: number, ascending: boolean): number {

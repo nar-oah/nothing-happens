@@ -91,7 +91,8 @@
 		const filter = rightFilters['利益集团'];
 		if (typeof filter === 'boolean') return;
 		const current = filter.selected[0];
-		const selected = current && groupOptions.includes(current) ? [current] : groupOptions.slice(0, 1);
+		const selected =
+			current && groupOptions.includes(current) ? [current] : groupOptions.slice(0, 1);
 		if (
 			filter.options.join('\u0000') !== groupOptions.join('\u0000') ||
 			filter.selected.join('\u0000') !== selected.join('\u0000')
@@ -108,7 +109,10 @@
 	});
 
 	function selectProposal(item: ProposalLeftItem) {
-		if (confirming && !selectedProposals.some((selected) => isSameLeftRef(selected.ref, item.ref))) {
+		if (
+			confirming &&
+			!selectedProposals.some((selected) => isSameLeftRef(selected.ref, item.ref))
+		) {
 			return;
 		}
 		selectedProposals = toggleProposalSelection(selectedProposals, item);
@@ -167,10 +171,14 @@
 		/>
 	</div>
 
-	<div class="left-list mt-12 flex min-h-0 w-full flex-1 flex-col gap-12 overflow-y-auto pb-[120px]">
+	<div
+		class="left-list mt-12 flex min-h-0 w-full flex-1 flex-col gap-12 overflow-y-auto pb-[120px]"
+	>
 		{#if synthesisMode}
 			{#each synthesisItems as item (`${item.ref.collection}-${item.ref.index}`)}
-				{@const selected = selectedProposals.some((current) => isSameLeftRef(current.ref, item.ref))}
+				{@const selected = selectedProposals.some((current) =>
+					isSameLeftRef(current.ref, item.ref)
+				)}
 				<button
 					type="button"
 					class="w-[230px] shrink-0 cursor-pointer border-0 bg-transparent p-0 text-left"

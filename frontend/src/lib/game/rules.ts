@@ -159,10 +159,7 @@ export function getBillMetrics(proposals: Proposal[], policies: PolicyDefinition
 }
 
 export function getPolicyMetrics(policy: PolicyDefinition): Metric[] {
-	const involved = new Set<Metric>([
-		policy.condition.left_metric,
-		policy.condition.right_metric
-	]);
+	const involved = new Set<Metric>([policy.condition.left_metric, policy.condition.right_metric]);
 	for (const effect of policy.effects) {
 		involved.add(effect.target_metric);
 		involved.add(effect.source_a);

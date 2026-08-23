@@ -29,9 +29,37 @@
 </main>
 
 <style>
-	.game-view { position: relative; height: 100vh; overflow: hidden; background: transparent; }
-	.top-slot { position: absolute; top: 24px; right: 28px; }
-	.state-slot { position: absolute; right: 32px; bottom: 30px; }
-	.constitution { position: absolute; left: 50%; top: 52%; transform: translate(-50%, -50%) scale(0.95); transform-origin: center; }
-	.notice { position: absolute; left: 28px; bottom: 24px; margin: 0; background: #1e2e3b; padding: 5px 12px; color: #efb836; font: 300 16px "RealTypeWriter"; }
+	.game-view {
+		position: relative;
+		height: 100vh;
+		overflow: hidden;
+		background: transparent;
+	}
+	.top-slot {
+		position: absolute;
+		top: 24px;
+		right: 28px;
+	}
+	.state-slot {
+		position: absolute;
+		right: 32px;
+		bottom: 30px;
+	}
+	.constitution {
+		position: absolute;
+		left: 50%;
+		top: 52%;
+		transform: translate(-50%, -50%) scale(0.95);
+		transform-origin: center;
+	}
+	.notice {
+		position: absolute;
+		left: 28px;
+		bottom: 24px;
+		margin: 0;
+		background: #1e2e3b;
+		padding: 5px 12px;
+		color: #efb836;
+		font: 300 16px 'RealTypeWriter';
+	}
 </style>

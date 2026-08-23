@@ -4,7 +4,12 @@
 	import ContextDetail from '$lib/components/detail/ContextDetail.svelte';
 	import { MemorialBillEditor, MemorialProposalClosed } from '$lib/components/memorial';
 	import { proposalToMemorialMetrics } from '$lib/components/left/left';
-	import { getMockBillPreview, mockObjectDetail, mockSavedBills, mockProposalItems } from '$lib/demo/mock';
+	import {
+		getMockBillPreview,
+		mockObjectDetail,
+		mockSavedBills,
+		mockProposalItems
+	} from '$lib/demo/mock';
 
 	let leftFilters = $state({
 		类型: { options: ['约法', '法案', '提案', '政策'], selected: ['提案'], multiple: true },
@@ -46,9 +51,32 @@
 </main>
 
 <style>
-	.gallery { box-sizing: border-box; min-height: 100vh; display: flex; flex-direction: column; gap: 36px; padding: 48px; background: #537087; }
-	header { display: flex; align-items: baseline; gap: 24px; color: #1e2e3b; font-family: "RealTypeWriter"; }
-	header a { color: #1e2e3b; }
-	section { display: flex; align-items: flex-start; gap: 32px; }
-	.wide { overflow-x: auto; padding-bottom: 20px; }
+	.gallery {
+		box-sizing: border-box;
+		min-height: 100vh;
+		display: flex;
+		flex-direction: column;
+		gap: 36px;
+		padding: 48px;
+		background: #537087;
+	}
+	header {
+		display: flex;
+		align-items: baseline;
+		gap: 24px;
+		color: #1e2e3b;
+		font-family: 'RealTypeWriter';
+	}
+	header a {
+		color: #1e2e3b;
+	}
+	section {
+		display: flex;
+		align-items: flex-start;
+		gap: 32px;
+	}
+	.wide {
+		overflow-x: auto;
+		padding-bottom: 20px;
+	}
 </style>

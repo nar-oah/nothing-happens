@@ -45,10 +45,40 @@
 </main>
 
 <style>
-	.game-view { position: relative; height: 100vh; overflow: hidden; background: transparent; }
-	.left-slot { position: absolute; inset: 150px auto 20px 24px; }
-	.top-slot { position: absolute; top: 24px; right: 28px; }
-	.detail-slot { position: absolute; top: 230px; right: 32px; }
-	.state-slot { position: absolute; right: 32px; bottom: 30px; }
-	.notice { position: absolute; left: 50%; bottom: 18px; margin: 0; transform: translateX(-50%); background: #1e2e3b; padding: 5px 12px; color: #efb836; font: 300 16px "RealTypeWriter"; }
+	.game-view {
+		position: relative;
+		height: 100vh;
+		overflow: hidden;
+		background: transparent;
+	}
+	.left-slot {
+		position: absolute;
+		inset: 150px auto 20px 24px;
+	}
+	.top-slot {
+		position: absolute;
+		top: 24px;
+		right: 28px;
+	}
+	.detail-slot {
+		position: absolute;
+		top: 230px;
+		right: 32px;
+	}
+	.state-slot {
+		position: absolute;
+		right: 32px;
+		bottom: 30px;
+	}
+	.notice {
+		position: absolute;
+		left: 50%;
+		bottom: 18px;
+		margin: 0;
+		transform: translateX(-50%);
+		background: #1e2e3b;
+		padding: 5px 12px;
+		color: #efb836;
+		font: 300 16px 'RealTypeWriter';
+	}
 </style>

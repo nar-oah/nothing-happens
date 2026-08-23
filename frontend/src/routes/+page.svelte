@@ -26,11 +26,7 @@
 
 	<nav class="view-selector" aria-label="开发界面切换">
 		{#each views as view (view)}
-			<button
-				type="button"
-				class:active={activeView === view}
-				onclick={() => (activeView = view)}
-			>
+			<button type="button" class:active={activeView === view} onclick={() => (activeView = view)}>
 				{view}
 			</button>
 		{/each}
@@ -42,11 +38,16 @@
 	.demo-stage {
 		min-height: 100vh;
 		background-color: #537087;
-		background-image: linear-gradient(45deg, rgb(52 70 84 / 0.18) 25%, transparent 25%),
+		background-image:
+			linear-gradient(45deg, rgb(52 70 84 / 0.18) 25%, transparent 25%),
 			linear-gradient(-45deg, rgb(52 70 84 / 0.18) 25%, transparent 25%),
 			linear-gradient(45deg, transparent 75%, rgb(52 70 84 / 0.18) 75%),
 			linear-gradient(-45deg, transparent 75%, rgb(52 70 84 / 0.18) 75%);
-		background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+		background-position:
+			0 0,
+			0 8px,
+			8px -8px,
+			-8px 0;
 		background-size: 16px 16px;
 	}
 
@@ -68,7 +69,7 @@
 		background: #344654;
 		padding: 6px 10px;
 		color: #efb836;
-		font: 300 14px "RealTypeWriter";
+		font: 300 14px 'RealTypeWriter';
 		text-decoration: none;
 	}
 

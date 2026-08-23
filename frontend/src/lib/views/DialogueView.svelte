@@ -30,8 +30,12 @@
 	<div class="dialog-area">
 		<div class="speaker"><ChoreItem text={speaker} value="发言" isRow /></div>
 		<div class="choices" aria-label="对话选项">
-			<button type="button" onclick={() => choose('秘书', '先核对案牍，再向各公所说明我们的期限。')}>暂缓答复</button>
-			<button type="button" onclick={() => choose('总督', '那就现在表态，并承担表态之后的一切。')}>立即表态</button>
+			<button type="button" onclick={() => choose('秘书', '先核对案牍，再向各公所说明我们的期限。')}
+				>暂缓答复</button
+			>
+			<button type="button" onclick={() => choose('总督', '那就现在表态，并承担表态之后的一切。')}
+				>立即表态</button
+			>
 		</div>
 		<Dialog text={dialogue} />
 	</div>
@@ -39,12 +43,57 @@
 </main>
 
 <style>
-	.game-view { position: relative; height: 100vh; overflow: hidden; background: transparent; }
-	.left-slot { position: absolute; inset: 150px auto 20px 24px; }
-	.top-dialog { position: absolute; top: 30px; left: 50%; transform: translateX(-50%); }
-	.dialog-area { position: absolute; right: 3vw; bottom: 28px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
-	.speaker { position: absolute; left: -120px; bottom: 30px; }
-	.choices { display: flex; gap: 8px; margin-right: 3vw; }
-	.choices button { cursor: pointer; border: 0; background: #1e2e3b; padding: 6px 12px; color: #efb836; font: 300 18px "RealTypeWriter"; }
-	.notice { position: absolute; top: 18px; right: 28px; margin: 0; background: #1e2e3b; padding: 5px 12px; color: #efb836; font: 300 16px "RealTypeWriter"; }
+	.game-view {
+		position: relative;
+		height: 100vh;
+		overflow: hidden;
+		background: transparent;
+	}
+	.left-slot {
+		position: absolute;
+		inset: 150px auto 20px 24px;
+	}
+	.top-dialog {
+		position: absolute;
+		top: 30px;
+		left: 50%;
+		transform: translateX(-50%);
+	}
+	.dialog-area {
+		position: absolute;
+		right: 3vw;
+		bottom: 28px;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+		gap: 8px;
+	}
+	.speaker {
+		position: absolute;
+		left: -120px;
+		bottom: 30px;
+	}
+	.choices {
+		display: flex;
+		gap: 8px;
+		margin-right: 3vw;
+	}
+	.choices button {
+		cursor: pointer;
+		border: 0;
+		background: #1e2e3b;
+		padding: 6px 12px;
+		color: #efb836;
+		font: 300 18px 'RealTypeWriter';
+	}
+	.notice {
+		position: absolute;
+		top: 18px;
+		right: 28px;
+		margin: 0;
+		background: #1e2e3b;
+		padding: 5px 12px;
+		color: #efb836;
+		font: 300 16px 'RealTypeWriter';
+	}
 </style>

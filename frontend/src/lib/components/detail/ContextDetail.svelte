@@ -34,8 +34,8 @@
 				type="button"
 				class="cursor-pointer border-0 bg-transparent font-document text-24 text-surface-amber"
 				aria-label={`关闭${title}详情`}
-				onclick={onClose}
-			>×</button>
+				onclick={onClose}>×</button
+			>
 		{/if}
 	</div>
 	<div class="box-border flex min-h-[150px] w-full flex-col bg-ink-primary p-12 text-surface-amber">
