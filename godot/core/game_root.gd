@@ -28,6 +28,7 @@ func _create_cef_texture() -> Control:
 		var instance: Object = ClassDB.instantiate("CefTexture")
 		if instance is Control:
 			cef_texture = instance
+	has_cef = cef_texture != null
 	if cef_texture == null:
 		cef_texture = TextureRect.new()
 	cef_texture.name = "CefTexture"
