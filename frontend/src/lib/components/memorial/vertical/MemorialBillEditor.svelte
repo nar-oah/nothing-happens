@@ -107,7 +107,8 @@
 					{#if editingTitle}
 						<input
 							bind:this={titleInput}
-							class="absolute left-[15px] top-[15px] h-[315px] w-45 border-0 bg-accent-amber-deep p-0 font-document text-[60px] font-light leading-[48px] text-ink-secondary outline-none [text-orientation:upright] [writing-mode:vertical-rl]"
+							class="absolute left-[15px] top-[15px] w-45 border-0 bg-accent-amber-deep p-0 font-document text-[60px] font-light leading-[48px] text-ink-secondary outline-none [text-orientation:upright] [writing-mode:vertical-rl]"
+							style:height={`${Math.max(1, Array.from(titleDraft).length) * 48}px`}
 							aria-label="法案名称"
 							value={titleDraft}
 							oninput={(event) => (titleDraft = event.currentTarget.value)}

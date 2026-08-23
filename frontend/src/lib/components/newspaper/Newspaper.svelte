@@ -28,6 +28,7 @@
 	}
 
 	.newspaper-paper {
+		width: 345px;
 		transform: translate3d(-205px, -62px, 0) rotate(-45deg);
 		transform-origin: center;
 		transition: transform 260ms ease-out;
