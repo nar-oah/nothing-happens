@@ -5,9 +5,17 @@
 		limit?: number;
 		isRow?: boolean;
 		isCenter?: boolean;
+		onTitleClick?: () => void;
 	};
 
-	let { text, value, limit = 0, isRow = false, isCenter = true }: Props = $props();
+	let {
+		text,
+		value,
+		limit = 0,
+		isRow = false,
+		isCenter = true,
+		onTitleClick
+	}: Props = $props();
 	let rowWithValue = $derived(!limit && isRow);
 	let columnWithValue = $derived(!limit && !isRow);
 	let valueCharacters = $derived(Array.from(String(value ?? '')));
@@ -34,13 +42,19 @@
 	class="flex"
 >
 	{#if isRow}
-		<div class="-mb-[10px] bg-shadow-deep text-center">
+		<svelte:element
+			this={onTitleClick ? 'button' : 'div'}
+			type={onTitleClick ? 'button' : undefined}
+			class:cursor-pointer={onTitleClick}
+			class="-mb-[10px] border-0 bg-shadow-deep p-0 text-center"
+			onclick={onTitleClick}
+		>
 			<p
 				class="m-0 whitespace-nowrap font-policy text-48 font-medium leading-[40px] text-surface-amber"
 			>
 				{text}
 			</p>
-		</div>
+		</svelte:element>
 	{/if}
 
 	{#if !isCenter}
