@@ -12,16 +12,26 @@ func calculate_total_effect(proposals: Array[ProposalInstance]) -> MetricVector:
 func are_gameplay_equivalent(first: ProposalInstance, second: ProposalInstance) -> bool:
 	if first == null or second == null:
 		return first == second
-	return (
-		first.source_group == second.source_group
-		and _metric_vectors_equal(first.base_effect, second.base_effect)
-		and _metric_vectors_equal(first.positive_effect, second.positive_effect)
-		and first.lag_months == second.lag_months
-		and is_equal_approx(first.collapse_impact, second.collapse_impact)
-		and is_equal_approx(first.donation_offer, second.donation_offer)
-		and first.bonus_choice_resolved == second.bonus_choice_resolved
-		and first.positive_trait_accepted == second.positive_trait_accepted
-	)
+	if (
+		first.source_group != second.source_group
+		or not _metric_vectors_equal(first.base_effect, second.base_effect)
+		or first.lag_months != second.lag_months
+		or not is_equal_approx(first.collapse_impact, second.collapse_impact)
+	):
+		return false
+	var first_has_positive := first.has_positive_trait()
+	if first_has_positive != second.has_positive_trait():
+		return false
+	if not first_has_positive:
+		return true
+	if not _metric_vectors_equal(first.positive_effect, second.positive_effect):
+		return false
+	var first_pending := first.is_bonus_choice_pending()
+	if first_pending != second.is_bonus_choice_pending():
+		return false
+	if first_pending:
+		return is_equal_approx(first.donation_offer, second.donation_offer)
+	return first.positive_trait_accepted == second.positive_trait_accepted
 
 
 func match_equivalent_proposals(
@@ -155,7 +165,7 @@ func add_to_hand(state: RunState, proposal: ProposalInstance) -> void:
 	if proposal == null:
 		push_error("Cannot add null proposal to hand.")
 		return
-	state.proposal_hand.append(proposal)
+	state.add_proposal_to_hand(proposal)
 
 
 func calculate_automatic_draw_weight(
@@ -302,9 +312,8 @@ func merge_three(
 		result.donation_offer = float(upgraded) * balance.donation_per_positive_point
 		result.bonus_choice_resolved = selected_positive.bonus_choice_resolved
 		result.positive_trait_accepted = selected_positive.positive_trait_accepted
-	for mother in mothers:
-		state.proposal_hand.erase(mother)
-	state.proposal_hand.append(result)
+	state.consume_proposals(mothers)
+	state.add_proposal_to_hand(result)
 	return result
 
 

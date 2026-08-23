@@ -7,7 +7,7 @@ func move_proposal_from_hand(state: RunState, hand_index: int) -> bool:
 		return false
 	if state.proposal_hand[hand_index].is_bonus_choice_pending():
 		return false
-	var proposal: ProposalInstance = state.proposal_hand.pop_at(hand_index)
+	var proposal := state.take_proposal_from_hand(hand_index)
 	state.draft_bill.proposals.append(proposal)
 	return true
 
@@ -16,7 +16,7 @@ func return_proposal_to_hand(state: RunState, draft_index: int) -> bool:
 	if draft_index < 0 or draft_index >= state.draft_bill.proposals.size():
 		return false
 	var proposal: ProposalInstance = state.draft_bill.proposals.pop_at(draft_index)
-	state.proposal_hand.append(proposal)
+	state.restore_proposal_to_hand(proposal)
 	return true
 
 
@@ -92,7 +92,8 @@ func reorder_policy(state: RunState, from_index: int, to_index: int) -> bool:
 
 
 func clear_draft(state: RunState) -> void:
-	state.proposal_hand.append_array(state.draft_bill.proposals)
+	for proposal in state.draft_bill.proposals:
+		state.restore_proposal_to_hand(proposal)
 	state.draft_bill = DraftBillState.new()
 	state.editing_saved_bill_index = RunState.NEW_BILL_INDEX
 
@@ -116,8 +117,8 @@ func load_saved_bill_for_editing(context: RunContext, saved_index: int) -> bool:
 	for proposal in matches:
 		if proposal == null:
 			continue
-		state.proposal_hand.erase(proposal)
-		state.draft_bill.proposals.append(proposal)
+		if state.reserve_proposal_from_hand(proposal):
+			state.draft_bill.proposals.append(proposal)
 	for saved_policy in saved.policies:
 		if saved_policy != null:
 			add_available_policy_by_name(context, saved_policy.display_name)
@@ -143,3 +144,7 @@ func save_draft(state: RunState, draft: DraftBillState = null) -> int:
 
 func cancel_editing(state: RunState) -> void:
 	clear_draft(state)
+
+
+func consume_draft_proposals(state: RunState, draft: DraftBillState) -> void:
+	state.consume_proposals(draft.proposals)
