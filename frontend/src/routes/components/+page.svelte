@@ -7,7 +7,7 @@
 	import { proposalToMemorialMetrics } from '$lib/components/left/left';
 	import {
 		getMockBillPreview,
-		mockObjectDetail,
+		mockContextDetail,
 		mockSavedBills,
 		mockProposalItems
 	} from '$lib/demo/mock';
@@ -40,7 +40,7 @@
 			lag={mockProposalItems[0].proposal.lag_months}
 			metrics={proposalToMemorialMetrics(mockProposalItems[0].proposal)}
 		/>
-		<ContextDetail {...mockObjectDetail} onAction={() => undefined} />
+		<ContextDetail {...mockContextDetail} />
 	</section>
 	<section class="wide">
 		<MemorialBillEditor

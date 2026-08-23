@@ -38,18 +38,6 @@
 <style>
 	.demo-stage {
 		min-height: 100vh;
-		background-color: #537087;
-		background-image:
-			linear-gradient(45deg, rgb(52 70 84 / 0.18) 25%, transparent 25%),
-			linear-gradient(-45deg, rgb(52 70 84 / 0.18) 25%, transparent 25%),
-			linear-gradient(45deg, transparent 75%, rgb(52 70 84 / 0.18) 75%),
-			linear-gradient(-45deg, transparent 75%, rgb(52 70 84 / 0.18) 75%);
-		background-position:
-			0 0,
-			0 8px,
-			8px -8px,
-			-8px 0;
-		background-size: 16px 16px;
 	}
 
 	.view-selector {
@@ -60,7 +48,6 @@
 		display: flex;
 		gap: 2px;
 		transform: translateX(-50%);
-		box-shadow: 0 4px 0 rgb(30 46 59 / 0.3);
 	}
 
 	.view-selector button,
