@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
+	import { asset } from '$app/paths';
 
 	type Props = {
 		text: string;
@@ -11,7 +11,7 @@
 
 {#snippet dialogContent()}
 	<img
-		src={resolve('/images/dialog-bottom.svg')}
+		src={asset('/images/dialog-bottom.svg')}
 		alt=""
 		aria-hidden="true"
 		draggable="false"

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
+	import { asset } from '$app/paths';
 
 	type Props = {
 		text: string;
@@ -15,7 +15,7 @@
 	data-block-world-input
 >
 	<img
-		src={resolve('/images/dialog-top.svg')}
+		src={asset('/images/dialog-top.svg')}
 		alt=""
 		aria-hidden="true"
 		draggable="false"

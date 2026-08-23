@@ -150,7 +150,7 @@
 		<ConstitutionView
 			raceItems={topItems.raceItems}
 			interestGroupItems={topItems.interestGroupItems}
-			{gameState}
+			gameState={frame.gameState}
 			title={snapshot.constitution.title}
 			{constitution}
 			onArticleSelectionChange={selectConstitutionArticle}
