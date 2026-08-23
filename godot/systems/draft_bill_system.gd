@@ -124,12 +124,13 @@ func load_saved_bill_for_editing(context: RunContext, saved_index: int) -> bool:
 	return true
 
 
-func save_draft(state: RunState) -> int:
+func save_draft(state: RunState, draft: DraftBillState = null) -> int:
+	var source := state.draft_bill if draft == null else draft
 	var saved := SavedBillState.new()
-	saved.title = state.draft_bill.title
-	for proposal in state.draft_bill.proposals:
+	saved.title = source.title
+	for proposal in source.proposals:
 		saved.proposals.append(proposal.copy())
-	saved.policies.assign(state.draft_bill.policies)
+	saved.policies.assign(source.policies)
 	var saved_index := state.editing_saved_bill_index
 	if saved_index < 0 or saved_index >= state.saved_bills.size():
 		state.saved_bills.append(saved)

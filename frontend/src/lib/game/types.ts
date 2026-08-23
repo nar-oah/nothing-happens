@@ -60,6 +60,8 @@ export type PolicyDefinition = {
 	collapse_impact: number;
 };
 
+export type Policy = PolicyDefinition;
+
 export type Proposal = {
 	source_group: InterestGroupDefinition;
 	base_effect: MetricVector;

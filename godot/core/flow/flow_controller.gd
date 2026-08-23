@@ -49,7 +49,7 @@ func submit_draft(draft: DraftBillState) -> VoteResultState:
 	var result := VoteResultState.new()
 	if not context.draft_bill_system.is_ready_to_submit(context, draft):
 		return result
-	context.draft_bill_system.save_draft(context.state)
+	context.draft_bill_system.save_draft(context.state, draft)
 	context.collapse_system.record_intervention(
 		context,
 		&"bill_submission",

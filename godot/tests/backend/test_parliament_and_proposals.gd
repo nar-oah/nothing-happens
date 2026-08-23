@@ -6,6 +6,8 @@ const BackendTestContext = preload("res://tests/backend/backend_test_context.gd"
 func run(t: BackendTestContext) -> void:
 	_test_resource_identity(t)
 	_test_group_stance_and_generated_proposal(t)
+	_test_proposal_gameplay_equivalence(t)
+	_test_duplicate_equivalent_matching(t)
 	_test_positive_trait_and_donation_choice(t)
 	_test_pending_choice_blocks_submission(t)
 	_test_merge_uses_group_resource_identity(t)
@@ -47,8 +49,8 @@ func _test_group_stance_and_generated_proposal(t: BackendTestContext) -> void:
 	var balance := GameBalanceDefinition.new()
 	balance.proposal_negative_magnitude_min = 10
 	balance.proposal_negative_magnitude_max = 10
-	balance.proposal_digestion_speed_min = 0.75
-	balance.proposal_digestion_speed_max = 0.75
+	balance.proposal_lag_months_min = 4
+	balance.proposal_lag_months_max = 4
 	balance.proposal_magnitude_growth_per_year = 0.10
 	var state := RunState.new()
 	state.year = 2
@@ -63,7 +65,56 @@ func _test_group_stance_and_generated_proposal(t: BackendTestContext) -> void:
 	t.check_equal(proposal.base_effect.tax, 11, "tax downside uses compounded magnitude")
 	t.check_equal(proposal.base_effect.wage, -11, "wage downside uses compounded magnitude")
 	t.check_equal(proposal.base_effect.trade, 0, "unconcerned metrics stay empty")
-	t.check_approx(proposal.digestion_speed, 0.75, "digestion range is balance-driven")
+	t.check_equal(proposal.lag_months, 4, "lag month range is balance-driven")
+
+
+func _test_proposal_gameplay_equivalence(t: BackendTestContext) -> void:
+	var group := t.make_group("equivalent source")
+	var proposal := t.make_proposal(group)
+	proposal.base_effect.tax = 8
+	proposal.positive_effect.wage = 5
+	proposal.lag_months = 4
+	proposal.collapse_impact = 2.0
+	proposal.donation_offer = 5.0
+	proposal.bonus_choice_resolved = true
+	proposal.positive_trait_accepted = true
+	var system := ProposalSystem.new()
+	var equivalent := proposal.copy()
+	t.check(proposal != equivalent, "equivalent proposals may be different runtime instances")
+	t.check(
+		system.are_gameplay_equivalent(proposal, equivalent),
+		"copied gameplay content is equivalent"
+	)
+	equivalent.lag_months = 5
+	t.check(
+		not system.are_gameplay_equivalent(proposal, equivalent),
+		"lag months participate in gameplay equivalence"
+	)
+	equivalent = proposal.copy()
+	equivalent.positive_trait_accepted = false
+	t.check(
+		not system.are_gameplay_equivalent(proposal, equivalent),
+		"positive trait final state participates in gameplay equivalence"
+	)
+	equivalent = proposal.copy()
+	equivalent.base_effect.tax += 1
+	t.check(
+		not system.are_gameplay_equivalent(proposal, equivalent),
+		"metric effects participate in gameplay equivalence"
+	)
+
+
+func _test_duplicate_equivalent_matching(t: BackendTestContext) -> void:
+	var proposal := t.make_proposal(t.make_group("duplicate source"))
+	proposal.base_effect.trade = -7
+	proposal.lag_months = 3
+	var replacement := proposal.copy()
+	var matches := ProposalSystem.new().match_equivalent_proposals(
+		[proposal.copy(), proposal.copy()], [replacement]
+	)
+	t.check_equal(matches.size(), 2, "matching preserves every saved proposal slot")
+	t.check(matches[0] == replacement, "an equivalent hand proposal fills the first slot")
+	t.check(matches[1] == null, "one hand instance cannot fill a duplicate second slot")
 
 
 func _test_positive_trait_and_donation_choice(t: BackendTestContext) -> void:
