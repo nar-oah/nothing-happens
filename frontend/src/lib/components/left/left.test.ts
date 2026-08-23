@@ -213,13 +213,22 @@ test('selection hides selected ingredients and the editing saved bill', () => {
 		policyDisplayNames: [policy.display_name],
 		editingSavedBillIndex: 0
 	});
-	assert.equal(selection.some((item) => item.kind === 'constitution'), false);
+	assert.equal(
+		selection.some((item) => item.kind === 'constitution'),
+		false
+	);
 	assert.equal(
 		selection.some((item) => item.kind === 'proposal' && item.ref.index === proposals[0].ref.index),
 		false
 	);
-	assert.equal(selection.some((item) => item.kind === 'policy'), false);
-	assert.equal(selection.some((item) => item.kind === 'bill' && item.ref.index === 0), false);
+	assert.equal(
+		selection.some((item) => item.kind === 'policy'),
+		false
+	);
+	assert.equal(
+		selection.some((item) => item.kind === 'bill' && item.ref.index === 0),
+		false
+	);
 });
 
 test('restoring a draft Proposal keeps acquisition ref order', () => {

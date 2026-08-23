@@ -132,7 +132,8 @@
 		const filter = secondaryFilters['利益集团'];
 		if (typeof filter === 'boolean') return;
 		const current = filter.selected[0];
-		const selected = current && groupOptions.includes(current) ? [current] : groupOptions.slice(0, 1);
+		const selected =
+			current && groupOptions.includes(current) ? [current] : groupOptions.slice(0, 1);
 		if (
 			filter.options.join('\u0000') !== groupOptions.join('\u0000') ||
 			filter.selected.join('\u0000') !== selected.join('\u0000')

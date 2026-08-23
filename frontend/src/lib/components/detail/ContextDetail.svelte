@@ -36,4 +36,3 @@
 		onSwitchChange={onModeChange}
 	/>
 </section>
-

@@ -63,10 +63,7 @@ export function getLeftItemMetrics(item: LeftItem): Metric[] {
 	}
 }
 
-export function filterSelectionItems(
-	items: LeftItem[],
-	selection: LeftSelectionState
-): LeftItem[] {
+export function filterSelectionItems(items: LeftItem[], selection: LeftSelectionState): LeftItem[] {
 	return items.filter((item) => {
 		if (item.kind === 'constitution') return false;
 		if (item.kind === 'proposal') {

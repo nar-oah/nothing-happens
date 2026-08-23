@@ -38,4 +38,3 @@
 		{@render dialogContent()}
 	</section>
 {/if}
-

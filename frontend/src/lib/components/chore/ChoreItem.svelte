@@ -8,14 +8,7 @@
 		onTitleClick?: () => void;
 	};
 
-	let {
-		text,
-		value,
-		limit = 0,
-		isRow = false,
-		isCenter = true,
-		onTitleClick
-	}: Props = $props();
+	let { text, value, limit = 0, isRow = false, isCenter = true, onTitleClick }: Props = $props();
 	let rowWithValue = $derived(!limit && isRow);
 	let columnWithValue = $derived(!limit && !isRow);
 	let valueCharacters = $derived(Array.from(String(value ?? '')));

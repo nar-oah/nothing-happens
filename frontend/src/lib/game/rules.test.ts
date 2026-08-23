@@ -160,11 +160,14 @@ test('policy identity uses display_name only', () => {
 		]
 	};
 	assert.equal(arePoliciesGameplayEquivalent(first, second), true);
-	assert.deepEqual(reconcileSavedBill({ title: '', proposals: [], policies: [first] }, [], [second]), {
-		title: '',
-		proposals: [],
-		policies: [second]
-	});
+	assert.deepEqual(
+		reconcileSavedBill({ title: '', proposals: [], policies: [first] }, [], [second]),
+		{
+			title: '',
+			proposals: [],
+			policies: [second]
+		}
+	);
 });
 
 test('PolicyDefinition has no collapse_impact field', () => {

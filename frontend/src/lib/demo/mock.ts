@@ -6,10 +6,7 @@ import type {
 	ProposalLeftItem
 } from '../components/left/types.ts';
 import { policyToMemorialContent } from '../components/memorial/presentation.ts';
-import type {
-	MemorialConstitutionData,
-	MemorialMetricData
-} from '../components/memorial/types.ts';
+import type { MemorialConstitutionData, MemorialMetricData } from '../components/memorial/types.ts';
 import type { StateItem } from '../components/state/GameStateDisplay.svelte';
 import type { TopItemData } from '../components/top/top.ts';
 import {
@@ -240,10 +237,7 @@ export const mockConstitutionItem: ConstitutionLeftItem = {
 export const mockArchiveItems = [mockConstitutionItem, ...mockBillItems];
 export const mockLeftItems = [...mockArchiveItems, ...mockProposalItems, ...mockPolicyItems];
 
-const makeTopDetail = (
-	leftLabel: string,
-	leftBody = ''
-): Omit<ContextDetailData, 'title'> => ({
+const makeTopDetail = (leftLabel: string, leftBody = ''): Omit<ContextDetailData, 'title'> => ({
 	leftLabel,
 	rightLabel: '政治献金',
 	leftBody,
@@ -311,26 +305,22 @@ export const mockConstitutionMemorial: MemorialConstitutionData = {
 };
 
 export function getMockBillPreview(bill: Bill): MemorialMetricData[] {
-	const totals = bill.proposals.reduce(
-		(result, proposal) => {
-			const proposalEffect = getProposalTotalEffect(proposal);
-			for (const metric of METRICS) {
-				const key = {
-					[Metric.TAX]: 'tax',
-					[Metric.PRICE]: 'price',
-					[Metric.WAGE]: 'wage',
-					[Metric.EMPLOYMENT]: 'employment',
-					[Metric.TRADE]: 'trade'
-				}[metric] as keyof MetricValues;
-				result[key] += getMetricValue(proposalEffect, metric);
-			}
-			return result;
-		},
-		vector()
-	);
+	const totals = bill.proposals.reduce((result, proposal) => {
+		const proposalEffect = getProposalTotalEffect(proposal);
+		for (const metric of METRICS) {
+			const key = {
+				[Metric.TAX]: 'tax',
+				[Metric.PRICE]: 'price',
+				[Metric.WAGE]: 'wage',
+				[Metric.EMPLOYMENT]: 'employment',
+				[Metric.TRADE]: 'trade'
+			}[metric] as keyof MetricValues;
+			result[key] += getMetricValue(proposalEffect, metric);
+		}
+		return result;
+	}, vector());
 	return getBillMetrics(bill.proposals, bill.policies).map((metric) => ({
 		text: METRIC_DISPLAY_NAMES[metric],
 		value: getMetricValue(totals, metric)
 	}));
 }
-

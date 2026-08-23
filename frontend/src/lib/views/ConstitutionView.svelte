@@ -49,4 +49,3 @@
 		left: 80px;
 	}
 </style>
-
