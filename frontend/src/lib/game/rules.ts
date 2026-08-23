@@ -38,10 +38,7 @@ export function getMetricValue(values: MetricValues, metric: Metric): number {
 	return values[METRIC_KEYS[metric]];
 }
 
-export function isMetricConditionMet(
-	condition: MetricCondition,
-	values: MetricValues
-): boolean {
+export function isMetricConditionMet(condition: MetricCondition, values: MetricValues): boolean {
 	const left = getMetricValue(values, condition.left_metric);
 	const right = getMetricValue(values, condition.right_metric) * condition.right_multiplier;
 	switch (condition.operator) {
@@ -56,10 +53,7 @@ export function isMetricConditionMet(
 	}
 }
 
-export function calculatePolicyEffectAmount(
-	effect: PolicyEffect,
-	values: MetricValues
-): number {
+export function calculatePolicyEffectAmount(effect: PolicyEffect, values: MetricValues): number {
 	const raw =
 		effect.formula === PolicyEffectFormula.METRIC_VALUE
 			? getMetricValue(values, effect.source_a)
@@ -85,10 +79,7 @@ export function getBillLagMonths(proposals: Proposal[]): number {
 	return proposals.reduce((maximum, proposal) => Math.max(maximum, proposal.lag_months), 0);
 }
 
-export function getBillMetrics(
-	proposals: Proposal[],
-	policies: PolicyDefinition[]
-): Metric[] {
+export function getBillMetrics(proposals: Proposal[], policies: PolicyDefinition[]): Metric[] {
 	const involved = new Set<Metric>();
 	for (const proposal of proposals) {
 		addVectorMetrics(involved, proposal.base_effect);

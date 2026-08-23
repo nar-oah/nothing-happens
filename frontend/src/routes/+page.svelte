@@ -250,16 +250,8 @@
 	<section class="flex flex-col gap-[20px]">
 		<h2 class="m-0 font-policy text-30 font-medium text-ink-primary">印章</h2>
 		<div class="flex flex-wrap gap-[32px]">
-			<Mark
-				bind:direction
-				policy={markPolicy}
-				baseline={markBaseline}
-			/>
-			<Mark
-				bind:direction={directionb}
-				policy={markPolicy}
-				baseline={markBaseline}
-			/>
+			<Mark bind:direction policy={markPolicy} baseline={markBaseline} />
+			<Mark bind:direction={directionb} policy={markPolicy} baseline={markBaseline} />
 		</div>
 	</section>
 
