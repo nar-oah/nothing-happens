@@ -112,7 +112,7 @@ export type PendingDialogueDto = {
 export type ActiveProposalDto = {
 	proposal: Proposal;
 	digested_months: number;
-	progress: number;
+	digestion_progress: number;
 	fully_digested: boolean;
 };
 
@@ -172,7 +172,9 @@ export type DraftSyncDto = {
 export type ProposalSyncDto = {
 	state_version: number;
 	proposal_hand: Proposal[];
-	result: Record<string, unknown> | null;
+	result:
+		| { kind: 'merge'; proposal: Proposal }
+		| { kind: 'bonus_choice'; hand_index: number; accept_trait: boolean; proposal: Proposal };
 	political_donation_pool: number;
 	pending_dialogue: PendingDialogueDto | null;
 	ui_mode: UiMode;
