@@ -10,3 +10,18 @@
 </svelte:head>
 
 {@render children()}
+
+<style>
+	:global(html),
+	:global(body) {
+		margin: 0;
+		min-width: 960px;
+		min-height: 100%;
+		background: transparent;
+	}
+
+	:global(button),
+	:global(input) {
+		font: inherit;
+	}
+</style>

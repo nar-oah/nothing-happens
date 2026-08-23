@@ -1,4 +1,26 @@
-# sv
+# Nothing Happens frontend
+
+This package is a standalone Svelte UI shell. It currently uses view-layer mock data and does not
+connect to Godot or define an IPC protocol.
+
+## Development preview
+
+```sh
+pnpm dev
+```
+
+The root page has a development-only selector for Office, Dialogue, Parliament, and Constitution.
+The standalone component gallery is available at `/components`.
+
+## Verification
+
+```sh
+pnpm test
+pnpm run check
+pnpm run lint
+```
+
+## Original Svelte scaffold notes
 
 Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
 

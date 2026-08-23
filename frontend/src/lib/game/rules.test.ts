@@ -1,7 +1,17 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { areProposalsGameplayEquivalent, reconcileSavedBillProposals } from './rules.ts';
-import type { InterestGroupDefinition, Proposal } from './types.ts';
+import { arePoliciesGameplayEquivalent, reconcileSavedBill } from './rules.ts';
+import {
+	Metric,
+	MetricConditionOperator,
+	PolicyEffectFormula,
+	type InterestGroupDefinition,
+	type PolicyDefinition,
+	type Proposal
+} from './types.ts';
+
+type PolicyHasCollapseImpact = 'collapse_impact' extends keyof PolicyDefinition ? true : false;
+const policyHasCollapseImpact: PolicyHasCollapseImpact = false;
 
 const sourceGroup: InterestGroupDefinition = {
 	display_name: 'source',
@@ -26,56 +36,77 @@ function makeProposal(): Proposal {
 	};
 }
 
-test('settled historical bonus fields do not affect future gameplay equivalence', () => {
-	const ordinary = makeProposal();
-	const converted = {
-		...makeProposal(),
-		donation_offer: 20,
-		positive_trait_accepted: false
+test('saved bill reconciliation preserves proposals and removes unavailable policies', () => {
+	const firstProposal = makeProposal();
+	const secondProposal = { ...makeProposal(), lag_months: 99 };
+	const availablePolicy: PolicyDefinition = {
+		display_name: '现行政策',
+		condition: {
+			left_metric: Metric.TAX,
+			operator: MetricConditionOperator.LESS_THAN,
+			right_metric: Metric.TRADE,
+			right_multiplier: 1
+		},
+		effects: [
+			{
+				target_metric: Metric.TRADE,
+				formula: PolicyEffectFormula.METRIC_VALUE,
+				source_a: Metric.TAX,
+				source_b: Metric.TAX,
+				multiplier: 0.1
+			}
+		]
 	};
-	assert.equal(areProposalsGameplayEquivalent(ordinary, converted), true);
-	const staleChoiceFlag = { ...makeProposal(), bonus_choice_resolved: false };
-	assert.equal(areProposalsGameplayEquivalent(ordinary, staleChoiceFlag), true);
+	const stalePolicy = { ...availablePolicy, display_name: '已失效政策' };
+	const reconciled = reconcileSavedBill(
+		{
+			title: '旧法案',
+			proposals: [firstProposal, secondProposal],
+			policies: [{ ...availablePolicy }, stalePolicy]
+		},
+		[availablePolicy]
+	);
+	assert.deepEqual(reconciled.proposals, [firstProposal, secondProposal]);
+	assert.deepEqual(reconciled.policies, [availablePolicy]);
 });
 
-test('actionable bonus state remains part of gameplay equivalence', () => {
-	const pending = makeProposal();
-	pending.positive_effect.wage = 5;
-	pending.bonus_choice_resolved = false;
-	pending.positive_trait_accepted = false;
-	pending.donation_offer = 10;
-	const differentOffer = {
-		...pending,
-		positive_effect: { ...pending.positive_effect },
-		donation_offer: 11
+test('policy identity uses display_name only', () => {
+	const first: PolicyDefinition = {
+		display_name: '同名政策',
+		condition: {
+			left_metric: Metric.TAX,
+			operator: MetricConditionOperator.LESS_THAN,
+			right_metric: Metric.TRADE,
+			right_multiplier: 1
+		},
+		effects: []
 	};
-	assert.equal(areProposalsGameplayEquivalent(pending, differentOffer), false);
-
-	const accepted = { ...pending, bonus_choice_resolved: true, positive_trait_accepted: true };
-	const acceptedWithHistoricalOffer = { ...accepted, donation_offer: 99 };
-	assert.equal(areProposalsGameplayEquivalent(accepted, acceptedWithHistoricalOffer), true);
+	const second: PolicyDefinition = {
+		display_name: '同名政策',
+		condition: {
+			left_metric: Metric.WAGE,
+			operator: MetricConditionOperator.GREATER_THAN,
+			right_metric: Metric.PRICE,
+			right_multiplier: 2
+		},
+		effects: [
+			{
+				target_metric: Metric.EMPLOYMENT,
+				formula: PolicyEffectFormula.METRIC_VALUE,
+				source_a: Metric.TRADE,
+				source_b: Metric.TAX,
+				multiplier: 0.5
+			}
+		]
+	};
+	assert.equal(arePoliciesGameplayEquivalent(first, second), true);
+	assert.deepEqual(reconcileSavedBill({ title: '', proposals: [], policies: [first] }, [second]), {
+		title: '',
+		proposals: [],
+		policies: [second]
+	});
 });
 
-test('source groups match by serialized display name', () => {
-	const deserializedSourceGroup: InterestGroupDefinition = { ...sourceGroup };
-	const savedProposal = makeProposal();
-	const handProposal: Proposal = {
-		...makeProposal(),
-		source_group: deserializedSourceGroup
-	};
-
-	assert.notEqual(deserializedSourceGroup, sourceGroup);
-	assert.equal(areProposalsGameplayEquivalent(savedProposal, handProposal), true);
-	assert.deepEqual(reconcileSavedBillProposals([savedProposal], [handProposal]), [handProposal]);
-});
-
-test('saved proposal reconciliation consumes each hand object at most once', () => {
-	const saved = [makeProposal(), makeProposal()];
-	const replacement = makeProposal();
-	const oneMatch = reconcileSavedBillProposals(saved, [replacement]);
-	assert.deepEqual(oneMatch, [replacement, null]);
-
-	const secondReplacement = makeProposal();
-	const twoMatches = reconcileSavedBillProposals(saved, [replacement, secondReplacement]);
-	assert.deepEqual(twoMatches, [replacement, secondReplacement]);
+test('PolicyDefinition has no collapse_impact field', () => {
+	assert.equal(policyHasCollapseImpact, false);
 });

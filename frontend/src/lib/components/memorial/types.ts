@@ -1,21 +1,23 @@
-export enum MetricText {
-	Tax = '税課',
-	Price = '物價',
-	Wage = '工錢',
-	Employment = '用工',
-	Trade = '商貿',
-	Lag = '滞后'
-}
+export const MetricText = {
+	Tax: '税課',
+	Price: '物價',
+	Wage: '工錢',
+	Employment: '用工',
+	Trade: '商貿',
+	Lag: '滞后'
+} as const;
 
-export enum MetricSymbol {
-	Increase = '+',
-	Decrease = '-'
-}
+export const MetricSymbol = {
+	Increase: '+',
+	Decrease: '-'
+} as const;
+
+export type MetricSymbol = (typeof MetricSymbol)[keyof typeof MetricSymbol];
 
 export type MemorialMetricData = {
 	text: string;
 	symbol?: MetricSymbol;
-	value: number;
+	value: number | string;
 	isReverse?: boolean;
 };
 

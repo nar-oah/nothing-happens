@@ -9,49 +9,6 @@ func calculate_total_effect(proposals: Array[ProposalInstance]) -> MetricVector:
 	return total
 
 
-func are_gameplay_equivalent(first: ProposalInstance, second: ProposalInstance) -> bool:
-	if first == null or second == null:
-		return first == second
-	if (
-		first.source_group != second.source_group
-		or not _metric_vectors_equal(first.base_effect, second.base_effect)
-		or first.lag_months != second.lag_months
-		or not is_equal_approx(first.collapse_impact, second.collapse_impact)
-	):
-		return false
-	var first_has_positive := first.has_positive_trait()
-	if first_has_positive != second.has_positive_trait():
-		return false
-	if not first_has_positive:
-		return true
-	if not _metric_vectors_equal(first.positive_effect, second.positive_effect):
-		return false
-	var first_pending := first.is_bonus_choice_pending()
-	if first_pending != second.is_bonus_choice_pending():
-		return false
-	if first_pending:
-		return is_equal_approx(first.donation_offer, second.donation_offer)
-	return first.positive_trait_accepted == second.positive_trait_accepted
-
-
-func match_equivalent_proposals(
-	required: Array[ProposalInstance], available: Array[ProposalInstance]
-) -> Array[ProposalInstance]:
-	var result: Array[ProposalInstance] = []
-	var used_instances: Dictionary[int, bool] = {}
-	for required_proposal in required:
-		var matched_proposal: ProposalInstance
-		for candidate in available:
-			if candidate == null or used_instances.has(candidate.get_instance_id()):
-				continue
-			if are_gameplay_equivalent(required_proposal, candidate):
-				matched_proposal = candidate
-				used_instances[candidate.get_instance_id()] = true
-				break
-		result.append(matched_proposal)
-	return result
-
-
 func calculate_pure_target(
 	start_values: MetricValues, proposals: Array[ProposalInstance]
 ) -> MetricValues:
@@ -345,12 +302,3 @@ func _can_merge(
 				return false
 		return true
 	return selected_positive in mothers and selected_positive.has_positive_trait()
-
-
-func _metric_vectors_equal(first: MetricVector, second: MetricVector) -> bool:
-	if first == null or second == null:
-		return first == second
-	for metric in Metric.all_ids():
-		if first.get_value(metric) != second.get_value(metric):
-			return false
-	return true

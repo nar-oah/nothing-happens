@@ -5,6 +5,7 @@ import {
 	type MetricCondition,
 	type MetricValues,
 	type MetricVector,
+	type Bill,
 	type PolicyDefinition,
 	type PolicyEffect,
 	type Proposal
@@ -69,39 +70,21 @@ export function isProposalBonusChoicePending(proposal: Proposal): boolean {
 	return hasPositiveTrait(proposal) && !proposal.bonus_choice_resolved;
 }
 
-export function areProposalsGameplayEquivalent(first: Proposal, second: Proposal): boolean {
-	if (
-		first.source_group.display_name !== second.source_group.display_name ||
-		!areMetricVectorsEqual(first.base_effect, second.base_effect) ||
-		first.lag_months !== second.lag_months ||
-		!isApproximatelyEqual(first.collapse_impact, second.collapse_impact)
-	) {
-		return false;
-	}
-	const firstHasPositive = hasPositiveTrait(first);
-	if (firstHasPositive !== hasPositiveTrait(second)) return false;
-	if (!firstHasPositive) return true;
-	if (!areMetricVectorsEqual(first.positive_effect, second.positive_effect)) return false;
-	const firstPending = isProposalBonusChoicePending(first);
-	if (firstPending !== isProposalBonusChoicePending(second)) return false;
-	if (firstPending) return isApproximatelyEqual(first.donation_offer, second.donation_offer);
-	return first.positive_trait_accepted === second.positive_trait_accepted;
+export function arePoliciesGameplayEquivalent(
+	first: PolicyDefinition,
+	second: PolicyDefinition
+): boolean {
+	return first.display_name === second.display_name;
 }
 
-export function reconcileSavedBillProposals(
-	savedProposals: Proposal[],
-	hand: Proposal[]
-): Array<Proposal | null> {
-	const used = new Set<Proposal>();
-	return savedProposals.map((savedProposal) => {
-		const matched = hand.find(
-			(candidate) =>
-				!used.has(candidate) && areProposalsGameplayEquivalent(savedProposal, candidate)
+export function reconcileSavedBill(savedBill: Bill, availablePolicies: PolicyDefinition[]): Bill {
+	const policies = savedBill.policies.flatMap((savedPolicy) => {
+		const available = availablePolicies.find((policy) =>
+			arePoliciesGameplayEquivalent(savedPolicy, policy)
 		);
-		if (!matched) return null;
-		used.add(matched);
-		return matched;
+		return available ? [available] : [];
 	});
+	return { title: savedBill.title, proposals: savedBill.proposals, policies };
 }
 
 export function getProposalTotalEffect(proposal: Proposal): MetricVector {
@@ -124,14 +107,16 @@ export function getBillMetrics(proposals: Proposal[], policies: PolicyDefinition
 		addVectorMetrics(involved, proposal.base_effect);
 		if (proposal.positive_trait_accepted) addVectorMetrics(involved, proposal.positive_effect);
 	}
-	for (const policy of policies) {
-		involved.add(policy.condition.left_metric);
-		involved.add(policy.condition.right_metric);
-		for (const effect of policy.effects) {
-			involved.add(effect.target_metric);
-			involved.add(effect.source_a);
-			if (effect.formula === PolicyEffectFormula.METRIC_GAP) involved.add(effect.source_b);
-		}
+	for (const policy of policies) getPolicyMetrics(policy).forEach((metric) => involved.add(metric));
+	return METRICS.filter((metric) => involved.has(metric));
+}
+
+export function getPolicyMetrics(policy: PolicyDefinition): Metric[] {
+	const involved = new Set<Metric>([policy.condition.left_metric, policy.condition.right_metric]);
+	for (const effect of policy.effects) {
+		involved.add(effect.target_metric);
+		involved.add(effect.source_a);
+		if (effect.formula === PolicyEffectFormula.METRIC_GAP) involved.add(effect.source_b);
 	}
 	return METRICS.filter((metric) => involved.has(metric));
 }
@@ -140,18 +125,6 @@ function addVectorMetrics(involved: Set<Metric>, values: MetricValues): void {
 	for (const metric of METRICS) {
 		if (getMetricValue(values, metric) !== 0) involved.add(metric);
 	}
-}
-
-function areMetricVectorsEqual(first: MetricValues, second: MetricValues): boolean {
-	return METRICS.every(
-		(metric) => getMetricValue(first, metric) === getMetricValue(second, metric)
-	);
-}
-
-function isApproximatelyEqual(first: number, second: number): boolean {
-	if (first === second) return true;
-	const tolerance = Math.max(0.00001, 0.00001 * Math.abs(first));
-	return Math.abs(first - second) < tolerance;
 }
 
 function roundLikeGodot(value: number): number {

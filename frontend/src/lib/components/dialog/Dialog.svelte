@@ -1,12 +1,13 @@
 <script lang="ts">
 	type Props = {
 		text: string;
+		onclick?: () => void;
 	};
 
-	let { text }: Props = $props();
+	let { text, onclick }: Props = $props();
 </script>
 
-<section class="relative w-[70vw]" style="aspect-ratio: 644 / 132" aria-label="对话">
+{#snippet dialogContent()}
 	<img
 		src="/images/dialog-bottom.svg"
 		alt=""
@@ -20,4 +21,20 @@
 	>
 		<p class="m-0 w-full whitespace-pre-line [overflow-wrap:anywhere]">{text}</p>
 	</div>
-</section>
+{/snippet}
+
+{#if onclick}
+	<button
+		type="button"
+		class="relative block w-full cursor-pointer border-0 bg-transparent p-0 text-left"
+		style="aspect-ratio: 644 / 132"
+		aria-label="对话"
+		{onclick}
+	>
+		{@render dialogContent()}
+	</button>
+{:else}
+	<section class="relative w-full" style="aspect-ratio: 644 / 132" aria-label="对话">
+		{@render dialogContent()}
+	</section>
+{/if}

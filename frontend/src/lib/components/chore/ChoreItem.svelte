@@ -5,9 +5,10 @@
 		limit?: number;
 		isRow?: boolean;
 		isCenter?: boolean;
+		onTitleClick?: () => void;
 	};
 
-	let { text, value, limit = 0, isRow = false, isCenter = true }: Props = $props();
+	let { text, value, limit = 0, isRow = false, isCenter = true, onTitleClick }: Props = $props();
 	let rowWithValue = $derived(!limit && isRow);
 	let columnWithValue = $derived(!limit && !isRow);
 	let valueCharacters = $derived(Array.from(String(value ?? '')));
@@ -24,6 +25,14 @@
 	</span>
 {/snippet}
 
+{#snippet rowTitle()}
+	<p
+		class="m-0 whitespace-nowrap font-policy text-48 font-medium leading-[40px] text-surface-amber"
+	>
+		{text}
+	</p>
+{/snippet}
+
 <div
 	class:flex-col={isRow}
 	class:items-start={!isCenter}
@@ -34,19 +43,25 @@
 	class="flex"
 >
 	{#if isRow}
-		<div class="-mb-[10px] bg-shadow-deep text-center">
-			<p
-				class="m-0 whitespace-nowrap font-policy text-48 font-medium leading-[40px] text-surface-amber"
+		{#if onTitleClick}
+			<button
+				type="button"
+				class="-mb-[10px] cursor-pointer border-0 bg-shadow-deep p-0 text-center"
+				onclick={onTitleClick}
 			>
-				{text}
-			</p>
-		</div>
+				{@render rowTitle()}
+			</button>
+		{:else}
+			<div class="-mb-[10px] bg-shadow-deep text-center">
+				{@render rowTitle()}
+			</div>
+		{/if}
 	{/if}
 
 	{#if !isCenter}
-		<div class="z-1 flex items-center justify-center bg-ink-secondary">
+		<div class="z-1 flex max-w-[500px] items-center justify-center bg-ink-secondary">
 			<p
-				class="m-0 max-w-[500px] whitespace-nowrap font-document text-30 font-light leading-auto text-accent-amber-deep"
+				class="m-0 max-w-full whitespace-pre-line font-document text-30 font-light leading-auto text-accent-amber-deep [overflow-wrap:anywhere]"
 			>
 				{value}
 			</p>
