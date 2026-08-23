@@ -103,7 +103,6 @@
 		draft = { ...draft, title };
 		stateVersion += 1;
 	}
-
 </script>
 
 <svelte:head>
@@ -112,7 +111,10 @@
 
 <div class="demo-stage">
 	{#if activeView === 'Office'}
-		<OfficeView {...frame} onSynthesisConfirm={(result) => console.info('Office synthesis', result)} />
+		<OfficeView
+			{...frame}
+			onSynthesisConfirm={(result) => console.info('Office synthesis', result)}
+		/>
 	{:else if activeView === 'Dialogue'}
 		<DialogueView
 			{...frame}

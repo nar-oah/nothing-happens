@@ -11,16 +11,8 @@
 		onResolveBonus?: (handIndex: number, acceptTrait: boolean) => void;
 	};
 
-	let {
-		items,
-		baseline,
-		term,
-		year,
-		month,
-		onNewspaperOpen,
-		dialogue,
-		onResolveBonus
-	}: Props = $props();
+	let { items, baseline, term, year, month, onNewspaperOpen, dialogue, onResolveBonus }: Props =
+		$props();
 	let donationChoice = $state(false);
 	let dialogueText = $derived(
 		`${dialogue.groupName}愿意给出一个优惠的提案，\n您可以选择给我手上的这张提案添加一个优惠条款，或收下我们的一点心意`
@@ -37,11 +29,7 @@
 </script>
 
 <main class="game-view" aria-label="对话界面">
-	<Left
-		scene="dialogue"
-		{items}
-		{baseline}
-	/>
+	<Left scene="dialogue" {items} {baseline} />
 	<Newspaper {term} {year} {month} onOpen={onNewspaperOpen} />
 
 	<div class="top-dialog">

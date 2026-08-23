@@ -25,12 +25,7 @@
 </script>
 
 <main class="game-view" aria-label="办公室界面">
-	<Left
-		scene="office"
-		{items}
-		{baseline}
-		{onSynthesisConfirm}
-	/>
+	<Left scene="office" {items} {baseline} {onSynthesisConfirm} />
 	<Newspaper {term} {year} {month} onOpen={onNewspaperOpen} />
 	<div class="top-slot">
 		<Top {raceItems} {interestGroupItems} />

@@ -219,7 +219,10 @@ test('preview keeps only the largest reverse metric with stable ties', () => {
 test('synthesis confirmation records the clicked negative base ref', () => {
 	const confirmation = createSynthesisConfirmation(proposals, proposals[1]);
 	assert.equal(confirmation.negativeBaseRef, proposals[1].ref);
-	assert.deepEqual(confirmation.refs, proposals.map((item) => item.ref));
+	assert.deepEqual(
+		confirmation.refs,
+		proposals.map((item) => item.ref)
+	);
 });
 
 test('Left secondary mode follows its scene', () => {

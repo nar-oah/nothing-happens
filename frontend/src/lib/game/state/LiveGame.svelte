@@ -22,10 +22,7 @@
 	} from './selectors';
 	import { createGameStore, EMPTY_GAME_STORE, type GameStoreValue } from './store';
 
-	type MutationPayload<T extends GameplayCommandType> = Omit<
-		OutboundPayloads[T],
-		'state_version'
-	>;
+	type MutationPayload<T extends GameplayCommandType> = Omit<OutboundPayloads[T], 'state_version'>;
 
 	const gameStore = createGameStore();
 	let storeValue = $state<GameStoreValue>(EMPTY_GAME_STORE);
@@ -133,14 +130,11 @@
 			editingSavedBillIndex={snapshot.editing_saved_bill_index ?? undefined}
 			{preview}
 			voteCanPass={snapshot.draft_preview.vote.passed}
-			onAddProposal={(handIndex) =>
-				mutate('draft.proposal.add', { hand_index: handIndex })}
+			onAddProposal={(handIndex) => mutate('draft.proposal.add', { hand_index: handIndex })}
 			onRemoveProposal={(draftIndex) =>
 				mutate('draft.proposal.remove', { draft_index: draftIndex })}
-			onAddPolicy={(displayName) =>
-				mutate('draft.policy.add', { display_name: displayName })}
-			onRemovePolicy={(draftIndex) =>
-				mutate('draft.policy.remove', { draft_index: draftIndex })}
+			onAddPolicy={(displayName) => mutate('draft.policy.add', { display_name: displayName })}
+			onRemovePolicy={(draftIndex) => mutate('draft.policy.remove', { draft_index: draftIndex })}
 			onTitleChange={(title) => mutate('draft.title.set', { title })}
 			onEditSavedBill={(savedBillIndex) =>
 				mutate('bill.edit', { saved_bill_index: savedBillIndex })}

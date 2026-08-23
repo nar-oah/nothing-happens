@@ -5,10 +5,7 @@
 	import Top from '$lib/components/top/Top.svelte';
 	import type { ViewFrameProps } from './types';
 
-	type Props = Pick<
-		ViewFrameProps,
-		'raceItems' | 'interestGroupItems' | 'gameState'
-	> & {
+	type Props = Pick<ViewFrameProps, 'raceItems' | 'interestGroupItems' | 'gameState'> & {
 		title: string;
 		constitution: MemorialConstitutionData;
 		onArticleSelectionChange?: (articleRef: number, selected: boolean) => void;
@@ -30,11 +27,7 @@
 	</div>
 	<div class="state-slot"><GameStateDisplay {...gameState} /></div>
 	<div class="constitution" data-block-world-input>
-		<MemorialVerticalConstitution
-			{title}
-			{constitution}
-			{onArticleSelectionChange}
-		/>
+		<MemorialVerticalConstitution {title} {constitution} {onArticleSelectionChange} />
 	</div>
 </main>
 
