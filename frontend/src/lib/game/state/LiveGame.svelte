@@ -100,7 +100,8 @@
 	}
 
 	function selectConstitutionArticle(articleRef: number, selected: boolean): void {
-		selectedConstitutionArticle = selected ? articleRef : undefined;
+		if (selected) selectedConstitutionArticle = articleRef;
+		else if (selectedConstitutionArticle === articleRef) selectedConstitutionArticle = undefined;
 	}
 </script>
 
