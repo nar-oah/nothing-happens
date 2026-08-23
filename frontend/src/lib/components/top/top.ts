@@ -1,3 +1,5 @@
+import type { ContextDetailData } from '../detail/detail';
+
 export type TopItemData = {
 	key: string;
 	item: {
@@ -5,14 +7,7 @@ export type TopItemData = {
 		value?: string | number;
 		limit?: number;
 	};
-	detail: {
-		leftLabel: string;
-		rightLabel: string;
-		leftBody: string;
-		rightBody: string;
-		actionLabel?: string;
-	};
+	detail: Omit<ContextDetailData, 'title'>;
 	payload?: unknown;
 	onSelect?: (payload: unknown) => void;
-	onAction?: (payload: unknown, isRight: boolean) => void;
 };

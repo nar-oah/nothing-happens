@@ -6,7 +6,7 @@
 	let { text }: Props = $props();
 </script>
 
-<section class="relative w-[45vw]" style="aspect-ratio: 433 / 130" aria-label="对话">
+<section class="relative w-full" style="aspect-ratio: 433 / 130" aria-label="来客介绍">
 	<img
 		src="/images/dialog-top.svg"
 		alt=""

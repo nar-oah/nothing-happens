@@ -5,6 +5,7 @@
 		text: string;
 		value?: string | number;
 		limit?: number;
+		isRow: boolean;
 	};
 
 	type Props = {
@@ -15,7 +16,7 @@
 	let { primary, secondary }: Props = $props();
 </script>
 
-<aside class="flex items-end gap-12" aria-label="游戏状态">
+<aside class="flex flex-col items-end gap-[20px]" aria-label="游戏状态">
 	<ChoreItem {...primary} />
 	<ChoreItem {...secondary} />
 </aside>

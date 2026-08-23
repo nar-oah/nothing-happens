@@ -1,12 +1,22 @@
 <script lang="ts">
 	type Props = {
 		text: string;
+		onclick?: () => void;
 	};
 
-	let { text }: Props = $props();
+	let { text, onclick }: Props = $props();
 </script>
 
-<section class="relative w-[70vw]" style="aspect-ratio: 644 / 132" aria-label="对话">
+<section
+	class:cursor-pointer={onclick}
+	class="relative w-full"
+	style="aspect-ratio: 644 / 132"
+	aria-label="对话"
+	role={onclick ? 'button' : undefined}
+	tabindex={onclick ? 0 : undefined}
+	{onclick}
+	onkeydown={(event) => (event.key === 'Enter' || event.key === ' ') && onclick?.()}
+>
 	<img
 		src="/images/dialog-bottom.svg"
 		alt=""
