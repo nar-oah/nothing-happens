@@ -8,6 +8,8 @@
 
 	let choiceVisible = $state(true);
 	let donationChoice = $state(false);
+	const dialogueText =
+		'造身公所愿意给出一个优惠的提案，\n您可以选择给我手上的这张提案添加一个优惠条款，或收下我们的一点心意';
 
 	function advanceDialogue() {
 		if (choiceVisible) {
@@ -38,10 +40,7 @@
 				<ChoreSwitch left="商貿+8" right="政治献金+5" bind:isSwitch={donationChoice} />
 			</div>
 		{/if}
-		<Dialog
-			text={'造身公所愿意给出一个优惠的提案，\n您可以选择给我手上的这张提案添加一个优惠条款，或收下我们的一点心意'}
-			onclick={advanceDialogue}
-		/>
+		<Dialog text={dialogueText} onclick={advanceDialogue} />
 	</div>
 </main>
 
