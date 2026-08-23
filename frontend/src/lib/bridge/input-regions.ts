@@ -40,6 +40,7 @@ export class InputRegionReporter {
 		this.mutationObserver.observe(this.root, {
 			attributes: true,
 			childList: true,
+			characterData: true,
 			subtree: true
 		});
 		this.targetWindow.addEventListener('resize', this.schedule);
