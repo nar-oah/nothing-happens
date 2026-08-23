@@ -84,6 +84,12 @@ func send_full_state(request_id: Variant = null) -> void:
 func set_ui_mode(mode: String, send_sync: bool = true) -> bool:
 	if mode not in UiProtocol.UI_MODES:
 		return false
+	if (
+		run_session != null
+		and run_session.state != null
+		and _serializer.pending_dialogue(run_session.state) != null
+	):
+		mode = "dialogue"
 	ui_mode = mode
 	world_scene = "parliament" if mode == "parliament" else "office"
 	if scene_manager != null:
