@@ -5,7 +5,9 @@
 	import LiveGame from '$lib/game/state/LiveGame.svelte';
 
 	let live = $state(false);
-	onMount(() => (live = hasCefBridge()));
+	onMount(() => {
+		live = hasCefBridge();
+	});
 </script>
 
 {#if live}
