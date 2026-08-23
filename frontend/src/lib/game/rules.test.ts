@@ -1,0 +1,69 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import {
+	areProposalsGameplayEquivalent,
+	reconcileSavedBillProposals
+} from './rules.ts';
+import type { InterestGroupDefinition, Proposal } from './types.ts';
+
+const sourceGroup: InterestGroupDefinition = {
+	display_name: 'source',
+	base_column_weight: 1,
+	decrease_tax: true,
+	decrease_price: false,
+	decrease_wage: false,
+	decrease_employment: false,
+	decrease_trade: false
+};
+
+function makeProposal(): Proposal {
+	return {
+		source_group: sourceGroup,
+		base_effect: { tax: 8, price: 0, wage: 0, employment: 0, trade: 0 },
+		positive_effect: { tax: 0, price: 0, wage: 0, employment: 0, trade: 0 },
+		lag_months: 4,
+		collapse_impact: 2,
+		donation_offer: 0,
+		bonus_choice_resolved: true,
+		positive_trait_accepted: true
+	};
+}
+
+test('settled historical bonus fields do not affect future gameplay equivalence', () => {
+	const ordinary = makeProposal();
+	const converted = {
+		...makeProposal(),
+		donation_offer: 20,
+		positive_trait_accepted: false
+	};
+	assert.equal(areProposalsGameplayEquivalent(ordinary, converted), true);
+});
+
+test('actionable bonus state remains part of gameplay equivalence', () => {
+	const pending = makeProposal();
+	pending.positive_effect.wage = 5;
+	pending.bonus_choice_resolved = false;
+	pending.positive_trait_accepted = false;
+	pending.donation_offer = 10;
+	const differentOffer = {
+		...pending,
+		positive_effect: { ...pending.positive_effect },
+		donation_offer: 11
+	};
+	assert.equal(areProposalsGameplayEquivalent(pending, differentOffer), false);
+
+	const accepted = { ...pending, bonus_choice_resolved: true, positive_trait_accepted: true };
+	const acceptedWithHistoricalOffer = { ...accepted, donation_offer: 99 };
+	assert.equal(areProposalsGameplayEquivalent(accepted, acceptedWithHistoricalOffer), true);
+});
+
+test('saved proposal reconciliation consumes each hand object at most once', () => {
+	const saved = [makeProposal(), makeProposal()];
+	const replacement = makeProposal();
+	const oneMatch = reconcileSavedBillProposals(saved, [replacement]);
+	assert.deepEqual(oneMatch, [replacement, null]);
+
+	const secondReplacement = makeProposal();
+	const twoMatches = reconcileSavedBillProposals(saved, [replacement, secondReplacement]);
+	assert.deepEqual(twoMatches, [replacement, secondReplacement]);
+});

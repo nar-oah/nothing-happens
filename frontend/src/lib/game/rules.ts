@@ -8,7 +8,7 @@ import {
 	type PolicyDefinition,
 	type PolicyEffect,
 	type Proposal
-} from './types';
+} from './types.ts';
 
 export const METRICS: Metric[] = [
 	Metric.TAX,
@@ -65,6 +65,44 @@ export function hasPositiveTrait(proposal: Proposal): boolean {
 	return METRICS.some((metric) => getMetricValue(proposal.positive_effect, metric) !== 0);
 }
 
+export function isProposalBonusChoicePending(proposal: Proposal): boolean {
+	return hasPositiveTrait(proposal) && !proposal.bonus_choice_resolved;
+}
+
+export function areProposalsGameplayEquivalent(first: Proposal, second: Proposal): boolean {
+	if (
+		first.source_group !== second.source_group ||
+		!areMetricVectorsEqual(first.base_effect, second.base_effect) ||
+		first.lag_months !== second.lag_months ||
+		!isApproximatelyEqual(first.collapse_impact, second.collapse_impact)
+	) {
+		return false;
+	}
+	const firstHasPositive = hasPositiveTrait(first);
+	if (firstHasPositive !== hasPositiveTrait(second)) return false;
+	if (!firstHasPositive) return true;
+	if (!areMetricVectorsEqual(first.positive_effect, second.positive_effect)) return false;
+	const firstPending = isProposalBonusChoicePending(first);
+	if (firstPending !== isProposalBonusChoicePending(second)) return false;
+	if (firstPending) return isApproximatelyEqual(first.donation_offer, second.donation_offer);
+	return first.positive_trait_accepted === second.positive_trait_accepted;
+}
+
+export function reconcileSavedBillProposals(
+	savedProposals: Proposal[],
+	hand: Proposal[]
+): Array<Proposal | null> {
+	const used = new Set<Proposal>();
+	return savedProposals.map((savedProposal) => {
+		const matched = hand.find(
+			(candidate) => !used.has(candidate) && areProposalsGameplayEquivalent(savedProposal, candidate)
+		);
+		if (!matched) return null;
+		used.add(matched);
+		return matched;
+	});
+}
+
 export function getProposalTotalEffect(proposal: Proposal): MetricVector {
 	const result: MetricVector = { ...proposal.base_effect };
 	if (!proposal.positive_trait_accepted) return result;
@@ -101,6 +139,16 @@ function addVectorMetrics(involved: Set<Metric>, values: MetricValues): void {
 	for (const metric of METRICS) {
 		if (getMetricValue(values, metric) !== 0) involved.add(metric);
 	}
+}
+
+function areMetricVectorsEqual(first: MetricValues, second: MetricValues): boolean {
+	return METRICS.every((metric) => getMetricValue(first, metric) === getMetricValue(second, metric));
+}
+
+function isApproximatelyEqual(first: number, second: number): boolean {
+	if (first === second) return true;
+	const tolerance = Math.max(0.00001, 0.00001 * Math.abs(first));
+	return Math.abs(first - second) < tolerance;
 }
 
 function roundLikeGodot(value: number): number {
