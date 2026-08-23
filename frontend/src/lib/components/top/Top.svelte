@@ -38,10 +38,9 @@
 <nav
 	class="flex w-screen items-start justify-end gap-12 overflow-hidden"
 	aria-label="顶部信息"
-	data-block-world-input
 >
 	<div class="top-items min-w-0 flex-1 overflow-x-auto">
-		<div class="ml-auto flex w-max items-start justify-end gap-12">
+		<div class="ml-auto flex w-max items-start justify-end gap-12" data-block-world-input>
 			{#each items as item (item.key)}
 				{#if expandedKey === item.key}
 					<div class="shrink-0">
