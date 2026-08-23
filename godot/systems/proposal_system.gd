@@ -30,15 +30,15 @@ func match_equivalent_proposals(
 	var result: Array[ProposalInstance] = []
 	var used_instances: Dictionary[int, bool] = {}
 	for required_proposal in required:
-		var match: ProposalInstance
+		var matched_proposal: ProposalInstance
 		for candidate in available:
 			if candidate == null or used_instances.has(candidate.get_instance_id()):
 				continue
 			if are_gameplay_equivalent(required_proposal, candidate):
-				match = candidate
+				matched_proposal = candidate
 				used_instances[candidate.get_instance_id()] = true
 				break
-		result.append(match)
+		result.append(matched_proposal)
 	return result
 
 
