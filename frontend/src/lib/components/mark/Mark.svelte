@@ -1,26 +1,26 @@
 <script lang="ts">
 	import MarkFace from './MarkFace.svelte';
 	import MarkSeal from './MarkSeal.svelte';
-	import { MARK_SEAL_SOURCE_SIZE, createMarkGeometry } from './mark';
-	import type { MarkDirection, MarkFaceContent } from './mark';
+	import { MARK_SEAL_SOURCE_SIZE, createMarkGeometry, createPolicyMarkContent } from './mark';
+	import type { MarkDirection } from './mark';
+	import type { MetricValues, PolicyDefinition } from '$lib/game';
 
 	type Props = {
 		direction?: MarkDirection;
-		policyName: string;
-		requirement: MarkFaceContent;
-		effect: MarkFaceContent;
+		policy: PolicyDefinition;
+		baseline: MetricValues;
 		onDirectionChange?: (direction: MarkDirection) => void;
 	};
 
 	let {
 		direction = $bindable<MarkDirection>('up'),
-		policyName,
-		requirement,
-		effect,
+		policy,
+		baseline,
 		onDirectionChange
 	}: Props = $props();
 
 	let geometry = $derived(createMarkGeometry(direction));
+	let content = $derived(createPolicyMarkContent(policy, baseline));
 
 	function setDirection(next: MarkDirection) {
 		if (direction === next) return;
@@ -49,8 +49,8 @@
 		style:transform={geometry.requirement.transform}
 	>
 		<MarkFace
-			headline={requirement.headline}
-			detail={requirement.detail}
+			headline={content.requirement.headline}
+			detail={content.requirement.detail}
 			is_show={direction === 'up'}
 		/>
 	</div>
@@ -61,7 +61,11 @@
 		style:--front-width={`${geometry.frontWidth}px`}
 		style:transform={geometry.effect.transform}
 	>
-		<MarkFace headline={effect.headline} detail={effect.detail} is_show={direction === 'down'} />
+		<MarkFace
+			headline={content.effect.headline}
+			detail={content.effect.detail}
+			is_show={direction === 'down'}
+		/>
 	</div>
 
 	<div
@@ -69,6 +73,6 @@
 		style:--seal-size={`${MARK_SEAL_SOURCE_SIZE}px`}
 		style:transform={geometry.sealTransform}
 	>
-		<MarkSeal text={policyName} />
+		<MarkSeal text={policy.display_name} />
 	</div>
 </button>

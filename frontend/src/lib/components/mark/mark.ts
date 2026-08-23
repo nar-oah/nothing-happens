@@ -13,6 +13,68 @@ export type MarkFaceContent = {
 	detail: string;
 };
 
+const CONDITION_SYMBOLS: Record<MetricConditionOperator, string> = {
+	[MetricConditionOperator.LESS_THAN]: '＜',
+	[MetricConditionOperator.LESS_THAN_OR_EQUAL]: '≤',
+	[MetricConditionOperator.GREATER_THAN]: '＞',
+	[MetricConditionOperator.GREATER_THAN_OR_EQUAL]: '≥'
+};
+
+export function createPolicyMarkContent(
+	policy: PolicyDefinition,
+	baseline: MetricValues
+): { requirement: MarkFaceContent; effect: MarkFaceContent } {
+	const condition = policy.condition;
+	const symbol = CONDITION_SYMBOLS[condition.operator];
+	const leftName = METRIC_DISPLAY_NAMES[condition.left_metric];
+	const rightName = METRIC_DISPLAY_NAMES[condition.right_metric];
+	const leftValue = getMetricValue(baseline, condition.left_metric);
+	const rightValue = getMetricValue(baseline, condition.right_metric) * condition.right_multiplier;
+	const multiplier = formatMultiplier(condition.right_multiplier);
+	const triggerText = isMetricConditionMet(condition, baseline) ? '本批觸發' : '本批不觸發';
+	const effectRules = policy.effects.map(formatEffectRule);
+	const effectAmounts = policy.effects.map((effect) => {
+		const amount = calculatePolicyEffectAmount(effect, baseline);
+		return `${METRIC_DISPLAY_NAMES[effect.target_metric]}${formatSigned(amount)}`;
+	});
+	if (policy.collapse_impact !== 0) {
+		effectAmounts.push(`崩潰${formatSigned(policy.collapse_impact)}`);
+	}
+	return {
+		requirement: {
+			headline: `所需　${leftName}${symbol}${rightName}${multiplier}`,
+			detail: `今數　${formatNumber(leftValue)}${symbol}${formatNumber(rightValue)}　${triggerText}`
+		},
+		effect: {
+			headline: `效用　${effectRules.length > 0 ? effectRules.join('；') : '無指標效果'}`,
+			detail: `單次　${effectAmounts.length > 0 ? effectAmounts.join('；') : '無變化'}`
+		}
+	};
+}
+
+function formatEffectRule(effect: PolicyEffect): string {
+	const target = METRIC_DISPLAY_NAMES[effect.target_metric];
+	const sourceA = METRIC_DISPLAY_NAMES[effect.source_a];
+	const multiplier = formatMultiplier(effect.multiplier);
+	if (effect.formula === PolicyEffectFormula.METRIC_VALUE) {
+		return `${target}按${sourceA}${multiplier}變動`;
+	}
+	const sourceB = METRIC_DISPLAY_NAMES[effect.source_b];
+	return `${target}按（${sourceA}－${sourceB}）${multiplier}變動`;
+}
+
+function formatMultiplier(multiplier: number): string {
+	return multiplier === 1 ? '' : `×${formatNumber(multiplier)}`;
+}
+
+function formatSigned(value: number): string {
+	return `${value >= 0 ? '＋' : '－'}${formatNumber(Math.abs(value))}`;
+}
+
+function formatNumber(value: number): string {
+	return Number.isInteger(value) ? String(value) : String(Number(value.toFixed(2)));
+}
+
 function clamp(value: number, min: number, max: number): number {
 	return Math.min(max, Math.max(min, value));
 }
@@ -82,3 +144,14 @@ export function createMarkGeometry(direction: MarkDirection) {
 		)
 	};
 }
+import {
+	METRIC_DISPLAY_NAMES,
+	MetricConditionOperator,
+	PolicyEffectFormula,
+	calculatePolicyEffectAmount,
+	getMetricValue,
+	isMetricConditionMet,
+	type MetricValues,
+	type PolicyDefinition,
+	type PolicyEffect
+} from '$lib/game';
