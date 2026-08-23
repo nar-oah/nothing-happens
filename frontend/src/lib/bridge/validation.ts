@@ -88,26 +88,26 @@ export function isOutboundType(value: unknown): value is OutboundType {
 }
 
 export function isLiveGameState(value: unknown): value is LiveGameState {
+	if (!isRecord(value) || !isGameStatus(value)) return false;
+	const state = value as Record<string, unknown>;
 	return (
-		isRecord(value) &&
-		isGameStatus(value) &&
-		isVersion(value.state_version) &&
-		isUiMode(value.ui_mode) &&
-		isWorldScene(value.world_scene) &&
-		isNonnegativeInteger(value.term) &&
-		isArrayOf(value.proposal_hand, isProposal) &&
-		isArrayOf(value.saved_bills, isBill) &&
-		isBill(value.draft_bill) &&
-		isNullableIndex(value.editing_saved_bill_index) &&
-		isArrayOf(value.available_policies, isPolicy) &&
-		isConstitution(value.constitution) &&
-		isArrayOf(value.races, isRaceSummary) &&
-		isArrayOf(value.interest_groups, isInterestGroupSummary) &&
-		isArrayOf(value.seats, isSeatSummary) &&
-		isParliamentSummary(value.parliament) &&
-		(value.active_bill === null || isActiveBill(value.active_bill)) &&
-		isDraftPreview(value.draft_preview) &&
-		(value.pending_dialogue === null || isPendingDialogue(value.pending_dialogue))
+		isVersion(state.state_version) &&
+		isUiMode(state.ui_mode) &&
+		isWorldScene(state.world_scene) &&
+		isNonnegativeInteger(state.term) &&
+		isArrayOf(state.proposal_hand, isProposal) &&
+		isArrayOf(state.saved_bills, isBill) &&
+		isBill(state.draft_bill) &&
+		isNullableIndex(state.editing_saved_bill_index) &&
+		isArrayOf(state.available_policies, isPolicy) &&
+		isConstitution(state.constitution) &&
+		isArrayOf(state.races, isRaceSummary) &&
+		isArrayOf(state.interest_groups, isInterestGroupSummary) &&
+		isArrayOf(state.seats, isSeatSummary) &&
+		isParliamentSummary(state.parliament) &&
+		(state.active_bill === null || isActiveBill(state.active_bill)) &&
+		isDraftPreview(state.draft_preview) &&
+		(state.pending_dialogue === null || isPendingDialogue(state.pending_dialogue))
 	);
 }
 
