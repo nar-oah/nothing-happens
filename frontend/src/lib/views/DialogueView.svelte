@@ -23,8 +23,7 @@
 	}
 
 	$effect(() => {
-		dialogue.handIndex;
-		donationChoice = false;
+		if (dialogue.handIndex >= 0) donationChoice = false;
 	});
 </script>
 
