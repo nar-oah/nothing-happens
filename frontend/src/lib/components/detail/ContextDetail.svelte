@@ -1,16 +1,9 @@
 <script lang="ts">
 	import ChoreItem from '../chore/ChoreItem.svelte';
 	import ChoreSwitch from '../chore/ChoreSwitch.svelte';
+	import type { ContextDetailData } from './detail';
 
-	type Props = {
-		title: string;
-		value?: string | number;
-		limit?: number;
-		leftLabel: string;
-		rightLabel: string;
-		leftBody: string;
-		rightBody: string;
-		actionLabel?: string;
+	type Props = ContextDetailData & {
 		isRight?: boolean;
 		onModeChange?: (isRight: boolean) => void;
 		onAction?: (isRight: boolean) => void;
