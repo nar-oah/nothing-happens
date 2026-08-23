@@ -56,6 +56,19 @@ test('actionable bonus state remains part of gameplay equivalence', () => {
 	assert.equal(areProposalsGameplayEquivalent(accepted, acceptedWithHistoricalOffer), true);
 });
 
+test('source groups match by serialized display name', () => {
+	const deserializedSourceGroup: InterestGroupDefinition = { ...sourceGroup };
+	const savedProposal = makeProposal();
+	const handProposal: Proposal = {
+		...makeProposal(),
+		source_group: deserializedSourceGroup
+	};
+
+	assert.notEqual(deserializedSourceGroup, sourceGroup);
+	assert.equal(areProposalsGameplayEquivalent(savedProposal, handProposal), true);
+	assert.deepEqual(reconcileSavedBillProposals([savedProposal], [handProposal]), [handProposal]);
+});
+
 test('saved proposal reconciliation consumes each hand object at most once', () => {
 	const saved = [makeProposal(), makeProposal()];
 	const replacement = makeProposal();
