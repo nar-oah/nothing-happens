@@ -1,3 +1,15 @@
+import {
+	METRIC_DISPLAY_NAMES,
+	MetricConditionOperator,
+	PolicyEffectFormula,
+	calculatePolicyEffectAmount,
+	getMetricValue,
+	isMetricConditionMet,
+	type MetricValues,
+	type PolicyDefinition,
+	type PolicyEffect
+} from '$lib/game';
+
 export const MARK_WIDTH = 230;
 export const MARK_HEIGHT = 86;
 export const MARK_SPLIT = 0.8;
@@ -144,14 +156,3 @@ export function createMarkGeometry(direction: MarkDirection) {
 		)
 	};
 }
-import {
-	METRIC_DISPLAY_NAMES,
-	MetricConditionOperator,
-	PolicyEffectFormula,
-	calculatePolicyEffectAmount,
-	getMetricValue,
-	isMetricConditionMet,
-	type MetricValues,
-	type PolicyDefinition,
-	type PolicyEffect
-} from '$lib/game';

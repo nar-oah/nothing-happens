@@ -1,5 +1,5 @@
 export { default as MemorialConstitutionClosed } from './closed/MemorialConstitutionClosed.svelte';
-export { default as MemorialPolicyClosed } from './closed/MemorialPolicyClosed.svelte';
+export { default as MemorialBillClosed } from './closed/MemorialBillClosed.svelte';
 export { default as MemorialProposalClosed } from './closed/MemorialProposalClosed.svelte';
 export { default as MemorialProposalOption } from './closed/MemorialProposalOption.svelte';
 export { default as MemorialConstitutionContent } from './content/MemorialConstitutionContent.svelte';
