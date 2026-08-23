@@ -8,7 +8,9 @@ import type {
 } from '../../game/index.ts';
 
 export type LeftItemKind = 'constitution' | 'bill' | 'proposal' | 'policy';
-export type LeftCollection = 'constitutions' | 'bills' | 'proposals' | 'policies';
+export type LeftCollection = 'constitution' | 'bills' | 'proposals' | 'policies';
+export type LeftScene = 'office' | 'parliament' | 'dialogue';
+export type LeftMode = 'archive' | 'synthesis' | 'selection';
 
 export type LeftItemRef = {
 	collection: LeftCollection;
@@ -17,7 +19,7 @@ export type LeftItemRef = {
 
 export type ConstitutionLeftItem = {
 	kind: 'constitution';
-	ref: LeftItemRef & { collection: 'constitutions' };
+	ref: LeftItemRef & { collection: 'constitution' };
 	constitution: Constitution;
 };
 
@@ -66,9 +68,19 @@ export type SynthesisConfirmation = {
 	reverseSource?: ProposalLeftItem;
 };
 
+export type LeftSelectionState = {
+	proposalRefs: LeftItemRef[];
+	policyDisplayNames: string[];
+	editingSavedBillIndex?: number;
+};
+
 export type LeftProps = {
+	scene: LeftScene;
 	items: LeftItem[];
 	baseline: MetricValues;
-	onItemSelect?: (item: LeftItem) => void;
+	activeMode?: LeftMode;
+	selection?: LeftSelectionState;
+	onModeChange?: (mode: LeftMode) => void;
+	onItemSelect?: (item: LeftItem, mode: LeftMode) => void;
 	onSynthesisConfirm?: (confirmation: SynthesisConfirmation) => void;
 };

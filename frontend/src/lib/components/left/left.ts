@@ -12,6 +12,9 @@ import type {
 	ArchiveFilterState,
 	LeftItem,
 	LeftItemKind,
+	LeftMode,
+	LeftScene,
+	LeftSelectionState,
 	ProposalLeftItem,
 	ProposalPreview,
 	SynthesisFilterState
@@ -32,6 +35,12 @@ export const LEFT_METRIC_LABELS: Record<Metric, string> = {
 	[Metric.TRADE]: '商贸'
 };
 
+export function getLeftSecondaryMode(scene: LeftScene): Exclude<LeftMode, 'archive'> | undefined {
+	if (scene === 'office') return 'synthesis';
+	if (scene === 'parliament') return 'selection';
+	return undefined;
+}
+
 export function isSameLeftRef(first: LeftItem['ref'], second: LeftItem['ref']): boolean {
 	return first.collection === second.collection && first.index === second.index;
 }
@@ -39,7 +48,10 @@ export function isSameLeftRef(first: LeftItem['ref'], second: LeftItem['ref']): 
 export function getLeftItemMetrics(item: LeftItem): Metric[] {
 	switch (item.kind) {
 		case 'constitution':
-			return getBillMetrics([], item.constitution.policies);
+			return getBillMetrics(
+				[],
+				item.constitution.active_articles.flatMap((article) => article.policies)
+			);
 		case 'bill':
 			return getBillMetrics(item.bill.proposals, item.bill.policies);
 		case 'proposal':
@@ -49,6 +61,22 @@ export function getLeftItemMetrics(item: LeftItem): Metric[] {
 		case 'policy':
 			return getPolicyMetrics(item.policy);
 	}
+}
+
+export function filterSelectionItems(
+	items: LeftItem[],
+	selection: LeftSelectionState
+): LeftItem[] {
+	return items.filter((item) => {
+		if (item.kind === 'constitution') return false;
+		if (item.kind === 'proposal') {
+			return !selection.proposalRefs.some((ref) => isSameLeftRef(ref, item.ref));
+		}
+		if (item.kind === 'policy') {
+			return !selection.policyDisplayNames.includes(item.policy.display_name);
+		}
+		return item.ref.index !== selection.editingSavedBillIndex;
+	});
 }
 
 export function filterArchiveItems(items: LeftItem[], state: ArchiveFilterState): LeftItem[] {
@@ -115,6 +143,13 @@ export function sortProposalItemsByValue(
 	return stableSort(items, (first, second) =>
 		compareProposalValues(first, second, metrics, ascending)
 	);
+}
+
+export function restoreProposalToHand(
+	hand: ProposalLeftItem[],
+	restored: ProposalLeftItem
+): ProposalLeftItem[] {
+	return sortProposalItemsByTime([...hand, restored], true);
 }
 
 export function toggleProposalSelection(
