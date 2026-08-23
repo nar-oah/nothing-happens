@@ -45,9 +45,11 @@
 
 	.constitution {
 		position: absolute;
-		inset: 0;
+		bottom: 20px;
+		left: 0;
+		z-index: 60;
 		display: flex;
-		align-items: center;
+		width: 100%;
 		justify-content: center;
 	}
 </style>
