@@ -77,12 +77,15 @@
 	onDestroy(unsubscribe);
 
 	function mutate<T extends GameplayCommandType>(type: T, payload: MutationPayload<T>): void {
+		const requestClient = client;
+		const requestStateVersion = storeValue.snapshot?.state_version;
+		if (!requestClient || requestStateVersion === undefined) return;
 		mutationQueue = mutationQueue
 			.then(async () => {
-				if (!client || !storeValue.snapshot) return;
-				await client.request(type, {
+				if (client !== requestClient) return;
+				await requestClient.request(type, {
 					...payload,
-					state_version: storeValue.snapshot.state_version
+					state_version: requestStateVersion
 				} as OutboundPayloads[T]);
 			})
 			.catch((error: unknown) => console.error('Godot command failed', error));

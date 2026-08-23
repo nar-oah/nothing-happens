@@ -591,6 +591,6 @@ func _is_region(region: Dictionary) -> bool:
 		and y >= 0.0
 		and width >= 0.0
 		and height >= 0.0
-		and x + width <= 1.0
-		and y + height <= 1.0
+		and x + width <= 1.000001
+		and y + height <= 1.000001
 	)
