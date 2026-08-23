@@ -178,8 +178,8 @@
 	}
 
 	function optionFor(item: ProposalLeftItem): string {
-		if (!confirming) return '选中';
-		return isSameLeftRef(selectedProposals[2].ref, item.ref) ? '取消' : '确认';
+		if (!confirming) return '選取';
+		return isSameLeftRef(selectedProposals[2].ref, item.ref) ? '取消' : '確認';
 	}
 
 	function activateOption(item: ProposalLeftItem) {

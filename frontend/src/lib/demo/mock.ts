@@ -168,6 +168,8 @@ const unavailablePolicy = policy('公开预算', condition(Metric.TAX, Metric.EM
 export const mockProposalItems: ProposalLeftItem[] = [
 	makeProposal(mockInterestGroups.造身公所, { price: 8, employment: -5 }, 6, { trade: 8 }),
 	makeProposal(mockInterestGroups.造身公所, { price: 5, employment: -9 }, 3),
+	makeProposal(mockInterestGroups.造身公所, { price: 5, employment: -9 }, 3),
+	makeProposal(mockInterestGroups.造身公所, { price: 5, employment: -9 }, 3, { employment: 6 }),
 	makeProposal(mockInterestGroups.槐安公所, { wage: -6, price: 7 }, 4, { employment: 6 }),
 	makeProposal(mockInterestGroups.槐安公所, { wage: -4, price: 10 }, 7),
 	makeProposal(mockInterestGroups.永乐轮运局, { price: 6, trade: -8 }, 5, { tax: -5 }),
