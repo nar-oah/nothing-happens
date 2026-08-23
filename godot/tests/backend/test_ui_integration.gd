@@ -270,7 +270,8 @@ func _test_normalized_input_regions(t: BackendTestContext) -> void:
 
 
 func _test_game_root_shell(t: BackendTestContext) -> void:
-	var root := load("res://core/game_root.tscn").instantiate()
+	var scene: PackedScene = load("res://core/game_root.tscn")
+	var root: Node = scene.instantiate()
 	Engine.get_main_loop().root.add_child(root)
 	t.check(root.has_node("RunSession"), "GameRoot owns RunSession")
 	t.check(root.has_node("SceneManager/World"), "GameRoot owns SceneManager World")
