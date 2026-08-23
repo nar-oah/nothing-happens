@@ -24,7 +24,7 @@ func _add_policy(state: RunState, policy: PolicyDefinition) -> bool:
 	if policy == null:
 		return false
 	for current in state.draft_bill.policies:
-		if current == policy:
+		if current.display_name == policy.display_name:
 			return false
 	state.draft_bill.policies.append(policy)
 	return true
@@ -40,19 +40,24 @@ func remove_policy(state: RunState, draft_index: int) -> bool:
 func add_available_policy(context: RunContext, policy: PolicyDefinition) -> bool:
 	if policy == null:
 		return false
-	var available := context.constitution_system.get_available_policies(context)
-	for candidate in available:
-		if candidate == policy:
-			return _add_policy(context.state, policy)
-	return false
+	return add_available_policy_by_name(context, policy.display_name)
+
+
+func add_available_policy_by_name(context: RunContext, display_name: String) -> bool:
+	var policy := context.constitution_system.get_available_policy(context, display_name)
+	return false if policy == null else _add_policy(context.state, policy)
 
 
 func is_ready_to_submit(context: RunContext, draft: DraftBillState) -> bool:
 	if context == null or draft == null or draft.is_empty():
 		return false
-	var available := context.constitution_system.get_available_policies(context)
 	for policy in draft.policies:
-		if policy == null or policy not in available:
+		if (
+			policy == null
+			or context.constitution_system.get_available_policy(
+				context, policy.display_name
+			) == null
+		):
 			return false
 	for proposal in draft.proposals:
 		if proposal == null or proposal.is_bonus_choice_pending():
@@ -89,3 +94,51 @@ func reorder_policy(state: RunState, from_index: int, to_index: int) -> bool:
 func clear_draft(state: RunState) -> void:
 	state.proposal_hand.append_array(state.draft_bill.proposals)
 	state.draft_bill = DraftBillState.new()
+	state.editing_saved_bill_index = RunState.NEW_BILL_INDEX
+
+
+func start_new_bill(state: RunState, title: String = "") -> void:
+	clear_draft(state)
+	state.draft_bill.title = title
+
+
+func load_saved_bill_for_editing(context: RunContext, saved_index: int) -> bool:
+	var state := context.state
+	if saved_index < 0 or saved_index >= state.saved_bills.size():
+		return false
+	var saved := state.saved_bills[saved_index]
+	clear_draft(state)
+	state.draft_bill.title = saved.title
+	state.editing_saved_bill_index = saved_index
+	var matches := context.proposal_system.match_equivalent_proposals(
+		saved.proposals, state.proposal_hand
+	)
+	for proposal in matches:
+		if proposal == null:
+			continue
+		state.proposal_hand.erase(proposal)
+		state.draft_bill.proposals.append(proposal)
+	for saved_policy in saved.policies:
+		if saved_policy != null:
+			add_available_policy_by_name(context, saved_policy.display_name)
+	return true
+
+
+func save_draft(state: RunState) -> int:
+	var saved := SavedBillState.new()
+	saved.title = state.draft_bill.title
+	for proposal in state.draft_bill.proposals:
+		saved.proposals.append(proposal.copy())
+	saved.policies.assign(state.draft_bill.policies)
+	var saved_index := state.editing_saved_bill_index
+	if saved_index < 0 or saved_index >= state.saved_bills.size():
+		state.saved_bills.append(saved)
+		saved_index = state.saved_bills.size() - 1
+	else:
+		state.saved_bills[saved_index] = saved
+	state.editing_saved_bill_index = saved_index
+	return saved_index
+
+
+func cancel_editing(state: RunState) -> void:
+	clear_draft(state)

@@ -49,6 +49,7 @@ func submit_draft(draft: DraftBillState) -> VoteResultState:
 	var result := VoteResultState.new()
 	if not context.draft_bill_system.is_ready_to_submit(context, draft):
 		return result
+	context.draft_bill_system.save_draft(context.state)
 	context.collapse_system.record_intervention(
 		context,
 		&"bill_submission",
@@ -61,11 +62,13 @@ func submit_draft(draft: DraftBillState) -> VoteResultState:
 		return result
 	enact_bill(draft)
 	context.state.draft_bill = DraftBillState.new()
+	context.state.editing_saved_bill_index = RunState.NEW_BILL_INDEX
 	return result
 
 
 func _build_active_bill(draft: DraftBillState) -> ActiveBillState:
 	var bill := ActiveBillState.new()
+	bill.title = draft.title
 	bill.start_values = context.state.metrics.copy()
 	bill.pure_target = context.proposal_system.calculate_pure_target(
 		bill.start_values, draft.proposals

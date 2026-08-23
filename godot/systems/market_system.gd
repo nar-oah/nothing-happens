@@ -6,28 +6,16 @@ func settle_month(context: RunContext) -> void:
 	var bill := context.state.active_bill
 
 	if bill != null:
-		_advance_proposal_digestion(bill, context.balance, context.random_system)
+		_advance_proposal_digestion(bill)
 		var anchor := context.proposal_system.calculate_digested_anchor(bill)
 		_move_market_toward_anchor(
 			context.state.metrics, anchor, context.balance, context.random_system
 		)
 
 
-func _advance_proposal_digestion(
-	bill: ActiveBillState, balance: GameBalanceDefinition, random_system: RandomSystem
-) -> void:
+func _advance_proposal_digestion(bill: ActiveBillState) -> void:
 	for active_proposal in bill.proposals:
-		if active_proposal.is_fully_digested():
-			continue
-
-		var speed := maxf(active_proposal.proposal.digestion_speed, 0.0)
-		var min_progress := balance.digestion_progress_min * speed
-		var max_progress := balance.digestion_progress_max * speed
-		var progress_delta := random_system.random_float(min_progress, max_progress)
-
-		active_proposal.digestion_progress = minf(
-			1.0, active_proposal.digestion_progress + progress_delta
-		)
+		active_proposal.advance_month()
 
 
 func _move_market_toward_anchor(
