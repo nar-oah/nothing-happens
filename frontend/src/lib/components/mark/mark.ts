@@ -84,7 +84,7 @@ function formatSigned(value: number): string {
 }
 
 function formatNumber(value: number): string {
-	return Number.isInteger(value) ? String(value) : String(Number(value.toFixed(2)));
+	return Number.isInteger(value) ? String(value) : String(Number(value.toFixed(4)));
 }
 
 function clamp(value: number, min: number, max: number): number {

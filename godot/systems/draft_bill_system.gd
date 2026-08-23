@@ -24,7 +24,7 @@ func _add_policy(state: RunState, policy: PolicyDefinition) -> bool:
 	if policy == null:
 		return false
 	for current in state.draft_bill.policies:
-		if current.display_name == policy.display_name:
+		if current != null and current.display_name == policy.display_name:
 			return false
 	state.draft_bill.policies.append(policy)
 	return true

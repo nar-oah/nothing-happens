@@ -4,6 +4,7 @@ import {
 	PolicyEffectFormula,
 	type MetricCondition,
 	type MetricValues,
+	type MetricVector,
 	type PolicyDefinition,
 	type PolicyEffect,
 	type Proposal
@@ -64,6 +65,20 @@ export function calculatePolicyEffectAmount(
 			? getMetricValue(values, effect.source_a)
 			: getMetricValue(values, effect.source_a) - getMetricValue(values, effect.source_b);
 	return roundLikeGodot(raw * effect.multiplier);
+}
+
+export function hasPositiveTrait(proposal: Proposal): boolean {
+	return METRICS.some((metric) => getMetricValue(proposal.positive_effect, metric) !== 0);
+}
+
+export function getProposalTotalEffect(proposal: Proposal): MetricVector {
+	const result: MetricVector = { ...proposal.base_effect };
+	if (!proposal.positive_trait_accepted) return result;
+	for (const metric of METRICS) {
+		const key = METRIC_KEYS[metric];
+		result[key] += getMetricValue(proposal.positive_effect, metric);
+	}
+	return result;
 }
 
 export function getBillLagMonths(proposals: Proposal[]): number {
