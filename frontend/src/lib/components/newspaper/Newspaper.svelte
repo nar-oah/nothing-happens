@@ -23,8 +23,8 @@
 		top: 0;
 		left: 0;
 		z-index: 50;
-		width: 240px;
-		height: 190px;
+		width: 282px;
+		height: 237px;
 	}
 
 	.newspaper {

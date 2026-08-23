@@ -26,7 +26,7 @@
 		<Top {raceItems} {interestGroupItems} />
 	</div>
 	<div class="state-slot"><GameStateDisplay {...gameState} /></div>
-	<div class="constitution" data-block-world-input>
+	<div class="constitution">
 		<MemorialVerticalConstitution {title} {constitution} {onArticleSelectionChange} />
 	</div>
 </main>
