@@ -82,6 +82,17 @@ const policy: PolicyDefinition = {
 	]
 };
 
+const secondArticlePolicy: PolicyDefinition = {
+	display_name: '物价政策',
+	condition: {
+		left_metric: Metric.PRICE,
+		operator: MetricConditionOperator.GREATER_THAN,
+		right_metric: Metric.TAX,
+		right_multiplier: 1
+	},
+	effects: []
+};
+
 const proposals = [
 	proposalItem(4, proposal('商会', -4, 1)),
 	proposalItem(9, proposal('工所', -9, 3)),
@@ -94,7 +105,10 @@ const items: LeftItem[] = [
 		ref: { collection: 'constitution', index: 0 },
 		constitution: {
 			title: '约法',
-			active_articles: [{ display_name: '节点', content: '', policies: [policy] }]
+			active_articles: [
+				{ display_name: '节点一', content: '', policies: [policy] },
+				{ display_name: '节点二', content: '', policies: [secondArticlePolicy] }
+			]
 		}
 	},
 	{
@@ -123,7 +137,7 @@ test('Left filters by discriminated kind without mutating input', () => {
 test('Left metric filter matches any involved metric', () => {
 	const filtered = filterArchiveItems(items, {
 		kinds: ['constitution', 'proposal'],
-		metrics: [Metric.EMPLOYMENT],
+		metrics: [Metric.PRICE],
 		timeAscending: false,
 		valueAscending: false
 	});
