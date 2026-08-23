@@ -6,6 +6,8 @@ const BackendTestContext = preload("res://tests/backend/backend_test_context.gd"
 func run(t: BackendTestContext) -> void:
 	_test_resource_identity(t)
 	_test_group_stance_and_generated_proposal(t)
+	_test_proposal_gameplay_equivalence(t)
+	_test_duplicate_equivalent_matching(t)
 	_test_positive_trait_and_donation_choice(t)
 	_test_pending_choice_blocks_submission(t)
 	_test_merge_uses_group_resource_identity(t)
@@ -64,6 +66,92 @@ func _test_group_stance_and_generated_proposal(t: BackendTestContext) -> void:
 	t.check_equal(proposal.base_effect.wage, -11, "wage downside uses compounded magnitude")
 	t.check_equal(proposal.base_effect.trade, 0, "unconcerned metrics stay empty")
 	t.check_equal(proposal.lag_months, 4, "lag month range is balance-driven")
+
+
+func _test_proposal_gameplay_equivalence(t: BackendTestContext) -> void:
+	var group := t.make_group("equivalent source")
+	var proposal := t.make_proposal(group)
+	proposal.base_effect.tax = 8
+	proposal.positive_effect.wage = 5
+	proposal.lag_months = 4
+	proposal.collapse_impact = 2.0
+	proposal.donation_offer = 5.0
+	proposal.bonus_choice_resolved = true
+	proposal.positive_trait_accepted = true
+	var system := ProposalSystem.new()
+	var equivalent := proposal.copy()
+	t.check(proposal != equivalent, "equivalent proposals may be different runtime instances")
+	t.check(
+		system.are_gameplay_equivalent(proposal, equivalent),
+		"copied gameplay content is equivalent"
+	)
+	equivalent.lag_months = 5
+	t.check(
+		not system.are_gameplay_equivalent(proposal, equivalent),
+		"lag months participate in gameplay equivalence"
+	)
+	equivalent = proposal.copy()
+	equivalent.positive_trait_accepted = false
+	t.check(
+		not system.are_gameplay_equivalent(proposal, equivalent),
+		"positive trait final state participates in gameplay equivalence"
+	)
+	equivalent = proposal.copy()
+	equivalent.base_effect.tax += 1
+	t.check(
+		not system.are_gameplay_equivalent(proposal, equivalent),
+		"metric effects participate in gameplay equivalence"
+	)
+	var ordinary := t.make_proposal(group)
+	ordinary.base_effect.tax = 8
+	ordinary.lag_months = 4
+	ordinary.collapse_impact = 2.0
+	var converted := ordinary.copy()
+	converted.donation_offer = 20.0
+	converted.positive_trait_accepted = false
+	t.check(
+		system.are_gameplay_equivalent(ordinary, converted),
+		"settled bonus bookkeeping does not change future gameplay"
+	)
+	var stale_choice_flag := ordinary.copy()
+	stale_choice_flag.bonus_choice_resolved = false
+	t.check(
+		system.are_gameplay_equivalent(ordinary, stale_choice_flag),
+		"a choice flag without a positive trait has no future gameplay effect"
+	)
+	var pending := ordinary.copy()
+	pending.positive_effect.wage = 5
+	pending.bonus_choice_resolved = false
+	pending.positive_trait_accepted = false
+	pending.donation_offer = 10.0
+	var different_offer := pending.copy()
+	different_offer.donation_offer = 11.0
+	t.check(
+		not system.are_gameplay_equivalent(pending, different_offer),
+		"an actionable donation choice participates in equivalence"
+	)
+	var accepted := pending.copy()
+	accepted.bonus_choice_resolved = true
+	accepted.positive_trait_accepted = true
+	var accepted_with_historical_offer := accepted.copy()
+	accepted_with_historical_offer.donation_offer = 99.0
+	t.check(
+		system.are_gameplay_equivalent(accepted, accepted_with_historical_offer),
+		"a resolved accepted trait ignores its historical donation offer"
+	)
+
+
+func _test_duplicate_equivalent_matching(t: BackendTestContext) -> void:
+	var proposal := t.make_proposal(t.make_group("duplicate source"))
+	proposal.base_effect.trade = -7
+	proposal.lag_months = 3
+	var replacement := proposal.copy()
+	var matches := ProposalSystem.new().match_equivalent_proposals(
+		[proposal.copy(), proposal.copy()], [replacement]
+	)
+	t.check_equal(matches.size(), 2, "matching preserves every saved proposal slot")
+	t.check(matches[0] == replacement, "an equivalent hand proposal fills the first slot")
+	t.check(matches[1] == null, "one hand instance cannot fill a duplicate second slot")
 
 
 func _test_positive_trait_and_donation_choice(t: BackendTestContext) -> void:
