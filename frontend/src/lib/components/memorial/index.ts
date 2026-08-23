@@ -10,5 +10,5 @@ export { default as MemorialProposalContent } from './content/MemorialProposalCo
 export { default as MemorialHorizontal } from './horizontal/MemorialHorizontal.svelte';
 export { default as MemorialNewspaper } from './MemorialNewspaper.svelte';
 export { default as MemorialVerticalConstitution } from './vertical/MemorialVerticalConstitution.svelte';
-export { default as MemorialVerticalPolicy } from './vertical/MemorialVerticalPolicy.svelte';
+export { default as MemorialBillEditor } from './vertical/MemorialBillEditor.svelte';
 export * from './types';
