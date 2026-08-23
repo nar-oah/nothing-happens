@@ -1,25 +1,39 @@
 <script lang="ts">
 	import { MemorialVerticalConstitution } from '$lib/components/memorial';
+	import type { MemorialConstitutionData } from '$lib/components/memorial/types';
 	import GameStateDisplay from '$lib/components/state/GameStateDisplay.svelte';
 	import Top from '$lib/components/top/Top.svelte';
-	import {
-		mockConstitution,
-		mockConstitutionMemorial,
-		mockInterestGroupTopItems,
-		mockRaceTopItems,
-		mockState
-	} from '$lib/demo/mock';
+	import type { ViewFrameProps } from './types';
+
+	type Props = Pick<
+		ViewFrameProps,
+		'raceItems' | 'interestGroupItems' | 'gameState'
+	> & {
+		title: string;
+		constitution: MemorialConstitutionData;
+		onArticleSelectionChange?: (articleRef: number, selected: boolean) => void;
+	};
+
+	let {
+		raceItems,
+		interestGroupItems,
+		gameState,
+		title,
+		constitution,
+		onArticleSelectionChange
+	}: Props = $props();
 </script>
 
 <main class="game-view" aria-label="约法界面">
 	<div class="top-slot">
-		<Top raceItems={mockRaceTopItems} interestGroupItems={mockInterestGroupTopItems} />
+		<Top {raceItems} {interestGroupItems} />
 	</div>
-	<div class="state-slot"><GameStateDisplay {...mockState} /></div>
-	<div class="constitution">
+	<div class="state-slot"><GameStateDisplay {...gameState} /></div>
+	<div class="constitution" data-block-world-input>
 		<MemorialVerticalConstitution
-			title={mockConstitution.title}
-			constitution={mockConstitutionMemorial}
+			{title}
+			{constitution}
+			{onArticleSelectionChange}
 		/>
 	</div>
 </main>

@@ -4,42 +4,58 @@
 	import TopDialog from '$lib/components/dialog/TopDialog.svelte';
 	import Left from '$lib/components/left/Left.svelte';
 	import Newspaper from '$lib/components/newspaper/Newspaper.svelte';
-	import { mockBaseline, mockLeftItems } from '$lib/demo/mock';
+	import type { DialoguePresentation, ViewFrameProps } from './types';
 
-	let choiceVisible = $state(true);
+	type Props = ViewFrameProps & {
+		dialogue: DialoguePresentation;
+		onResolveBonus?: (handIndex: number, acceptTrait: boolean) => void;
+	};
+
+	let {
+		items,
+		baseline,
+		term,
+		year,
+		month,
+		onNewspaperOpen,
+		dialogue,
+		onResolveBonus
+	}: Props = $props();
 	let donationChoice = $state(false);
-	const dialogueText =
-		'造身公所愿意给出一个优惠的提案，\n您可以选择给我手上的这张提案添加一个优惠条款，或收下我们的一点心意';
+	let dialogueText = $derived(
+		`${dialogue.groupName}愿意给出一个优惠的提案，\n您可以选择给我手上的这张提案添加一个优惠条款，或收下我们的一点心意`
+	);
 
 	function advanceDialogue() {
-		if (choiceVisible) {
-			console.info('Dialogue choice', donationChoice ? '政治献金+5' : '商貿+8');
-			choiceVisible = false;
-			return;
-		}
-		console.info('Advance dialogue');
+		onResolveBonus?.(dialogue.handIndex, !donationChoice);
 	}
+
+	$effect(() => {
+		dialogue.handIndex;
+		donationChoice = false;
+	});
 </script>
 
 <main class="game-view" aria-label="对话界面">
 	<Left
 		scene="dialogue"
-		items={mockLeftItems}
-		baseline={mockBaseline}
-		onItemSelect={(item) => console.info('Dialogue archive item', item)}
+		{items}
+		{baseline}
 	/>
-	<Newspaper term={2} year={3} month={7} onOpen={() => console.info('Open newspaper')} />
+	<Newspaper {term} {year} {month} onOpen={onNewspaperOpen} />
 
 	<div class="top-dialog">
-		<TopDialog text="造身公所派来的代表，负责行身制造与维修网络。" />
+		<TopDialog text={`${dialogue.groupName}代表来访。`} />
 	</div>
 
 	<div class="dialog-area">
-		{#if choiceVisible}
-			<div class="choice-switch">
-				<ChoreSwitch left="商貿+8" right="政治献金+5" bind:isSwitch={donationChoice} />
-			</div>
-		{/if}
+		<div class="choice-switch">
+			<ChoreSwitch
+				left={dialogue.positiveEffect}
+				right={dialogue.donationOffer}
+				bind:isSwitch={donationChoice}
+			/>
+		</div>
 		<Dialog text={dialogueText} onclick={advanceDialogue} />
 	</div>
 </main>
