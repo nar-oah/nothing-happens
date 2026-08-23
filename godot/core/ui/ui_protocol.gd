@@ -38,7 +38,7 @@ const UI_MODES: Array[String] = ["office", "dialogue", "parliament", "constituti
 
 
 func decode(raw_message: String) -> Dictionary:
-	var decoded := JSON.parse_string(raw_message)
+	var decoded: Variant = JSON.parse_string(raw_message)
 	if not decoded is Dictionary:
 		return _failure("malformed_json", "IPC message must be a JSON object.")
 	var message: Dictionary = decoded

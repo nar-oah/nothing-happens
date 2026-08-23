@@ -323,7 +323,7 @@ func _handle_proposal_merge(message: Dictionary, messages: Array[Dictionary]) ->
 		return
 	var hand_indices: Array[int] = []
 	for raw_index in raw_indices:
-		var parsed_index := _int_value(raw_index)
+		var parsed_index: Variant = _int_value(raw_index)
 		if parsed_index == null:
 			_append_mutation_error(
 				messages,

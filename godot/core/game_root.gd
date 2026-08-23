@@ -21,9 +21,9 @@ func _ready() -> void:
 
 func _create_cef_texture() -> Control:
 	var cef_texture: Control
-	var has_cef := ClassDB.class_exists("CefTexture") and ClassDB.can_instantiate("CefTexture")
+	var has_cef: bool = ClassDB.class_exists("CefTexture") and ClassDB.can_instantiate("CefTexture")
 	if has_cef:
-		var instance := ClassDB.instantiate("CefTexture")
+		var instance: Object = ClassDB.instantiate("CefTexture")
 		if instance is Control:
 			cef_texture = instance
 	if cef_texture == null:
