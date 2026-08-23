@@ -212,6 +212,7 @@ func full_state(
 	session: RunSession, ui_mode: String, world_scene: String, state_version: int
 ) -> Dictionary:
 	var state := session.state
+	# TODO: Replace this presentation value when a formally designed term state exists.
 	return {
 		"state_version": state_version,
 		"ui_mode": ui_mode,
