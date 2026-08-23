@@ -56,8 +56,8 @@
 	let activeLeftMode = $state<LeftMode>('archive');
 	let voteMode = $state(false);
 	let optimisticDraft = $state<Bill>();
-	let appliedVersion = $state(untrack(() => stateVersion));
-	let appliedDraft = $state(untrack(() => draft));
+	let appliedVersion = untrack(() => stateVersion);
+	let appliedDraft = untrack(() => draft);
 	let visibleDraft = $derived(optimisticDraft ?? draft);
 	let selection = $derived({
 		proposalRefs: [],
