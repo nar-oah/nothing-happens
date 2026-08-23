@@ -1,14 +1,7 @@
 <script lang="ts">
 	import ChoreSelect from './ChoreSelect.svelte';
 	import ChoreSwitch from './ChoreSwitch.svelte';
-
-	type ChoreFilterOptions = {
-		options: string[];
-		selected: string[];
-		multiple: boolean;
-	};
-	type ChoreFilterValue = ChoreFilterOptions | boolean;
-	type ChoreFilters = Record<string, ChoreFilterValue>;
+	import type { ChoreFilters, ChoreFilterValue } from './chore';
 	type Props = {
 		left: string;
 		right: string;

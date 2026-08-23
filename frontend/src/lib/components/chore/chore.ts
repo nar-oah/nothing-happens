@@ -5,6 +5,15 @@ export type ChoreMetricKey = 'tax' | 'price' | 'wage' | 'employment' | 'trade';
 export type ChoreArchiveState = Record<ChoreArchiveKey, boolean>;
 export type ChoreMetricState = Record<ChoreMetricKey, boolean>;
 
+export type ChoreFilterOptions = {
+	options: string[];
+	selected: string[];
+	multiple: boolean;
+};
+
+export type ChoreFilterValue = ChoreFilterOptions | boolean;
+export type ChoreFilters = Record<string, ChoreFilterValue>;
+
 export const CHORE_ARCHIVE_OPTIONS = [
 	{ key: 'constitution', text: '约法' },
 	{ key: 'bill', text: '法案' },
