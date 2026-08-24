@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { asset } from '$app/paths';
+
 	type Props = {
 		text: string;
 	};
@@ -6,9 +8,14 @@
 	let { text }: Props = $props();
 </script>
 
-<section class="relative w-full" style="aspect-ratio: 433 / 130" aria-label="来客介绍">
+<section
+	class="relative w-full"
+	style="aspect-ratio: 433 / 130"
+	aria-label="来客介绍"
+	data-block-world-input
+>
 	<img
-		src="/images/dialog-top.svg"
+		src={asset('/images/dialog-top.svg')}
 		alt=""
 		aria-hidden="true"
 		draggable="false"

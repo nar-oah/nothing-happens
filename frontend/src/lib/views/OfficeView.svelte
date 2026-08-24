@@ -3,28 +3,34 @@
 	import Newspaper from '$lib/components/newspaper/Newspaper.svelte';
 	import GameStateDisplay from '$lib/components/state/GameStateDisplay.svelte';
 	import Top from '$lib/components/top/Top.svelte';
-	import {
-		mockBaseline,
-		mockInterestGroupTopItems,
-		mockLeftItems,
-		mockRaceTopItems,
-		mockState
-	} from '$lib/demo/mock';
+	import type { SynthesisConfirmation } from '$lib/components/left/types';
+	import type { ViewFrameProps } from './types';
+
+	type Props = ViewFrameProps & {
+		onSynthesisConfirm?: (confirmation: SynthesisConfirmation) => void;
+	};
+
+	let {
+		items,
+		baseline,
+		raceItems,
+		interestGroupItems,
+		gameState,
+		term,
+		year,
+		month,
+		onNewspaperOpen,
+		onSynthesisConfirm
+	}: Props = $props();
 </script>
 
 <main class="game-view" aria-label="办公室界面">
-	<Left
-		scene="office"
-		items={mockLeftItems}
-		baseline={mockBaseline}
-		onItemSelect={(item) => console.info('Office archive item', item)}
-		onSynthesisConfirm={(result) => console.info('Office synthesis', result)}
-	/>
-	<Newspaper term={2} year={3} month={7} onOpen={() => console.info('Open newspaper')} />
+	<Left scene="office" {items} {baseline} {onSynthesisConfirm} />
+	<Newspaper {term} {year} {month} onOpen={onNewspaperOpen} />
 	<div class="top-slot">
-		<Top raceItems={mockRaceTopItems} interestGroupItems={mockInterestGroupTopItems} />
+		<Top {raceItems} {interestGroupItems} />
 	</div>
-	<div class="state-slot"><GameStateDisplay {...mockState} /></div>
+	<div class="state-slot"><GameStateDisplay {...gameState} /></div>
 </main>
 
 <style>

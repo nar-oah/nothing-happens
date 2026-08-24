@@ -72,6 +72,11 @@
 [ext_resource type="Resource" path="res://data/constitutions/言论自由.tres" id="70_10ui0"]
 [ext_resource type="Resource" path="res://data/constitutions/透明政府.tres" id="71_ao0ki"]
 [ext_resource type="Resource" path="res://data/constitutions/锦衣卫.tres" id="72_7qj7d"]
+[ext_resource type="Script" path="res://core/world/scene_manager.gd" id="73_scene_manager"]
+[ext_resource type="PackedScene" path="res://worlds/office_world.tscn" id="74_office_world"]
+[ext_resource type="PackedScene" path="res://worlds/parliament_world.tscn" id="75_parliament_world"]
+[ext_resource type="Script" path="res://core/ui/ui_bridge.gd" id="76_ui_bridge"]
+[ext_resource type="Script" path="res://core/world/world_input_router.gd" id="77_input_router"]
 
 [node name="GameRoot" type="Node" unique_id=1300880904]
 script = ExtResource("1_x0thd")
@@ -82,3 +87,18 @@ race_definitions = Array[ExtResource("4_0r11x")]([ExtResource("5_we0k6"), ExtRes
 interest_groups = Array[ExtResource("11_1shov")]([ExtResource("12_1aeih"), ExtResource("13_h1fnt"), ExtResource("14_6fjwy"), ExtResource("15_38qif"), ExtResource("16_k22fy"), ExtResource("17_voci3"), ExtResource("18_dhh7q")])
 seat_definitions = Array[ExtResource("19_4n2pu")]([ExtResource("20_a6cpr"), ExtResource("21_kqsq3"), ExtResource("22_jadge"), ExtResource("23_uaxo7"), ExtResource("24_hopro"), ExtResource("25_7yoxf"), ExtResource("26_chmvc"), ExtResource("27_ojhtw"), ExtResource("28_d6omd"), ExtResource("29_e3wpd"), ExtResource("30_eqwrj"), ExtResource("31_vnm3j"), ExtResource("32_qmo08"), ExtResource("33_qhwkk"), ExtResource("34_xmmwl"), ExtResource("35_kl2wn"), ExtResource("36_4qy55"), ExtResource("37_3srgt"), ExtResource("38_070mi"), ExtResource("39_r11ik"), ExtResource("40_s2cwy"), ExtResource("41_nj0w5"), ExtResource("42_57sny"), ExtResource("43_i13b5"), ExtResource("44_e86gt")])
 constitution_articles = Array[ExtResource("45_3sfi2")]([ExtResource("46_1dwfh"), ExtResource("47_bj4pd"), ExtResource("48_b7dc2"), ExtResource("49_8wqqe"), ExtResource("50_twem7"), ExtResource("51_cwgya"), ExtResource("52_xo8f3"), ExtResource("53_h6mgg"), ExtResource("54_72itv"), ExtResource("55_4l6ui"), ExtResource("56_i863l"), ExtResource("57_askjp"), ExtResource("58_u7tc2"), ExtResource("59_wuq7l"), ExtResource("60_q6e73"), ExtResource("61_kaijq"), ExtResource("62_newfd"), ExtResource("63_t42pf"), ExtResource("64_0145r"), ExtResource("65_efvib"), ExtResource("66_us4ch"), ExtResource("67_uiqy4"), ExtResource("68_0pmbp"), ExtResource("69_6nhup"), ExtResource("70_10ui0"), ExtResource("71_ao0ki"), ExtResource("72_7qj7d")])
+
+[node name="SceneManager" type="Node" parent="."]
+script = ExtResource("73_scene_manager")
+office_scene = ExtResource("74_office_world")
+parliament_scene = ExtResource("75_parliament_world")
+
+[node name="World" type="Node2D" parent="SceneManager"]
+
+[node name="UiBridge" type="Node" parent="."]
+script = ExtResource("76_ui_bridge")
+
+[node name="WorldInputRouter" type="Node" parent="."]
+script = ExtResource("77_input_router")
+
+[node name="UiLayer" type="CanvasLayer" parent="."]

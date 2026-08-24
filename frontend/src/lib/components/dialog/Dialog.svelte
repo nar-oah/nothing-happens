@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { asset } from '$app/paths';
+
 	type Props = {
 		text: string;
 		onclick?: () => void;
@@ -9,7 +11,7 @@
 
 {#snippet dialogContent()}
 	<img
-		src="/images/dialog-bottom.svg"
+		src={asset('/images/dialog-bottom.svg')}
 		alt=""
 		aria-hidden="true"
 		draggable="false"
@@ -29,12 +31,18 @@
 		class="relative block w-full cursor-pointer border-0 bg-transparent p-0 text-left"
 		style="aspect-ratio: 644 / 132"
 		aria-label="对话"
+		data-block-world-input
 		{onclick}
 	>
 		{@render dialogContent()}
 	</button>
 {:else}
-	<section class="relative w-full" style="aspect-ratio: 644 / 132" aria-label="对话">
+	<section
+		class="relative w-full"
+		style="aspect-ratio: 644 / 132"
+		aria-label="对话"
+		data-block-world-input
+	>
 		{@render dialogContent()}
 	</section>
 {/if}

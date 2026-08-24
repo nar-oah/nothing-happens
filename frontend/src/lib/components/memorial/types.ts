@@ -44,6 +44,7 @@ export type MemorialConstitutionRowData = {
 };
 
 export type MemorialConstitutionRowContentData = MemorialConstitutionRowData & {
+	articleRef?: number;
 	contents: MemorialHorizontalContentData[];
 	policies: MemorialPolicyContentData[];
 };

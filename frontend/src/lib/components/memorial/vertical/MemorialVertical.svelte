@@ -30,6 +30,7 @@
 	style:width={`${count * VERTICAL_FOLD_WIDTH}px`}
 	style:height={`${VERTICAL_FOLD_HEIGHT + maxY - minY}px`}
 	aria-label="展开的竖版奏折"
+	data-block-world-input
 >
 	{#each skews as skew, index (index)}
 		<MemorialVerticalFold y={positions[index] - minY} {index} {skew}>

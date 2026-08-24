@@ -1,0 +1,307 @@
+extends RefCounted
+
+const BackendTestContext = preload("res://tests/backend/backend_test_context.gd")
+
+
+func run(t: BackendTestContext) -> void:
+	_test_protocol_envelopes(t)
+	_test_core_dto_serialization(t)
+	_test_full_state_and_saved_bill_indices(t)
+	_test_command_errors_and_state_recovery(t)
+	_test_policy_name_resolution(t)
+	_test_saved_bill_reconciliation(t)
+	_test_merge_refs(t)
+	_test_draft_preview(t)
+	_test_bonus_choice_sync(t)
+	_test_normalized_input_regions(t)
+	_test_game_root_shell(t)
+
+
+func _test_protocol_envelopes(t: BackendTestContext) -> void:
+	var protocol := UiProtocol.new()
+	var malformed := protocol.decode("{")
+	t.check(not malformed["ok"], "malformed JSON is rejected")
+	t.check_equal(malformed["error"]["code"], "malformed_json", "malformed JSON has a code")
+	var unknown := protocol.decode(JSON.stringify({"type": "unknown", "payload": {}}))
+	t.check(not unknown["ok"], "unknown command is rejected")
+	t.check_equal(unknown["error"]["code"], "unknown_type", "unknown command has a code")
+	var missing_payload := protocol.decode(JSON.stringify({"type": "ui.ready"}))
+	t.check(not missing_payload["ok"], "every envelope requires payload")
+	t.check_equal(
+		missing_payload["error"]["code"], "missing_payload", "missing payload has a code"
+	)
+	var ready := protocol.decode(
+		protocol.encode("ui.ready", {}, "ready-request")
+	)
+	t.check(ready["ok"], "encoded ready envelope decodes")
+	t.check_equal(ready["message"]["request_id"], "ready-request", "request id round trips")
+
+
+func _test_core_dto_serialization(t: BackendTestContext) -> void:
+	var serializer := UiSerializer.new()
+	var values := MetricValues.new()
+	values.tax = 1
+	values.price = 2
+	values.wage = 3
+	values.employment = 4
+	values.trade = 5
+	t.check_equal(
+		serializer.metric_values(values),
+		{"tax": 1, "price": 2, "wage": 3, "employment": 4, "trade": 5},
+		"MetricValues serializes every named metric"
+	)
+	var group := t.make_group("serializer group", 4)
+	group.decrease_tax = true
+	var proposal := t.make_proposal(group)
+	proposal.base_effect.tax = 8
+	proposal.positive_effect.trade = 5
+	proposal.lag_months = 6
+	proposal.collapse_impact = 2.5
+	proposal.donation_offer = 5.0
+	proposal.bonus_choice_resolved = false
+	proposal.positive_trait_accepted = false
+	var proposal_dto: Dictionary = serializer.proposal(proposal)
+	t.check_equal(proposal_dto["source_group"]["display_name"], "serializer group", "proposal source serializes")
+	t.check_equal(proposal_dto["base_effect"]["tax"], 8, "proposal base effect serializes")
+	t.check_equal(proposal_dto["positive_effect"]["trade"], 5, "proposal trait serializes")
+	t.check_equal(proposal_dto["lag_months"], 6, "proposal lag serializes")
+	t.check(not proposal_dto["bonus_choice_resolved"], "proposal pending state serializes")
+	var policy := _make_policy("serializer policy")
+	var policy_dto: Dictionary = serializer.policy(policy)
+	t.check_equal(policy_dto["condition"]["operator"], 3, "policy operator keeps enum value")
+	t.check_equal(policy_dto["effects"][0]["formula"], 0, "policy formula keeps enum value")
+	var draft := DraftBillState.new()
+	draft.title = "serializer bill"
+	draft.proposals.append(proposal)
+	draft.policies.append(policy)
+	var bill_dto: Dictionary = serializer.bill(draft)
+	t.check_equal(bill_dto["title"], "serializer bill", "bill title serializes")
+	t.check_equal(bill_dto["proposals"].size(), 1, "bill proposals serialize")
+	t.check_equal(bill_dto["policies"].size(), 1, "bill policies serialize")
+
+
+func _test_full_state_and_saved_bill_indices(t: BackendTestContext) -> void:
+	var race := t.make_race("full race")
+	var group := t.make_group("full group")
+	var session := t.make_session([race], [group], t.make_seats(2, "full"))
+	var saved := SavedBillState.new()
+	saved.title = "saved zero"
+	session.state.saved_bills.append(saved)
+	var serializer := UiSerializer.new()
+	var full := serializer.full_state(session, "office", "office", 7)
+	t.check_equal(full["state_version"], 7, "full sync carries state version")
+	t.check_equal(full["saved_bills"][0]["title"], "saved zero", "saved bill array preserves index")
+	t.check_equal(full["editing_saved_bill_index"], null, "new bill index serializes as null")
+	t.check_equal(full["constitution"]["title"], "蓬莱约法", "constitution uses its fixed title")
+	t.check_equal(full["constitution"]["articles"][0]["content"], "", "article content remains empty")
+	t.check_equal(full["races"][0]["seat_count"], 2, "race summary uses actual seats")
+	t.check_equal(full["parliament"]["total_seats"], 2, "parliament summary uses actual pool")
+	t.check_equal(full["max_collapse"], session.balance.max_collapse, "status uses balance collapse limit")
+	var bridge := UiBridge.new()
+	bridge.setup(session)
+	var ready := bridge.receive_ipc_message(_message("ui.ready", {}))
+	t.check_equal(ready[0]["type"], "state.full", "ui.ready receives authoritative full sync")
+	t.check_equal(ready[0]["request_id"], "test", "handshake response preserves request id")
+	bridge.free()
+	session.free()
+
+
+func _test_command_errors_and_state_recovery(t: BackendTestContext) -> void:
+	var race := t.make_race("errors")
+	var group := t.make_group("errors")
+	var session := t.make_session([race], [group], t.make_seats(1, "errors"))
+	var bridge := UiBridge.new()
+	bridge.setup(session)
+	var out_of_range := bridge.receive_ipc_message(
+		_message("draft.proposal.add", {"state_version": 0, "hand_index": 4})
+	)
+	t.check_equal(out_of_range.size(), 2, "invalid mutation returns error and full state")
+	t.check_equal(out_of_range[0]["type"], "command.error", "invalid hand index is explicit")
+	t.check(out_of_range[0]["payload"]["recover_full_state"], "error announces recovery full sync")
+	t.check_equal(out_of_range[1]["type"], "state.full", "invalid hand index recovers state")
+	t.check_equal(bridge.state_version, 0, "rejected mutation does not advance version")
+	var stale := bridge.receive_ipc_message(
+		_message("bill.new", {"state_version": 3})
+	)
+	t.check_equal(stale[0]["payload"]["code"], "stale_state", "stale command is rejected")
+	t.check_equal(stale[1]["payload"]["state_version"], 0, "stale recovery is authoritative")
+	bridge.free()
+	session.free()
+
+
+func _test_policy_name_resolution(t: BackendTestContext) -> void:
+	var race := t.make_race("policy race")
+	var group := t.make_group("policy group")
+	var policy := _make_policy("available policy")
+	var article := t.make_article(race)
+	article.policies.append(policy)
+	var session := t.make_session([race], [group], t.make_seats(1, "policy"), [article])
+	var bridge := UiBridge.new()
+	bridge.setup(session)
+	var messages := bridge.receive_ipc_message(
+		_message(
+			"draft.policy.add",
+			{"state_version": 0, "display_name": "available policy"}
+		)
+	)
+	t.check_equal(messages[0]["type"], "draft.sync", "policy command returns draft domain sync")
+	t.check_equal(session.state.draft_bill.policies[0], policy, "policy name resolves current Resource")
+	t.check_equal(bridge.state_version, 1, "successful policy mutation advances version")
+	var unavailable := bridge.receive_ipc_message(
+		_message("draft.policy.add", {"state_version": 1, "display_name": "missing"})
+	)
+	t.check_equal(unavailable[0]["payload"]["code"], "unavailable_policy", "unknown policy is rejected")
+	bridge.free()
+	session.free()
+
+
+func _test_saved_bill_reconciliation(t: BackendTestContext) -> void:
+	var race := t.make_race("saved race")
+	var group := t.make_group("saved group")
+	var session := t.make_session([race], [group], t.make_seats(1, "saved"))
+	var current := t.make_proposal(group)
+	current.base_effect.tax = 8
+	session.proposal_system.add_to_hand(session.state, current)
+	var saved := SavedBillState.new()
+	saved.title = "recipe"
+	saved.proposals.append(current.copy())
+	session.state.saved_bills.append(saved)
+	var bridge := UiBridge.new()
+	bridge.setup(session)
+	var messages := bridge.receive_ipc_message(
+		_message("bill.edit", {"state_version": 0, "saved_bill_index": 0})
+	)
+	t.check_equal(messages[0]["type"], "draft.sync", "saved recipe returns draft sync")
+	t.check_equal(session.state.draft_bill.proposals[0], current, "saved recipe reserves current hand instance")
+	t.check_equal(session.state.proposal_hand.size(), 0, "reserved hand instance leaves hand")
+	t.check_equal(messages[0]["payload"]["editing_saved_bill_index"], 0, "saved index syncs")
+	bridge.free()
+	session.free()
+
+
+func _test_merge_refs(t: BackendTestContext) -> void:
+	var race := t.make_race("merge race")
+	var group := t.make_group("merge group")
+	var session := t.make_session([race], [group], t.make_seats(1, "merge"))
+	var base := t.make_proposal(group)
+	base.base_effect.tax = 7
+	var positive := t.make_proposal(group)
+	positive.positive_effect.wage = 6
+	var third := t.make_proposal(group)
+	for current in [base, positive, third]:
+		session.proposal_system.add_to_hand(session.state, current)
+	var bridge := UiBridge.new()
+	bridge.setup(session)
+	var messages := bridge.receive_ipc_message(
+		_message(
+			"proposal.merge",
+			{
+				"state_version": 0,
+				"hand_indices": [0, 1, 2],
+				"negative_base_index": 0,
+				"selected_positive_index": 1,
+			}
+		)
+	)
+	t.check_equal(messages[0]["type"], "proposal.sync", "valid merge returns proposal sync")
+	t.check_equal(messages[0]["payload"]["result"]["kind"], "merge", "merge result is discriminated")
+	t.check_equal(session.state.proposal_hand.size(), 1, "authoritative merge consumes three mothers")
+	t.check_equal(session.state.proposal_hand[0].base_effect.tax, 7, "negative base ref is honored")
+	t.check_equal(bridge.state_version, 1, "merge advances version once")
+	bridge.free()
+	session.free()
+
+
+func _test_draft_preview(t: BackendTestContext) -> void:
+	var race := t.make_race("preview race")
+	var group := t.make_group("preview group")
+	var policy := _make_policy("preview policy")
+	var article := t.make_article(race)
+	article.policies.append(policy)
+	var session := t.make_session([race], [group], t.make_seats(1, "preview"), [article])
+	var proposal := t.make_proposal(group)
+	proposal.base_effect.tax = 7
+	session.state.draft_bill.proposals.append(proposal)
+	session.state.draft_bill.policies.append(policy)
+	var preview := UiSerializer.new().draft_preview(session)
+	t.check_equal(preview["current_metrics"]["tax"], 100, "preview includes current metrics")
+	t.check_equal(preview["pure_proposal_target"]["tax"], 107, "preview uses pure proposal target")
+	t.check_equal(preview["immediate_policy_result"]["trade"], 110, "preview uses policy chain")
+	t.check_equal(preview["projected_metrics"]["tax"], 107, "projected metrics include proposal")
+	t.check_equal(preview["projected_metrics"]["trade"], 110, "projected metrics include policy")
+	t.check_equal(preview["vote"]["seat_votes"].size(), 1, "preview uses authoritative seat vote")
+	session.free()
+
+
+func _test_bonus_choice_sync(t: BackendTestContext) -> void:
+	var race := t.make_race("dialogue race")
+	var group := t.make_group("dialogue group")
+	var session := t.make_session([race], [group], t.make_seats(1, "dialogue"))
+	var proposal := t.make_proposal(group)
+	proposal.positive_effect.trade = 8
+	proposal.donation_offer = 8.0
+	proposal.bonus_choice_resolved = false
+	proposal.positive_trait_accepted = false
+	session.proposal_system.add_to_hand(session.state, proposal)
+	var bridge := UiBridge.new()
+	bridge.setup(session)
+	t.check_equal(bridge.ui_mode, "dialogue", "pending proposal enters dialogue mode")
+	var messages := bridge.receive_ipc_message(
+		_message(
+			"proposal.bonus.resolve",
+			{"state_version": 0, "hand_index": 0, "accept_trait": false}
+		)
+	)
+	t.check_equal(messages[0]["type"], "proposal.sync", "bonus choice returns proposal sync")
+	t.check_equal(session.state.political_donation_pool, 8.0, "donation choice uses gameplay API")
+	t.check_equal(messages[0]["payload"]["pending_dialogue"], null, "resolved choice clears dialogue")
+	t.check_equal(messages[0]["payload"]["ui_mode"], "office", "last dialogue returns to office")
+	bridge.free()
+	session.free()
+
+
+func _test_normalized_input_regions(t: BackendTestContext) -> void:
+	var texture := CefTextureInput.new()
+	texture.size = Vector2(200.0, 100.0)
+	texture.set_blocker_regions([{"x": 0.1, "y": 0.2, "width": 0.3, "height": 0.4}])
+	t.check(texture._has_point(Vector2(40.0, 30.0)), "point inside normalized blocker hits CEF")
+	t.check(not texture._has_point(Vector2(180.0, 80.0)), "point outside blockers passes to world")
+	texture.free()
+
+
+func _test_game_root_shell(t: BackendTestContext) -> void:
+	var scene: PackedScene = load("res://core/game_root.tscn")
+	var root: Node = scene.instantiate()
+	Engine.get_main_loop().root.add_child(root)
+	t.check(root.has_node("RunSession"), "GameRoot owns RunSession")
+	t.check(root.has_node("SceneManager/World"), "GameRoot owns SceneManager World")
+	t.check(root.has_node("UiBridge"), "GameRoot owns one UiBridge")
+	t.check(root.has_node("WorldInputRouter"), "GameRoot owns WorldInputRouter")
+	t.check(root.has_node("UiLayer/CefTexture"), "GameRoot creates one full-screen CEF slot")
+	t.check_equal(root.get_node("UiLayer").get_child_count(), 1, "UiLayer owns one browser node")
+	var bridge: UiBridge = root.get_node("UiBridge")
+	var ready := bridge.receive_ipc_message(_message("ui.ready", {}))
+	t.check_equal(ready[0]["type"], "state.full", "production GameRoot completes handshake")
+	t.check_equal(ready[0]["payload"]["metrics"]["tax"], 100, "production snapshot uses RunState")
+	root.free()
+
+
+func _make_policy(display_name: String) -> PolicyDefinition:
+	var condition := MetricCondition.new()
+	condition.left_metric = Metric.Id.TAX
+	condition.operator = MetricCondition.Operator.GREATER_THAN_OR_EQUAL
+	condition.right_metric = Metric.Id.TRADE
+	var effect := PolicyEffect.new()
+	effect.target_metric = Metric.Id.TRADE
+	effect.formula = PolicyEffect.Formula.METRIC_VALUE
+	effect.source_a = Metric.Id.TAX
+	effect.multiplier = 0.1
+	var policy := PolicyDefinition.new()
+	policy.display_name = display_name
+	policy.condition = condition
+	policy.effects.append(effect)
+	return policy
+
+
+func _message(message_type: String, payload: Dictionary) -> String:
+	return JSON.stringify({"type": message_type, "request_id": "test", "payload": payload})

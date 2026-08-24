@@ -21,7 +21,11 @@
 	}: Props = $props();
 </script>
 
-<section class="flex w-[500px] flex-col items-start" aria-label={`${title}详情`}>
+<section
+	class="flex w-[500px] flex-col items-start"
+	aria-label={`${title}详情`}
+	data-block-world-input
+>
 	<ChoreItem
 		text={title}
 		value={isRight ? rightBody : leftBody}
