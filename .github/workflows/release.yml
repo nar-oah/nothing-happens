@@ -68,6 +68,9 @@ jobs:
           rm -rf "$CEF_TMP" "$CEF_ZIP"
           du -sh "$GODOT_DIR/addons/godot_cef"
 
+      - name: Patch Godot CEF for macOS
+        run: python3 scripts/patch_godot_cef_macos.py
+
       - name: Export Godot project
         id: export
         uses: firebelley/godot-export@v8.0.0
