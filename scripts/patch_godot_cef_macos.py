@@ -7,11 +7,23 @@ ROOT = Path(__file__).resolve().parent.parent
 
 CEF_DIR = ROOT / "godot/addons/godot_cef"
 MACOS_DIR = CEF_DIR / "bin/universal-apple-darwin"
+
 FRAMEWORK = MACOS_DIR / "Godot CEF.framework"
-PLIST = FRAMEWORK / "Resources/Info.plist"
+FRAMEWORK_PLIST = FRAMEWORK / "Resources/Info.plist"
 
 OLD_EXECUTABLE = FRAMEWORK / "libgdcef.dylib"
 NEW_EXECUTABLE = FRAMEWORK / "Godot CEF"
+
+GDEXTENSION = CEF_DIR / "godot_cef.gdextension"
+
+ORIGINAL_MACOS_DEPENDENCIES = """macos = {
+  "bin/universal-apple-darwin/Godot CEF.framework" : "Contents/Frameworks",
+  "bin/universal-apple-darwin/Godot CEF.app" : "Contents/Frameworks"
+}"""
+
+PATCHED_MACOS_DEPENDENCIES = """macos = {
+  "bin/universal-apple-darwin/Godot CEF.framework" : "Contents/Frameworks"
+}"""
 
 
 def fail(message: str) -> None:
@@ -32,10 +44,10 @@ def patch_framework_executable() -> None:
 
 
 def patch_framework_plist() -> None:
-    if not PLIST.is_file():
-        fail(f"CEF framework Info.plist not found: {PLIST}")
+    if not FRAMEWORK_PLIST.is_file():
+        fail(f"CEF framework Info.plist not found: {FRAMEWORK_PLIST}")
 
-    with PLIST.open("rb") as file:
+    with FRAMEWORK_PLIST.open("rb") as file:
         data = plistlib.load(file)
 
     data["CFBundleExecutable"] = "Godot CEF"
@@ -48,10 +60,36 @@ def patch_framework_plist() -> None:
     data["CFBundlePackageType"] = "FMWK"
     data["CFBundleSupportedPlatforms"] = ["MacOSX"]
 
-    with PLIST.open("wb") as file:
+    with FRAMEWORK_PLIST.open("wb") as file:
         plistlib.dump(data, file, sort_keys=False)
 
-    print(f"Patched: {PLIST}")
+    print(f"Patched: {FRAMEWORK_PLIST}")
+
+
+def patch_gdextension_dependencies() -> None:
+    if not GDEXTENSION.is_file():
+        fail(f"GDExtension config not found: {GDEXTENSION}")
+
+    text = GDEXTENSION.read_text(encoding="utf-8")
+
+    if ORIGINAL_MACOS_DEPENDENCIES in text:
+        text = text.replace(
+            ORIGINAL_MACOS_DEPENDENCIES,
+            PATCHED_MACOS_DEPENDENCIES,
+            1,
+        )
+        GDEXTENSION.write_text(text, encoding="utf-8")
+        print("Removed Godot CEF.app from macOS GDExtension dependencies.")
+        return
+
+    if PATCHED_MACOS_DEPENDENCIES in text:
+        print("macOS GDExtension dependencies already patched.")
+        return
+
+    fail(
+        "Unexpected macOS dependency block in godot_cef.gdextension. "
+        "The installed godot-cef version may have changed."
+    )
 
 
 def main() -> None:
@@ -60,8 +98,9 @@ def main() -> None:
 
     patch_framework_executable()
     patch_framework_plist()
+    patch_gdextension_dependencies()
 
-    print("Godot CEF macOS framework patch complete.")
+    print("Godot CEF macOS patch complete.")
 
 
 if __name__ == "__main__":
