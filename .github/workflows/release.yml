@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - "*"
+    branches:
+      - fix/macos-cef-export
   workflow_dispatch:
 
 permissions:
