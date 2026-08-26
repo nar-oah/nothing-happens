@@ -82,11 +82,9 @@
 
 	<div class="state-controls">
 		<button class="state-button" type="button" aria-label="设置" data-block-world-input>
-			<span class="state-accent bg-accent-amber-deep" aria-hidden="true"></span>
 			<span class="typo-control-heading state-label bg-shadow-deep text-surface-amber">设置</span>
 		</button>
 		<button class="state-button" type="button" aria-label="退出" data-block-world-input>
-			<span class="state-accent bg-accent-amber-deep" aria-hidden="true"></span>
 			<span class="typo-control-heading state-label bg-shadow-deep text-surface-amber">退出</span>
 		</button>
 	</div>
