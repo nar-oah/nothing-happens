@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Left from '$lib/components/left/Left.svelte';
-	import Newspaper from '$lib/components/newspaper/Newspaper.svelte';
+	import NewspaperEntry from '$lib/components/newspaper/NewspaperEntry.svelte';
 	import GameStateDisplay from '$lib/components/state/GameStateDisplay.svelte';
 	import Top from '$lib/components/top/Top.svelte';
 	import type { SynthesisConfirmation } from '$lib/components/left/types';
@@ -26,7 +26,7 @@
 
 <main class="game-view" aria-label="办公室界面">
 	<Left scene="office" {items} {baseline} {onSynthesisConfirm} />
-	<Newspaper {term} {year} {month} onOpen={onNewspaperOpen} />
+	<NewspaperEntry {term} {year} {month} onOpen={onNewspaperOpen} />
 	<div class="top-slot">
 		<Top {raceItems} {interestGroupItems} />
 	</div>

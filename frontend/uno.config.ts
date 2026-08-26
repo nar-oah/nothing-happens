@@ -42,6 +42,7 @@ const fontFamily = {
 };
 
 const fontSize = {
+	9: '9px',
 	11: '11px',
 	12: '12px',
 	13: '13px',
@@ -51,17 +52,22 @@ const fontSize = {
 	18: '18px',
 	20: '20px',
 	24: '24px',
+	25: '25px',
 	30: '30px',
 	32: '32px',
 	36: '36px',
 	40: '40px',
+	42: '42px',
 	48: '48px',
+	54: '54px',
 	72: '72px'
 };
 
 const lineHeight = {
 	0: '0',
 	auto: 'normal',
+	12: '12px',
+	15: '15px',
 	16: '16px',
 	18: '18px',
 	20: '20px',
@@ -72,12 +78,16 @@ const lineHeight = {
 	30: '30px',
 	36: '36px',
 	40: '40px',
+	42: '42px',
 	45: '45px',
+	56: '56px',
 	58: '58px'
 };
 
 const letterSpacing = {
 	normal: '0',
+	'negative-2': '-0.02em',
+	'negative-3': '-0.03em',
 	'negative-5': '-0.05em',
 	'negative-20': '-0.2em',
 	'negative-30': '-0.3em',
@@ -214,7 +224,14 @@ export default defineConfig({
 		'typo-document-annotation': typo('official', 'normal', 12, 18),
 		'typo-document-data': typo('document', 'light', 14, 20, 'positive-2'),
 		'typo-document-signature': typo('archival', 'normal', 14, 20, 'negative-5'),
-		'typo-document-rule-label': typo('policy', 'normal', 14, 20)
+		'typo-document-rule-label': typo('policy', 'normal', 14, 20),
+
+		'typo-newspaper-masthead': typo('display', 'bold', 54, 56),
+		'typo-newspaper-caption': typo('archival', 'normal', 9, 12, 'negative-3'),
+		'typo-newspaper-data-hero': typo('document', 'light', 42, 42, 'negative-2'),
+		'typo-newspaper-headline': typo('policy', 'medium', 25, 28),
+		'typo-newspaper-body': typo('document', 'light', 11, 15),
+		'typo-newspaper-subhead': typo('official', 'medium', 16, 20)
 	},
 
 	preflights: [

@@ -1,0 +1,10 @@
+export { default as Newspaper } from './Newspaper.svelte';
+export { default as NewspaperEntry } from './NewspaperEntry.svelte';
+export { default as NewspaperFold } from './NewspaperFold.svelte';
+export { default as NewspaperTop } from './Top.svelte';
+export { default as NewspaperMetric } from './Metric.svelte';
+export { default as NewspaperFront } from './Front.svelte';
+export { default as NewspaperEvent } from './Event.svelte';
+export { default as NewspaperCalendar } from './Calendar.svelte';
+export { default as NewspaperComment } from './Comment.svelte';
+export * from './types';
