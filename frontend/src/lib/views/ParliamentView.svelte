@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { untrack } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import ChoreSwitch from '$lib/components/chore/ChoreSwitch.svelte';
 	import Left from '$lib/components/left/Left.svelte';
 	import type { BillLeftItem, LeftItem, LeftMode } from '$lib/components/left/types';
@@ -28,6 +28,7 @@
 		onSubmit?: () => void;
 	};
 
+	const LEFT_SCROLL_RESERVE = 390;
 	let {
 		items,
 		baseline,
@@ -63,6 +64,11 @@
 		proposalRefs: [],
 		policyDisplayNames: visibleDraft.policies.map((policy) => policy.display_name),
 		editingSavedBillIndex
+	});
+	let editorScroller: HTMLDivElement;
+
+	onMount(() => {
+		editorScroller.scrollLeft = LEFT_SCROLL_RESERVE;
 	});
 
 	$effect(() => {
@@ -122,23 +128,28 @@
 		<Top {raceItems} {interestGroupItems} />
 	</div>
 	<div class="state-slot"><GameStateDisplay {...gameState} /></div>
-	<div class="editor-slot">
-		<div class="editor-content">
-			<div class="vote-switch">
-				<ChoreSwitch
-					left="草案"
-					right={voteCanPass ? '投票(可通过)' : '投票(不可通过)'}
-					bind:isSwitch={voteMode}
-					onSwitchChange={submitDraft}
-				/>
+	<div bind:this={editorScroller} class="editor-slot">
+		<div class="editor-scroll-range">
+			<div class="editor-track">
+				<div class="editor-content">
+					<div class="vote-switch">
+						<ChoreSwitch
+							left="草案"
+							right={voteCanPass ? '投票(可通过)' : '投票(不可通过)'}
+							bind:isSwitch={voteMode}
+							onSwitchChange={submitDraft}
+						/>
+					</div>
+
+					<MemorialBillEditor
+						bill={visibleDraft}
+						{preview}
+						onTitleChange={setTitle}
+						onRemoveProposal={removeProposal}
+						onRemovePolicy={removePolicy}
+					/>
+				</div>
 			</div>
-			<MemorialBillEditor
-				bill={visibleDraft}
-				{preview}
-				onTitleChange={setTitle}
-				onRemoveProposal={removeProposal}
-				onRemovePolicy={removePolicy}
-			/>
 		</div>
 	</div>
 </main>
@@ -166,9 +177,27 @@
 		position: absolute;
 		bottom: 20px;
 		left: 0;
-		z-index: 60;
-		display: flex;
+		z-index: 20;
 		width: 100%;
+		overflow-x: auto;
+		scrollbar-width: none;
+		overscroll-behavior-x: contain;
+	}
+
+	.editor-slot::-webkit-scrollbar {
+		display: none;
+	}
+
+	.editor-scroll-range {
+		display: flex;
+		width: max-content;
+		padding-left: 390px;
+	}
+
+	.editor-track {
+		display: flex;
+		width: max-content;
+		min-width: 100vw;
 		justify-content: center;
 	}
 
