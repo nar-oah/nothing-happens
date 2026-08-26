@@ -59,8 +59,8 @@
 			comment: '我们是在解决问题，\n还是在证明危机存在？'
 		}
 	};
+	const MOCK_NEWSPAPER_CLOSE_TARGET: Exclude<ViewName, 'Newspaper'> = 'Constitution';
 	let activeView = $state<ViewName>('Office');
-	let viewBeforeNewspaper = $state<Exclude<ViewName, 'Newspaper'>>('Office');
 	let stateVersion = $state(0);
 	let proposalHand = $state<ProposalLeftItem[]>(mockProposalItems.slice(1));
 	let draftProposalItems = $state<ProposalLeftItem[]>([initialDraftProposal]);
@@ -84,12 +84,12 @@
 	});
 
 	function openNewspaper() {
-		if (activeView !== 'Newspaper') viewBeforeNewspaper = activeView;
 		activeView = 'Newspaper';
 	}
 
 	function closeNewspaper() {
-		activeView = viewBeforeNewspaper;
+		console.info('Mock Godot resolved Newspaper close to', MOCK_NEWSPAPER_CLOSE_TARGET);
+		activeView = MOCK_NEWSPAPER_CLOSE_TARGET;
 	}
 
 	function selectView(view: ViewName) {

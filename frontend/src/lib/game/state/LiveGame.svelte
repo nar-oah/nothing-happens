@@ -93,6 +93,21 @@
 			.catch((error: unknown) => console.error('Godot command failed', error));
 	}
 
+	async function closeNewspaper(): Promise<void> {
+		const requestClient = client;
+		if (!requestClient) {
+			newspaperOpen = false;
+			return;
+		}
+		try {
+			await requestClient.request('ui.newspaper.close', {});
+		} catch (error: unknown) {
+			console.error('Newspaper close sync failed', error);
+		} finally {
+			newspaperOpen = false;
+		}
+	}
+
 	function mergeProposals(confirmation: SynthesisConfirmation): void {
 		mutate('proposal.merge', {
 			hand_indices: confirmation.refs.map((ref) => ref.index),
@@ -117,7 +132,7 @@
 			metrics={[]}
 			events={[]}
 			comment={{ title: '', comment: '' }}
-			onClose={() => (newspaperOpen = false)}
+			onClose={closeNewspaper}
 		/>
 	{:else if snapshot.ui_mode === 'dialogue' && pendingDialogue}
 		<DialogueView

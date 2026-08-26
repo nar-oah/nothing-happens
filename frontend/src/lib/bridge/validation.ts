@@ -46,6 +46,7 @@ const outboundTypes = new Set<OutboundType>([
 	'ui.ready',
 	'ui.input_regions',
 	'ui.mode.set',
+	'ui.newspaper.close',
 	'draft.proposal.add',
 	'draft.proposal.remove',
 	'draft.policy.add',
