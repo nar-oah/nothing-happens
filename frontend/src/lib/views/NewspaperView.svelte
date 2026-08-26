@@ -75,22 +75,24 @@
 	>
 		<div class="newspaper-scroll-space" style:height={`${viewportHeight + totalScrollRange}px`}>
 			<div class="newspaper-viewport">
-				<div
-					class="newspaper-rotator"
-					style:width={`${viewportWidth}px`}
-					style:height={`${scaledHeight}px`}
-				>
+				<div class="newspaper-entry-motion">
 					<div
-						class="newspaper-axis-track"
-						style:transform={`translateY(${newspaperAxisOffset}px)`}
+						class="newspaper-rotator"
+						style:width={`${viewportWidth}px`}
+						style:height={`${scaledHeight}px`}
 					>
 						<div
-							class="newspaper-scaler"
-							style:width={`${VERTICAL_FOLD_HEIGHT}px`}
-							style:height={`${baseHeight}px`}
-							style:transform={`scale(${scale})`}
+							class="newspaper-axis-track"
+							style:transform={`translateY(${newspaperAxisOffset}px)`}
 						>
-							<Newspaper {year} {month} {metrics} {events} {comment} {onCommentClick} />
+							<div
+								class="newspaper-scaler"
+								style:width={`${VERTICAL_FOLD_HEIGHT}px`}
+								style:height={`${baseHeight}px`}
+								style:transform={`scale(${scale})`}
+							>
+								<Newspaper {year} {month} {metrics} {events} {comment} {onCommentClick} />
+							</div>
 						</div>
 					</div>
 				</div>
@@ -142,12 +144,35 @@
 		overflow: visible;
 	}
 
+	.newspaper-entry-motion {
+		position: absolute;
+		inset: 0;
+		animation: newspaper-enter 420ms cubic-bezier(0.22, 0.8, 0.2, 1) both;
+		will-change: transform;
+	}
+
 	.newspaper-rotator {
 		position: absolute;
 		top: 50%;
 		left: 50%;
 		transform: translate(-50%, -50%) rotate(-20deg);
 		transform-origin: center;
+	}
+
+	@keyframes newspaper-enter {
+		from {
+			transform: translate3d(-50vw, -50vh, 0);
+		}
+
+		to {
+			transform: translate3d(0, 0, 0);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.newspaper-entry-motion {
+			animation: none;
+		}
 	}
 
 	.newspaper-axis-track {
