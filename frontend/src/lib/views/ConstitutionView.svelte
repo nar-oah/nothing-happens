@@ -27,7 +27,9 @@
 	</div>
 	<div class="state-slot"><GameStateDisplay {...gameState} /></div>
 	<div class="constitution">
-		<MemorialVerticalConstitution {title} {constitution} {onArticleSelectionChange} />
+		<div class="constitution-track">
+			<MemorialVerticalConstitution {title} {constitution} {onArticleSelectionChange} />
+		</div>
 	</div>
 </main>
 
@@ -55,8 +57,20 @@
 		bottom: 20px;
 		left: 0;
 		z-index: 60;
-		display: flex;
 		width: 100%;
+		overflow-x: auto;
+		scrollbar-width: none;
+		overscroll-behavior-x: contain;
+	}
+
+	.constitution::-webkit-scrollbar {
+		display: none;
+	}
+
+	.constitution-track {
+		display: flex;
+		width: max-content;
+		min-width: 100%;
 		justify-content: center;
 	}
 </style>
