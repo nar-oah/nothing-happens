@@ -117,6 +117,7 @@
 			metrics={[]}
 			events={[]}
 			comment={{ title: '', comment: '' }}
+			onClose={() => (newspaperOpen = false)}
 		/>
 	{:else if snapshot.ui_mode === 'dialogue' && pendingDialogue}
 		<DialogueView

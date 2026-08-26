@@ -11,6 +11,8 @@
 		NewspaperMetricData
 	} from '$lib/components/newspaper/types';
 
+	type NewspaperMotionPhase = 'entering' | 'active' | 'leaving';
+
 	type Props = {
 		year: number;
 		month: number;
@@ -18,6 +20,7 @@
 		events: NewspaperEventData[];
 		comment: NewspaperCommentData;
 		onCommentClick?: () => void;
+		onClose?: () => void;
 	};
 
 	const ROTATION_DEGREES = -20;
@@ -25,10 +28,12 @@
 	const ROTATION_SIN = Math.sin(ROTATION_RADIANS);
 	const ROTATION_COS = Math.cos(ROTATION_RADIANS);
 
-	let { year, month, metrics, events, comment, onCommentClick }: Props = $props();
+	let { year, month, metrics, events, comment, onCommentClick, onClose }: Props = $props();
 	let viewportWidth = $state(1512);
 	let viewportHeight = $state(982);
 	let scrollPosition = $state(0);
+	let motionPhase = $state<NewspaperMotionPhase>('entering');
+	let backgroundCovered = $state(false);
 	let scrollElement: HTMLDivElement;
 
 	const pageCount = $derived(4 + events.length);
@@ -48,6 +53,26 @@
 		scrollPosition = scrollElement.scrollTop;
 	}
 
+	function finishMotion(event: AnimationEvent) {
+		if (event.target !== event.currentTarget) return;
+		if (motionPhase === 'entering') {
+			motionPhase = 'active';
+			backgroundCovered = true;
+			return;
+		}
+		if (motionPhase === 'leaving') onClose?.();
+	}
+
+	function requestClose() {
+		if (motionPhase !== 'active' || !onClose) return;
+		backgroundCovered = false;
+		motionPhase = 'leaving';
+	}
+
+	function blockClose(event: MouseEvent) {
+		event.stopPropagation();
+	}
+
 	$effect(() => {
 		const element = scrollElement;
 		const target = totalScrollRange / 2;
@@ -61,11 +86,13 @@
 </script>
 
 <main
-	class="newspaper-view bg-surface-amber"
+	class="newspaper-view"
+	class:bg-surface-amber={backgroundCovered}
 	aria-label="报纸界面"
 	bind:clientWidth={viewportWidth}
 	bind:clientHeight={viewportHeight}
 	data-block-world-input
+	onclick={requestClose}
 >
 	<div
 		class="newspaper-scroll"
@@ -75,11 +102,17 @@
 	>
 		<div class="newspaper-scroll-space" style:height={`${viewportHeight + totalScrollRange}px`}>
 			<div class="newspaper-viewport">
-				<div class="newspaper-entry-motion">
+				<div
+					class="newspaper-entry-motion"
+					class:entering={motionPhase === 'entering'}
+					class:leaving={motionPhase === 'leaving'}
+					onanimationend={finishMotion}
+				>
 					<div
 						class="newspaper-rotator"
 						style:width={`${viewportWidth}px`}
 						style:height={`${scaledHeight}px`}
+						onclick={blockClose}
 					>
 						<div
 							class="newspaper-axis-track"
@@ -102,10 +135,10 @@
 
 	<div class="top-controls">
 		<div class="top-items" aria-hidden="true"></div>
-		<ChoreSwitch left="保存" right="读取" />
+		<div onclick={blockClose}><ChoreSwitch left="保存" right="读取" /></div>
 	</div>
 
-	<div class="state-slot"><GameStateDisplay {primary} {secondary} /></div>
+	<div class="state-slot" onclick={blockClose}><GameStateDisplay {primary} {secondary} /></div>
 </main>
 
 <style>
@@ -114,6 +147,7 @@
 		width: 100vw;
 		height: 100vh;
 		overflow: hidden;
+		background: transparent;
 	}
 
 	.newspaper-scroll {
@@ -147,8 +181,15 @@
 	.newspaper-entry-motion {
 		position: absolute;
 		inset: 0;
-		animation: newspaper-enter 420ms cubic-bezier(0.22, 0.8, 0.2, 1) both;
 		will-change: transform;
+	}
+
+	.newspaper-entry-motion.entering {
+		animation: newspaper-enter 420ms cubic-bezier(0.22, 0.8, 0.2, 1) both;
+	}
+
+	.newspaper-entry-motion.leaving {
+		animation: newspaper-leave 420ms cubic-bezier(0.22, 0.8, 0.2, 1) both;
 	}
 
 	.newspaper-rotator {
@@ -169,9 +210,20 @@
 		}
 	}
 
+	@keyframes newspaper-leave {
+		from {
+			transform: translate3d(0, 0, 0);
+		}
+
+		to {
+			transform: translate3d(-50vw, -50vh, 0);
+		}
+	}
+
 	@media (prefers-reduced-motion: reduce) {
-		.newspaper-entry-motion {
-			animation: none;
+		.newspaper-entry-motion.entering,
+		.newspaper-entry-motion.leaving {
+			animation-duration: 1ms;
 		}
 	}
 
