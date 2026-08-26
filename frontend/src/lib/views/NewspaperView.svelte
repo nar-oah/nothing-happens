@@ -26,21 +26,32 @@
 	let { year, month, metrics, events, comment, onCommentClick }: Props = $props();
 	let viewportWidth = $state(1512);
 	let viewportHeight = $state(982);
+	let scrollPosition = $state(0);
 	let scrollElement: HTMLDivElement;
 
 	const pageCount = $derived(4 + events.length);
 	const baseHeight = $derived(pageCount * VERTICAL_FOLD_WIDTH);
 	const scale = $derived(viewportWidth / VERTICAL_FOLD_HEIGHT);
 	const scaledHeight = $derived(baseHeight * scale);
-	const rotatedWidth = $derived(viewportWidth * ROTATION_COS + scaledHeight * ROTATION_SIN);
-	const rotatedHeight = $derived(viewportWidth * ROTATION_SIN + scaledHeight * ROTATION_COS);
+	const viewportAxisSpan = $derived(
+		viewportHeight * ROTATION_COS + viewportWidth * ROTATION_SIN
+	);
+	const maxScroll = $derived(Math.max(0, scaledHeight - viewportAxisSpan));
+	const newspaperAxisOffset = $derived(maxScroll / 2 - scrollPosition);
+
+	function syncScrollPosition() {
+		if (!scrollElement) return;
+		scrollPosition = scrollElement.scrollTop;
+	}
 
 	$effect(() => {
 		const element = scrollElement;
-		const target = Math.max(0, (rotatedHeight - viewportHeight) / 2);
+		const target = maxScroll / 2;
 		if (!element) return;
 		void tick().then(() => {
-			if (scrollElement === element) element.scrollTop = target;
+			if (scrollElement !== element) return;
+			element.scrollTop = target;
+			scrollPosition = target;
 		});
 	});
 </script>
@@ -52,24 +63,35 @@
 	bind:clientHeight={viewportHeight}
 	data-block-world-input
 >
-	<div class="newspaper-scroll" bind:this={scrollElement} aria-label="报纸内容">
+	<div
+		class="newspaper-scroll"
+		bind:this={scrollElement}
+		aria-label="报纸内容"
+		onscroll={syncScrollPosition}
+	>
 		<div
-			class="newspaper-stage"
-			style:width={`${rotatedWidth}px`}
-			style:height={`${rotatedHeight}px`}
+			class="newspaper-scroll-space"
+			style:height={`${viewportHeight + maxScroll}px`}
 		>
-			<div
-				class="newspaper-rotator"
-				style:width={`${viewportWidth}px`}
-				style:height={`${scaledHeight}px`}
-			>
+			<div class="newspaper-viewport">
 				<div
-					class="newspaper-scaler"
-					style:width={`${VERTICAL_FOLD_HEIGHT}px`}
-					style:height={`${baseHeight}px`}
-					style:transform={`scale(${scale})`}
+					class="newspaper-rotator"
+					style:width={`${viewportWidth}px`}
+					style:height={`${scaledHeight}px`}
 				>
-					<Newspaper {year} {month} {metrics} {events} {comment} {onCommentClick} />
+					<div
+						class="newspaper-axis-track"
+						style:transform={`translateY(${newspaperAxisOffset}px)`}
+					>
+						<div
+							class="newspaper-scaler"
+							style:width={`${VERTICAL_FOLD_HEIGHT}px`}
+							style:height={`${baseHeight}px`}
+							style:transform={`scale(${scale})`}
+						>
+							<Newspaper {year} {month} {metrics} {events} {comment} {onCommentClick} />
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -105,16 +127,25 @@
 		overflow-y: auto;
 		overscroll-behavior: contain;
 		scrollbar-width: none;
+		touch-action: pan-y;
 	}
 
 	.newspaper-scroll::-webkit-scrollbar {
 		display: none;
 	}
 
-	.newspaper-stage {
+	.newspaper-scroll-space {
 		position: relative;
-		left: 50%;
-		transform: translateX(-50%);
+		width: 100%;
+		min-height: 100%;
+	}
+
+	.newspaper-viewport {
+		position: sticky;
+		top: 0;
+		width: 100%;
+		height: 100vh;
+		overflow: visible;
 	}
 
 	.newspaper-rotator {
@@ -123,6 +154,12 @@
 		left: 50%;
 		transform: translate(-50%, -50%) rotate(-20deg);
 		transform-origin: center;
+	}
+
+	.newspaper-axis-track {
+		width: 100%;
+		height: 100%;
+		will-change: transform;
 	}
 
 	.newspaper-scaler {
