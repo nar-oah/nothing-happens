@@ -5,7 +5,7 @@
 	import type { BillLeftItem, LeftItem, LeftMode } from '$lib/components/left/types';
 	import { MemorialBillEditor } from '$lib/components/memorial';
 	import type { MemorialMetricData } from '$lib/components/memorial/types';
-	import Newspaper from '$lib/components/newspaper/Newspaper.svelte';
+	import NewspaperEntry from '$lib/components/newspaper/NewspaperEntry.svelte';
 	import GameStateDisplay from '$lib/components/state/GameStateDisplay.svelte';
 	import Top from '$lib/components/top/Top.svelte';
 	import { reconcileSavedBill, type Bill, type PolicyDefinition, type Proposal } from '$lib/game';
@@ -123,7 +123,7 @@
 		{selection}
 		onItemSelect={selectLeft}
 	/>
-	<Newspaper {term} {year} {month} onOpen={onNewspaperOpen} />
+	<NewspaperEntry {term} {year} {month} onOpen={onNewspaperOpen} />
 	<div class="top-slot">
 		<Top {raceItems} {interestGroupItems} />
 	</div>
