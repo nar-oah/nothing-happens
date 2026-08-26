@@ -1,6 +1,5 @@
 export { default as Newspaper } from './Newspaper.svelte';
 export { default as NewspaperEntry } from './NewspaperEntry.svelte';
-export { default as NewspaperFold } from './NewspaperFold.svelte';
 export { default as NewspaperTop } from './Top.svelte';
 export { default as NewspaperMetric } from './Metric.svelte';
 export { default as NewspaperFront } from './Front.svelte';

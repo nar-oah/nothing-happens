@@ -1,13 +1,16 @@
 <script lang="ts">
-	import { VERTICAL_FOLD_HEIGHT } from '../memorial/constants';
+	import { VERTICAL_FOLD_HEIGHT, VERTICAL_FOLD_WIDTH } from '../memorial/constants';
+	import MemorialHorizontalFold from '../memorial/horizontal/MemorialHorizontalFold.svelte';
 	import Calendar from './Calendar.svelte';
 	import Comment from './Comment.svelte';
 	import Event from './Event.svelte';
 	import Front from './Front.svelte';
-	import NewspaperFold from './NewspaperFold.svelte';
 	import PublicMetrics from './PublicMetrics.svelte';
 	import Top from './Top.svelte';
 	import type { NewspaperCommentData, NewspaperEventData, NewspaperMetricData } from './types';
+
+	const NEWSPAPER_FOLD_WIDTH = VERTICAL_FOLD_HEIGHT;
+	const NEWSPAPER_FOLD_HEIGHT = VERTICAL_FOLD_WIDTH;
 
 	type NewspaperPage =
 		| { kind: 'top' }
@@ -37,15 +40,45 @@
 		result.push({ kind: 'calendar' }, { kind: 'comment' });
 		return result;
 	});
+	const skews = $derived(createFoldSkews(pages.length));
+
+	function createFoldSkews(count: number): number[] {
+		const MAX_FOLD_SKEW = 4.5;
+		const MIN_FOLD_SKEW = 2.5;
+		if (count <= 0) return [];
+		if (count === 1) return [0];
+		return Array.from({ length: count }, (_, index) => {
+			const progress = index / (count - 1);
+			const magnitude = MAX_FOLD_SKEW - (MAX_FOLD_SKEW - MIN_FOLD_SKEW) * progress;
+			const direction = index % 2 === 0 ? 1 : -1;
+			return magnitude * direction;
+		});
+	}
+
+	function getFoldX(index: number): number {
+		return skews.slice(0, index).reduce(
+			(x, skew) => x + NEWSPAPER_FOLD_HEIGHT * Math.tan((skew * Math.PI) / 180),
+			0
+		);
+	}
 </script>
 
 <article
-	class="flex w-$width flex-col items-start overflow-hidden"
-	style:--width={`${VERTICAL_FOLD_HEIGHT}px`}
+	class="newspaper relative h-$height w-$width overflow-visible text-ink-primary"
+	style:--width={`${NEWSPAPER_FOLD_WIDTH}px`}
+	style:--height={`${pages.length * NEWSPAPER_FOLD_HEIGHT}px`}
 	aria-label={`第 ${year} 年 ${month} 月弦外报`}
 >
 	{#each pages as page, index (index)}
-		<NewspaperFold {index}>
+		<MemorialHorizontalFold
+			x={getFoldX(index)}
+			open
+			{index}
+			count={pages.length}
+			skew={skews[index]}
+			width={NEWSPAPER_FOLD_WIDTH}
+			height={NEWSPAPER_FOLD_HEIGHT}
+		>
 			{#if page.kind === 'top'}
 				<Top {year} {month} />
 			{:else if page.kind === 'metrics'}
@@ -63,6 +96,17 @@
 					<Comment {...comment} />
 				{/if}
 			{/if}
-		</NewspaperFold>
+		</MemorialHorizontalFold>
 	{/each}
 </article>
+
+<style>
+	.newspaper,
+	.newspaper :global(*) {
+		box-sizing: border-box;
+	}
+
+	.newspaper :global(p) {
+		margin: 0;
+	}
+</style>

@@ -8,18 +8,29 @@
 		index: number;
 		count: number;
 		skew: number;
+		width?: number;
+		height?: number;
 		children: Snippet;
 	};
 
-	let { x, open, index, count, skew, children }: Props = $props();
+	let {
+		x,
+		open,
+		index,
+		count,
+		skew,
+		width = HORIZONTAL_FOLD_WIDTH,
+		height = HORIZONTAL_FOLD_HEIGHT,
+		children
+	}: Props = $props();
 </script>
 
 <div
 	class="memorial-fold-position absolute left-0 top-0 h-$height w-$width will-change-transform"
 	aria-hidden={!open && index !== 0}
-	style:--width={`${HORIZONTAL_FOLD_WIDTH}px`}
-	style:--height={`${HORIZONTAL_FOLD_HEIGHT}px`}
-	style:transform={`translate3d(${open ? x : 0}px, ${open ? index * HORIZONTAL_FOLD_HEIGHT : 0}px, 0)`}
+	style:--width={`${width}px`}
+	style:--height={`${height}px`}
+	style:transform={`translate3d(${open ? x : 0}px, ${open ? index * height : 0}px, 0)`}
 	style:z-index={count - index}
 	style:transition-delay={`${open ? (count - index - 1) * 24 : index * 32}ms`}
 >
