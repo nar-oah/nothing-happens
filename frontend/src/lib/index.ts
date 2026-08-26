@@ -3,7 +3,6 @@ export { default as ContextDetail } from './components/detail/ContextDetail.svel
 export { default as Left } from './components/left/Left.svelte';
 export { default as Newspaper } from './components/newspaper/Newspaper.svelte';
 export { default as NewspaperEntry } from './components/newspaper/NewspaperEntry.svelte';
-export { default as NewspaperFold } from './components/newspaper/NewspaperFold.svelte';
 export { default as NewspaperTop } from './components/newspaper/Top.svelte';
 export { default as NewspaperMetric } from './components/newspaper/Metric.svelte';
 export { default as NewspaperFront } from './components/newspaper/Front.svelte';

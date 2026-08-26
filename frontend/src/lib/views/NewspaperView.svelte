@@ -69,10 +69,6 @@
 		motionPhase = 'leaving';
 	}
 
-	function blockClose(event: MouseEvent) {
-		event.stopPropagation();
-	}
-
 	$effect(() => {
 		const element = scrollElement;
 		const target = totalScrollRange / 2;
@@ -92,7 +88,6 @@
 	bind:clientWidth={viewportWidth}
 	bind:clientHeight={viewportHeight}
 	data-block-world-input
-	onclick={requestClose}
 >
 	<div
 		class="newspaper-scroll"
@@ -102,6 +97,7 @@
 	>
 		<div class="newspaper-scroll-space" style:height={`${viewportHeight + totalScrollRange}px`}>
 			<div class="newspaper-viewport">
+				<button class="newspaper-close-layer" type="button" aria-label="关闭报纸" onclick={requestClose}></button>
 				<div
 					class="newspaper-entry-motion"
 					class:entering={motionPhase === 'entering'}
@@ -122,7 +118,6 @@
 								style:width={`${VERTICAL_FOLD_HEIGHT}px`}
 								style:height={`${baseHeight}px`}
 								style:transform={`scale(${scale})`}
-								onclick={blockClose}
 							>
 								<Newspaper {year} {month} {metrics} {events} {comment} {onCommentClick} />
 							</div>
@@ -135,10 +130,10 @@
 
 	<div class="top-controls">
 		<div class="top-items" aria-hidden="true"></div>
-		<div onclick={blockClose}><ChoreSwitch left="保存" right="读取" /></div>
+		<ChoreSwitch left="保存" right="读取" />
 	</div>
 
-	<div class="state-slot" onclick={blockClose}><GameStateDisplay {primary} {secondary} /></div>
+	<div class="state-slot"><GameStateDisplay {primary} {secondary} /></div>
 </main>
 
 <style>
@@ -177,9 +172,20 @@
 		overflow: visible;
 	}
 
+	.newspaper-close-layer {
+		position: absolute;
+		inset: 0;
+		z-index: 0;
+		border: 0;
+		background: transparent;
+		padding: 0;
+	}
+
 	.newspaper-entry-motion {
 		position: absolute;
 		inset: 0;
+		z-index: 1;
+		pointer-events: none;
 		will-change: transform;
 	}
 
@@ -233,6 +239,7 @@
 	}
 
 	.newspaper-scaler {
+		pointer-events: auto;
 		transform-origin: top left;
 	}
 
@@ -258,5 +265,6 @@
 		position: absolute;
 		top: 72px;
 		right: 0;
+		z-index: 20;
 	}
 </style>
