@@ -36,8 +36,10 @@
 	const scale = $derived(viewportWidth / VERTICAL_FOLD_HEIGHT);
 	const scaledHeight = $derived(baseHeight * scale);
 	const viewportAxisSpan = $derived(viewportHeight * ROTATION_COS + viewportWidth * ROTATION_SIN);
-	const maxScroll = $derived(Math.max(0, scaledHeight - viewportAxisSpan));
-	const newspaperAxisOffset = $derived(maxScroll / 2 - scrollPosition);
+	const contentScrollRange = $derived(Math.max(0, scaledHeight - viewportAxisSpan));
+	const edgeScrollPadding = $derived(VERTICAL_FOLD_WIDTH * scale);
+	const totalScrollRange = $derived(contentScrollRange + edgeScrollPadding * 2);
+	const newspaperAxisOffset = $derived(totalScrollRange / 2 - scrollPosition);
 	const primary: StateItem = { text: '设置', isRow: false };
 	const secondary: StateItem = { text: '退出', isRow: false };
 
@@ -48,7 +50,7 @@
 
 	$effect(() => {
 		const element = scrollElement;
-		const target = maxScroll / 2;
+		const target = totalScrollRange / 2;
 		if (!element) return;
 		void tick().then(() => {
 			if (scrollElement !== element) return;
@@ -71,7 +73,7 @@
 		aria-label="报纸内容"
 		onscroll={syncScrollPosition}
 	>
-		<div class="newspaper-scroll-space" style:height={`${viewportHeight + maxScroll}px`}>
+		<div class="newspaper-scroll-space" style:height={`${viewportHeight + totalScrollRange}px`}>
 			<div class="newspaper-viewport">
 				<div
 					class="newspaper-rotator"
