@@ -60,6 +60,7 @@
 		}
 	};
 	let activeView = $state<ViewName>('Office');
+	let viewBeforeNewspaper = $state<Exclude<ViewName, 'Newspaper'>>('Office');
 	let stateVersion = $state(0);
 	let proposalHand = $state<ProposalLeftItem[]>(mockProposalItems.slice(1));
 	let draftProposalItems = $state<ProposalLeftItem[]>([initialDraftProposal]);
@@ -81,6 +82,20 @@
 		year: 3,
 		month: 7
 	});
+
+	function openNewspaper() {
+		if (activeView !== 'Newspaper') viewBeforeNewspaper = activeView;
+		activeView = 'Newspaper';
+	}
+
+	function closeNewspaper() {
+		activeView = viewBeforeNewspaper;
+	}
+
+	function selectView(view: ViewName) {
+		if (view === 'Newspaper') return openNewspaper();
+		activeView = view;
+	}
 
 	function addProposal(handIndex: number) {
 		const item = proposalHand.find((current) => current.ref.index === handIndex);
@@ -148,13 +163,13 @@
 	{#if activeView === 'Office'}
 		<OfficeView
 			{...frame}
-			onNewspaperOpen={() => (activeView = 'Newspaper')}
+			onNewspaperOpen={openNewspaper}
 			onSynthesisConfirm={(result) => console.info('Office synthesis', result)}
 		/>
 	{:else if activeView === 'Dialogue'}
 		<DialogueView
 			{...frame}
-			onNewspaperOpen={() => (activeView = 'Newspaper')}
+			onNewspaperOpen={openNewspaper}
 			dialogue={{
 				handIndex: 0,
 				groupName: '造身公所',
@@ -167,7 +182,7 @@
 	{:else if activeView === 'Parliament'}
 		<ParliamentView
 			{...frame}
-			onNewspaperOpen={() => (activeView = 'Newspaper')}
+			onNewspaperOpen={openNewspaper}
 			{stateVersion}
 			{draft}
 			proposalHand={proposalHand.map((item) => item.proposal)}
@@ -184,7 +199,7 @@
 			onSubmit={() => console.info('Submit bill', draft)}
 		/>
 	{:else if activeView === 'Newspaper'}
-		<NewspaperView {...mockNewspaper} />
+		<NewspaperView {...mockNewspaper} onClose={closeNewspaper} />
 	{:else}
 		<ConstitutionView
 			raceItems={mockRaceTopItems}
@@ -197,7 +212,7 @@
 
 	<nav class="view-selector" aria-label="开发界面切换">
 		{#each views as view (view)}
-			<button type="button" class:active={activeView === view} onclick={() => (activeView = view)}>
+			<button type="button" class:active={activeView === view} onclick={() => selectView(view)}>
 				{view}
 			</button>
 		{/each}

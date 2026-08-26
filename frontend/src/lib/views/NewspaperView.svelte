@@ -112,7 +112,6 @@
 						class="newspaper-rotator"
 						style:width={`${viewportWidth}px`}
 						style:height={`${scaledHeight}px`}
-						onclick={blockClose}
 					>
 						<div
 							class="newspaper-axis-track"
@@ -123,6 +122,7 @@
 								style:width={`${VERTICAL_FOLD_HEIGHT}px`}
 								style:height={`${baseHeight}px`}
 								style:transform={`scale(${scale})`}
+								onclick={blockClose}
 							>
 								<Newspaper {year} {month} {metrics} {events} {comment} {onCommentClick} />
 							</div>
@@ -147,7 +147,6 @@
 		width: 100vw;
 		height: 100vh;
 		overflow: hidden;
-		background: transparent;
 	}
 
 	.newspaper-scroll {
