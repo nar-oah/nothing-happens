@@ -123,6 +123,8 @@ func _dispatch(message: Dictionary, messages: Array[Dictionary]) -> void:
 			_handle_input_regions(message, messages)
 		"ui.mode.set":
 			_handle_mode_set(message, messages)
+		"ui.newspaper.close":
+			_handle_newspaper_close(message, messages)
 		"draft.proposal.add":
 			_handle_draft_proposal_add(message, messages)
 		"draft.proposal.remove":
@@ -183,6 +185,12 @@ func _handle_mode_set(message: Dictionary, messages: Array[Dictionary]) -> void:
 		messages.append(_full_state(message["request_id"]))
 		return
 	set_ui_mode(mode, false)
+	messages.append(_full_state(message["request_id"]))
+
+
+func _handle_newspaper_close(message: Dictionary, messages: Array[Dictionary]) -> void:
+	_refresh_dialogue_mode()
+	set_ui_mode(ui_mode, false)
 	messages.append(_full_state(message["request_id"]))
 
 

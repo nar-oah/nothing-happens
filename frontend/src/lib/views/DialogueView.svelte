@@ -3,7 +3,7 @@
 	import Dialog from '$lib/components/dialog/Dialog.svelte';
 	import TopDialog from '$lib/components/dialog/TopDialog.svelte';
 	import Left from '$lib/components/left/Left.svelte';
-	import Newspaper from '$lib/components/newspaper/Newspaper.svelte';
+	import NewspaperEntry from '$lib/components/newspaper/NewspaperEntry.svelte';
 	import type { DialoguePresentation, ViewFrameProps } from './types';
 
 	type Props = ViewFrameProps & {
@@ -29,7 +29,7 @@
 
 <main class="game-view" aria-label="对话界面">
 	<Left scene="dialogue" {items} {baseline} />
-	<Newspaper {term} {year} {month} onOpen={onNewspaperOpen} />
+	<NewspaperEntry {term} {year} {month} onOpen={onNewspaperOpen} />
 
 	<div class="top-dialog">
 		<TopDialog text={`${dialogue.groupName}代表来访。`} />

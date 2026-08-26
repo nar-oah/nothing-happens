@@ -2,10 +2,12 @@
 	import { resolve } from '$app/paths';
 	import { restoreProposalToHand, sortProposalItemsByTime } from '$lib/components/left/left';
 	import type { LeftItem, ProposalLeftItem } from '$lib/components/left/types';
-	import type { Bill } from '$lib/game';
+	import { NewspaperEventState, NewspaperRace } from '$lib/components/newspaper/types';
+	import { Metric, type Bill } from '$lib/game';
 	import ConstitutionView from '$lib/views/ConstitutionView.svelte';
 	import DialogueView from '$lib/views/DialogueView.svelte';
 	import OfficeView from '$lib/views/OfficeView.svelte';
+	import NewspaperView from '$lib/views/NewspaperView.svelte';
 	import ParliamentView from '$lib/views/ParliamentView.svelte';
 	import {
 		getMockBillPreview,
@@ -21,9 +23,43 @@
 		mockState
 	} from './mock';
 
-	type ViewName = 'Office' | 'Dialogue' | 'Parliament' | 'Constitution';
-	const views: ViewName[] = ['Office', 'Dialogue', 'Parliament', 'Constitution'];
+	type ViewName = 'Office' | 'Dialogue' | 'Parliament' | 'Newspaper' | 'Constitution';
+	const views: ViewName[] = ['Office', 'Dialogue', 'Parliament', 'Newspaper', 'Constitution'];
 	const initialDraftProposal = mockProposalItems[0];
+	const mockNewspaper = {
+		year: 3,
+		month: 7,
+		metrics: [
+			{ metric: Metric.TAX, value: 62, change: 2 },
+			{ metric: Metric.PRICE, value: 71, change: -1 },
+			{ metric: Metric.WAGE, value: 48, change: 3 },
+			{ metric: Metric.EMPLOYMENT, value: 55, change: 0 },
+			{ metric: Metric.TRADE, value: 83, change: -4 }
+		],
+		events: [
+			{
+				race: NewspaperRace.NANKE,
+				metric: Metric.WAGE,
+				value: 52,
+				countdown: 3,
+				strength: 100,
+				state: NewspaperEventState.DETERIORATION
+			},
+			{
+				race: NewspaperRace.BIYI,
+				metric: Metric.PRICE,
+				value: 60,
+				countdown: 7,
+				strength: 72,
+				state: NewspaperEventState.POSTPONED
+			}
+		],
+		comment: {
+			title: '危机，还是事件？',
+			comment: '我们是在解决问题，\n还是在证明危机存在？'
+		}
+	};
+	const MOCK_NEWSPAPER_CLOSE_TARGET: Exclude<ViewName, 'Newspaper'> = 'Constitution';
 	let activeView = $state<ViewName>('Office');
 	let stateVersion = $state(0);
 	let proposalHand = $state<ProposalLeftItem[]>(mockProposalItems.slice(1));
@@ -46,6 +82,20 @@
 		year: 3,
 		month: 7
 	});
+
+	function openNewspaper() {
+		activeView = 'Newspaper';
+	}
+
+	function closeNewspaper() {
+		console.info('Mock Godot resolved Newspaper close to', MOCK_NEWSPAPER_CLOSE_TARGET);
+		activeView = MOCK_NEWSPAPER_CLOSE_TARGET;
+	}
+
+	function selectView(view: ViewName) {
+		if (view === 'Newspaper') return openNewspaper();
+		activeView = view;
+	}
 
 	function addProposal(handIndex: number) {
 		const item = proposalHand.find((current) => current.ref.index === handIndex);
@@ -113,11 +163,13 @@
 	{#if activeView === 'Office'}
 		<OfficeView
 			{...frame}
+			onNewspaperOpen={openNewspaper}
 			onSynthesisConfirm={(result) => console.info('Office synthesis', result)}
 		/>
 	{:else if activeView === 'Dialogue'}
 		<DialogueView
 			{...frame}
+			onNewspaperOpen={openNewspaper}
 			dialogue={{
 				handIndex: 0,
 				groupName: '造身公所',
@@ -130,6 +182,7 @@
 	{:else if activeView === 'Parliament'}
 		<ParliamentView
 			{...frame}
+			onNewspaperOpen={openNewspaper}
 			{stateVersion}
 			{draft}
 			proposalHand={proposalHand.map((item) => item.proposal)}
@@ -145,6 +198,8 @@
 			onEditSavedBill={editSavedBill}
 			onSubmit={() => console.info('Submit bill', draft)}
 		/>
+	{:else if activeView === 'Newspaper'}
+		<NewspaperView {...mockNewspaper} onClose={closeNewspaper} />
 	{:else}
 		<ConstitutionView
 			raceItems={mockRaceTopItems}
@@ -157,7 +212,7 @@
 
 	<nav class="view-selector" aria-label="开发界面切换">
 		{#each views as view (view)}
-			<button type="button" class:active={activeView === view} onclick={() => (activeView = view)}>
+			<button type="button" class:active={activeView === view} onclick={() => selectView(view)}>
 				{view}
 			</button>
 		{/each}

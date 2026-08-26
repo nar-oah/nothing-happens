@@ -26,6 +26,7 @@ export type OutboundPayloads = {
 	'ui.ready': Record<string, never>;
 	'ui.input_regions': { regions: NormalizedRect[] };
 	'ui.mode.set': { state_version: number; mode: UiMode };
+	'ui.newspaper.close': Record<string, never>;
 	'draft.proposal.add': { state_version: number; hand_index: number };
 	'draft.proposal.remove': { state_version: number; draft_index: number };
 	'draft.policy.add': { state_version: number; display_name: string };
@@ -50,7 +51,10 @@ export type OutboundPayloads = {
 };
 
 export type OutboundType = keyof OutboundPayloads;
-export type GameplayCommandType = Exclude<OutboundType, 'ui.ready' | 'ui.input_regions'>;
+export type GameplayCommandType = Exclude<
+	OutboundType,
+	'ui.ready' | 'ui.input_regions' | 'ui.newspaper.close'
+>;
 
 export type OutboundMessage<T extends OutboundType = OutboundType> = T extends OutboundType
 	? {

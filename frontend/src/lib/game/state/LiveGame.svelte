@@ -11,6 +11,7 @@
 	import ConstitutionView from '$lib/views/ConstitutionView.svelte';
 	import DialogueView from '$lib/views/DialogueView.svelte';
 	import OfficeView from '$lib/views/OfficeView.svelte';
+	import NewspaperView from '$lib/views/NewspaperView.svelte';
 	import ParliamentView from '$lib/views/ParliamentView.svelte';
 	import {
 		deriveConstitutionMemorial,
@@ -29,6 +30,7 @@
 	let client: CefIpcClient | null = null;
 	let mutationQueue = Promise.resolve();
 	let selectedConstitutionArticle = $state<number>();
+	let newspaperOpen = $state(false);
 	const unsubscribe = gameStore.subscribe((value) => (storeValue = value));
 	let snapshot = $derived(storeValue.snapshot);
 	let leftItems = $derived(snapshot ? deriveLeftItems(snapshot) : []);
@@ -91,6 +93,21 @@
 			.catch((error: unknown) => console.error('Godot command failed', error));
 	}
 
+	async function closeNewspaper(): Promise<void> {
+		const requestClient = client;
+		if (!requestClient) {
+			newspaperOpen = false;
+			return;
+		}
+		try {
+			await requestClient.request('ui.newspaper.close', {});
+		} catch (error: unknown) {
+			console.error('Newspaper close sync failed', error);
+		} finally {
+			newspaperOpen = false;
+		}
+	}
+
 	function mergeProposals(confirmation: SynthesisConfirmation): void {
 		mutate('proposal.merge', {
 			hand_indices: confirmation.refs.map((ref) => ref.index),
@@ -108,9 +125,19 @@
 <svelte:head><title>Nothing Happens</title></svelte:head>
 
 {#if snapshot && frame}
-	{#if snapshot.ui_mode === 'dialogue' && pendingDialogue}
+	{#if newspaperOpen}
+		<NewspaperView
+			year={snapshot.year}
+			month={snapshot.month}
+			metrics={[]}
+			events={[]}
+			comment={{ title: '', comment: '' }}
+			onClose={closeNewspaper}
+		/>
+	{:else if snapshot.ui_mode === 'dialogue' && pendingDialogue}
 		<DialogueView
 			{...frame}
+			onNewspaperOpen={() => (newspaperOpen = true)}
 			dialogue={{
 				handIndex: pendingDialogue.hand_index,
 				groupName: snapshot.pending_dialogue!.proposal.source_group.display_name,
@@ -126,6 +153,7 @@
 	{:else if snapshot.ui_mode === 'parliament'}
 		<ParliamentView
 			{...frame}
+			onNewspaperOpen={() => (newspaperOpen = true)}
 			stateVersion={snapshot.state_version}
 			draft={snapshot.draft_bill}
 			proposalHand={snapshot.proposal_hand}
@@ -153,6 +181,10 @@
 			onArticleSelectionChange={selectConstitutionArticle}
 		/>
 	{:else}
-		<OfficeView {...frame} onSynthesisConfirm={mergeProposals} />
+		<OfficeView
+			{...frame}
+			onNewspaperOpen={() => (newspaperOpen = true)}
+			onSynthesisConfirm={mergeProposals}
+		/>
 	{/if}
 {/if}
