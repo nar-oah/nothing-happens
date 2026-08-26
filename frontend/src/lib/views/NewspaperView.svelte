@@ -3,6 +3,8 @@
 	import ChoreSwitch from '$lib/components/chore/ChoreSwitch.svelte';
 	import { VERTICAL_FOLD_HEIGHT, VERTICAL_FOLD_WIDTH } from '$lib/components/memorial/constants';
 	import Newspaper from '$lib/components/newspaper/Newspaper.svelte';
+	import GameStateDisplay from '$lib/components/state/GameStateDisplay.svelte';
+	import type { StateItem } from '$lib/components/state/GameStateDisplay.svelte';
 	import type {
 		NewspaperCommentData,
 		NewspaperEventData,
@@ -33,11 +35,11 @@
 	const baseHeight = $derived(pageCount * VERTICAL_FOLD_WIDTH);
 	const scale = $derived(viewportWidth / VERTICAL_FOLD_HEIGHT);
 	const scaledHeight = $derived(baseHeight * scale);
-	const viewportAxisSpan = $derived(
-		viewportHeight * ROTATION_COS + viewportWidth * ROTATION_SIN
-	);
+	const viewportAxisSpan = $derived(viewportHeight * ROTATION_COS + viewportWidth * ROTATION_SIN);
 	const maxScroll = $derived(Math.max(0, scaledHeight - viewportAxisSpan));
 	const newspaperAxisOffset = $derived(maxScroll / 2 - scrollPosition);
+	const primary: StateItem = { text: '设置', isRow: false };
+	const secondary: StateItem = { text: '退出', isRow: false };
 
 	function syncScrollPosition() {
 		if (!scrollElement) return;
@@ -69,10 +71,7 @@
 		aria-label="报纸内容"
 		onscroll={syncScrollPosition}
 	>
-		<div
-			class="newspaper-scroll-space"
-			style:height={`${viewportHeight + maxScroll}px`}
-		>
+		<div class="newspaper-scroll-space" style:height={`${viewportHeight + maxScroll}px`}>
 			<div class="newspaper-viewport">
 				<div
 					class="newspaper-rotator"
@@ -102,14 +101,7 @@
 		<ChoreSwitch left="保存" right="读取" />
 	</div>
 
-	<div class="state-controls">
-		<button class="state-button" type="button" aria-label="设置" data-block-world-input>
-			<span class="typo-control-heading state-label bg-shadow-deep text-surface-amber">设置</span>
-		</button>
-		<button class="state-button" type="button" aria-label="退出" data-block-world-input>
-			<span class="typo-control-heading state-label bg-shadow-deep text-surface-amber">退出</span>
-		</button>
-	</div>
+	<div class="state-slot"><GameStateDisplay {primary} {secondary} /></div>
 </main>
 
 <style>
@@ -184,44 +176,9 @@
 		pointer-events: none;
 	}
 
-	.state-controls {
+	.state-slot {
 		position: absolute;
 		top: 72px;
 		right: 0;
-		z-index: 20;
-		display: flex;
-		width: 52px;
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 20px;
-	}
-
-	.state-button {
-		display: flex;
-		width: 52px;
-		cursor: pointer;
-		isolation: isolate;
-		align-items: center;
-		justify-content: flex-end;
-		border: 0;
-		background: transparent;
-		padding: 0;
-	}
-
-	.state-accent {
-		z-index: 2;
-		width: 22px;
-		height: 45px;
-		margin-right: -10px;
-		flex: none;
-	}
-
-	.state-label {
-		z-index: 1;
-		width: 40px;
-		flex: none;
-		text-align: center;
-		white-space: normal;
-		word-break: break-word;
 	}
 </style>
