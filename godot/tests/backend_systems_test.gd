@@ -10,6 +10,7 @@ const AnnualFlowAndBalanceTests = preload("res://tests/backend/test_annual_flow_
 const CollapseTests = preload("res://tests/backend/test_collapse.gd")
 const SavedBillTests = preload("res://tests/backend/test_saved_bills.gd")
 const UiIntegrationTests = preload("res://tests/backend/test_ui_integration.gd")
+const TransitionFlowTests = preload("res://tests/backend/test_transition_flow.gd")
 
 
 func _init() -> void:
@@ -28,6 +29,7 @@ func _run() -> void:
 		CollapseTests.new(),
 		SavedBillTests.new(),
 		UiIntegrationTests.new(),
+		TransitionFlowTests.new(),
 	]
 	for suite in suites:
 		suite.run(t)
