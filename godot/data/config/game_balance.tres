@@ -5,6 +5,7 @@
 [resource]
 script = ExtResource("1_14gic")
 initial_metric_value = 100
+race_expectation_growth_per_year = 0.1
 automatic_draw_count = 3
 proposal_negative_magnitude_min = 8
 proposal_negative_magnitude_max = 12
