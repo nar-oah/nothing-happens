@@ -22,9 +22,7 @@
 		deriveTopItems
 	} from './selectors';
 	import { createGameStore, EMPTY_GAME_STORE, type GameStoreValue } from './store';
-
 	type MutationPayload<T extends GameplayCommandType> = Omit<OutboundPayloads[T], 'state_version'>;
-
 	const gameStore = createGameStore();
 	let storeValue = $state<GameStoreValue>(EMPTY_GAME_STORE);
 	let client: CefIpcClient | null = null;
@@ -59,7 +57,6 @@
 				}
 			: null
 	);
-
 	onMount(() => {
 		client = createCefIpcClient({
 			onMessage: gameStore.apply,
@@ -75,9 +72,7 @@
 			client = null;
 		};
 	});
-
 	onDestroy(unsubscribe);
-
 	function mutate<T extends GameplayCommandType>(type: T, payload: MutationPayload<T>): void {
 		const requestClient = client;
 		const requestStateVersion = storeValue.snapshot?.state_version;
@@ -92,7 +87,6 @@
 			})
 			.catch((error: unknown) => console.error('Godot command failed', error));
 	}
-
 	async function closeNewspaper(): Promise<void> {
 		const requestClient = client;
 		if (!requestClient) {
@@ -107,7 +101,6 @@
 			newspaperOpen = false;
 		}
 	}
-
 	function mergeProposals(confirmation: SynthesisConfirmation): void {
 		mutate('proposal.merge', {
 			hand_indices: confirmation.refs.map((ref) => ref.index),
@@ -115,7 +108,6 @@
 			selected_positive_index: confirmation.reverseSource?.ref.index ?? null
 		});
 	}
-
 	function selectConstitutionArticle(articleRef: number, selected: boolean): void {
 		if (selected) selectedConstitutionArticle = articleRef;
 		else if (selectedConstitutionArticle === articleRef) selectedConstitutionArticle = undefined;
@@ -123,7 +115,6 @@
 </script>
 
 <svelte:head><title>Nothing Happens</title></svelte:head>
-
 {#if snapshot && frame}
 	{#if newspaperOpen}
 		<NewspaperView
@@ -132,6 +123,7 @@
 			metrics={[]}
 			events={[]}
 			comment={{ title: '', comment: '' }}
+			onAdvance={() => mutate('month.advance', {})}
 			onClose={closeNewspaper}
 		/>
 	{:else if snapshot.ui_mode === 'dialogue' && pendingDialogue}
@@ -145,10 +137,7 @@
 				donationOffer: pendingDialogue.donation_label
 			}}
 			onResolveBonus={(handIndex, acceptTrait) =>
-				mutate('proposal.bonus.resolve', {
-					hand_index: handIndex,
-					accept_trait: acceptTrait
-				})}
+				mutate('proposal.bonus.resolve', { hand_index: handIndex, accept_trait: acceptTrait })}
 		/>
 	{:else if snapshot.ui_mode === 'parliament'}
 		<ParliamentView

@@ -12,7 +12,6 @@
 	} from '$lib/components/newspaper/types';
 
 	type NewspaperMotionPhase = 'entering' | 'active' | 'leaving';
-
 	type Props = {
 		year: number;
 		month: number;
@@ -20,22 +19,22 @@
 		events: NewspaperEventData[];
 		comment: NewspaperCommentData;
 		onCommentClick?: () => void;
+		onAdvance?: () => void;
 		onClose?: () => void;
 	};
-
 	const ROTATION_DEGREES = -20;
 	const ROTATION_RADIANS = (Math.abs(ROTATION_DEGREES) * Math.PI) / 180;
 	const ROTATION_SIN = Math.sin(ROTATION_RADIANS);
 	const ROTATION_COS = Math.cos(ROTATION_RADIANS);
 
-	let { year, month, metrics, events, comment, onCommentClick, onClose }: Props = $props();
+	let { year, month, metrics, events, comment, onCommentClick, onAdvance, onClose }: Props =
+		$props();
 	let viewportWidth = $state(1512);
 	let viewportHeight = $state(982);
 	let scrollPosition = $state(0);
 	let motionPhase = $state<NewspaperMotionPhase>('entering');
 	let backgroundCovered = $state(false);
 	let scrollElement: HTMLDivElement;
-
 	const pageCount = $derived(4 + events.length);
 	const baseHeight = $derived(pageCount * VERTICAL_FOLD_WIDTH);
 	const scale = $derived(viewportWidth / VERTICAL_FOLD_HEIGHT);
@@ -47,12 +46,9 @@
 	const newspaperAxisOffset = $derived(totalScrollRange / 2 - scrollPosition);
 	const primary: StateItem = { text: '设置', isRow: false };
 	const secondary: StateItem = { text: '退出', isRow: false };
-
 	function syncScrollPosition() {
-		if (!scrollElement) return;
-		scrollPosition = scrollElement.scrollTop;
+		if (scrollElement) scrollPosition = scrollElement.scrollTop;
 	}
-
 	function finishMotion(event: AnimationEvent) {
 		if (event.target !== event.currentTarget) return;
 		if (motionPhase === 'entering') {
@@ -62,13 +58,11 @@
 		}
 		if (motionPhase === 'leaving') onClose?.();
 	}
-
 	function requestClose() {
 		if (motionPhase !== 'active' || !onClose) return;
 		backgroundCovered = false;
 		motionPhase = 'leaving';
 	}
-
 	$effect(() => {
 		const element = scrollElement;
 		const target = totalScrollRange / 2;
@@ -97,7 +91,12 @@
 	>
 		<div class="newspaper-scroll-space" style:height={`${viewportHeight + totalScrollRange}px`}>
 			<div class="newspaper-viewport">
-				<button class="newspaper-close-layer" type="button" aria-label="关闭报纸" onclick={requestClose}></button>
+				<button
+					class="newspaper-close-layer"
+					type="button"
+					aria-label="关闭报纸"
+					onclick={requestClose}
+				></button>
 				<div
 					class="newspaper-entry-motion"
 					class:entering={motionPhase === 'entering'}
@@ -119,7 +118,15 @@
 								style:height={`${baseHeight}px`}
 								style:transform={`scale(${scale})`}
 							>
-								<Newspaper {year} {month} {metrics} {events} {comment} {onCommentClick} />
+								<Newspaper
+									{year}
+									{month}
+									{metrics}
+									{events}
+									{comment}
+									{onCommentClick}
+									{onAdvance}
+								/>
 							</div>
 						</div>
 					</div>
@@ -127,12 +134,10 @@
 			</div>
 		</div>
 	</div>
-
 	<div class="top-controls">
 		<div class="top-items" aria-hidden="true"></div>
 		<ChoreSwitch left="保存" right="读取" />
 	</div>
-
 	<div class="state-slot"><GameStateDisplay {primary} {secondary} /></div>
 </main>
 
@@ -143,7 +148,6 @@
 		height: 100vh;
 		overflow: hidden;
 	}
-
 	.newspaper-scroll {
 		position: absolute;
 		inset: 0;
@@ -153,17 +157,14 @@
 		scrollbar-width: none;
 		touch-action: pan-y;
 	}
-
 	.newspaper-scroll::-webkit-scrollbar {
 		display: none;
 	}
-
 	.newspaper-scroll-space {
 		position: relative;
 		width: 100%;
 		min-height: 100%;
 	}
-
 	.newspaper-viewport {
 		position: sticky;
 		top: 0;
@@ -171,7 +172,6 @@
 		height: 100vh;
 		overflow: visible;
 	}
-
 	.newspaper-close-layer {
 		position: absolute;
 		inset: 0;
@@ -180,7 +180,6 @@
 		background: transparent;
 		padding: 0;
 	}
-
 	.newspaper-entry-motion {
 		position: absolute;
 		inset: 0;
@@ -188,15 +187,12 @@
 		pointer-events: none;
 		will-change: transform;
 	}
-
 	.newspaper-entry-motion.entering {
 		animation: newspaper-enter 420ms cubic-bezier(0.22, 0.8, 0.2, 1) both;
 	}
-
 	.newspaper-entry-motion.leaving {
 		animation: newspaper-leave 420ms cubic-bezier(0.22, 0.8, 0.2, 1) both;
 	}
-
 	.newspaper-rotator {
 		position: absolute;
 		top: 50%;
@@ -204,45 +200,37 @@
 		transform: translate(-50%, -50%) rotate(-20deg);
 		transform-origin: center;
 	}
-
 	@keyframes newspaper-enter {
 		from {
 			transform: translate3d(-50vw, -50vh, 0);
 		}
-
 		to {
 			transform: translate3d(0, 0, 0);
 		}
 	}
-
 	@keyframes newspaper-leave {
 		from {
 			transform: translate3d(0, 0, 0);
 		}
-
 		to {
 			transform: translate3d(-50vw, -50vh, 0);
 		}
 	}
-
 	@media (prefers-reduced-motion: reduce) {
 		.newspaper-entry-motion.entering,
 		.newspaper-entry-motion.leaving {
 			animation-duration: 1ms;
 		}
 	}
-
 	.newspaper-axis-track {
 		width: 100%;
 		height: 100%;
 		will-change: transform;
 	}
-
 	.newspaper-scaler {
 		pointer-events: auto;
 		transform-origin: top left;
 	}
-
 	.top-controls {
 		position: absolute;
 		top: 0;
@@ -254,13 +242,11 @@
 		gap: 30px;
 		pointer-events: auto;
 	}
-
 	.top-items {
 		min-width: 0;
 		flex: 1;
 		pointer-events: none;
 	}
-
 	.state-slot {
 		position: absolute;
 		top: 72px;

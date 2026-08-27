@@ -11,7 +11,6 @@
 
 	const NEWSPAPER_FOLD_WIDTH = VERTICAL_FOLD_HEIGHT;
 	const NEWSPAPER_FOLD_HEIGHT = VERTICAL_FOLD_WIDTH;
-
 	type NewspaperPage =
 		| { kind: 'top' }
 		| { kind: 'metrics' }
@@ -19,7 +18,6 @@
 		| { kind: 'event'; event: NewspaperEventData }
 		| { kind: 'calendar' }
 		| { kind: 'comment' };
-
 	type Props = {
 		year: number;
 		month: number;
@@ -27,9 +25,10 @@
 		events: NewspaperEventData[];
 		comment: NewspaperCommentData;
 		onCommentClick?: () => void;
+		onAdvance?: () => void;
 	};
 
-	let { year, month, metrics, events, comment, onCommentClick }: Props = $props();
+	let { year, month, metrics, events, comment, onCommentClick, onAdvance }: Props = $props();
 	const sortedEvents = $derived([...events].sort((a, b) => a.countdown - b.countdown));
 	const pages = $derived.by((): NewspaperPage[] => {
 		const result: NewspaperPage[] = [{ kind: 'top' }, { kind: 'metrics' }];
@@ -50,16 +49,14 @@
 		return Array.from({ length: count }, (_, index) => {
 			const progress = index / (count - 1);
 			const magnitude = MAX_FOLD_SKEW - (MAX_FOLD_SKEW - MIN_FOLD_SKEW) * progress;
-			const direction = index % 2 === 0 ? 1 : -1;
-			return magnitude * direction;
+			return magnitude * (index % 2 === 0 ? 1 : -1);
 		});
 	}
 
 	function getFoldX(index: number): number {
-		return skews.slice(0, index).reduce(
-			(x, skew) => x + NEWSPAPER_FOLD_HEIGHT * Math.tan((skew * Math.PI) / 180),
-			0
-		);
+		return skews
+			.slice(0, index)
+			.reduce((x, skew) => x + NEWSPAPER_FOLD_HEIGHT * Math.tan((skew * Math.PI) / 180), 0);
 	}
 </script>
 
@@ -80,7 +77,7 @@
 			height={NEWSPAPER_FOLD_HEIGHT}
 		>
 			{#if page.kind === 'top'}
-				<Top {year} {month} />
+				<Top {year} {month} {onAdvance} />
 			{:else if page.kind === 'metrics'}
 				<PublicMetrics {metrics} />
 			{:else if page.kind === 'front'}
@@ -89,12 +86,15 @@
 				<Event {...page.event} />
 			{:else if page.kind === 'calendar'}
 				<Calendar {month} />
+			{:else if onCommentClick}
+				<button
+					class="h-full w-full border-0 bg-transparent p-0 text-left"
+					type="button"
+					onclick={onCommentClick}
+					aria-label="切换报纸评论"><Comment {...comment} /></button
+				>
 			{:else}
-				{#if onCommentClick}
-					<button class="h-full w-full border-0 bg-transparent p-0 text-left" type="button" onclick={onCommentClick} aria-label="切换报纸评论"><Comment {...comment} /></button>
-				{:else}
-					<Comment {...comment} />
-				{/if}
+				<Comment {...comment} />
 			{/if}
 		</MemorialHorizontalFold>
 	{/each}
@@ -105,7 +105,6 @@
 	.newspaper :global(*) {
 		box-sizing: border-box;
 	}
-
 	.newspaper :global(p) {
 		margin: 0;
 	}

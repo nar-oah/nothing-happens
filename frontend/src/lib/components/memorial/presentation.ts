@@ -26,10 +26,7 @@ const CONDITION_SYMBOLS: Record<MetricConditionOperator, string> = {
 export function proposalToMemorialContent(proposal: Proposal): MemorialProposalContentData {
 	return {
 		proposalTitle: proposal.source_group.display_name,
-		content: {
-			title: '指标',
-			body: formatVector(getProposalTotalEffect(proposal))
-		}
+		content: { title: '指标', body: formatVector(getProposalTotalEffect(proposal)) }
 	};
 }
 
@@ -38,7 +35,8 @@ export function proposalToHorizontalContents(proposal: Proposal): MemorialHorizo
 		{ title: proposal.source_group.display_name, body: '' },
 		{ title: '指标', body: formatVector(getProposalTotalEffect(proposal)) },
 		{
-			body: `\n\n如果你把该提案加入到法案中，${proposal.source_group.display_name}会很高兴。`
+			body: `如果你把该提案加入到法案中，${proposal.source_group.display_name}会很高兴。`,
+			redacted: true
 		}
 	];
 }
@@ -50,10 +48,7 @@ export function billToHorizontalContents(bill: Bill): MemorialHorizontalContentD
 			title: '提案',
 			body: bill.proposals.map((proposal) => proposal.source_group.display_name).join('\n')
 		},
-		{
-			title: '政策',
-			body: bill.policies.map((policy) => policy.display_name).join('\n')
-		}
+		{ title: '政策', body: bill.policies.map((policy) => policy.display_name).join('\n') }
 	];
 }
 
@@ -65,9 +60,7 @@ export function constitutionToHorizontalContents(
 			title: article.display_name,
 			body: article.content
 		})),
-		{
-			body: '\n\n这是为了保证蓬莱岛的运转，各族妥协出的结果，尽管真正满意的人很少。'
-		}
+		{ body: '这是为了保证蓬莱岛的运转，各族妥协出的结果，尽管真正满意的人很少。', redacted: true }
 	];
 }
 

@@ -24,6 +24,7 @@ export type MemorialMetricData = {
 export type MemorialHorizontalContentData = {
 	title?: string;
 	body: string;
+	redacted?: boolean;
 };
 
 export type MemorialProposalContentData = {

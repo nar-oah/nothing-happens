@@ -27,10 +27,8 @@ export function splitMemorialBodyIntoLines(body: string): string[] {
 			end += 1;
 		}
 
-		if (!forcedBreak && end < characters.length && isPunctuation(characters[end]) && end > start) {
+		if (!forcedBreak && end < characters.length && isPunctuation(characters[end]) && end > start)
 			end -= 1;
-		}
-
 		if (end === start && !forcedBreak) end += 1;
 		lines.push(characters.slice(start, end).join(''));
 		start = end + (forcedBreak ? 1 : 0);
@@ -45,17 +43,17 @@ export function paginateMemorialContents(
 	return contents.flatMap((content) => {
 		const lines = splitMemorialBodyIntoLines(content.body);
 		const firstPageLineCount = content.title ? TITLED_PAGE_BODY_LINES : UNTITLED_PAGE_BODY_LINES;
-
 		if (lines.length === 0) return [{ ...content }];
 
 		const pages: MemorialHorizontalContentData[] = [
 			{ ...content, body: lines.slice(0, firstPageLineCount).join('\n') }
 		];
-
 		for (let index = firstPageLineCount; index < lines.length; index += UNTITLED_PAGE_BODY_LINES) {
-			pages.push({ body: lines.slice(index, index + UNTITLED_PAGE_BODY_LINES).join('\n') });
+			pages.push({
+				body: lines.slice(index, index + UNTITLED_PAGE_BODY_LINES).join('\n'),
+				redacted: content.redacted
+			});
 		}
-
 		return pages;
 	});
 }
