@@ -173,7 +173,7 @@
 			dialogue={{
 				handIndex: 0,
 				groupName: '造身公所',
-				positiveEffect: '商貿+8',
+				positiveEffect: '商贸+8',
 				donationOffer: '政治献金+5'
 			}}
 			onResolveBonus={(_, acceptTrait) =>
@@ -199,12 +199,16 @@
 			onSubmit={() => console.info('Submit bill', draft)}
 		/>
 	{:else if activeView === 'Newspaper'}
-		<NewspaperView {...mockNewspaper} onClose={closeNewspaper} />
+		<NewspaperView {...mockNewspaper} onRequestClose={closeNewspaper} />
 	{:else}
 		<ConstitutionView
 			raceItems={mockRaceTopItems}
 			interestGroupItems={mockInterestGroupTopItems}
 			gameState={mockState}
+			term={frame.term}
+			year={frame.year}
+			month={frame.month}
+			onNewspaperOpen={openNewspaper}
 			title={mockConstitution.title}
 			constitution={mockConstitutionMemorial}
 		/>
