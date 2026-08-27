@@ -11,6 +11,9 @@ func setup(run_context: RunContext) -> void:
 func advance_month() -> void:
 	if context.state.run_failed or context.state.ending_id != &"":
 		return
+	if context.state.month == 0:
+		context.time_system.advance_month(context.state)
+		return
 	for definition in context.race_definitions:
 		var race_state := context.state.get_race(definition)
 		if race_state != null:
