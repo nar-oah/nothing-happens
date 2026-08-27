@@ -14,6 +14,8 @@ func is_met(context) -> bool:
 	var eligible_count := 0
 	var matching_count := 0
 	for seat in context.state.seats:
+		if seat.race is ZhushuiRaceDefinition:
+			continue
 		if race != null and interest_group == null:
 			eligible_count += 1
 			matching_count += 1 if seat.race == race else 0
