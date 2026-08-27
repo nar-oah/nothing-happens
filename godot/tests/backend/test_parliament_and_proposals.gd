@@ -74,7 +74,7 @@ func _test_proposal_gameplay_equivalence(t: BackendTestContext) -> void:
 	proposal.base_effect.tax = 8
 	proposal.positive_effect.wage = 5
 	proposal.lag_months = 4
-	proposal.collapse_impact = 2.0
+	proposal.collapse_impact = 2
 	proposal.donation_offer = 5.0
 	proposal.bonus_choice_resolved = true
 	proposal.positive_trait_accepted = true
@@ -105,7 +105,7 @@ func _test_proposal_gameplay_equivalence(t: BackendTestContext) -> void:
 	var ordinary := t.make_proposal(group)
 	ordinary.base_effect.tax = 8
 	ordinary.lag_months = 4
-	ordinary.collapse_impact = 2.0
+	ordinary.collapse_impact = 2
 	var converted := ordinary.copy()
 	converted.donation_offer = 20.0
 	converted.positive_trait_accepted = false
