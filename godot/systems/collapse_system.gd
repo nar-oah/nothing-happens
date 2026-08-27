@@ -8,10 +8,6 @@ func record_intervention(context: RunContext, kind: StringName, pressure: float)
 	state.intervention_records.append(
 		InterventionRecordState.new(kind, state.absolute_month(), maxf(pressure, 0.0))
 	)
-	if state.silent_observation:
-		state.silent_observation = false
-		if state.collapse_level >= context.balance.max_collapse:
-			state.run_failed = true
 
 
 func settle_month(context: RunContext) -> void:
@@ -19,27 +15,22 @@ func settle_month(context: RunContext) -> void:
 	var balance := context.balance
 	if state.run_failed or state.ending_id != &"":
 		return
-	if state.silent_observation and not state.has_intervened:
-		state.collapse_level = maxf(
-			0.0, state.collapse_level - balance.silent_recovery_per_month
-		)
-		state.pending_collapse_delta = 0.0
-		if state.collapse_level <= 0.0:
-			state.ending_id = &"nothing_happens"
-		return
 	state.regulation_pressure = _calculate_regulation_pressure(state, balance)
-	var delta := (
-		state.pending_collapse_delta + state.regulation_pressure * balance.pressure_to_collapse
-	)
+	var pressure_delta := roundi(state.regulation_pressure * balance.pressure_to_collapse)
+	var delta: int = state.pending_collapse_delta + maxi(pressure_delta, 0)
 	if _has_negative_metric(state.metrics):
 		delta += balance.negative_metric_monthly_pressure
-	state.pending_collapse_delta = 0.0
-	state.collapse_level = clampf(state.collapse_level + delta, 0.0, balance.max_collapse)
+	state.pending_collapse_delta = 0
+	state.collapse_level = clampi(
+		state.collapse_level + maxi(delta, 0),
+		0,
+		balance.max_collapse
+	)
 	if state.collapse_level >= balance.max_collapse:
 		if state.has_intervened:
 			state.run_failed = true
 		else:
-			state.silent_observation = true
+			state.ending_id = &"nothing_happens"
 
 
 func _calculate_regulation_pressure(
