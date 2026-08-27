@@ -208,6 +208,21 @@ func pending_dialogue(state: RunState) -> Variant:
 	return null
 
 
+func month_report(state: RunState) -> Variant:
+	if state.month_report_previous_metrics == null or state.month_report_current_metrics == null:
+		return null
+	var report_events: Array = []
+	for current in state.month_report_events:
+		report_events.append(current.duplicate(true))
+	return {
+		"year": state.month_report_year,
+		"month": state.month_report_month,
+		"previous_metrics": metric_values(state.month_report_previous_metrics),
+		"current_metrics": metric_values(state.month_report_current_metrics),
+		"events": report_events,
+	}
+
+
 func full_state(
 	session: RunSession, ui_mode: String, world_scene: String, state_version: int
 ) -> Dictionary:
@@ -221,6 +236,7 @@ func full_state(
 		"year": state.year,
 		"month": state.month,
 		"metrics": metric_values(state.metrics),
+		"month_report": month_report(state),
 		"proposal_hand": _proposals(state.proposal_hand),
 		"saved_bills": _bills(state.saved_bills),
 		"draft_bill": bill(state.draft_bill),

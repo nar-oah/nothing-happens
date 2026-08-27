@@ -8,6 +8,8 @@ func run(t: BackendTestContext) -> void:
 	_test_constitution_uses_parliament_world(t)
 	_test_year_boundary_enters_constitution(t)
 	_test_constitution_month_returns_to_office(t)
+	_test_normal_month_creates_newspaper_report(t)
+	_test_month_report_serializes_events(t)
 
 
 func _test_time_system_constitution_month(t: BackendTestContext) -> void:
@@ -63,6 +65,10 @@ func _test_constitution_month_returns_to_office(t: BackendTestContext) -> void:
 	var session := t.make_session([race], [group], t.make_seats(1, "constitution exit"))
 	session.state.year = 2
 	session.state.month = 0
+	session.state.month_report_year = 1
+	session.state.month_report_month = 12
+	session.state.month_report_previous_metrics = session.state.metrics.copy()
+	session.state.month_report_current_metrics = session.state.metrics.copy()
 	var before_metrics := session.state.metrics.copy()
 	var bridge := UiBridge.new()
 	bridge.setup(session)
@@ -79,8 +85,67 @@ func _test_constitution_month_returns_to_office(t: BackendTestContext) -> void:
 		before_metrics.tax,
 		"month zero skips normal monthly metric settlement"
 	)
+	t.check_equal(
+		full["payload"]["month_report"]["month"],
+		12,
+		"month zero preserves the previous normal month report"
+	)
 	bridge.free()
 	session.free()
+
+
+func _test_normal_month_creates_newspaper_report(t: BackendTestContext) -> void:
+	var race := t.make_race("newspaper report race")
+	var group := t.make_group("newspaper report group")
+	var session := t.make_session([race], [group], t.make_seats(1, "newspaper report"))
+	session.state.metrics.tax = 37
+	var bridge := UiBridge.new()
+	bridge.setup(session)
+	var messages := bridge.receive_ipc_message(
+		_message("month.advance", {"state_version": 0})
+	)
+	var full: Dictionary = messages[messages.size() - 1]
+	var report: Dictionary = full["payload"]["month_report"]
+	t.check_equal(report["year"], 1, "newspaper report records the settled year")
+	t.check_equal(report["month"], 1, "newspaper report records the settled month")
+	t.check_equal(
+		report["previous_metrics"]["tax"],
+		37,
+		"newspaper report preserves pre-settlement metrics"
+	)
+	t.check_equal(
+		report["current_metrics"]["tax"],
+		full["payload"]["metrics"]["tax"],
+		"newspaper report preserves post-settlement metrics"
+	)
+	bridge.free()
+	session.free()
+
+
+func _test_month_report_serializes_events(t: BackendTestContext) -> void:
+	var state := RunState.new()
+	state.month_report_year = 3
+	state.month_report_month = 7
+	state.month_report_previous_metrics = state.metrics.copy()
+	state.month_report_current_metrics = state.metrics.copy()
+	state.month_report_events.append(
+		{
+			"race_display_name": "驻岁",
+			"metric": int(Metric.Id.TAX),
+			"value": 42,
+			"countdown": 3,
+			"strength": 60,
+			"phase": int(EventState.Phase.PAUSED),
+		}
+	)
+	var report: Dictionary = UiSerializer.new().month_report(state)
+	t.check_equal(report["events"].size(), 1, "newspaper report serializes event snapshots")
+	t.check_equal(
+		report["events"][0]["race_display_name"],
+		"驻岁",
+		"newspaper event keeps its race display name"
+	)
+	t.check_equal(report["events"][0]["value"], 42, "newspaper event keeps its requirement")
 
 
 func _message(message_type: String, payload: Dictionary) -> String:

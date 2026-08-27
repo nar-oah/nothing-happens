@@ -5,11 +5,16 @@
 		createInputRegionReporter,
 		type CefIpcClient,
 		type GameplayCommandType,
-		type OutboundPayloads,
-		type RaceId
+		type OutboundPayloads
 	} from '$lib/bridge';
 	import type { SynthesisConfirmation } from '$lib/components/left/types';
-	import { NewspaperRace, type NewspaperMetricData } from '$lib/components/newspaper/types';
+	import {
+		NewspaperEventState,
+		NewspaperRace,
+		type NewspaperEventData,
+		type NewspaperMetricData
+	} from '$lib/components/newspaper/types';
+	import { Metric } from '$lib/game/types';
 	import ConstitutionView from '$lib/views/ConstitutionView.svelte';
 	import DialogueView from '$lib/views/DialogueView.svelte';
 	import OfficeView from '$lib/views/OfficeView.svelte';
@@ -24,18 +29,57 @@
 		deriveTopItems
 	} from './selectors';
 	import { createGameStore, EMPTY_GAME_STORE, type GameStoreValue } from './store';
+	import type { LiveGameState, MonthReportEventPhase } from './types';
 
 	type MutationPayload<T extends GameplayCommandType> = Omit<OutboundPayloads[T], 'state_version'>;
 	type NewspaperTransitionAction = () => Promise<void>;
 
-	const NEWSPAPER_RACE_BY_ID: Record<RaceId, NewspaperRace> = {
-		stationary: NewspaperRace.驻岁,
-		dream: NewspaperRace.南柯,
-		wing: NewspaperRace.比翼,
-		doll: NewspaperRace.偃偶,
-		peach: NewspaperRace.桃花妖,
-		human: NewspaperRace.人族
+	const NEWSPAPER_RACE_BY_DISPLAY_NAME: Record<string, NewspaperRace> = {
+		驻岁: NewspaperRace.ZHUSHUI,
+		南柯: NewspaperRace.NANKE,
+		比翼: NewspaperRace.BIYI,
+		偃偶: NewspaperRace.YANOU,
+		桃花妖: NewspaperRace.PEACH_BLOSSOM,
+		人类: NewspaperRace.HUMAN
 	};
+	const NEWSPAPER_EVENT_STATE_BY_PHASE: Record<MonthReportEventPhase, NewspaperEventState> = {
+		0: NewspaperEventState.DETERIORATION,
+		1: NewspaperEventState.POSTPONED,
+		2: NewspaperEventState.CALM
+	};
+
+	function deriveNewspaperMetrics(state: LiveGameState): NewspaperMetricData[] {
+		const current = state.month_report?.current_metrics ?? state.metrics;
+		const previous = state.month_report?.previous_metrics ?? current;
+		return [
+			{ metric: Metric.TAX, value: current.tax, change: current.tax - previous.tax },
+			{ metric: Metric.PRICE, value: current.price, change: current.price - previous.price },
+			{ metric: Metric.WAGE, value: current.wage, change: current.wage - previous.wage },
+			{
+				metric: Metric.EMPLOYMENT,
+				value: current.employment,
+				change: current.employment - previous.employment
+			},
+			{ metric: Metric.TRADE, value: current.trade, change: current.trade - previous.trade }
+		];
+	}
+
+	function deriveNewspaperEvents(state: LiveGameState): NewspaperEventData[] {
+		return (state.month_report?.events ?? []).flatMap((event) => {
+			const race = NEWSPAPER_RACE_BY_DISPLAY_NAME[event.race_display_name];
+			if (!race) return [];
+			return [
+				{
+					race,
+					metric: event.metric,
+					value: event.value,
+					countdown: event.countdown,
+					strength: event.strength,
+					state: NEWSPAPER_EVENT_STATE_BY_PHASE[event.phase]
+				}
+			];
+		});
+	}
 
 	const gameStore = createGameStore();
 	let storeValue = $state<GameStoreValue>(EMPTY_GAME_STORE);
@@ -60,17 +104,8 @@
 	let pendingDialogue = $derived(
 		snapshot ? deriveDialoguePresentation(snapshot.pending_dialogue) : null
 	);
-	let newspaperMetrics = $derived(
-		snapshot
-			? snapshot.races.map(
-					(race): NewspaperMetricData => ({
-						race: NEWSPAPER_RACE_BY_ID[race.race_id],
-						value: race.metric,
-						change: race.monthly_detail?.total ?? 0
-					})
-				)
-			: []
-	);
+	let newspaperMetrics = $derived(snapshot ? deriveNewspaperMetrics(snapshot) : []);
+	let newspaperEvents = $derived(snapshot ? deriveNewspaperEvents(snapshot) : []);
 	let frame = $derived(
 		snapshot && gameState
 			? {
@@ -289,7 +324,7 @@
 			year={snapshot.year}
 			month={snapshot.month}
 			metrics={newspaperMetrics}
-			events={[]}
+			events={newspaperEvents}
 			comment={{ title: '', comment: '' }}
 			busy={newspaperBusy}
 			leaving={newspaperLeaving}

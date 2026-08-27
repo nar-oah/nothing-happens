@@ -2,6 +2,7 @@ import { Metric } from '$lib/game/types';
 
 export const NewspaperRace = {
 	HUMAN: 'human',
+	ZHUSHUI: 'zhushui',
 	PEACH_BLOSSOM: 'peach_blossom',
 	NANKE: 'nanke',
 	BIYI: 'biyi',
@@ -56,6 +57,7 @@ const METRIC_LABELS: Record<Metric, string> = {
 
 const RACE_LABELS: Record<NewspaperRace, string> = {
 	[NewspaperRace.HUMAN]: '人类',
+	[NewspaperRace.ZHUSHUI]: '驻岁',
 	[NewspaperRace.PEACH_BLOSSOM]: '桃花妖',
 	[NewspaperRace.NANKE]: '南柯',
 	[NewspaperRace.BIYI]: '比翼',
@@ -64,6 +66,7 @@ const RACE_LABELS: Record<NewspaperRace, string> = {
 
 const RACE_EVENT_DESCRIPTIONS: Record<NewspaperRace, string> = {
 	[NewspaperRace.HUMAN]: '朝使认为国用与贡路正在偏离朝廷要求，催促联合政府尽快纠正。',
+	[NewspaperRace.ZHUSHUI]: '现行秩序正在偏离驻岁所能承受的节律，驻岁要求联合政府尽快纠正。',
 	[NewspaperRace.PEACH_BLOSSOM]: '外部征敛与市场往来继续牵动地方生活，桃源要求收束与外界的联系。',
 	[NewspaperRace.NANKE]: '连续轮班与现实劳动正在挤压睡眠，南柯要求改善眼前的劳动处境。',
 	[NewspaperRace.BIYI]: '公共秩序仍在偏离当月清醒半身的尺度，比翼要求尽快纠正。',

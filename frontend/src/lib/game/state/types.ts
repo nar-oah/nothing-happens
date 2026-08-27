@@ -130,6 +130,25 @@ export type ActiveBillDto = {
 	policies: ActivePolicyDto[];
 };
 
+export type MonthReportEventPhase = 0 | 1 | 2;
+
+export type MonthReportEventDto = {
+	race_display_name: string;
+	metric: Metric;
+	value: number;
+	countdown: number;
+	strength: number;
+	phase: MonthReportEventPhase;
+};
+
+export type MonthReportDto = {
+	year: number;
+	month: number;
+	previous_metrics: MetricValues;
+	current_metrics: MetricValues;
+	events: MonthReportEventDto[];
+};
+
 export type GameStatusDto = {
 	year: number;
 	month: number;
@@ -159,6 +178,7 @@ export type LiveGameState = GameStatusDto & {
 	active_bill: ActiveBillDto | null;
 	draft_preview: DraftPreviewDto;
 	pending_dialogue: PendingDialogueDto | null;
+	month_report?: MonthReportDto | null;
 };
 
 export type DraftSyncDto = {
