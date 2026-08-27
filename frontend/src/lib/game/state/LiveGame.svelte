@@ -5,9 +5,11 @@
 		createInputRegionReporter,
 		type CefIpcClient,
 		type GameplayCommandType,
-		type OutboundPayloads
+		type OutboundPayloads,
+		type RaceId
 	} from '$lib/bridge';
 	import type { SynthesisConfirmation } from '$lib/components/left/types';
+	import { NewspaperRace, type NewspaperMetricData } from '$lib/components/newspaper/types';
 	import ConstitutionView from '$lib/views/ConstitutionView.svelte';
 	import DialogueView from '$lib/views/DialogueView.svelte';
 	import OfficeView from '$lib/views/OfficeView.svelte';
@@ -25,6 +27,15 @@
 
 	type MutationPayload<T extends GameplayCommandType> = Omit<OutboundPayloads[T], 'state_version'>;
 	type NewspaperTransitionAction = () => Promise<void>;
+
+	const NEWSPAPER_RACE_BY_ID: Record<RaceId, NewspaperRace> = {
+		stationary: NewspaperRace.驻岁,
+		dream: NewspaperRace.南柯,
+		wing: NewspaperRace.比翼,
+		doll: NewspaperRace.偃偶,
+		peach: NewspaperRace.桃花妖,
+		human: NewspaperRace.人族
+	};
 
 	const gameStore = createGameStore();
 	let storeValue = $state<GameStoreValue>(EMPTY_GAME_STORE);
@@ -48,6 +59,17 @@
 	let constitution = $derived(snapshot ? deriveConstitutionMemorial(snapshot) : {});
 	let pendingDialogue = $derived(
 		snapshot ? deriveDialoguePresentation(snapshot.pending_dialogue) : null
+	);
+	let newspaperMetrics = $derived(
+		snapshot
+			? snapshot.races.map(
+					(race): NewspaperMetricData => ({
+						race: NEWSPAPER_RACE_BY_ID[race.race_id],
+						value: race.metric,
+						change: race.monthly_detail?.total ?? 0
+					})
+				)
+			: []
 	);
 	let frame = $derived(
 		snapshot && gameState
@@ -266,7 +288,7 @@
 		<NewspaperView
 			year={snapshot.year}
 			month={snapshot.month}
-			metrics={[]}
+			metrics={newspaperMetrics}
 			events={[]}
 			comment={{ title: '', comment: '' }}
 			busy={newspaperBusy}
