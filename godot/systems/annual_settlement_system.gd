@@ -12,7 +12,7 @@ func settle_year(context: RunContext) -> void:
 	context.parliament_system.apply_annual_coloring(context)
 	context.constitution_system.apply_influence_rules(context)
 	context.constitution_system.on_year_settlement(context)
-	context.race_system.advance_expectations(state)
+	context.race_system.advance_expectations(state, context.balance)
 	state.constitution.revision_available = true
 	state.petition_used_this_year = 0
 	state.annual_proposal_slot_counts.clear()
