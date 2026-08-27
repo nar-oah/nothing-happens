@@ -2,17 +2,15 @@
 	import ChoreSwitch from '$lib/components/chore/ChoreSwitch.svelte';
 	import Dialog from '$lib/components/dialog/Dialog.svelte';
 	import TopDialog from '$lib/components/dialog/TopDialog.svelte';
-	import Left from '$lib/components/left/Left.svelte';
 	import NewspaperEntry from '$lib/components/newspaper/NewspaperEntry.svelte';
 	import type { DialoguePresentation, ViewFrameProps } from './types';
 
-	type Props = ViewFrameProps & {
+	type Props = Pick<ViewFrameProps, 'term' | 'year' | 'month' | 'onNewspaperOpen'> & {
 		dialogue: DialoguePresentation;
 		onResolveBonus?: (handIndex: number, acceptTrait: boolean) => void;
 	};
 
-	let { items, baseline, term, year, month, onNewspaperOpen, dialogue, onResolveBonus }: Props =
-		$props();
+	let { term, year, month, onNewspaperOpen, dialogue, onResolveBonus }: Props = $props();
 	let donationChoice = $state(false);
 	let dialogueText = $derived(
 		`${dialogue.groupName}愿意给出一个优惠的提案，\n您可以选择给我手上的这张提案添加一个优惠条款，或收下我们的一点心意`
@@ -28,7 +26,6 @@
 </script>
 
 <main class="game-view" aria-label="对话界面">
-	<Left scene="dialogue" {items} {baseline} />
 	<NewspaperEntry {term} {year} {month} onOpen={onNewspaperOpen} />
 
 	<div class="top-dialog">
@@ -37,11 +34,7 @@
 
 	<div class="dialog-area">
 		<div class="choice-switch">
-			<ChoreSwitch
-				left={dialogue.positiveEffect}
-				right={dialogue.donationOffer}
-				bind:isSwitch={donationChoice}
-			/>
+			<ChoreSwitch left={dialogue.positiveEffect} right={dialogue.donationOffer} bind:isSwitch={donationChoice} />
 		</div>
 		<Dialog text={dialogueText} onclick={advanceDialogue} />
 	</div>
