@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onDestroy, onMount } from 'svelte';
+	import { onDestroy, onMount, tick } from 'svelte';
 	import {
 		createCefIpcClient,
 		createInputRegionReporter,
@@ -22,13 +22,19 @@
 		deriveTopItems
 	} from './selectors';
 	import { createGameStore, EMPTY_GAME_STORE, type GameStoreValue } from './store';
+
 	type MutationPayload<T extends GameplayCommandType> = Omit<OutboundPayloads[T], 'state_version'>;
+	type NewspaperTransitionAction = () => Promise<void>;
+
 	const gameStore = createGameStore();
 	let storeValue = $state<GameStoreValue>(EMPTY_GAME_STORE);
 	let client: CefIpcClient | null = null;
 	let mutationQueue = Promise.resolve();
 	let selectedConstitutionArticle = $state<number>();
-	let newspaperOpen = $state(false);
+	let newspaperOpen = $state(true);
+	let newspaperBusy = $state(false);
+	let newspaperLeaving = $state(false);
+	let pendingNewspaperAction: NewspaperTransitionAction | null = null;
 	const unsubscribe = gameStore.subscribe((value) => (storeValue = value));
 	let snapshot = $derived(storeValue.snapshot);
 	let leftItems = $derived(snapshot ? deriveLeftItems(snapshot) : []);
@@ -57,6 +63,7 @@
 				}
 			: null
 	);
+
 	onMount(() => {
 		client = createCefIpcClient({
 			onMessage: gameStore.apply,
@@ -72,14 +79,17 @@
 			client = null;
 		};
 	});
+
 	onDestroy(unsubscribe);
+
 	function mutate<T extends GameplayCommandType>(type: T, payload: MutationPayload<T>): void {
 		const requestClient = client;
-		const requestStateVersion = storeValue.snapshot?.state_version;
-		if (!requestClient || requestStateVersion === undefined) return;
+		if (!requestClient) return;
 		mutationQueue = mutationQueue
 			.then(async () => {
 				if (client !== requestClient) return;
+				const requestStateVersion = storeValue.snapshot?.state_version;
+				if (requestStateVersion === undefined) return;
 				await requestClient.request(type, {
 					...payload,
 					state_version: requestStateVersion
@@ -87,20 +97,102 @@
 			})
 			.catch((error: unknown) => console.error('Godot command failed', error));
 	}
-	async function closeNewspaper(): Promise<void> {
+
+	async function requestMutation<T extends GameplayCommandType>(
+		type: T,
+		payload: MutationPayload<T>
+	): Promise<void> {
+		await mutationQueue;
+		const requestClient = client;
+		const requestStateVersion = storeValue.snapshot?.state_version;
+		if (!requestClient || requestStateVersion === undefined) throw new Error('Godot IPC is not ready.');
+		await requestClient.request(type, {
+			...payload,
+			state_version: requestStateVersion
+		} as OutboundPayloads[T]);
+	}
+
+	function openNewspaper(): void {
+		if (newspaperOpen) return;
+		pendingNewspaperAction = null;
+		newspaperBusy = false;
+		newspaperLeaving = false;
+		newspaperOpen = true;
+	}
+
+	function transitionThroughNewspaper(action: NewspaperTransitionAction): void {
+		if (newspaperOpen || newspaperBusy) return;
+		pendingNewspaperAction = action;
+		newspaperBusy = true;
+		newspaperLeaving = false;
+		newspaperOpen = true;
+	}
+
+	async function handleNewspaperCovered(): Promise<void> {
+		const action = pendingNewspaperAction;
+		if (!action) return;
+		pendingNewspaperAction = null;
+		try {
+			await action();
+			await tick();
+			newspaperLeaving = true;
+		} catch (error: unknown) {
+			console.error('Newspaper transition failed', error);
+			newspaperBusy = false;
+		}
+	}
+
+	async function advanceFromNewspaper(): Promise<void> {
+		if (newspaperBusy || newspaperLeaving) return;
+		newspaperBusy = true;
+		try {
+			await requestMutation('month.advance', {});
+			await tick();
+			newspaperLeaving = true;
+		} catch (error: unknown) {
+			console.error('Month advance failed', error);
+			newspaperBusy = false;
+		}
+	}
+
+	async function requestNewspaperClose(): Promise<void> {
+		if (newspaperBusy || newspaperLeaving) return;
+		newspaperBusy = true;
 		const requestClient = client;
 		if (!requestClient) {
-			newspaperOpen = false;
+			newspaperLeaving = true;
 			return;
 		}
 		try {
 			await requestClient.request('ui.newspaper.close', {});
+			await tick();
+			newspaperLeaving = true;
 		} catch (error: unknown) {
 			console.error('Newspaper close sync failed', error);
-		} finally {
-			newspaperOpen = false;
+			newspaperBusy = false;
 		}
 	}
+
+	function finishNewspaperClose(): void {
+		newspaperOpen = false;
+		newspaperBusy = false;
+		newspaperLeaving = false;
+		pendingNewspaperAction = null;
+	}
+
+	function submitBill(): void {
+		transitionThroughNewspaper(() => requestMutation('bill.submit', {}));
+	}
+
+	function submitConstitution(): void {
+		const articleIndex = selectedConstitutionArticle;
+		transitionThroughNewspaper(async () => {
+			if (articleIndex === undefined) await requestMutation('month.advance', {});
+			else await requestMutation('constitution.revise', { article_index: articleIndex });
+			selectedConstitutionArticle = undefined;
+		});
+	}
+
 	function mergeProposals(confirmation: SynthesisConfirmation): void {
 		mutate('proposal.merge', {
 			hand_indices: confirmation.refs.map((ref) => ref.index),
@@ -108,6 +200,7 @@
 			selected_positive_index: confirmation.reverseSource?.ref.index ?? null
 		});
 	}
+
 	function selectConstitutionArticle(articleRef: number, selected: boolean): void {
 		if (selected) selectedConstitutionArticle = articleRef;
 		else if (selectedConstitutionArticle === articleRef) selectedConstitutionArticle = undefined;
@@ -116,20 +209,10 @@
 
 <svelte:head><title>Nothing Happens</title></svelte:head>
 {#if snapshot && frame}
-	{#if newspaperOpen}
-		<NewspaperView
-			year={snapshot.year}
-			month={snapshot.month}
-			metrics={[]}
-			events={[]}
-			comment={{ title: '', comment: '' }}
-			onAdvance={() => mutate('month.advance', {})}
-			onClose={closeNewspaper}
-		/>
-	{:else if snapshot.ui_mode === 'dialogue' && pendingDialogue}
+	{#if snapshot.ui_mode === 'dialogue' && pendingDialogue}
 		<DialogueView
 			{...frame}
-			onNewspaperOpen={() => (newspaperOpen = true)}
+			onNewspaperOpen={openNewspaper}
 			dialogue={{
 				handIndex: pendingDialogue.hand_index,
 				groupName: snapshot.pending_dialogue!.proposal.source_group.display_name,
@@ -142,7 +225,7 @@
 	{:else if snapshot.ui_mode === 'parliament'}
 		<ParliamentView
 			{...frame}
-			onNewspaperOpen={() => (newspaperOpen = true)}
+			onNewspaperOpen={openNewspaper}
 			stateVersion={snapshot.state_version}
 			draft={snapshot.draft_bill}
 			proposalHand={snapshot.proposal_hand}
@@ -158,22 +241,39 @@
 			onTitleChange={(title) => mutate('draft.title.set', { title })}
 			onEditSavedBill={(savedBillIndex) =>
 				mutate('bill.edit', { saved_bill_index: savedBillIndex })}
-			onSubmit={() => mutate('bill.submit', {})}
+			onSubmit={submitBill}
 		/>
 	{:else if snapshot.ui_mode === 'constitution'}
 		<ConstitutionView
 			raceItems={topItems.raceItems}
 			interestGroupItems={topItems.interestGroupItems}
 			gameState={frame.gameState}
+			term={frame.term}
+			year={frame.year}
+			month={frame.month}
+			onNewspaperOpen={openNewspaper}
 			title={snapshot.constitution.title}
 			{constitution}
 			onArticleSelectionChange={selectConstitutionArticle}
+			onSubmit={submitConstitution}
 		/>
 	{:else}
-		<OfficeView
-			{...frame}
-			onNewspaperOpen={() => (newspaperOpen = true)}
-			onSynthesisConfirm={mergeProposals}
+		<OfficeView {...frame} onNewspaperOpen={openNewspaper} onSynthesisConfirm={mergeProposals} />
+	{/if}
+
+	{#if newspaperOpen}
+		<NewspaperView
+			year={snapshot.year}
+			month={snapshot.month}
+			metrics={[]}
+			events={[]}
+			comment={{ title: '', comment: '' }}
+			busy={newspaperBusy}
+			leaving={newspaperLeaving}
+			onCovered={handleNewspaperCovered}
+			onAdvance={advanceFromNewspaper}
+			onRequestClose={requestNewspaperClose}
+			onClosed={finishNewspaperClose}
 		/>
 	{/if}
 {/if}
