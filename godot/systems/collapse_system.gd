@@ -27,10 +27,7 @@ func settle_month(context: RunContext) -> void:
 		balance.max_collapse
 	)
 	if state.collapse_level >= balance.max_collapse:
-		if state.has_intervened:
-			state.run_failed = true
-		else:
-			state.ending_id = &"nothing_happens"
+		state.run_failed = true
 
 
 func _calculate_regulation_pressure(
