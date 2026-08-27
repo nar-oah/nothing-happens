@@ -42,6 +42,10 @@ func configure_content(
 
 
 func start_new_run() -> void:
+	_start_term(1)
+
+
+func _start_term(term_number: int) -> void:
 	if balance == null:
 		push_error("RunSession requires GameBalanceDefinition.")
 		return
@@ -55,6 +59,7 @@ func start_new_run() -> void:
 		push_error("RunSession requires seat definitions.")
 		return
 	state = RunState.new()
+	state.term = maxi(term_number, 1)
 	time_system = TimeSystem.new()
 	random_system = RandomSystem.new()
 	proposal_system = ProposalSystem.new()
@@ -62,7 +67,7 @@ func start_new_run() -> void:
 	policy_system = PolicySystem.new()
 	inflation_system = InflationSystem.new()
 	inflation_system.initialize_metrics(state.metrics, balance)
-	state.year_start_metrics = (state.metrics.copy())
+	state.year_start_metrics = state.metrics.copy()
 
 	parliament_system = ParliamentSystem.new()
 	race_system = RaceSystem.new()
@@ -109,6 +114,7 @@ func start_new_run() -> void:
 		return
 	constitution_system.apply_influence_rules(context)
 	constitution_system.activate_initial_articles(context)
+	proposal_system.draw_automatic_proposals(context)
 
 	flow_controller = FlowController.new()
 	flow_controller.setup(context)
@@ -116,6 +122,8 @@ func start_new_run() -> void:
 
 func advance_month() -> void:
 	flow_controller.advance_month()
+	if state.run_failed and state.ending_id == &"":
+		_start_term(state.term + 1)
 
 
 func enact_bill(draft: DraftBillState) -> void:
