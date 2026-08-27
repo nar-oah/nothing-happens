@@ -1,34 +1,56 @@
 <script lang="ts">
+	import ChoreSwitch from '$lib/components/chore/ChoreSwitch.svelte';
 	import { MemorialVerticalConstitution } from '$lib/components/memorial';
 	import type { MemorialConstitutionData } from '$lib/components/memorial/types';
+	import NewspaperEntry from '$lib/components/newspaper/NewspaperEntry.svelte';
 	import GameStateDisplay from '$lib/components/state/GameStateDisplay.svelte';
 	import Top from '$lib/components/top/Top.svelte';
 	import type { ViewFrameProps } from './types';
 
-	type Props = Pick<ViewFrameProps, 'raceItems' | 'interestGroupItems' | 'gameState'> & {
+	type Props = Pick<
+		ViewFrameProps,
+		'raceItems' | 'interestGroupItems' | 'gameState' | 'term' | 'year' | 'month' | 'onNewspaperOpen'
+	> & {
 		title: string;
 		constitution: MemorialConstitutionData;
 		onArticleSelectionChange?: (articleRef: number, selected: boolean) => void;
+		onSubmit?: () => void;
 	};
 
 	let {
 		raceItems,
 		interestGroupItems,
 		gameState,
+		term,
+		year,
+		month,
+		onNewspaperOpen,
 		title,
 		constitution,
-		onArticleSelectionChange
+		onArticleSelectionChange,
+		onSubmit
 	}: Props = $props();
+	let confirmMode = $state(false);
+
+	function submitRevision(isConfirm: boolean) {
+		if (!isConfirm) return;
+		onSubmit?.();
+		queueMicrotask(() => (confirmMode = false));
+	}
 </script>
 
 <main class="game-view" aria-label="约法界面">
+	<NewspaperEntry {term} {year} {month} onOpen={onNewspaperOpen} />
 	<div class="top-slot">
 		<Top {raceItems} {interestGroupItems} />
 	</div>
 	<div class="state-slot"><GameStateDisplay {...gameState} /></div>
 	<div class="constitution">
 		<div class="constitution-track">
-			<MemorialVerticalConstitution {title} {constitution} {onArticleSelectionChange} />
+			<div class="constitution-content">
+				<div class="confirm-switch"><ChoreSwitch left="约法" right="确认" bind:isSwitch={confirmMode} onSwitchChange={submitRevision} /></div>
+				<MemorialVerticalConstitution {title} {constitution} {onArticleSelectionChange} />
+			</div>
 		</div>
 	</div>
 </main>
@@ -72,5 +94,16 @@
 		width: max-content;
 		min-width: 100%;
 		justify-content: center;
+	}
+
+	.constitution-content {
+		display: flex;
+		width: max-content;
+		flex-direction: column;
+		align-items: flex-end;
+	}
+
+	.confirm-switch {
+		margin-bottom: 8px;
 	}
 </style>
