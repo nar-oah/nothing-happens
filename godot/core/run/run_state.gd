@@ -3,6 +3,7 @@ class_name RunState
 
 const NEW_BILL_INDEX: int = -1
 
+var term: int = 1
 var year: int = 1
 var month: int = 1
 var metrics: MetricValues
