@@ -10,6 +10,8 @@ func run(t: BackendTestContext) -> void:
 	_test_constitution_month_returns_to_office(t)
 	_test_normal_month_creates_newspaper_report(t)
 	_test_month_report_serializes_events(t)
+	_test_opening_draw_and_failed_term_reset(t)
+	_test_zhushui_fixed_executive_seat(t)
 
 
 func _test_time_system_constitution_month(t: BackendTestContext) -> void:
@@ -146,6 +148,58 @@ func _test_month_report_serializes_events(t: BackendTestContext) -> void:
 		"newspaper event keeps its race display name"
 	)
 	t.check_equal(report["events"][0]["value"], 42, "newspaper event keeps its requirement")
+
+
+func _test_opening_draw_and_failed_term_reset(t: BackendTestContext) -> void:
+	var race := t.make_race("term reset race")
+	var group := t.make_group("term reset group")
+	group.decrease_tax = true
+	var balance := GameBalanceDefinition.new()
+	balance.automatic_draw_count = 2
+	balance.event_spawn_count_min = 0
+	balance.event_spawn_count_max = 0
+	balance.event_early_reveal_probability_per_seat = 0.0
+	balance.market_noise_ratio = 0.0
+	var session := t.make_session(
+		[race], [group], t.make_seats(2, "term reset"), [], balance
+	)
+	t.check_equal(session.state.proposal_hand.size(), 2, "a new term draws proposals immediately")
+	session.state.has_intervened = true
+	session.state.pending_collapse_delta = balance.max_collapse
+	session.advance_month()
+	t.check_equal(session.state.term, 2, "ordinary collapse starts the next term")
+	t.check_equal(session.state.year, 1, "new term returns to year one")
+	t.check_equal(session.state.month, 1, "new term returns to month one")
+	t.check_approx(session.state.collapse_level, 0.0, "new term resets collapse")
+	t.check_equal(session.state.events.size(), 0, "new term starts without stale events")
+	t.check_equal(session.state.proposal_hand.size(), 2, "new term receives its opening proposals")
+	var full := UiSerializer.new().full_state(session, "office", "office", 0)
+	t.check_equal(full["term"], 2, "serialized state exposes the new term number")
+	session.free()
+
+
+func _test_zhushui_fixed_executive_seat(t: BackendTestContext) -> void:
+	var zhushui := ZhushuiRaceDefinition.new()
+	zhushui.display_name = "驻岁"
+	var other := t.make_race("other race")
+	var group := t.make_group("fixed seat group")
+	group.decrease_tax = true
+	var seats: Array[SeatDefinition] = [t.make_seat("久视", zhushui)]
+	for index in range(5):
+		seats.append(t.make_seat("variable_%s" % index))
+	var session := t.make_session([zhushui, other], [group], seats)
+	t.check_equal(
+		session.parliament_system.get_race_seat_count(session.state, zhushui),
+		1,
+		"Zhushui always owns exactly one executive seat"
+	)
+	var fixed_seat := session.parliament_system.get_race_seats(session.state, zhushui)[0]
+	t.check_equal(fixed_seat.actual_group, null, "Zhushui executive seat has no interest-group influence")
+	t.check(
+		not session.parliament_system.can_reassign_seat(session.context, fixed_seat, other),
+		"Zhushui executive seat cannot be reassigned"
+	)
+	session.free()
 
 
 func _message(message_type: String, payload: Dictionary) -> String:
