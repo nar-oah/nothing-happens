@@ -28,10 +28,15 @@
 		  }
 		| { type: 'detail'; title: string; contents: MemorialHorizontalContentData[] }
 		| { type: 'policy'; content: MemorialPolicyContentData };
+	type PendingArticleSelection = {
+		sectionTitle: string;
+		rowKey: string;
+		articleRef: number;
+	};
 
 	let { title, constitution, onArticleSelectionChange }: Props = $props();
 	let expandedRow = $state<{ sectionTitle: string; rowIndex: number }>();
-	let selectedRows = $state<Record<string, boolean>>({});
+	let pendingSelection = $state<PendingArticleSelection>();
 	let appliedConstitution = untrack(() => constitution);
 	let pages: ConstitutionPage[] = $derived.by(() =>
 		Object.entries(constitution).flatMap(([sectionTitle, content]) => {
@@ -57,7 +62,7 @@
 		if (constitution === appliedConstitution) return;
 		appliedConstitution = constitution;
 		expandedRow = undefined;
-		selectedRows = {};
+		pendingSelection = undefined;
 	});
 
 	function openRow(sectionTitle: string, rowIndex: number) {
@@ -79,7 +84,8 @@
 		rowIndex: number,
 		row: MemorialConstitutionRowContentData
 	) {
-		return selectedRows[getRowKey(sectionTitle, rowIndex, row)] ?? row.selected;
+		if (pendingSelection?.sectionTitle !== sectionTitle) return row.selected;
+		return pendingSelection.rowKey === getRowKey(sectionTitle, rowIndex, row);
 	}
 
 	function setRowSelected(
@@ -88,8 +94,20 @@
 		row: MemorialConstitutionRowContentData,
 		selected: boolean
 	) {
-		selectedRows[getRowKey(sectionTitle, rowIndex, row)] = selected;
-		if (row.articleRef !== undefined) onArticleSelectionChange?.(row.articleRef, selected);
+		if (row.articleRef === undefined) return;
+		const rowKey = getRowKey(sectionTitle, rowIndex, row);
+		if (selected) {
+			const previousArticleRef = pendingSelection?.articleRef;
+			pendingSelection = { sectionTitle, rowKey, articleRef: row.articleRef };
+			if (previousArticleRef !== undefined && previousArticleRef !== row.articleRef) {
+				onArticleSelectionChange?.(previousArticleRef, false);
+			}
+			onArticleSelectionChange?.(row.articleRef, true);
+			return;
+		}
+		if (pendingSelection?.articleRef !== row.articleRef) return;
+		pendingSelection = undefined;
+		onArticleSelectionChange?.(row.articleRef, false);
 	}
 </script>
 
@@ -105,10 +123,7 @@
 			{#if currentPage?.type === 'section'}
 				<MemorialConstitutionContent title={currentPage.title}>
 					{#if typeof currentPage.content === 'number'}
-						<div
-							class="flex h-full w-full flex-col items-center justify-center bg-ink-primary font-document text-[60px] font-light leading-[48px] text-surface-amber"
-							aria-label={`解锁要求 ${currentPage.content}`}
-						>
+						<div class="flex h-full w-full flex-col items-center justify-center bg-ink-primary font-document text-[60px] font-light leading-[48px] text-surface-amber" aria-label={`解锁要求 ${currentPage.content}`}>
 							{#each [0, 1, 2, 3, 4, 5] as row (row)}
 								<span>{currentPage.content}</span>
 							{/each}
@@ -116,13 +131,7 @@
 					{:else}
 						<div class="flex h-full flex-col items-center gap-[20px] pt-10">
 							{#each currentPage.content as row, rowIndex (`${currentPage.title}-${row.text}-${rowIndex}`)}
-								<MemorialConstitutionRow
-									{...row}
-									selected={getRowSelected(currentPage.title, rowIndex, row)}
-									onSelectedChange={(selected) =>
-										setRowSelected(currentPage.title, rowIndex, row, selected)}
-									onclick={() => openRow(currentPage.title, rowIndex)}
-								/>
+								<MemorialConstitutionRow {...row} selected={getRowSelected(currentPage.title, rowIndex, row)} onSelectedChange={(selected) => setRowSelected(currentPage.title, rowIndex, row, selected)} onclick={() => openRow(currentPage.title, rowIndex)} />
 							{/each}
 						</div>
 					{/if}
