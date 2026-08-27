@@ -10,6 +10,7 @@ func run(t: BackendTestContext) -> void:
 	_test_constitution_month_returns_to_office(t)
 	_test_normal_month_creates_newspaper_report(t)
 	_test_month_report_serializes_events(t)
+	_test_global_expectation_growth_uses_balance(t)
 	_test_opening_draw_and_failed_term_reset(t)
 	_test_zhushui_fixed_executive_seat(t)
 
@@ -148,6 +149,29 @@ func _test_month_report_serializes_events(t: BackendTestContext) -> void:
 		"newspaper event keeps its race display name"
 	)
 	t.check_equal(report["events"][0]["value"], 42, "newspaper event keeps its requirement")
+
+
+func _test_global_expectation_growth_uses_balance(t: BackendTestContext) -> void:
+	var race := t.make_race("global growth race")
+	race.increase_wage = true
+	var group := t.make_group("global growth group")
+	var balance := GameBalanceDefinition.new()
+	balance.automatic_draw_count = 0
+	balance.event_spawn_count_min = 0
+	balance.event_spawn_count_max = 0
+	balance.race_expectation_growth_per_year = 0.10
+	var session := t.make_session(
+		[race], [group], t.make_seats(1, "global growth"), [], balance
+	)
+	var race_state := session.state.get_race(race)
+	t.check_approx(race_state.expectation_growth_rate, 0.0, "initial article has no race-local growth")
+	session.annual_settlement_system.settle_year(session.context)
+	t.check_equal(
+		race_state.get_expectation(Metric.Id.WAGE),
+		110,
+		"annual settlement falls back to global expectation growth"
+	)
+	session.free()
 
 
 func _test_opening_draw_and_failed_term_reset(t: BackendTestContext) -> void:
