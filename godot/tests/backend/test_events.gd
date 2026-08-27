@@ -145,7 +145,10 @@ func _test_pause_relief_and_early_reveal(t: BackendTestContext) -> void:
 	t.check(not event.known, "zero reveal probability keeps event hidden")
 	balance.event_early_reveal_probability_per_seat = 0.5
 	session.event_system.update_information(session.context)
-	t.check(event.known and event.published, "two seats multiply per-seat reveal probability to one")
+	t.check(
+		event.known and not event.published,
+		"early reveal becomes known without entering the newspaper"
+	)
 
 	event.growth_progress = 1.0
 	balance.event_pause_satisfaction_threshold = 0.4
