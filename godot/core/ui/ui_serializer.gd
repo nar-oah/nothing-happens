@@ -227,12 +227,11 @@ func full_state(
 	session: RunSession, ui_mode: String, world_scene: String, state_version: int
 ) -> Dictionary:
 	var state := session.state
-	# TODO: Replace this presentation value when a formally designed term state exists.
 	return {
 		"state_version": state_version,
 		"ui_mode": ui_mode,
 		"world_scene": world_scene,
-		"term": 1,
+		"term": state.term,
 		"year": state.year,
 		"month": state.month,
 		"metrics": metric_values(state.metrics),
@@ -374,6 +373,7 @@ func parliament(session: RunSession) -> Dictionary:
 
 func game_status(session: RunSession) -> Dictionary:
 	return {
+		"term": session.state.term,
 		"year": session.state.year,
 		"month": session.state.month,
 		"metrics": metric_values(session.state.metrics),
