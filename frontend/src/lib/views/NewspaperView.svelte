@@ -18,17 +18,33 @@
 		metrics: NewspaperMetricData[];
 		events: NewspaperEventData[];
 		comment: NewspaperCommentData;
+		busy?: boolean;
+		leaving?: boolean;
 		onCommentClick?: () => void;
 		onAdvance?: () => void;
-		onClose?: () => void;
+		onCovered?: () => void;
+		onRequestClose?: () => void;
+		onClosed?: () => void;
 	};
 	const ROTATION_DEGREES = -20;
 	const ROTATION_RADIANS = (Math.abs(ROTATION_DEGREES) * Math.PI) / 180;
 	const ROTATION_SIN = Math.sin(ROTATION_RADIANS);
 	const ROTATION_COS = Math.cos(ROTATION_RADIANS);
 
-	let { year, month, metrics, events, comment, onCommentClick, onAdvance, onClose }: Props =
-		$props();
+	let {
+		year,
+		month,
+		metrics,
+		events,
+		comment,
+		busy = false,
+		leaving = false,
+		onCommentClick,
+		onAdvance,
+		onCovered,
+		onRequestClose,
+		onClosed
+	}: Props = $props();
 	let viewportWidth = $state(1512);
 	let viewportHeight = $state(982);
 	let scrollPosition = $state(0);
@@ -46,23 +62,34 @@
 	const newspaperAxisOffset = $derived(totalScrollRange / 2 - scrollPosition);
 	const primary: StateItem = { text: '设置', isRow: false };
 	const secondary: StateItem = { text: '退出', isRow: false };
+	const interactionDisabled = $derived(busy || motionPhase !== 'active');
+
 	function syncScrollPosition() {
 		if (scrollElement) scrollPosition = scrollElement.scrollTop;
 	}
+
 	function finishMotion(event: AnimationEvent) {
 		if (event.target !== event.currentTarget) return;
 		if (motionPhase === 'entering') {
 			motionPhase = 'active';
 			backgroundCovered = true;
+			onCovered?.();
 			return;
 		}
-		if (motionPhase === 'leaving') onClose?.();
+		if (motionPhase === 'leaving') onClosed?.();
 	}
+
 	function requestClose() {
-		if (motionPhase !== 'active' || !onClose) return;
+		if (interactionDisabled || !onRequestClose) return;
+		onRequestClose();
+	}
+
+	$effect(() => {
+		if (!leaving || motionPhase === 'leaving') return;
 		backgroundCovered = false;
 		motionPhase = 'leaving';
-	}
+	});
+
 	$effect(() => {
 		const element = scrollElement;
 		const target = totalScrollRange / 2;
@@ -75,58 +102,16 @@
 	});
 </script>
 
-<main
-	class="newspaper-view"
-	class:bg-surface-amber={backgroundCovered}
-	aria-label="报纸界面"
-	bind:clientWidth={viewportWidth}
-	bind:clientHeight={viewportHeight}
-	data-block-world-input
->
-	<div
-		class="newspaper-scroll"
-		bind:this={scrollElement}
-		aria-label="报纸内容"
-		onscroll={syncScrollPosition}
-	>
+<main class="newspaper-view" class:bg-surface-amber={backgroundCovered} aria-label="报纸界面" bind:clientWidth={viewportWidth} bind:clientHeight={viewportHeight} data-block-world-input>
+	<div class="newspaper-scroll" bind:this={scrollElement} aria-label="报纸内容" onscroll={syncScrollPosition}>
 		<div class="newspaper-scroll-space" style:height={`${viewportHeight + totalScrollRange}px`}>
 			<div class="newspaper-viewport">
-				<button
-					class="newspaper-close-layer"
-					type="button"
-					aria-label="关闭报纸"
-					onclick={requestClose}
-				></button>
-				<div
-					class="newspaper-entry-motion"
-					class:entering={motionPhase === 'entering'}
-					class:leaving={motionPhase === 'leaving'}
-					onanimationend={finishMotion}
-				>
-					<div
-						class="newspaper-rotator"
-						style:width={`${viewportWidth}px`}
-						style:height={`${scaledHeight}px`}
-					>
-						<div
-							class="newspaper-axis-track"
-							style:transform={`translateY(${newspaperAxisOffset}px)`}
-						>
-							<div
-								class="newspaper-scaler"
-								style:width={`${VERTICAL_FOLD_HEIGHT}px`}
-								style:height={`${baseHeight}px`}
-								style:transform={`scale(${scale})`}
-							>
-								<Newspaper
-									{year}
-									{month}
-									{metrics}
-									{events}
-									{comment}
-									{onCommentClick}
-									{onAdvance}
-								/>
+				<button class="newspaper-close-layer" type="button" aria-label="关闭报纸" disabled={interactionDisabled} onclick={requestClose}></button>
+				<div class="newspaper-entry-motion" class:entering={motionPhase === 'entering'} class:leaving={motionPhase === 'leaving'} onanimationend={finishMotion}>
+					<div class="newspaper-rotator" style:width={`${viewportWidth}px`} style:height={`${scaledHeight}px`}>
+						<div class="newspaper-axis-track" style:transform={`translateY(${newspaperAxisOffset}px)`}>
+							<div class="newspaper-scaler" style:width={`${VERTICAL_FOLD_HEIGHT}px`} style:height={`${baseHeight}px`} style:transform={`scale(${scale})`}>
+								<Newspaper {year} {month} {metrics} {events} {comment} {onCommentClick} {onAdvance} disabled={interactionDisabled} />
 							</div>
 						</div>
 					</div>
@@ -143,7 +128,9 @@
 
 <style>
 	.newspaper-view {
-		position: relative;
+		position: fixed;
+		inset: 0;
+		z-index: 1000;
 		width: 100vw;
 		height: 100vh;
 		overflow: hidden;
