@@ -5,7 +5,7 @@ var source_group: InterestGroupDefinition
 var base_effect: MetricVector
 var positive_effect: MetricVector
 var lag_months: int = 1
-var collapse_impact: float = 0.0
+var collapse_impact: int = 0
 var donation_offer: float = 0.0
 var bonus_choice_resolved: bool = true
 var positive_trait_accepted: bool = true
