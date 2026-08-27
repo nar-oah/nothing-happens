@@ -5,7 +5,10 @@
 	const lines = $derived(body.split('\n'));
 </script>
 
-<div class="memorial-content flex min-w-0 flex-col text-ink-primary [word-break:break-word]" class:redacted>
+<div
+	class="memorial-content flex min-w-0 flex-col text-ink-primary [word-break:break-word]"
+	class:redacted
+>
 	{#if title}
 		<p class="m-0 w-full font-policy text-[22px] font-medium leading-20">{title}</p>
 	{/if}
@@ -14,7 +17,10 @@
 			<div class="redaction-line relative min-h-[21px] w-full">
 				<span class="whitespace-pre-wrap">{line || ' '}</span>
 				{#if redacted && line}
-					<span class="redaction absolute inset-x-0 top-[2px] h-[17px] bg-ink-primary" aria-hidden="true"></span>
+					<span
+						class="redaction absolute inset-x-0 top-[2px] h-[17px] bg-ink-primary"
+						aria-hidden="true"
+					></span>
 				{/if}
 			</div>
 		{/each}
@@ -32,10 +38,17 @@
 		transform: scaleX(0);
 	}
 
-	.redacted .redaction-line:nth-child(2n) .redaction { transition-delay: 35ms; }
-	.redacted .redaction-line:nth-child(3n) .redaction { transition-delay: 70ms; }
+	.redacted .redaction-line:nth-child(2n) .redaction {
+		transition-delay: 35ms;
+	}
+	.redacted .redaction-line:nth-child(3n) .redaction {
+		transition-delay: 70ms;
+	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.redaction { transition-duration: 1ms; transition-delay: 0ms !important; }
+		.redaction {
+			transition-duration: 1ms;
+			transition-delay: 0ms !important;
+		}
 	}
 </style>

@@ -18,7 +18,9 @@
 	<div class="flex w-full shrink-0 items-start gap-10 overflow-hidden">
 		<p class="typo-newspaper-headline shrink-0 whitespace-nowrap">指标</p>
 		<div class="flex min-w-0 flex-1 flex-col items-end px-5 py-2">
-			<p class="typo-newspaper-caption whitespace-nowrap text-right">PUBLIC METRICS / MONTHLY MOVE</p>
+			<p class="typo-newspaper-caption whitespace-nowrap text-right">
+				PUBLIC METRICS / MONTHLY MOVE
+			</p>
 		</div>
 	</div>
 	<div class="h-px w-full shrink-0 bg-ink-primary"></div>
