@@ -173,7 +173,7 @@
 			dialogue={{
 				handIndex: 0,
 				groupName: '造身公所',
-				positiveEffect: '商贸+8',
+				positiveEffect: '商貿+8',
 				donationOffer: '政治献金+5'
 			}}
 			onResolveBonus={(_, acceptTrait) =>
