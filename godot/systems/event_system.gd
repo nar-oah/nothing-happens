@@ -71,8 +71,7 @@ func update_information(context: RunContext) -> void:
 	for event in context.state.events:
 		if event == null or not event.is_active():
 			continue
-		if event.known:
-			event.published = true
+		if event.published or event.known:
 			continue
 		if _force_public_window(event, context.balance):
 			continue
@@ -83,7 +82,6 @@ func update_information(context: RunContext) -> void:
 		)
 		if context.random_system.chance(probability):
 			event.known = true
-			event.published = true
 
 
 func get_current_requirement(event: EventState) -> int:
