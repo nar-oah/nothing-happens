@@ -4,6 +4,9 @@ class_name GameBalanceDefinition
 @export_group("基础")
 @export_range(1, 999999, 1) var initial_metric_value: int = 100
 
+@export_group("年度期望")
+@export_range(0.0, 1.0, 0.01) var race_expectation_growth_per_year: float = 0.10
+
 @export_group("提案")
 @export_range(0, 999, 1) var automatic_draw_count: int = 3
 @export_range(0, 999999, 1) var proposal_negative_magnitude_min: int = 8
