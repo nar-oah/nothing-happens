@@ -34,11 +34,10 @@ var petition_used_this_year: int = 0
 var donation_detection_probability: float = 0.0
 var event_early_reveal_bonus_probability: float = 0.0
 var intervention_records: Array[InterventionRecordState] = []
-var collapse_level: float = 0.0
+var collapse_level: int = 0
 var regulation_pressure: float = 0.0
-var pending_collapse_delta: float = 0.0
+var pending_collapse_delta: int = 0
 var has_intervened: bool = false
-var silent_observation: bool = false
 var run_failed: bool = false
 var ending_id: StringName
 
