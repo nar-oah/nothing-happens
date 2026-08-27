@@ -18,9 +18,7 @@
 {#snippet number(characters: string[])}
 	<span class="inline-flex">
 		{#each characters as character, index (`${character}-${index}`)}
-			<span style:margin-inline-end={index < characters.length - 1 ? '-15px' : undefined}>
-				{character}
-			</span>
+			<span>{character}</span>
 		{/each}
 	</span>
 {/snippet}
