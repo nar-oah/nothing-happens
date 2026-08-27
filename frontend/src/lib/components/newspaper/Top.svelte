@@ -5,34 +5,43 @@
 	type Props = {
 		year: number;
 		month: number;
+		disabled?: boolean;
 		onAdvance?: () => void;
 	};
 
-	let { year, month, onAdvance }: Props = $props();
+	let { year, month, disabled = false, onAdvance }: Props = $props();
 	let hovering = $state(false);
-	const nextMonth = $derived(month >= 12 ? 1 : month + 1);
+	const nextMonth = $derived(month >= 12 ? 0 : month + 1);
 	const nextYear = $derived(month >= 12 ? year + 1 : year);
-	const displayMonth = $derived(hovering ? nextMonth : month);
-	const displayYear = $derived(hovering ? nextYear : year);
+	const displayMonth = $derived(hovering && !disabled ? nextMonth : month);
+	const displayYear = $derived(hovering && !disabled ? nextYear : year);
 	const monthText = $derived(formatNewspaperNumber(displayMonth));
 	const monthKind = $derived(displayMonth % 2 === 1 ? '陰' : '陽');
+
+	function setHovering(value: boolean) {
+		if (disabled && value) return;
+		hovering = value;
+	}
 </script>
 
 <button
 	class="flex h-full w-full flex-col gap-[3px] overflow-hidden border-0 bg-transparent px-8 py-5 text-left"
 	type="button"
 	aria-label="进入次月"
-	onmouseenter={() => (hovering = true)}
-	onmouseleave={() => (hovering = false)}
-	onfocus={() => (hovering = true)}
-	onblur={() => (hovering = false)}
+	{disabled}
+	onmouseenter={() => setHovering(true)}
+	onmouseleave={() => setHovering(false)}
+	onfocus={() => setHovering(true)}
+	onblur={() => setHovering(false)}
 	onclick={onAdvance}
 >
 	<div class="h-px w-full shrink-0 bg-ink-primary"></div>
 	<div class="h-px w-full shrink-0 bg-ink-primary"></div>
 	<div class="flex w-full shrink-0 items-start gap-12 overflow-hidden text-ink-primary">
 		<div class="flex min-w-0 flex-1 flex-col items-start overflow-hidden">
-			<p class="typo-newspaper-masthead w-full"><MorphText text={hovering ? '次月' : '弦外'} /></p>
+			<p class="typo-newspaper-masthead w-full">
+				<MorphText text={hovering && !disabled ? '次月' : '弦外'} />
+			</p>
 			<p class="typo-newspaper-caption w-full">XIANWAI · THE OUT-OF-DISTRIBUTION TIMES</p>
 		</div>
 		<div

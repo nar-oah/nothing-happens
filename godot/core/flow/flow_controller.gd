@@ -11,6 +11,12 @@ func setup(run_context: RunContext) -> void:
 func advance_month() -> void:
 	if context.state.run_failed or context.state.ending_id != &"":
 		return
+	if context.state.month == 0:
+		context.time_system.advance_month(context.state)
+		return
+	var report_year := context.state.year
+	var report_month := context.state.month
+	var report_previous_metrics := context.state.metrics.copy()
 	for definition in context.race_definitions:
 		var race_state := context.state.get_race(definition)
 		if race_state != null:
@@ -28,6 +34,7 @@ func advance_month() -> void:
 	context.proposal_system.resolve_active_visits(context)
 	if context.state.month == 12:
 		context.annual_settlement_system.settle_year(context)
+	_record_month_report(report_year, report_month, report_previous_metrics)
 	context.time_system.advance_month(context.state)
 
 
@@ -65,6 +72,30 @@ func submit_draft(draft: DraftBillState) -> VoteResultState:
 	context.state.draft_bill = DraftBillState.new()
 	context.state.editing_saved_bill_index = RunState.NEW_BILL_INDEX
 	return result
+
+
+func _record_month_report(
+	report_year: int, report_month: int, previous_metrics: MetricValues
+) -> void:
+	var state := context.state
+	state.month_report_year = report_year
+	state.month_report_month = report_month
+	state.month_report_previous_metrics = previous_metrics.copy()
+	state.month_report_current_metrics = state.metrics.copy()
+	state.month_report_events.clear()
+	for event in state.events:
+		if event == null or not event.is_active() or not event.published:
+			continue
+		state.month_report_events.append(
+			{
+				"race_display_name": "" if event.race == null else event.race.display_name,
+				"metric": int(event.metric),
+				"value": context.event_system.get_current_requirement(event),
+				"countdown": maxi(context.balance.event_lifetime_months - event.months_alive, 0),
+				"strength": roundi(clampf(event.growth_progress, 0.0, 1.0) * 100.0),
+				"phase": int(event.phase),
+			}
+		)
 
 
 func _build_active_bill(draft: DraftBillState) -> ActiveBillState:

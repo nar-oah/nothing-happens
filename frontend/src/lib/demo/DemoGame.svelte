@@ -199,12 +199,16 @@
 			onSubmit={() => console.info('Submit bill', draft)}
 		/>
 	{:else if activeView === 'Newspaper'}
-		<NewspaperView {...mockNewspaper} onClose={closeNewspaper} />
+		<NewspaperView {...mockNewspaper} onRequestClose={closeNewspaper} />
 	{:else}
 		<ConstitutionView
 			raceItems={mockRaceTopItems}
 			interestGroupItems={mockInterestGroupTopItems}
 			gameState={mockState}
+			term={frame.term}
+			year={frame.year}
+			month={frame.month}
+			onNewspaperOpen={openNewspaper}
 			title={mockConstitution.title}
 			constitution={mockConstitutionMemorial}
 		/>

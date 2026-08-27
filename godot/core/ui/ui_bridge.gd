@@ -91,7 +91,7 @@ func set_ui_mode(mode: String, send_sync: bool = true) -> bool:
 	):
 		mode = "dialogue"
 	ui_mode = mode
-	world_scene = "parliament" if mode == "parliament" else "office"
+	world_scene = "parliament" if mode in ["parliament", "constitution"] else "office"
 	if scene_manager != null:
 		var method := "show_parliament" if world_scene == "parliament" else "show_office"
 		if scene_manager.has_method(method):
@@ -147,9 +147,8 @@ func _dispatch(message: Dictionary, messages: Array[Dictionary]) -> void:
 		"proposal.bonus.resolve":
 			_handle_bonus_resolve(message, messages)
 		"month.advance":
-			run_session.advance_month()
+			_advance_month_and_refresh_mode()
 			state_version += 1
-			_refresh_dialogue_mode()
 			messages.append(_full_state(message["request_id"]))
 		"constitution.revise":
 			_handle_constitution_revise(message, messages)
@@ -304,8 +303,8 @@ func _handle_bill_submit(message: Dictionary, messages: Array[Dictionary]) -> vo
 			message["request_id"]
 		)
 		return
+	_advance_month_and_refresh_mode()
 	state_version += 1
-	_refresh_dialogue_mode()
 	var payload := {
 		"state_version": state_version,
 		"submitted": result.submitted,
@@ -322,7 +321,8 @@ func _handle_bill_submit(message: Dictionary, messages: Array[Dictionary]) -> vo
 		"ui_mode": ui_mode,
 		"world_scene": world_scene,
 	}
-	messages.append(_envelope("bill.result", payload, message["request_id"]))
+	messages.append(_envelope("bill.result", payload))
+	messages.append(_full_state(message["request_id"]))
 
 
 func _handle_proposal_merge(message: Dictionary, messages: Array[Dictionary]) -> void:
@@ -463,8 +463,19 @@ func _handle_constitution_revise(message: Dictionary, messages: Array[Dictionary
 			message["request_id"]
 		)
 		return
+	_advance_month_and_refresh_mode()
 	state_version += 1
 	messages.append(_full_state(message["request_id"]))
+
+
+func _advance_month_and_refresh_mode() -> void:
+	run_session.advance_month()
+	if run_session.state.month == 0:
+		set_ui_mode("constitution", false)
+		return
+	_refresh_dialogue_mode()
+	if ui_mode != "dialogue":
+		set_ui_mode("office", false)
 
 
 func _finish_draft_mutation(messages: Array[Dictionary], request_id: Variant) -> void:

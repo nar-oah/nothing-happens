@@ -18,17 +18,33 @@
 		metrics: NewspaperMetricData[];
 		events: NewspaperEventData[];
 		comment: NewspaperCommentData;
+		busy?: boolean;
+		leaving?: boolean;
 		onCommentClick?: () => void;
 		onAdvance?: () => void;
-		onClose?: () => void;
+		onCovered?: () => void;
+		onRequestClose?: () => void;
+		onClosed?: () => void;
 	};
 	const ROTATION_DEGREES = -20;
 	const ROTATION_RADIANS = (Math.abs(ROTATION_DEGREES) * Math.PI) / 180;
 	const ROTATION_SIN = Math.sin(ROTATION_RADIANS);
 	const ROTATION_COS = Math.cos(ROTATION_RADIANS);
 
-	let { year, month, metrics, events, comment, onCommentClick, onAdvance, onClose }: Props =
-		$props();
+	let {
+		year,
+		month,
+		metrics,
+		events,
+		comment,
+		busy = false,
+		leaving = false,
+		onCommentClick,
+		onAdvance,
+		onCovered,
+		onRequestClose,
+		onClosed
+	}: Props = $props();
 	let viewportWidth = $state(1512);
 	let viewportHeight = $state(982);
 	let scrollPosition = $state(0);
@@ -46,23 +62,34 @@
 	const newspaperAxisOffset = $derived(totalScrollRange / 2 - scrollPosition);
 	const primary: StateItem = { text: '设置', isRow: false };
 	const secondary: StateItem = { text: '退出', isRow: false };
+	const interactionDisabled = $derived(busy || motionPhase !== 'active');
+
 	function syncScrollPosition() {
 		if (scrollElement) scrollPosition = scrollElement.scrollTop;
 	}
+
 	function finishMotion(event: AnimationEvent) {
 		if (event.target !== event.currentTarget) return;
 		if (motionPhase === 'entering') {
 			motionPhase = 'active';
 			backgroundCovered = true;
+			onCovered?.();
 			return;
 		}
-		if (motionPhase === 'leaving') onClose?.();
+		if (motionPhase === 'leaving') onClosed?.();
 	}
+
 	function requestClose() {
-		if (motionPhase !== 'active' || !onClose) return;
+		if (interactionDisabled || !onRequestClose) return;
+		onRequestClose();
+	}
+
+	$effect(() => {
+		if (!leaving || motionPhase === 'leaving') return;
 		backgroundCovered = false;
 		motionPhase = 'leaving';
-	}
+	});
+
 	$effect(() => {
 		const element = scrollElement;
 		const target = totalScrollRange / 2;
@@ -95,6 +122,7 @@
 					class="newspaper-close-layer"
 					type="button"
 					aria-label="关闭报纸"
+					disabled={interactionDisabled}
 					onclick={requestClose}
 				></button>
 				<div
@@ -126,6 +154,7 @@
 									{comment}
 									{onCommentClick}
 									{onAdvance}
+									disabled={interactionDisabled}
 								/>
 							</div>
 						</div>
@@ -143,7 +172,9 @@
 
 <style>
 	.newspaper-view {
-		position: relative;
+		position: fixed;
+		inset: 0;
+		z-index: 1000;
 		width: 100vw;
 		height: 100vh;
 		overflow: hidden;

@@ -24,11 +24,21 @@
 		metrics: NewspaperMetricData[];
 		events: NewspaperEventData[];
 		comment: NewspaperCommentData;
+		disabled?: boolean;
 		onCommentClick?: () => void;
 		onAdvance?: () => void;
 	};
 
-	let { year, month, metrics, events, comment, onCommentClick, onAdvance }: Props = $props();
+	let {
+		year,
+		month,
+		metrics,
+		events,
+		comment,
+		disabled = false,
+		onCommentClick,
+		onAdvance
+	}: Props = $props();
 	const sortedEvents = $derived([...events].sort((a, b) => a.countdown - b.countdown));
 	const pages = $derived.by((): NewspaperPage[] => {
 		const result: NewspaperPage[] = [{ kind: 'top' }, { kind: 'metrics' }];
@@ -77,7 +87,7 @@
 			height={NEWSPAPER_FOLD_HEIGHT}
 		>
 			{#if page.kind === 'top'}
-				<Top {year} {month} {onAdvance} />
+				<Top {year} {month} {disabled} {onAdvance} />
 			{:else if page.kind === 'metrics'}
 				<PublicMetrics {metrics} />
 			{:else if page.kind === 'front'}
