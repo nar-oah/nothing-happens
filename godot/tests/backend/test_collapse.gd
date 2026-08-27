@@ -31,25 +31,21 @@ func _test_configurable_collapse_routes(t: BackendTestContext) -> void:
 	balance.max_collapse = 10
 	balance.pressure_to_collapse = 0.0
 	balance.negative_metric_monthly_pressure = 0
-	var silent := _make_collapse_session(t, balance)
-	silent.state.collapse_level = 9
-	silent.state.pending_collapse_delta = 1
-	silent.collapse_system.settle_month(silent.context)
-	t.check_equal(silent.state.collapse_level, 10, "collapse reaches the configured integer maximum")
-	t.check_equal(
-		silent.state.ending_id,
-		&"nothing_happens",
-		"unintervened maximum collapse ends immediately without a recovery phase"
-	)
-	t.check(not silent.state.run_failed, "unintervened maximum uses the ending route")
-	silent.free()
+	var ordinary := _make_collapse_session(t, balance)
+	ordinary.state.collapse_level = 9
+	ordinary.state.pending_collapse_delta = 1
+	ordinary.collapse_system.settle_month(ordinary.context)
+	t.check_equal(ordinary.state.collapse_level, 10, "collapse reaches the configured integer maximum")
+	t.check(ordinary.state.run_failed, "maximum collapse always ends the current term")
+	t.check_equal(ordinary.state.ending_id, &"", "maximum collapse no longer enters a recovery ending route")
+	ordinary.free()
 
-	var failed := _make_collapse_session(t, balance)
-	failed.collapse_system.record_intervention(failed.context, &"test_intervention", 0.0)
-	failed.state.pending_collapse_delta = 10
-	failed.collapse_system.settle_month(failed.context)
-	t.check(failed.state.run_failed, "intervened max collapse fails the run")
-	failed.free()
+	var intervened := _make_collapse_session(t, balance)
+	intervened.collapse_system.record_intervention(intervened.context, &"test_intervention", 0.0)
+	intervened.state.pending_collapse_delta = 10
+	intervened.collapse_system.settle_month(intervened.context)
+	t.check(intervened.state.run_failed, "intervened max collapse also fails the run")
+	intervened.free()
 
 
 func _test_integer_monotonic_collapse(t: BackendTestContext) -> void:
