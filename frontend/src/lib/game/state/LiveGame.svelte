@@ -105,7 +105,8 @@
 		await mutationQueue;
 		const requestClient = client;
 		const requestStateVersion = storeValue.snapshot?.state_version;
-		if (!requestClient || requestStateVersion === undefined) throw new Error('Godot IPC is not ready.');
+		if (!requestClient || requestStateVersion === undefined)
+			throw new Error('Godot IPC is not ready.');
 		await requestClient.request(type, {
 			...payload,
 			state_version: requestStateVersion

@@ -48,7 +48,14 @@
 	<div class="constitution">
 		<div class="constitution-track">
 			<div class="constitution-content">
-				<div class="confirm-switch"><ChoreSwitch left="约法" right="确认" bind:isSwitch={confirmMode} onSwitchChange={submitRevision} /></div>
+				<div class="confirm-switch">
+					<ChoreSwitch
+						left="约法"
+						right="确认"
+						bind:isSwitch={confirmMode}
+						onSwitchChange={submitRevision}
+					/>
+				</div>
 				<MemorialVerticalConstitution {title} {constitution} {onArticleSelectionChange} />
 			</div>
 		</div>

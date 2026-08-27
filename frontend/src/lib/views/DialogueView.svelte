@@ -34,7 +34,11 @@
 
 	<div class="dialog-area">
 		<div class="choice-switch">
-			<ChoreSwitch left={dialogue.positiveEffect} right={dialogue.donationOffer} bind:isSwitch={donationChoice} />
+			<ChoreSwitch
+				left={dialogue.positiveEffect}
+				right={dialogue.donationOffer}
+				bind:isSwitch={donationChoice}
+			/>
 		</div>
 		<Dialog text={dialogueText} onclick={advanceDialogue} />
 	</div>

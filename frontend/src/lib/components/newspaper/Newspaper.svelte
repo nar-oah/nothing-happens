@@ -29,8 +29,16 @@
 		onAdvance?: () => void;
 	};
 
-	let { year, month, metrics, events, comment, disabled = false, onCommentClick, onAdvance }: Props =
-		$props();
+	let {
+		year,
+		month,
+		metrics,
+		events,
+		comment,
+		disabled = false,
+		onCommentClick,
+		onAdvance
+	}: Props = $props();
 	const sortedEvents = $derived([...events].sort((a, b) => a.countdown - b.countdown));
 	const pages = $derived.by((): NewspaperPage[] => {
 		const result: NewspaperPage[] = [{ kind: 'top' }, { kind: 'metrics' }];
@@ -62,9 +70,22 @@
 	}
 </script>
 
-<article class="newspaper relative h-$height w-$width overflow-visible text-ink-primary" style:--width={`${NEWSPAPER_FOLD_WIDTH}px`} style:--height={`${pages.length * NEWSPAPER_FOLD_HEIGHT}px`} aria-label={`第 ${year} 年 ${month} 月弦外报`}>
+<article
+	class="newspaper relative h-$height w-$width overflow-visible text-ink-primary"
+	style:--width={`${NEWSPAPER_FOLD_WIDTH}px`}
+	style:--height={`${pages.length * NEWSPAPER_FOLD_HEIGHT}px`}
+	aria-label={`第 ${year} 年 ${month} 月弦外报`}
+>
 	{#each pages as page, index (index)}
-		<MemorialHorizontalFold x={getFoldX(index)} open {index} count={pages.length} skew={skews[index]} width={NEWSPAPER_FOLD_WIDTH} height={NEWSPAPER_FOLD_HEIGHT}>
+		<MemorialHorizontalFold
+			x={getFoldX(index)}
+			open
+			{index}
+			count={pages.length}
+			skew={skews[index]}
+			width={NEWSPAPER_FOLD_WIDTH}
+			height={NEWSPAPER_FOLD_HEIGHT}
+		>
 			{#if page.kind === 'top'}
 				<Top {year} {month} {disabled} {onAdvance} />
 			{:else if page.kind === 'metrics'}
@@ -76,7 +97,12 @@
 			{:else if page.kind === 'calendar'}
 				<Calendar {month} />
 			{:else if onCommentClick}
-				<button class="h-full w-full border-0 bg-transparent p-0 text-left" type="button" onclick={onCommentClick} aria-label="切换报纸评论"><Comment {...comment} /></button>
+				<button
+					class="h-full w-full border-0 bg-transparent p-0 text-left"
+					type="button"
+					onclick={onCommentClick}
+					aria-label="切换报纸评论"><Comment {...comment} /></button
+				>
 			{:else}
 				<Comment {...comment} />
 			{/if}

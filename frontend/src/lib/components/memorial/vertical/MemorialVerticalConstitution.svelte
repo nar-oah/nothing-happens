@@ -123,7 +123,10 @@
 			{#if currentPage?.type === 'section'}
 				<MemorialConstitutionContent title={currentPage.title}>
 					{#if typeof currentPage.content === 'number'}
-						<div class="flex h-full w-full flex-col items-center justify-center bg-ink-primary font-document text-[60px] font-light leading-[48px] text-surface-amber" aria-label={`解锁要求 ${currentPage.content}`}>
+						<div
+							class="flex h-full w-full flex-col items-center justify-center bg-ink-primary font-document text-[60px] font-light leading-[48px] text-surface-amber"
+							aria-label={`解锁要求 ${currentPage.content}`}
+						>
 							{#each [0, 1, 2, 3, 4, 5] as row (row)}
 								<span>{currentPage.content}</span>
 							{/each}
@@ -131,7 +134,13 @@
 					{:else}
 						<div class="flex h-full flex-col items-center gap-[20px] pt-10">
 							{#each currentPage.content as row, rowIndex (`${currentPage.title}-${row.text}-${rowIndex}`)}
-								<MemorialConstitutionRow {...row} selected={getRowSelected(currentPage.title, rowIndex, row)} onSelectedChange={(selected) => setRowSelected(currentPage.title, rowIndex, row, selected)} onclick={() => openRow(currentPage.title, rowIndex)} />
+								<MemorialConstitutionRow
+									{...row}
+									selected={getRowSelected(currentPage.title, rowIndex, row)}
+									onSelectedChange={(selected) =>
+										setRowSelected(currentPage.title, rowIndex, row, selected)}
+									onclick={() => openRow(currentPage.title, rowIndex)}
+								/>
 							{/each}
 						</div>
 					{/if}

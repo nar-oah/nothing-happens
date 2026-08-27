@@ -102,16 +102,60 @@
 	});
 </script>
 
-<main class="newspaper-view" class:bg-surface-amber={backgroundCovered} aria-label="报纸界面" bind:clientWidth={viewportWidth} bind:clientHeight={viewportHeight} data-block-world-input>
-	<div class="newspaper-scroll" bind:this={scrollElement} aria-label="报纸内容" onscroll={syncScrollPosition}>
+<main
+	class="newspaper-view"
+	class:bg-surface-amber={backgroundCovered}
+	aria-label="报纸界面"
+	bind:clientWidth={viewportWidth}
+	bind:clientHeight={viewportHeight}
+	data-block-world-input
+>
+	<div
+		class="newspaper-scroll"
+		bind:this={scrollElement}
+		aria-label="报纸内容"
+		onscroll={syncScrollPosition}
+	>
 		<div class="newspaper-scroll-space" style:height={`${viewportHeight + totalScrollRange}px`}>
 			<div class="newspaper-viewport">
-				<button class="newspaper-close-layer" type="button" aria-label="关闭报纸" disabled={interactionDisabled} onclick={requestClose}></button>
-				<div class="newspaper-entry-motion" class:entering={motionPhase === 'entering'} class:leaving={motionPhase === 'leaving'} onanimationend={finishMotion}>
-					<div class="newspaper-rotator" style:width={`${viewportWidth}px`} style:height={`${scaledHeight}px`}>
-						<div class="newspaper-axis-track" style:transform={`translateY(${newspaperAxisOffset}px)`}>
-							<div class="newspaper-scaler" style:width={`${VERTICAL_FOLD_HEIGHT}px`} style:height={`${baseHeight}px`} style:transform={`scale(${scale})`}>
-								<Newspaper {year} {month} {metrics} {events} {comment} {onCommentClick} {onAdvance} disabled={interactionDisabled} />
+				<button
+					class="newspaper-close-layer"
+					type="button"
+					aria-label="关闭报纸"
+					disabled={interactionDisabled}
+					onclick={requestClose}
+				></button>
+				<div
+					class="newspaper-entry-motion"
+					class:entering={motionPhase === 'entering'}
+					class:leaving={motionPhase === 'leaving'}
+					onanimationend={finishMotion}
+				>
+					<div
+						class="newspaper-rotator"
+						style:width={`${viewportWidth}px`}
+						style:height={`${scaledHeight}px`}
+					>
+						<div
+							class="newspaper-axis-track"
+							style:transform={`translateY(${newspaperAxisOffset}px)`}
+						>
+							<div
+								class="newspaper-scaler"
+								style:width={`${VERTICAL_FOLD_HEIGHT}px`}
+								style:height={`${baseHeight}px`}
+								style:transform={`scale(${scale})`}
+							>
+								<Newspaper
+									{year}
+									{month}
+									{metrics}
+									{events}
+									{comment}
+									{onCommentClick}
+									{onAdvance}
+									disabled={interactionDisabled}
+								/>
 							</div>
 						</div>
 					</div>
