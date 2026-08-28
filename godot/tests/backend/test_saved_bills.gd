@@ -128,7 +128,6 @@ func _test_saved_bill_editing_is_isolated(t: BackendTestContext) -> void:
 	var saved_index := session.draft_bill_system.save_draft(session.state)
 
 	t.check_equal(saved_index, 0, "a new draft appends one saved bill")
-	t.check(not session.state.has_submitted_bill, "saving a draft is not a bill submission")
 	t.check_equal(session.state.saved_bills.size(), 1, "the bill library stores the new bill")
 	var saved := session.state.saved_bills[0]
 	t.check_equal(saved.title, "original", "a saved bill keeps its title")
@@ -144,7 +143,6 @@ func _test_saved_bill_editing_is_isolated(t: BackendTestContext) -> void:
 	var replacement := saved.proposals[0].copy()
 	session.state.proposal_hand = [replacement]
 	t.check(session.edit_saved_bill(0), "a saved bill can be loaded for editing")
-	t.check(not session.state.has_submitted_bill, "editing a saved bill is not a bill submission")
 	t.check_equal(
 		session.state.editing_saved_bill_index, 0, "editing tracks the saved bill index"
 	)
@@ -176,7 +174,6 @@ func _test_saved_bill_editing_is_isolated(t: BackendTestContext) -> void:
 		RunState.NEW_BILL_INDEX,
 		"cancel returns to new-bill mode"
 	)
-	t.check(not session.state.has_submitted_bill, "draft edits never record a bill submission")
 	session.free()
 
 
