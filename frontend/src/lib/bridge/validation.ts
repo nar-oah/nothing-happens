@@ -322,7 +322,8 @@ function isConstitutionArticleState(value: unknown): value is ConstitutionArticl
 		typeof state.active === 'boolean' &&
 		typeof state.selected === 'boolean' &&
 		typeof state.eligible === 'boolean' &&
-		typeof state.is_terminal === 'boolean'
+		typeof state.is_terminal === 'boolean' &&
+		(state.requirement_percent === null || isNumber(state.requirement_percent))
 	);
 }
 
