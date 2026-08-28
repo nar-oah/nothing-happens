@@ -47,7 +47,6 @@ var event_early_reveal_bonus_probability: float = 0.0
 var collapse_level: int = 0
 var run_phase: RunPhase = RunPhase.RUNNING
 var term_outcome: TermOutcome = TermOutcome.NONE
-var has_submitted_bill: bool = false
 var governing_months: int = 0
 
 
