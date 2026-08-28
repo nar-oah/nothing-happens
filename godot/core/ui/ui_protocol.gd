@@ -19,6 +19,7 @@ const COMMAND_TYPES: Array[String] = [
 	"month.advance",
 	"term.next",
 	"constitution.revise",
+	"constitution.column.unlock",
 ]
 
 const GAMEPLAY_MUTATIONS: Array[String] = [
@@ -35,6 +36,7 @@ const GAMEPLAY_MUTATIONS: Array[String] = [
 	"month.advance",
 	"term.next",
 	"constitution.revise",
+	"constitution.column.unlock",
 ]
 
 const UI_MODES: Array[String] = ["office", "dialogue", "parliament", "constitution"]
