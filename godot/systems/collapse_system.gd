@@ -29,16 +29,6 @@ func settle_month(context: RunContext) -> void:
 		increase(context)
 
 
-func recover_annual(context: RunContext) -> void:
-	var state := context.state
-	if state.run_phase != RunState.RunPhase.RUNNING or state.month != 0:
-		return
-	state.collapse_level = maxi(
-		state.collapse_level - context.balance.annual_collapse_recovery,
-		0
-	)
-
-
 func _has_negative_metric(values: MetricValues) -> bool:
 	for metric in Metric.all_ids():
 		if values.get_value(metric) < 0:
