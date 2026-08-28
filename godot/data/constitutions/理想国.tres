@@ -32,6 +32,7 @@ strike_group = ExtResource("5_group_1")
 strike_extends_to_group = true
 display_name = "理想国"
 row = ExtResource("row")
+is_terminal = true
 race = ExtResource("3_race_nanke")
 prerequisite = ExtResource("4_prereq")
 seat_condition = SubResource("Resource_seat_condition")
