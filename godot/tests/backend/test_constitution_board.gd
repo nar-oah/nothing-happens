@@ -159,16 +159,19 @@ func _test_column_unlock_ipc_stays_in_month_zero(t: BackendTestContext) -> void:
 	var zhushui := ZhushuiRaceDefinition.new()
 	zhushui.display_name = "驻岁"
 	var race := t.make_race("ipc axis")
+	var race_b := t.make_race("ipc companion")
 	var group := t.make_group("ipc group")
 	var row := _make_row(&"ipc_axis", "IPC轴", race, 0)
-	var regulator := _make_row(&"ipc_regulator", "监管", zhushui, 1, true, true)
+	var row_b := _make_row(&"ipc_companion", "陪测轴", race_b, 1)
+	var regulator := _make_row(&"ipc_regulator", "监管", zhushui, 2, true, true)
 	var center := _make_column(&"center", "常制", 0)
 	var right := _make_column(&"right", "新制", 12)
 	_add_article(center, row, "常制")
+	_add_article(center, row_b, "陪测常制")
 	_add_article(center, regulator, "哲人王")
 	_add_article(right, row, "新制")
 	var board := _make_board([center, right])
-	var races: Array[RaceDefinition] = [zhushui, race]
+	var races: Array[RaceDefinition] = [zhushui, race, race_b]
 	var groups: Array[InterestGroupDefinition] = [group]
 	var seats: Array[SeatDefinition] = [t.make_seat("久视", zhushui)]
 	for index in range(4):
@@ -283,11 +286,10 @@ func _test_variable_seat_denominators(t: BackendTestContext) -> void:
 	var races: Array[RaceDefinition] = [zhushui, race_a, race_b]
 	var groups: Array[InterestGroupDefinition] = [group_a, group_b]
 	var session := _make_board_session(t, races, groups, seats, board)
-	var target_counts: Dictionary[RaceDefinition, int] = {
-		zhushui: 1,
-		race_a: 12,
-		race_b: 12,
-	}
+	var target_counts: Dictionary[RaceDefinition, int] = {}
+	target_counts[zhushui] = 1
+	target_counts[race_a] = 12
+	target_counts[race_b] = 12
 	t.check(
 		session.parliament_system.assign_race_distribution(session.state, races, target_counts),
 		"ratio fixture can assign one fixed and twenty-four variable seats"
@@ -351,11 +353,10 @@ func _test_group_coloring_bias_and_hard_rule_layers(t: BackendTestContext) -> vo
 	var races: Array[RaceDefinition] = [zhushui, race_a, race_b]
 	var groups: Array[InterestGroupDefinition] = [source, biased, hard]
 	var session := _make_board_session(t, races, groups, seats, board)
-	var target_counts: Dictionary[RaceDefinition, int] = {
-		zhushui: 1,
-		race_a: 6,
-		race_b: 6,
-	}
+	var target_counts: Dictionary[RaceDefinition, int] = {}
+	target_counts[zhushui] = 1
+	target_counts[race_a] = 6
+	target_counts[race_b] = 6
 	t.check(
 		session.parliament_system.assign_race_distribution(session.state, races, target_counts),
 		"layer fixture assigns a stable six-seat row per test race"
