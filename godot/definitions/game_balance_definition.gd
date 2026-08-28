@@ -54,4 +54,3 @@ class_name GameBalanceDefinition
 @export_group("崩溃")
 @export_range(1, 999999, 1) var max_collapse: int = 100
 @export_range(0, 100, 1) var collapse_step: int = 1
-@export_range(0, 100, 1) var annual_collapse_recovery: int = 1
