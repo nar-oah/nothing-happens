@@ -9,7 +9,8 @@ class_name RunSession
 @export var race_definitions: Array[RaceDefinition] = []
 @export var interest_groups: Array[InterestGroupDefinition] = []
 @export var seat_definitions: Array[SeatDefinition] = []
-# Legacy flat content is retained for tests and external callers without a board.
+# Without a board this stores legacy flat content. With a board it is refreshed from
+# ConstitutionBoardDefinition so serializers and external callers share one article order.
 @export var constitution_articles: Array[ConstitutionArticleDefinition] = []
 
 var state: RunState
@@ -43,10 +44,10 @@ func configure_content(
 	race_definitions = races
 	interest_groups = groups
 	seat_definitions = seats
-	constitution_articles = articles
 	# configure_content is an explicit content override. Passing no board intentionally
 	# selects the legacy flat-article path instead of retaining the exported default board.
 	constitution_board = board
+	constitution_articles = board.get_articles() if board != null else articles
 
 
 func start_new_run() -> void:
@@ -66,6 +67,8 @@ func _start_term(term_number: int) -> bool:
 	if seat_definitions.is_empty():
 		push_error("RunSession requires seat definitions.")
 		return false
+	if constitution_board != null:
+		constitution_articles = constitution_board.get_articles()
 	state = RunState.new()
 	state.term = maxi(term_number, 1)
 	time_system = TimeSystem.new()
@@ -107,11 +110,7 @@ func _start_term(term_number: int) -> bool:
 	context.interest_groups = interest_groups
 	context.seat_definitions = seat_definitions
 	context.constitution_board = constitution_board
-	context.constitution_articles = (
-		constitution_board.get_articles()
-		if constitution_board != null
-		else constitution_articles
-	)
+	context.constitution_articles = constitution_articles
 	context.meta_progression = meta_progression
 	if not race_system.initialize_races(state, race_definitions, balance):
 		return false
