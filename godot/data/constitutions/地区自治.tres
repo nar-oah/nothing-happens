@@ -20,6 +20,7 @@ required_rate = 0.9
 script = ExtResource("1_article_script")
 display_name = "地区自治"
 row = ExtResource("row")
+is_terminal = true
 race = ExtResource("3_race_peach")
 prerequisite = ExtResource("4_prereq")
 seat_condition = SubResource("Resource_seat_condition")
