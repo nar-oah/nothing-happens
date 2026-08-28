@@ -43,13 +43,15 @@
 			{text}
 		</p>
 	</div>
-	<div
-		class:bg-ink-primary={!selected}
-		class:bg-surface-amber={selected}
-		class:text-surface-amber={!selected}
-		class:text-ink-primary={selected}
-		class="flex whitespace-nowrap font-document text-16 font-light leading-16 [word-break:break-word] text-surface-amber"
-	>
-		<span>{number}</span><span>%</span>
-	</div>
+	{#if number !== ''}
+		<div
+			class:bg-ink-primary={!selected}
+			class:bg-surface-amber={selected}
+			class:text-surface-amber={!selected}
+			class:text-ink-primary={selected}
+			class="flex whitespace-nowrap font-document text-16 font-light leading-16 [word-break:break-word] text-surface-amber"
+		>
+			<span>{number}</span><span>%</span>
+		</div>
+	{/if}
 </button>
