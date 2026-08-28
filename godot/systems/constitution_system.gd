@@ -4,29 +4,55 @@ class_name ConstitutionSystem
 
 func initialize(context: RunContext) -> bool:
 	context.state.constitution = ConstitutionState.new()
+	if context.constitution_board != null:
+		return _initialize_from_board(context)
+	return _initialize_legacy(context)
+
+
+func _initialize_from_board(context: RunContext) -> bool:
+	var board := context.constitution_board
+	if not board.validate():
+		return false
+	var center := board.get_center_column_index()
+	for row in board.get_rows():
+		var initial := board.get_article(row, center)
+		if initial == null:
+			push_error("Every constitution row requires a center article.")
+			return false
+		if initial.get_race() != row.race:
+			push_error("Constitution row race must match its center article race.")
+			return false
+		context.state.constitution.active_articles[row] = initial
+	context.constitution_articles = board.get_articles()
+	refresh_runtime(context)
+	return true
+
+
+func _initialize_legacy(context: RunContext) -> bool:
 	var seen: Dictionary[ConstitutionArticleDefinition, bool] = {}
 	for definition in context.constitution_articles:
-		if (
-			definition == null
-			or seen.has(definition)
-			or definition.race == null
-			or definition.race not in context.race_definitions
-		):
+		if definition == null or seen.has(definition) or definition.get_race() == null:
 			push_error("Constitution articles must be unique Resources owned by a content race.")
 			return false
 		seen[definition] = true
 	for race in context.race_definitions:
 		var initial: ConstitutionArticleDefinition
 		for definition in context.constitution_articles:
-			if definition == null or definition.race != race or not definition.is_initial:
+			if definition.get_race() != race or not definition.is_initial:
 				continue
 			if initial != null:
-				push_error("A race can have at most one initial constitution article.")
+				push_error("A race can have at most one legacy initial constitution article.")
 				return false
 			initial = definition
-		if initial != null:
-			context.state.constitution.active_articles[race] = initial
-			context.state.constitution.clicked_articles[initial] = true
+		if initial == null:
+			continue
+		var row := initial.row
+		if row == null:
+			row = ConstitutionRowDefinition.new()
+			row.id = StringName("legacy_%s" % race.display_name)
+			row.display_name = race.display_name
+			row.race = race
+		context.state.constitution.active_articles[row] = initial
 	refresh_runtime(context)
 	return true
 
@@ -37,44 +63,93 @@ func activate_initial_articles(context: RunContext) -> void:
 
 
 func can_revise(context: RunContext, definition: ConstitutionArticleDefinition) -> bool:
-	if (
-		definition == null
-		or definition.race == null
-		or not context.state.constitution.revision_available
-		or definition.race not in context.race_definitions
-		or definition not in context.constitution_articles
-		or context.state.constitution.get_active_article(definition.race) == definition
-	):
+	if definition == null or not context.state.constitution.revision_available:
+		return false
+	if context.constitution_board == null:
+		return _can_revise_legacy(context, definition)
+	if context.state.month != 0 or definition.row == null:
+		return false
+	var board := context.constitution_board
+	var target_column := board.get_column_index_for_article(definition)
+	if target_column < 0:
+		return false
+	var current := context.state.constitution.get_active_article_for_row(definition.row)
+	if current == null or current == definition:
+		return false
+	if definition.row.free_navigation:
+		return definition.can_activate(context)
+	if not definition.row.ignores_column_unlocks:
+		if context.meta_progression == null:
+			return false
+		if not context.meta_progression.is_column_unlocked(board.columns[target_column]):
+			return false
+	var current_column := board.get_column_index_for_article(current)
+	var center := board.get_center_column_index()
+	if current_column < 0 or center < 0:
+		return false
+	var expected: ConstitutionArticleDefinition
+	if current_column == center:
+		if target_column < center:
+			expected = _next_article_outward(board, definition.row, current_column, -1)
+		elif target_column > center:
+			expected = _next_article_outward(board, definition.row, current_column, 1)
+	else:
+		var direction := -1 if current_column < center else 1
+		expected = _next_article_outward(board, definition.row, current_column, direction)
+	if expected != definition:
 		return false
 	return definition.can_activate(context)
+
+
+func _can_revise_legacy(context: RunContext, definition: ConstitutionArticleDefinition) -> bool:
+	var race := definition.get_race()
+	if race == null or race not in context.race_definitions or definition not in context.constitution_articles:
+		return false
+	return context.state.constitution.get_active_article(race) != definition and definition.can_activate(context)
 
 
 func revise(context: RunContext, definition: ConstitutionArticleDefinition) -> bool:
 	if not can_revise(context, definition):
 		return false
-	var previous := context.state.constitution.get_active_article(definition.race)
-	var previous_races: Dictionary[SeatState, RaceDefinition] = {}
-	for seat in context.state.seats:
-		previous_races[seat] = seat.race
-	context.state.constitution.active_articles[definition.race] = definition
-	if not context.race_system.allocate_seats(context):
-		for seat in previous_races:
-			seat.race = previous_races[seat]
-		if previous == null:
-			context.state.constitution.active_articles.erase(definition.race)
-		else:
-			context.state.constitution.active_articles[definition.race] = previous
-		refresh_runtime(context)
+	var row := definition.row
+	if row == null:
+		for candidate in context.state.constitution.active_articles:
+			if candidate.race == definition.get_race():
+				row = candidate
+				break
+	if row == null:
 		return false
+	var previous := context.state.constitution.get_active_article_for_row(row)
+	context.state.constitution.active_articles[row] = definition
+	var target_race := definition.get_race()
+	if target_race != null and not (target_race is ZhushuiRaceDefinition):
+		if not context.race_system.enforce_constitution_constraints(context, target_race):
+			context.state.constitution.active_articles[row] = previous
+			refresh_runtime(context)
+			return false
 	if previous != null:
 		previous.on_deactivate(context)
 	_restore_constitution_base_groups(context)
 	apply_influence_rules(context)
 	refresh_runtime(context)
-	context.state.constitution.clicked_articles[definition] = true
 	context.state.constitution.revision_available = false
 	definition.on_activate(context)
 	return true
+
+
+func _next_article_outward(
+	board: ConstitutionBoardDefinition,
+	row: ConstitutionRowDefinition,
+	from_column: int,
+	direction: int
+) -> ConstitutionArticleDefinition:
+	var index := from_column + direction
+	while index >= 0 and index < board.columns.size():
+		var article := board.get_article(row, index)
+		if article != null:
+			return article
+		index += direction
+	return null
 
 
 func refresh_runtime(context: RunContext) -> void:
@@ -97,8 +172,14 @@ func refresh_runtime(context: RunContext) -> void:
 
 func get_active_articles(context: RunContext) -> Array[ConstitutionArticleDefinition]:
 	var result: Array[ConstitutionArticleDefinition] = []
-	for race in context.race_definitions:
-		var article := context.state.constitution.get_active_article(race)
+	if context.constitution_board != null:
+		for row in context.constitution_board.get_rows():
+			var article := context.state.constitution.get_active_article_for_row(row)
+			if article != null:
+				result.append(article)
+		return result
+	for row in context.state.constitution.active_articles:
+		var article: ConstitutionArticleDefinition = context.state.constitution.active_articles[row]
 		if article != null:
 			result.append(article)
 	return result
@@ -113,9 +194,7 @@ func get_available_policies(context: RunContext) -> Array[PolicyDefinition]:
 	return result
 
 
-func get_available_policy(
-	context: RunContext, display_name: String
-) -> PolicyDefinition:
+func get_available_policy(context: RunContext, display_name: String) -> PolicyDefinition:
 	for policy in get_available_policies(context):
 		if policy.display_name == display_name:
 			return policy
@@ -150,12 +229,10 @@ func modify_vote(vote_context: VoteContext) -> void:
 		article.modify_vote(vote_context)
 
 
-func get_race_seat_constraint(
-	context: RunContext, race: RaceDefinition
-) -> RaceSeatConstraint:
+func get_race_seat_constraint(context: RunContext, race: RaceDefinition) -> RaceSeatConstraint:
 	if race is ZhushuiRaceDefinition:
 		return RaceSeatConstraint.new(1, 1)
-	var pool := _get_variable_seat_pool(context)
+	var pool := context.state.seats.size()
 	var article := context.state.constitution.get_active_article(race)
 	var minimum := 0 if article == null else ceili(article.race_min_seat_rate * pool)
 	var maximum := pool if article == null else floori(article.race_max_seat_rate * pool)
@@ -165,13 +242,18 @@ func get_race_seat_constraint(
 	return RaceSeatConstraint.new(minimum, maximum)
 
 
-func get_race_seat_constraints(
-	context: RunContext
-) -> Dictionary[RaceDefinition, RaceSeatConstraint]:
+func get_race_seat_constraints(context: RunContext) -> Dictionary[RaceDefinition, RaceSeatConstraint]:
 	var result: Dictionary[RaceDefinition, RaceSeatConstraint] = {}
 	for race in context.race_definitions:
 		result[race] = get_race_seat_constraint(context, race)
 	return result
+
+
+func get_group_biases_for_race(
+	context: RunContext, race: RaceDefinition
+) -> Array[ConstitutionGroupBiasDefinition]:
+	var article := context.state.constitution.get_active_article(race)
+	return [] if article == null else article.group_biases
 
 
 func apply_influence_rules(context: RunContext) -> void:
@@ -182,9 +264,7 @@ func apply_influence_rules(context: RunContext) -> void:
 
 
 func _apply_influence_rule(context: RunContext, rule: ConstitutionInfluenceRule) -> void:
-	var eligible := context.parliament_system.get_influenceable_seats(
-		context.state, rule.race
-	)
+	var eligible := context.parliament_system.get_influenceable_seats(context.state, rule.race)
 	if eligible.is_empty():
 		return
 	var desired := 0
@@ -247,9 +327,7 @@ func _append_effective_group(
 		result.append(effective)
 
 
-func _resolve_merger(
-	state: RunState, group: InterestGroupDefinition
-) -> InterestGroupDefinition:
+func _resolve_merger(state: RunState, group: InterestGroupDefinition) -> InterestGroupDefinition:
 	var current := group
 	var visited: Dictionary[InterestGroupDefinition, bool] = {}
 	while current != null and state.constitution.group_mergers.has(current):
@@ -273,11 +351,3 @@ func _has_anchor(context: RunContext, race: RaceDefinition) -> bool:
 		if definition != null and definition.anchor_race == race:
 			return true
 	return false
-
-
-func _get_variable_seat_pool(context: RunContext) -> int:
-	var pool := context.state.seats.size()
-	for definition in context.seat_definitions:
-		if definition != null and definition.anchor_race is ZhushuiRaceDefinition:
-			return maxi(pool - 1, 0)
-	return pool
