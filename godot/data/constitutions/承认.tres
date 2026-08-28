@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://dajy5425i5dpq" path="res://definitions/constitution_article_definition.gd" id="1_article_script"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
 [ext_resource type="Resource" uid="uid://c2eco18e42n34" path="res://data/races/yano.tres" id="3_race_yano"]
+[ext_resource type="Resource" path="res://data/constitution_rows/偃偶.tres" id="row"]
 [ext_resource type="Resource" path="res://data/constitutions/有限.tres" id="4_prereq"]
 [ext_resource type="Resource" path="res://data/interest_groups/造身公所.tres" id="5_group_1"]
 [ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="6_seat_condition_script"]
@@ -25,6 +26,7 @@ required_rate = 0.5
 [resource]
 script = ExtResource("1_article_script")
 display_name = "承认"
+row = ExtResource("row")
 race = ExtResource("3_race_yano")
 prerequisite = ExtResource("4_prereq")
 seat_condition = SubResource("Resource_seat_condition")
