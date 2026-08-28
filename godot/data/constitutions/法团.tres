@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://dtldpcolvfdl0" path="res://definitions/biyi_constitution_article_definition.gd" id="1_article_script"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
 [ext_resource type="Resource" uid="uid://bw162ei21njtt" path="res://data/races/biyi.tres" id="3_race_biyi"]
+[ext_resource type="Resource" path="res://data/constitution_rows/文化.tres" id="row"]
 [ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/human.tres" id="4_race_human"]
 [ext_resource type="Resource" uid="uid://bto7mkhf8cqca" path="res://data/races/nanke.tres" id="5_race_nanke"]
 [ext_resource type="Resource" uid="uid://b4e7rdu770lrv" path="res://data/races/peach_blossom.tres" id="6_race_peach"]
@@ -59,6 +60,7 @@ required_rate = 0.9
 script = ExtResource("1_article_script")
 yin_yang_adjustment_rate = 0.1
 display_name = "法团"
+row = ExtResource("row")
 race = ExtResource("3_race_biyi")
 prerequisite = ExtResource("8_prereq")
 seat_condition = SubResource("Resource_seat_condition")
