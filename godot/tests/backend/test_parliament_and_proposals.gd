@@ -74,7 +74,6 @@ func _test_proposal_gameplay_equivalence(t: BackendTestContext) -> void:
 	proposal.base_effect.tax = 8
 	proposal.positive_effect.wage = 5
 	proposal.lag_months = 4
-	proposal.collapse_impact = 2
 	proposal.donation_offer = 5.0
 	proposal.bonus_choice_resolved = true
 	proposal.positive_trait_accepted = true
@@ -105,7 +104,6 @@ func _test_proposal_gameplay_equivalence(t: BackendTestContext) -> void:
 	var ordinary := t.make_proposal(group)
 	ordinary.base_effect.tax = 8
 	ordinary.lag_months = 4
-	ordinary.collapse_impact = 2
 	var converted := ordinary.copy()
 	converted.donation_offer = 20.0
 	converted.positive_trait_accepted = false
@@ -252,7 +250,7 @@ func _test_pending_choice_blocks_submission(t: BackendTestContext) -> void:
 	)
 	var result := session.submit_draft()
 	t.check(not result.submitted, "unresolved positive choice cannot be submitted")
-	t.check(not session.state.has_intervened, "rejected pending choice records no intervention")
+	t.check(not session.state.has_submitted_bill, "rejected pending choice records no submission")
 	session.free()
 
 
@@ -284,6 +282,7 @@ func _test_failed_draft_does_not_record_sources(t: BackendTestContext) -> void:
 	session.state.draft_bill.proposals.append(proposal)
 	var result := session.submit_draft()
 	t.check(result.submitted and not result.passed, "neutral draft fails its vote")
+	t.check(session.state.has_submitted_bill, "failed vote still records a real submission")
 	t.check(session.state.annual_proposal_slot_counts.is_empty(), "failed draft records no source")
 	var enacted := DraftBillState.new()
 	enacted.proposals.append(proposal)
