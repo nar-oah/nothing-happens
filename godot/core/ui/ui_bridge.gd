@@ -18,7 +18,15 @@ func setup(session: RunSession, manager: Node = null, texture: Control = null) -
 	run_session = session
 	scene_manager = manager
 	set_cef_texture(texture)
-	_refresh_dialogue_mode()
+	if (
+		run_session != null
+		and run_session.state != null
+		and run_session.state.run_phase == RunState.RunPhase.RUNNING
+		and run_session.state.month == 0
+	):
+		set_ui_mode("constitution", false)
+	else:
+		_refresh_dialogue_mode()
 
 
 func set_cef_texture(texture: Control) -> void:
@@ -87,6 +95,7 @@ func set_ui_mode(mode: String, send_sync: bool = true) -> bool:
 	if (
 		run_session != null
 		and run_session.state != null
+		and run_session.state.run_phase == RunState.RunPhase.RUNNING
 		and _serializer.pending_dialogue(run_session.state) != null
 	):
 		mode = "dialogue"
@@ -147,9 +156,11 @@ func _dispatch(message: Dictionary, messages: Array[Dictionary]) -> void:
 		"proposal.bonus.resolve":
 			_handle_bonus_resolve(message, messages)
 		"month.advance":
-			_advance_month_and_refresh_mode()
-			state_version += 1
+			if _advance_month_and_refresh_mode():
+				state_version += 1
 			messages.append(_full_state(message["request_id"]))
+		"term.next":
+			_handle_term_next(message, messages)
 		"constitution.revise":
 			_handle_constitution_revise(message, messages)
 
