@@ -34,45 +34,56 @@ func _test_donation_pool_spending_and_detection(t: BackendTestContext) -> void:
 	balance.automatic_draw_count = 0
 	balance.event_spawn_count_min = 0
 	balance.event_spawn_count_max = 0
-	balance.donation_detection_probability = 0.0
-	balance.donation_detection_collapse = 7
+	balance.collapse_step = 3
+	balance.donation_detection_probability = 1.0
 	var session := t.make_session(
-		[race], [group], t.make_seats(1, "donation"), [], balance
+		[race], [group], t.make_seats(2, "donation"), [], balance
 	)
-	var seat := session.state.seats[0]
-	session.state.political_donation_pool = 5.0
-	t.check(session.vote_system.set_donation(session.context, seat, 3.0), "donation spends available pool")
-	t.check_approx(session.state.political_donation_pool, 2.0, "successful allocation deducts pool")
-	t.check_approx(session.state.vote_donations[seat.definition], 3.0, "allocation key is SeatDefinition")
+	var first_seat := session.state.seats[0]
+	var second_seat := session.state.seats[1]
+	session.state.political_donation_pool = 10.0
+	var rng_before_edit := session.random_system.rng.state
+	t.check(session.vote_system.set_donation(session.context, first_seat, 3.0), "donation spends available pool")
+	t.check(session.vote_system.set_donation(session.context, first_seat, 4.0), "donation draft can be edited")
+	t.check(session.vote_system.set_donation(session.context, second_seat, 2.0), "a second donation can be drafted")
+	t.check_equal(session.random_system.rng.state, rng_before_edit, "editing donation values performs no detection")
+	t.check_equal(session.state.collapse_level, 0, "editing donation values adds no collapse")
+	t.check(session.state.saved_bills.is_empty(), "editing donations does not save a bill")
+	t.check_approx(session.state.political_donation_pool, 4.0, "only final donation increments are charged")
+	t.check_approx(session.state.vote_donations[first_seat.definition], 4.0, "allocation key is SeatDefinition")
 	t.check(
-		not session.vote_system.set_donation(session.context, seat, 6.0),
+		not session.vote_system.set_donation(session.context, first_seat, 20.0),
 		"allocation cannot exceed remaining pool"
 	)
-	t.check_approx(session.state.political_donation_pool, 2.0, "failed overspend changes no pool")
-	t.check_approx(session.state.vote_donations[seat.definition], 3.0, "failed overspend keeps allocation")
-	var preview := session.vote_system.preview_vote(DraftBillState.new(), session.context)
+	t.check_approx(session.state.political_donation_pool, 4.0, "failed overspend changes no pool")
+	t.check_approx(session.state.vote_donations[first_seat.definition], 4.0, "failed overspend keeps allocation")
+	var draft := DraftBillState.new()
+	draft.proposals.append(t.make_proposal(group))
+	var preview := session.vote_system.preview_vote(draft, session.context)
 	t.check_equal(
 		t.vote_for_race(preview, race).position,
 		SeatVoteState.Position.SUPPORT,
 		"allocated donation contributes to vote score"
 	)
-	session.state.donation_detection_probability = 1.0
-	t.check(session.vote_system.set_donation(session.context, seat, 4.0), "allocation can be increased")
-	t.check_approx(session.state.political_donation_pool, 1.0, "only incremental donation is charged")
-	t.check_equal(session.state.pending_collapse_delta, 7, "certain detection adds configured integer collapse")
-	session.vote_system.clear_donations(session.state)
-	t.check(session.state.vote_donations.is_empty(), "vote completion clears allocations")
+	session.state.draft_bill = draft
+	var result := session.submit_draft()
+	t.check(result.submitted, "non-empty draft is formally submitted")
+	t.check_equal(session.state.collapse_level, 6, "submission detects each final donation with shared steps")
+	t.check_equal(typeof(session.state.collapse_level), TYPE_INT, "donation collapse remains int")
+	t.check(session.state.vote_donations.is_empty(), "vote completion clears final allocations")
 	session.free()
 
 
 func _test_zhushui_intrinsic_support(t: BackendTestContext) -> void:
 	var race := ZhushuiRaceDefinition.new()
 	race.display_name = "zhushui"
+	var executive_seat := t.make_seat("zhushui executive", race)
 	var session := t.make_session(
-		[race], [t.make_group("group")], t.make_seats(1, "zhushui")
+		[race], [t.make_group("group")], [executive_seat]
 	)
 	var result := session.vote_system.preview_vote(DraftBillState.new(), session.context)
 	var vote := t.vote_for_race(result, race)
+	t.check(vote != null, "Zhushui's fixed executive seat participates in the vote")
 	t.check_equal(vote.position, SeatVoteState.Position.SUPPORT, "Zhushui subclass always supports")
 	t.check(vote.breakdown.has(&"zhushui_intrinsic_support"), "intrinsic subclass adds its reason")
 	session.free()

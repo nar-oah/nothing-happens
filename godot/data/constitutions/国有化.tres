@@ -1,7 +1,9 @@
 [gd_resource type="Resource" script_class="BiyiConstitutionArticleDefinition" format=3 uid="uid://do2fqf4b02kpc"]
 
+[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="1_a88qu"]
 [ext_resource type="Script" uid="uid://dtldpcolvfdl0" path="res://definitions/biyi_constitution_article_definition.gd" id="1_article_script"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
+[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_wwtgu"]
 [ext_resource type="Resource" uid="uid://bw162ei21njtt" path="res://data/races/biyi.tres" id="3_race_biyi"]
 [ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/human.tres" id="4_race_human"]
 [ext_resource type="Resource" uid="uid://bto7mkhf8cqca" path="res://data/races/nanke.tres" id="5_race_nanke"]
@@ -13,6 +15,7 @@
 [ext_resource type="Resource" uid="uid://d0tsptffgoh8s" path="res://data/policies/官营平价.tres" id="11_policy_1"]
 [ext_resource type="Resource" uid="uid://bs7ofkv8hds3c" path="res://data/policies/官业扩工.tres" id="12_policy_2"]
 [ext_resource type="Resource" uid="uid://rj2c4acnwl5f" path="res://data/policies/统购统销.tres" id="13_policy_3"]
+[ext_resource type="Resource" path="res://data/constitution_rows/文化.tres" id="row"]
 
 [sub_resource type="Resource" id="Resource_influence_1"]
 script = ExtResource("10_influence_rule_script")
@@ -53,6 +56,7 @@ rate = 0.5
 script = ExtResource("1_article_script")
 yin_yang_adjustment_rate = 0.1
 display_name = "国有化"
+row = ExtResource("row")
 race = ExtResource("3_race_biyi")
 prerequisite = ExtResource("8_prereq")
 policies = Array[ExtResource("2_policy_script")]([ExtResource("11_policy_1"), ExtResource("12_policy_2"), ExtResource("13_policy_3")])

@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://definitions/regulation_constitution_article_definition.gd" id="1_article_script"]
 [ext_resource type="Script" path="res://definitions/policy_definition.gd" id="2_policy_script"]
 [ext_resource type="Resource" path="res://data/races/zhushui.tres" id="3_race_zhushui"]
+[ext_resource type="Resource" path="res://data/constitution_rows/监管.tres" id="row"]
 [ext_resource type="Resource" path="res://data/policies/权宜平准.tres" id="4_policy_1"]
 [ext_resource type="Resource" path="res://data/policies/特旨通商.tres" id="5_policy_2"]
 [ext_resource type="Resource" path="res://data/policies/临机调工.tres" id="6_policy_3"]
@@ -10,8 +11,10 @@
 [resource]
 script = ExtResource("1_article_script")
 display_name = "哲人王"
+row = ExtResource("row")
 race = ExtResource("3_race_zhushui")
-is_initial = true
+participates_in_variable_seat_allocation = false
+expectation_growth_rate = -1.0
 donation_detection_probability = 0.0
 event_early_reveal_bonus_probability = 0.0
 policies = Array[ExtResource("2_policy_script")]([ExtResource("4_policy_1"), ExtResource("5_policy_2"), ExtResource("6_policy_3")])

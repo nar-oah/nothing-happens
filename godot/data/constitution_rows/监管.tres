@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ConstitutionRowDefinition" format=3]
+
+[ext_resource type="Script" path="res://definitions/constitution_row_definition.gd" id="1_script"]
+[ext_resource type="Resource" path="res://data/races/zhushui.tres" id="2_race"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"regulation"
+display_name = "监管"
+race = ExtResource("2_race")
+display_order = 5
+ignores_column_unlocks = true
+free_navigation = true

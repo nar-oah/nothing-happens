@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ConstitutionColumnDefinition" format=3]
+
+[ext_resource type="Script" path="res://definitions/constitution_column_definition.gd" id="1"]
+[ext_resource type="Resource" path="res://data/constitutions/朝贡.tres" id="2"]
+[ext_resource type="Resource" path="res://data/constitutions/汉化.tres" id="3"]
+[ext_resource type="Resource" path="res://data/constitutions/承认.tres" id="4"]
+[ext_resource type="Resource" path="res://data/constitutions/互助.tres" id="5"]
+[ext_resource type="Resource" path="res://data/constitutions/有限监管.tres" id="6"]
+
+[resource]
+script = ExtResource("1")
+id = &"deviation"
+display_name = "偏制"
+unlock_cost_months = 12
+articles = Array[ConstitutionArticleDefinition]([ExtResource("2"), ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("6")])

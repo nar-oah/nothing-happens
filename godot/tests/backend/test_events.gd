@@ -117,13 +117,12 @@ func _test_hidden_growth_public_window_and_resolution(t: BackendTestContext) -> 
 	for index in range(8):
 		session.event_system.settle_month(session.context)
 	t.check_equal(event.months_alive, 9, "remaining-three window begins after nine months")
-	t.check_approx(event.growth_progress, 1.0, "remaining-three window forces full growth")
+	t.check_approx(event.growth_progress, 0.5, "forced publication immediately applies satisfied relief")
 	t.check(event.known and event.published, "remaining-three window forces publication")
 	t.check(event.public_window_entered, "public-window entry is recorded exactly once")
+	t.check_equal(event.phase, EventState.Phase.RELIEVING, "public satisfied event begins relieving on the same settlement")
 	session.event_system.settle_month(session.context)
-	t.check_equal(event.phase, EventState.Phase.RELIEVING, "known event begins reducing demand")
-	t.check_approx(event.growth_progress, 0.5, "relief speed reduces demand progress")
-	session.event_system.settle_month(session.context)
+	t.check_approx(event.growth_progress, 0.0, "next relief tick reaches zero demand")
 	t.check_equal(event.phase, EventState.Phase.RESOLVED, "known event resolves at zero demand")
 	t.check_equal(
 		session.state.get_race(race).resolved_events_this_year, 1,
@@ -169,7 +168,7 @@ func _test_deadline_failure(t: BackendTestContext) -> void:
 	race.increase_employment = true
 	var balance := _event_balance()
 	t.check_equal(balance.event_lifetime_months, 12, "default event deadline is twelve months")
-	t.check_approx(balance.event_failure_collapse, 1.0, "default event failure collapse is one")
+	t.check_equal(balance.collapse_step, 1, "event failure uses the shared collapse step")
 	var session := t.make_session(
 		[race], [t.make_group("group")], t.make_seats(1, "failure"), [], balance
 	)
@@ -182,7 +181,8 @@ func _test_deadline_failure(t: BackendTestContext) -> void:
 	t.check_equal(event.months_alive, 12, "event fails at its twelve-month deadline")
 	t.check_equal(event.phase, EventState.Phase.FAILED, "unresolved event fails at deadline")
 	t.check(event.known and event.published, "failed event is public")
-	t.check_approx(session.state.pending_collapse_delta, 1.0, "failure adds exactly one collapse")
+	t.check_equal(session.state.collapse_level, 1, "failure adds exactly one collapse step")
+	t.check_equal(typeof(session.state.collapse_level), TYPE_INT, "event collapse remains int")
 	t.check_equal(
 		session.state.get_race(race).resolved_events_this_year, 0,
 		"failure does not count as resolution"

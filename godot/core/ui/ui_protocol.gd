@@ -17,7 +17,9 @@ const COMMAND_TYPES: Array[String] = [
 	"proposal.merge",
 	"proposal.bonus.resolve",
 	"month.advance",
+	"term.next",
 	"constitution.revise",
+	"constitution.column.unlock",
 ]
 
 const GAMEPLAY_MUTATIONS: Array[String] = [
@@ -32,7 +34,9 @@ const GAMEPLAY_MUTATIONS: Array[String] = [
 	"proposal.merge",
 	"proposal.bonus.resolve",
 	"month.advance",
+	"term.next",
 	"constitution.revise",
+	"constitution.column.unlock",
 ]
 
 const UI_MODES: Array[String] = ["office", "dialogue", "parliament", "constitution"]

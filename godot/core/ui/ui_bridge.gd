@@ -18,7 +18,15 @@ func setup(session: RunSession, manager: Node = null, texture: Control = null) -
 	run_session = session
 	scene_manager = manager
 	set_cef_texture(texture)
-	_refresh_dialogue_mode()
+	if (
+		run_session != null
+		and run_session.state != null
+		and run_session.state.run_phase == RunState.RunPhase.RUNNING
+		and run_session.state.month == 0
+	):
+		set_ui_mode("constitution", false)
+	else:
+		_refresh_dialogue_mode()
 
 
 func set_cef_texture(texture: Control) -> void:
@@ -87,6 +95,7 @@ func set_ui_mode(mode: String, send_sync: bool = true) -> bool:
 	if (
 		run_session != null
 		and run_session.state != null
+		and run_session.state.run_phase == RunState.RunPhase.RUNNING
 		and _serializer.pending_dialogue(run_session.state) != null
 	):
 		mode = "dialogue"
@@ -147,19 +156,21 @@ func _dispatch(message: Dictionary, messages: Array[Dictionary]) -> void:
 		"proposal.bonus.resolve":
 			_handle_bonus_resolve(message, messages)
 		"month.advance":
-			_advance_month_and_refresh_mode()
-			state_version += 1
+			if _advance_month_and_refresh_mode():
+				state_version += 1
 			messages.append(_full_state(message["request_id"]))
+		"term.next":
+			_handle_term_next(message, messages)
 		"constitution.revise":
 			_handle_constitution_revise(message, messages)
+		"constitution.column.unlock":
+			_handle_constitution_column_unlock(message, messages)
 
 
 func _handle_input_regions(message: Dictionary, messages: Array[Dictionary]) -> void:
 	var raw_regions: Variant = message["payload"].get("regions")
 	if not raw_regions is Array:
-		messages.append(
-			_error("invalid_field", "payload.regions must be an array.", message["request_id"])
-		)
+		messages.append(_error("invalid_field", "payload.regions must be an array.", message["request_id"]))
 		return
 	var regions: Array[Dictionary] = []
 	for raw_region in raw_regions:
@@ -198,9 +209,7 @@ func _handle_draft_proposal_add(message: Dictionary, messages: Array[Dictionary]
 	if not index["ok"]:
 		_append_mutation_error(messages, index["error"], message["request_id"])
 		return
-	if not run_session.draft_bill_system.move_proposal_from_hand(
-		run_session.state, index["value"]
-	):
+	if not run_session.draft_bill_system.move_proposal_from_hand(run_session.state, index["value"]):
 		_append_mutation_error(
 			messages,
 			{"code": "invalid_hand_index", "message": "Proposal cannot enter the draft."},
@@ -215,9 +224,7 @@ func _handle_draft_proposal_remove(message: Dictionary, messages: Array[Dictiona
 	if not index["ok"]:
 		_append_mutation_error(messages, index["error"], message["request_id"])
 		return
-	if not run_session.draft_bill_system.return_proposal_to_hand(
-		run_session.state, index["value"]
-	):
+	if not run_session.draft_bill_system.return_proposal_to_hand(run_session.state, index["value"]):
 		_append_mutation_error(
 			messages,
 			{"code": "invalid_draft_index", "message": "Draft proposal index is invalid."},
@@ -236,9 +243,7 @@ func _handle_draft_policy_add(message: Dictionary, messages: Array[Dictionary]) 
 			message["request_id"]
 		)
 		return
-	if not run_session.draft_bill_system.add_available_policy_by_name(
-		run_session.context, display_name
-	):
+	if not run_session.draft_bill_system.add_available_policy_by_name(run_session.context, display_name):
 		_append_mutation_error(
 			messages,
 			{
@@ -377,9 +382,7 @@ func _handle_proposal_merge(message: Dictionary, messages: Array[Dictionary]) ->
 	for index in hand_indices:
 		mothers.append(state.proposal_hand[index])
 	var negative_base: ProposalInstance = state.proposal_hand[negative_index["value"]]
-	var selected_positive: ProposalInstance = (
-		null if selected_index == null else state.proposal_hand[selected_index]
-	)
+	var selected_positive: ProposalInstance = null if selected_index == null else state.proposal_hand[selected_index]
 	var merged := run_session.proposal_system.merge_three(
 		state, mothers, negative_base, run_session.balance, selected_positive
 	)
@@ -392,9 +395,7 @@ func _handle_proposal_merge(message: Dictionary, messages: Array[Dictionary]) ->
 		return
 	state_version += 1
 	var result := {"kind": "merge", "proposal": _serializer.proposal(merged)}
-	messages.append(
-		_envelope("proposal.sync", _proposal_sync(result), message["request_id"])
-	)
+	messages.append(_envelope("proposal.sync", _proposal_sync(result), message["request_id"]))
 
 
 func _handle_bonus_resolve(message: Dictionary, messages: Array[Dictionary]) -> void:
@@ -439,9 +440,7 @@ func _handle_bonus_resolve(message: Dictionary, messages: Array[Dictionary]) -> 
 		"accept_trait": accept_trait,
 		"proposal": _serializer.proposal(current),
 	}
-	messages.append(
-		_envelope("proposal.sync", _proposal_sync(result), message["request_id"])
-	)
+	messages.append(_envelope("proposal.sync", _proposal_sync(result), message["request_id"]))
 
 
 func _handle_constitution_revise(message: Dictionary, messages: Array[Dictionary]) -> void:
@@ -468,14 +467,66 @@ func _handle_constitution_revise(message: Dictionary, messages: Array[Dictionary
 	messages.append(_full_state(message["request_id"]))
 
 
-func _advance_month_and_refresh_mode() -> void:
-	run_session.advance_month()
+func _handle_constitution_column_unlock(message: Dictionary, messages: Array[Dictionary]) -> void:
+	if (
+		run_session.constitution_board == null
+		or run_session.state.run_phase != RunState.RunPhase.RUNNING
+		or run_session.state.month != 0
+	):
+		_append_mutation_error(
+			messages,
+			{"code": "unlock_unavailable", "message": "Constitution columns can only be unlocked in month zero."},
+			message["request_id"]
+		)
+		return
+	var index := _protocol.read_int(message["payload"], "column_index")
+	if not index["ok"]:
+		_append_mutation_error(messages, index["error"], message["request_id"])
+		return
+	if index["value"] < 0 or index["value"] >= run_session.constitution_board.columns.size():
+		_append_mutation_error(
+			messages,
+			{"code": "invalid_column_index", "message": "Constitution column index is invalid."},
+			message["request_id"]
+		)
+		return
+	var column := run_session.constitution_board.columns[index["value"]]
+	if not run_session.unlock_constitution_column(column):
+		_append_mutation_error(
+			messages,
+			{"code": "unlock_rejected", "message": "Constitution column cannot be unlocked yet."},
+			message["request_id"]
+		)
+		return
+	state_version += 1
+	messages.append(_full_state(message["request_id"]))
+
+
+func _handle_term_next(message: Dictionary, messages: Array[Dictionary]) -> void:
+	if not run_session.start_next_term():
+		_append_mutation_error(
+			messages,
+			{"code": "term_not_ended", "message": "The current term has not ended."},
+			message["request_id"]
+		)
+		return
+	state_version += 1
+	set_ui_mode("constitution", false)
+	messages.append(_full_state(message["request_id"]))
+
+
+func _advance_month_and_refresh_mode() -> bool:
+	if not run_session.advance_month():
+		return false
+	if run_session.state.run_phase == RunState.RunPhase.TERM_ENDED:
+		return true
 	if run_session.state.month == 0:
 		set_ui_mode("constitution", false)
-		return
+		return true
 	_refresh_dialogue_mode()
 	if ui_mode != "dialogue":
 		set_ui_mode("office", false)
+	return true
 
 
 func _finish_draft_mutation(messages: Array[Dictionary], request_id: Variant) -> void:
@@ -505,14 +556,14 @@ func _proposal_sync(result: Dictionary) -> Dictionary:
 func _append_mutation_error(
 	messages: Array[Dictionary], error_value: Dictionary, request_id: Variant
 ) -> void:
-	messages.append(
-		_error(error_value["code"], error_value["message"], request_id, true)
-	)
+	messages.append(_error(error_value["code"], error_value["message"], request_id, true))
 	messages.append(_full_state(request_id))
 
 
 func _refresh_dialogue_mode() -> void:
 	if run_session == null or run_session.state == null:
+		return
+	if run_session.state.run_phase == RunState.RunPhase.TERM_ENDED:
 		return
 	var has_pending := _serializer.pending_dialogue(run_session.state) != null
 	if has_pending:
@@ -547,9 +598,7 @@ func _error(
 	)
 
 
-func _envelope(
-	message_type: String, payload: Dictionary, request_id: Variant = null
-) -> Dictionary:
+func _envelope(message_type: String, payload: Dictionary, request_id: Variant = null) -> Dictionary:
 	var message := {"type": message_type, "payload": payload}
 	if request_id != null:
 		message["request_id"] = request_id

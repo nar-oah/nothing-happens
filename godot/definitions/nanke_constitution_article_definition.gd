@@ -9,9 +9,10 @@ class_name NankeConstitutionArticleDefinition
 
 func apply_runtime(context) -> void:
 	super.apply_runtime(context)
-	if race == null:
+	var target_race := get_race()
+	if target_race == null:
 		return
-	var race_state = context.state.get_race(race)
+	var race_state = context.state.get_race(target_race)
 	if race_state == null:
 		return
 	race_state.absence_probability = absence_probability
@@ -21,25 +22,20 @@ func apply_runtime(context) -> void:
 
 
 func modify_vote(vote_context) -> void:
-	if (
-		vote_context == null
-		or vote_context.vote == null
-		or vote_context.seat == null
-		or vote_context.projected_metrics == null
-		or race == null
-	):
+	if vote_context == null or vote_context.vote == null or vote_context.seat == null or vote_context.projected_metrics == null:
 		return
-	var nanke_state = vote_context.run_context.state.get_race(race)
+	var target_race := get_race()
+	if target_race == null:
+		return
+	var nanke_state = vote_context.run_context.state.get_race(target_race)
 	if nanke_state == null or not nanke_state.strike_enabled:
 		return
 	if nanke_state.strike_group == null or vote_context.seat.actual_group != nanke_state.strike_group:
 		return
-	if not nanke_state.strike_extends_to_group and vote_context.seat.race != race:
+	if not nanke_state.strike_extends_to_group and vote_context.seat.race != target_race:
 		return
 	var projected_wage: int = vote_context.projected_metrics.get_value(Metric.Id.WAGE)
-	var year_start_wage: int = (
-		vote_context.run_context.state.year_start_metrics.get_value(Metric.Id.WAGE)
-	)
+	var year_start_wage: int = vote_context.run_context.state.year_start_metrics.get_value(Metric.Id.WAGE)
 	if projected_wage >= year_start_wage:
 		return
 	vote_context.vote.breakdown[&"nanke_strike"] = 1.0

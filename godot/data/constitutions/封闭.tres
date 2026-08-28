@@ -2,6 +2,8 @@
 
 [ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="1_0qqdk"]
 [ext_resource type="Script" uid="uid://dajy5425i5dpq" path="res://definitions/constitution_article_definition.gd" id="1_article_script"]
+[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="1_hvbr0"]
+[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_1vvyq"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
 [ext_resource type="Resource" uid="uid://b4e7rdu770lrv" path="res://data/races/peach_blossom.tres" id="3_race_peach"]
 [ext_resource type="Resource" path="res://data/constitutions/自治.tres" id="4_prereq"]
@@ -9,6 +11,8 @@
 [ext_resource type="Resource" uid="uid://bnyvicjgl8uey" path="res://data/policies/闭关减市.tres" id="6_policy_1"]
 [ext_resource type="Resource" uid="uid://cq1ot5f7pmk3b" path="res://data/policies/归田自给.tres" id="7_policy_2"]
 [ext_resource type="Resource" uid="uid://cg0ej8imb83y3" path="res://data/policies/族内免征.tres" id="8_policy_3"]
+[ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="12_eapqt"]
+[ext_resource type="Resource" path="res://data/constitution_rows/桃源.tres" id="row"]
 
 [sub_resource type="Resource" id="Resource_seat_condition"]
 script = ExtResource("5_seat_condition_script")
@@ -18,6 +22,7 @@ required_rate = 0.5
 [resource]
 script = ExtResource("1_article_script")
 display_name = "封闭"
+row = ExtResource("row")
 race = ExtResource("3_race_peach")
 prerequisite = ExtResource("4_prereq")
 seat_condition = SubResource("Resource_seat_condition")

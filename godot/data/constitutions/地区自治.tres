@@ -1,7 +1,9 @@
 [gd_resource type="Resource" script_class="LocalAutonomyConstitutionArticleDefinition" format=3 uid="uid://dce70h370cmcp"]
 
 [ext_resource type="Script" uid="uid://dv3eypbtseh1p" path="res://definitions/local_autonomy_constitution_article_definition.gd" id="1_article_script"]
+[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="1_h4ttb"]
 [ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="1_imfq5"]
+[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_cjewm"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
 [ext_resource type="Resource" uid="uid://b4e7rdu770lrv" path="res://data/races/peach_blossom.tres" id="3_race_peach"]
 [ext_resource type="Resource" uid="uid://bpw0qny2boax0" path="res://data/constitutions/封闭.tres" id="4_prereq"]
@@ -9,6 +11,8 @@
 [ext_resource type="Resource" uid="uid://dee3tls8eebax" path="res://data/policies/一地一议.tres" id="6_policy_1"]
 [ext_resource type="Resource" uid="uid://cy6isbo6ilvjh" path="res://data/policies/各地自给.tres" id="7_policy_2"]
 [ext_resource type="Resource" uid="uid://b5w6n7hgkbbhi" path="res://data/policies/地方平准.tres" id="8_policy_3"]
+[ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="12_1s73p"]
+[ext_resource type="Resource" path="res://data/constitution_rows/桃源.tres" id="row"]
 
 [sub_resource type="Resource" id="Resource_seat_condition"]
 script = ExtResource("5_seat_condition_script")
@@ -18,6 +22,8 @@ required_rate = 0.9
 [resource]
 script = ExtResource("1_article_script")
 display_name = "地区自治"
+row = ExtResource("row")
+is_terminal = true
 race = ExtResource("3_race_peach")
 prerequisite = ExtResource("4_prereq")
 seat_condition = SubResource("Resource_seat_condition")

@@ -5,11 +5,21 @@ import { makeDraftSync, makeLiveState } from './test-fixtures.ts';
 
 test('state.full replaces the complete snapshot', () => {
 	const first = makeLiveState(5);
-	const replacement = { ...makeLiveState(2), year: 9, proposal_hand: [] };
+	const replacement = {
+		...makeLiveState(2),
+		year: 9,
+		governing_months: 25,
+		run_phase: 'TERM_ENDED' as const,
+		term_outcome: 'COLLAPSE' as const,
+		proposal_hand: []
+	};
 	const loaded = applyGameMessage(EMPTY_GAME_STORE, { type: 'state.full', payload: first });
 	const replaced = applyGameMessage(loaded, { type: 'state.full', payload: replacement });
 	assert.equal(replaced.snapshot, replacement);
 	assert.equal(replaced.snapshot?.year, 9);
+	assert.equal(replaced.snapshot?.governing_months, 25);
+	assert.equal(replaced.snapshot?.run_phase, 'TERM_ENDED');
+	assert.equal(replaced.snapshot?.term_outcome, 'COLLAPSE');
 	assert.deepEqual(replaced.snapshot?.proposal_hand, []);
 });
 
@@ -21,6 +31,8 @@ test('domain sync immutably overwrites only its authoritative fields', () => {
 	assert.equal(original.proposal_hand.length, 1);
 	assert.deepEqual(updated.snapshot?.proposal_hand, []);
 	assert.equal(updated.snapshot?.year, original.year);
+	assert.equal(updated.snapshot?.run_phase, original.run_phase);
+	assert.equal(updated.snapshot?.term_outcome, original.term_outcome);
 	assert.equal(updated.snapshot?.state_version, 2);
 });
 

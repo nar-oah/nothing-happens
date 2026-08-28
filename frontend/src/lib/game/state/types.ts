@@ -16,17 +16,46 @@ export type ConstitutionArticleDto = ConstitutionArticle & {
 	article_index: number;
 };
 
+export type ConstitutionColumnDto = {
+	column_index: number;
+	id: string;
+	display_name: string;
+	unlock_cost_months: number;
+	unlocked: boolean;
+	can_unlock: boolean;
+};
+
+export type ConstitutionRowDto = {
+	row_index: number;
+	id: string;
+	display_name: string;
+	race_display_name: string;
+	free_navigation: boolean;
+	ignores_column_unlocks: boolean;
+	active_article_index: number;
+};
+
 export type ConstitutionArticleStateDto = ConstitutionArticleDto & {
+	row_index: number;
+	column_index: number;
+	row_display_name: string;
 	race_display_name: string;
 	active: boolean;
 	selected: boolean;
-	clicked: boolean;
 	eligible: boolean;
+	is_terminal: boolean;
+	requirement_percent: number | null;
 };
 
 export type ConstitutionDto = {
 	title: string;
 	revision_available: boolean;
+	center_column_index: number;
+	available_governing_months: number;
+	lifetime_governing_months: number;
+	terminal_article_index: number;
+	columns: ConstitutionColumnDto[];
+	rows: ConstitutionRowDto[];
 	active_articles: ConstitutionArticleDto[];
 	articles: ConstitutionArticleStateDto[];
 };
@@ -149,22 +178,26 @@ export type MonthReportDto = {
 	events: MonthReportEventDto[];
 };
 
+export type RunPhase = 'RUNNING' | 'TERM_ENDED';
+export type TermOutcome = 'NONE' | 'COLLAPSE' | 'NOTHING_HAPPENS';
+
 export type GameStatusDto = {
+	term: number;
 	year: number;
 	month: number;
+	governing_months: number;
+	run_phase: RunPhase;
+	term_outcome: TermOutcome;
 	metrics: MetricValues;
 	political_donation_pool: number;
 	collapse_level: number;
 	max_collapse: number;
-	run_failed?: boolean;
-	ending_id?: string;
 };
 
 export type LiveGameState = GameStatusDto & {
 	state_version: number;
 	ui_mode: UiMode;
 	world_scene: WorldScene;
-	term: number;
 	proposal_hand: Proposal[];
 	saved_bills: Bill[];
 	draft_bill: Bill;

@@ -3,14 +3,27 @@
 [ext_resource type="Script" path="res://definitions/constitution_article_definition.gd" id="1_article_script"]
 [ext_resource type="Script" path="res://definitions/policy_definition.gd" id="2_policy_script"]
 [ext_resource type="Resource" path="res://data/races/yano.tres" id="3_race_yano"]
+[ext_resource type="Resource" path="res://data/constitution_rows/偃偶.tres" id="row"]
 [ext_resource type="Resource" path="res://data/constitutions/有限.tres" id="4_prereq"]
+[ext_resource type="Script" path="res://definitions/constitution_seat_condition.gd" id="condition_script"]
+[ext_resource type="Resource" path="res://data/interest_groups/造身公所.tres" id="group"]
 [ext_resource type="Resource" path="res://data/policies/统配行身.tres" id="5_policy_1"]
 [ext_resource type="Resource" path="res://data/policies/机谱统购.tres" id="6_policy_2"]
 [ext_resource type="Resource" path="res://data/policies/身契转租.tres" id="7_policy_3"]
 
+[sub_resource type="Resource" id="Resource_condition"]
+script = ExtResource("condition_script")
+interest_group = ExtResource("group")
+comparison = 1
+required_rate = 0.0
+
 [resource]
 script = ExtResource("1_article_script")
 display_name = "否决"
+row = ExtResource("row")
 race = ExtResource("3_race_yano")
 prerequisite = ExtResource("4_prereq")
+seat_condition = SubResource("Resource_condition")
+participates_in_variable_seat_allocation = false
+revoke_fixed_seat = true
 policies = Array[ExtResource("2_policy_script")]([ExtResource("5_policy_1"), ExtResource("6_policy_2"), ExtResource("7_policy_3")])

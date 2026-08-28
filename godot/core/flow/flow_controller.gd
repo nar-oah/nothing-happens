@@ -8,12 +8,16 @@ func setup(run_context: RunContext) -> void:
 	context = run_context
 
 
-func advance_month() -> void:
-	if context.state.run_failed or context.state.ending_id != &"":
-		return
+func advance_month() -> bool:
+	if context.state.run_phase != RunState.RunPhase.RUNNING:
+		return false
 	if context.state.month == 0:
+		# Leaving month 0 without revising explicitly forfeits this year's revision.
+		context.state.constitution.revision_available = false
 		context.time_system.advance_month(context.state)
-		return
+		if context.state.year == 1 and context.state.governing_months == 0:
+			context.proposal_system.draw_automatic_proposals(context)
+		return true
 	var report_year := context.state.year
 	var report_month := context.state.month
 	var report_previous_metrics := context.state.metrics.copy()
@@ -27,19 +31,23 @@ func advance_month() -> void:
 	context.event_system.try_generate_month(context)
 	context.event_system.settle_month(context)
 	context.event_system.update_information(context)
-	context.collapse_system.settle_month(context)
-	if context.state.run_failed or context.state.ending_id != &"":
-		return
+	context.state.governing_months += 1
+	_record_month_report(report_year, report_month, report_previous_metrics)
+	if context.state.run_phase == RunState.RunPhase.TERM_ENDED:
+		return true
 	context.proposal_system.draw_automatic_proposals(context)
 	context.proposal_system.resolve_active_visits(context)
 	if context.state.month == 12:
 		context.annual_settlement_system.settle_year(context)
-	_record_month_report(report_year, report_month, report_previous_metrics)
 	context.time_system.advance_month(context.state)
+	return true
 
 
 func enact_bill(draft: DraftBillState) -> void:
-	if not context.draft_bill_system.is_ready_to_submit(context, draft):
+	if (
+		context.state.run_phase != RunState.RunPhase.RUNNING
+		or not context.draft_bill_system.is_ready_to_submit(context, draft)
+	):
 		push_error("Cannot enact an unavailable or unresolved draft.")
 		return
 	var new_bill := _build_active_bill(draft)
@@ -47,30 +55,29 @@ func enact_bill(draft: DraftBillState) -> void:
 	context.parliament_system.record_authorized_proposal_slots(
 		context.state, draft.proposals
 	)
-	for proposal in draft.proposals:
-		context.state.pending_collapse_delta += proposal.collapse_impact
 	context.policy_system.resolve_policy_chain(context.state)
 
 
 func submit_draft(draft: DraftBillState) -> VoteResultState:
 	var result := VoteResultState.new()
-	if not context.draft_bill_system.is_ready_to_submit(context, draft):
+	if (
+		context.state.run_phase != RunState.RunPhase.RUNNING
+		or not context.draft_bill_system.is_ready_to_submit(context, draft)
+	):
 		return result
+	# Saving happens before the vote, so saved_bills is the authoritative record that the
+	# player has ever submitted a bill this term. Collapse uses the array itself to decide
+	# whether the "nothing happens" outcome is still possible.
 	context.draft_bill_system.save_draft(context.state, draft)
-	context.collapse_system.record_intervention(
-		context,
-		&"bill_submission",
-		float(draft.slot_count()) * context.balance.bill_submission_pressure_per_slot
-	)
 	result = context.vote_system.calculate_vote(draft, context, true)
 	result.submitted = true
+	if result.passed:
+		enact_bill(draft)
+		context.draft_bill_system.consume_draft_proposals(context.state, draft)
+		context.state.draft_bill = DraftBillState.new()
+		context.state.editing_saved_bill_index = RunState.NEW_BILL_INDEX
+	context.vote_system.resolve_donation_detection(context)
 	context.vote_system.clear_donations(context.state)
-	if not result.passed:
-		return result
-	enact_bill(draft)
-	context.draft_bill_system.consume_draft_proposals(context.state, draft)
-	context.state.draft_bill = DraftBillState.new()
-	context.state.editing_saved_bill_index = RunState.NEW_BILL_INDEX
 	return result
 
 

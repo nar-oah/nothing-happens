@@ -15,9 +15,6 @@ import {
 	type Proposal
 } from './types.ts';
 
-type PolicyHasCollapseImpact = 'collapse_impact' extends keyof PolicyDefinition ? true : false;
-const policyHasCollapseImpact: PolicyHasCollapseImpact = false;
-
 const sourceGroup: InterestGroupDefinition = {
 	display_name: 'source',
 	base_column_weight: 1,
@@ -34,7 +31,6 @@ function makeProposal(): Proposal {
 		base_effect: { tax: 8, price: 0, wage: 0, employment: 0, trade: 0 },
 		positive_effect: { tax: 0, price: 0, wage: 0, employment: 0, trade: 0 },
 		lag_months: 4,
-		collapse_impact: 2,
 		donation_offer: 0,
 		bonus_choice_resolved: true,
 		positive_trait_accepted: true
@@ -168,8 +164,4 @@ test('policy identity uses display_name only', () => {
 			policies: [second]
 		}
 	);
-});
-
-test('PolicyDefinition has no collapse_impact field', () => {
-	assert.equal(policyHasCollapseImpact, false);
 });

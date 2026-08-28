@@ -9,6 +9,7 @@
 [ext_resource type="Resource" uid="uid://cycomgnbb7lqs" path="res://data/policies/竞价通商.tres" id="7_policy_1"]
 [ext_resource type="Resource" uid="uid://d3k0p8rtxf85j" path="res://data/policies/裁撤关卡.tres" id="8_policy_2"]
 [ext_resource type="Resource" uid="uid://dgamx4ym0hwv0" path="res://data/policies/航路套利.tres" id="9_policy_3"]
+[ext_resource type="Resource" path="res://data/constitution_rows/外交.tres" id="row"]
 
 [sub_resource type="Resource" id="Resource_influence_1"]
 script = ExtResource("6_influence_rule_script")
@@ -19,8 +20,10 @@ rate = 1.0
 [resource]
 script = ExtResource("1_article_script")
 display_name = "自由贸易"
+row = ExtResource("row")
 race = ExtResource("3_race_human")
 prerequisite = ExtResource("4_prereq")
 race_max_seat_rate = 0.0
+participates_in_variable_seat_allocation = false
 policies = Array[ExtResource("2_policy_script")]([ExtResource("7_policy_1"), ExtResource("8_policy_2"), ExtResource("9_policy_3")])
 influence_rules = Array[ExtResource("6_influence_rule_script")]([SubResource("Resource_influence_1")])

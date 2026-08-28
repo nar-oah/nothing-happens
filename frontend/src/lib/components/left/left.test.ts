@@ -52,7 +52,6 @@ const proposal = (
 		trade: positiveTrade
 	},
 	lag_months: 2,
-	collapse_impact: 1,
 	donation_offer: 0,
 	bonus_choice_resolved: true,
 	positive_trait_accepted: true

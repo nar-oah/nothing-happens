@@ -55,14 +55,45 @@ test('authoritative draft preview becomes existing Memorial metric props', () =>
 	);
 });
 
-test('constitution and dialogue presentation retain authoritative refs and values', () => {
+test('constitution presentation keeps one aligned row grid and turns locked columns into year pages', () => {
 	const state = makeLiveState();
+	state.constitution.columns.push({
+		column_index: 1,
+		id: 'new',
+		display_name: '新制',
+		unlock_cost_months: 12,
+		unlocked: false,
+		can_unlock: true
+	});
+	state.constitution.rows.push({
+		row_index: 1,
+		id: 'culture',
+		display_name: '文化',
+		race_display_name: '比翼',
+		free_navigation: false,
+		ignores_column_unlocks: false,
+		active_article_index: -1
+	});
 	const constitution = deriveConstitutionMemorial(state);
-	const row = Array.isArray(constitution['人类']) ? constitution['人类'][0] : undefined;
-	assert.equal(row?.articleRef, 0);
-	assert.equal(row?.selected, true);
-	assert.equal(row?.selectable, false);
+	const rowLabels = Array.isArray(constitution['']) ? constitution[''] : [];
+	const normalRows = Array.isArray(constitution['常制']) ? constitution['常制'] : [];
+	assert.equal(rowLabels.length, 2);
+	assert.equal(rowLabels[0]?.text, '外交');
+	assert.equal(rowLabels[0]?.number, 50);
+	assert.equal(rowLabels[0]?.selectable, false);
+	assert.equal(rowLabels[1]?.text, '文化');
+	assert.equal(rowLabels[1]?.number, '');
+	assert.equal(normalRows.length, 2);
+	assert.equal(normalRows[0]?.articleRef, 0);
+	assert.equal(normalRows[0]?.number, 50);
+	assert.equal(normalRows[0]?.selected, true);
+	assert.equal(normalRows[0]?.selectable, false);
+	assert.equal(normalRows[1]?.articleRef, undefined);
+	assert.equal(constitution['新制'], 1);
+});
 
+test('dialogue presentation retains authoritative values', () => {
+	const state = makeLiveState();
 	const dialogue = deriveDialoguePresentation(state.pending_dialogue);
 	assert.equal(dialogue?.visitor_text, '造身公所代表来访。');
 	assert.equal(dialogue?.trait_label, '商貿+8');

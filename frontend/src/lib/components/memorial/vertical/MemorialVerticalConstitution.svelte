@@ -17,7 +17,9 @@
 	type Props = {
 		title: string;
 		constitution: MemorialConstitutionData;
+		unlockableSections?: string[];
 		onArticleSelectionChange?: (articleRef: number, selected: boolean) => void;
+		onSectionUnlock?: (sectionTitle: string) => void;
 	};
 
 	type ConstitutionPage =
@@ -34,7 +36,13 @@
 		articleRef: number;
 	};
 
-	let { title, constitution, onArticleSelectionChange }: Props = $props();
+	let {
+		title,
+		constitution,
+		unlockableSections = [],
+		onArticleSelectionChange,
+		onSectionUnlock
+	}: Props = $props();
 	let expandedRow = $state<{ sectionTitle: string; rowIndex: number }>();
 	let pendingSelection = $state<PendingArticleSelection>();
 	let appliedConstitution = untrack(() => constitution);
@@ -44,7 +52,8 @@
 			if (
 				typeof content === 'number' ||
 				expandedRow?.sectionTitle !== sectionTitle ||
-				!content[expandedRow.rowIndex]
+				!content[expandedRow.rowIndex] ||
+				content[expandedRow.rowIndex].articleRef === undefined
 			) {
 				return [sectionPage];
 			}
@@ -65,7 +74,8 @@
 		pendingSelection = undefined;
 	});
 
-	function openRow(sectionTitle: string, rowIndex: number) {
+	function openRow(sectionTitle: string, rowIndex: number, row: MemorialConstitutionRowContentData) {
+		if (row.articleRef === undefined) return;
 		expandedRow = { sectionTitle, rowIndex };
 	}
 
@@ -123,23 +133,27 @@
 			{#if currentPage?.type === 'section'}
 				<MemorialConstitutionContent title={currentPage.title}>
 					{#if typeof currentPage.content === 'number'}
-						<div
-							class="flex h-full w-full flex-col items-center justify-center bg-ink-primary font-document text-[60px] font-light leading-[48px] text-surface-amber"
-							aria-label={`解锁要求 ${currentPage.content}`}
+						<button
+							class="flex h-full w-full flex-col items-center justify-center border-0 bg-ink-primary p-0 font-document text-[60px] font-light leading-[48px] text-surface-amber"
+							type="button"
+							disabled={!unlockableSections.includes(currentPage.title)}
+							onclick={() => onSectionUnlock?.(currentPage.title)}
+							aria-label={`解锁${currentPage.title}，需要执政${currentPage.content}年`}
 						>
 							{#each [0, 1, 2, 3, 4, 5] as row (row)}
 								<span>{currentPage.content}</span>
 							{/each}
-						</div>
+						</button>
 					{:else}
 						<div class="flex h-full flex-col items-center gap-[20px] pt-10">
 							{#each currentPage.content as row, rowIndex (`${currentPage.title}-${row.text}-${rowIndex}`)}
 								<MemorialConstitutionRow
 									{...row}
+									empty={row.articleRef === undefined && row.text === ''}
 									selected={getRowSelected(currentPage.title, rowIndex, row)}
 									onSelectedChange={(selected) =>
 										setRowSelected(currentPage.title, rowIndex, row, selected)}
-									onclick={() => openRow(currentPage.title, rowIndex)}
+									onclick={() => openRow(currentPage.title, rowIndex, row)}
 								/>
 							{/each}
 						</div>

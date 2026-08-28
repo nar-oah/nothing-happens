@@ -16,7 +16,6 @@ func are_gameplay_equivalent(first: ProposalInstance, second: ProposalInstance) 
 		first.source_group != second.source_group
 		or not _metric_vectors_equal(first.base_effect, second.base_effect)
 		or first.lag_months != second.lag_months
-		or not is_equal_approx(first.collapse_impact, second.collapse_impact)
 	):
 		return false
 	var first_has_positive := first.has_positive_trait()
@@ -114,7 +113,6 @@ func generate_proposal(
 	proposal.lag_months = random_system.random_int(
 		balance.proposal_lag_months_min, balance.proposal_lag_months_max
 	)
-	proposal.collapse_impact = balance.proposal_collapse_impact
 	return proposal
 
 

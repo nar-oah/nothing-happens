@@ -57,9 +57,13 @@ func settle_month(context: RunContext) -> void:
 			continue
 		event.months_alive += 1
 		var forced_public := _force_public_window(event, context.balance)
-		if not forced_public and event.known:
+		if forced_public:
+			# Becoming public starts satisfaction settlement immediately. Unknown events before
+			# this point deliberately only grow and cannot disappear off-screen.
 			_update_known_event(event, context)
-		elif not forced_public:
+		elif event.known:
+			_update_known_event(event, context)
+		else:
 			_advance_growth(event, context.balance)
 		if event.is_active() and event.months_alive >= context.balance.event_lifetime_months:
 			_fail(event, context)
@@ -74,6 +78,7 @@ func update_information(context: RunContext) -> void:
 		if event.published or event.known:
 			continue
 		if _force_public_window(event, context.balance):
+			_update_known_event(event, context)
 			continue
 		var probability: float = (
 			float(_get_race_seat_count(context.state, event.race))
@@ -82,6 +87,7 @@ func update_information(context: RunContext) -> void:
 		)
 		if context.random_system.chance(probability):
 			event.known = true
+			_update_known_event(event, context)
 
 
 func get_current_requirement(event: EventState) -> int:
@@ -190,6 +196,11 @@ func _update_known_event(event: EventState, context: RunContext) -> void:
 	if event.satisfaction_rate < context.balance.event_relief_satisfaction_threshold:
 		event.phase = EventState.Phase.PAUSED
 		return
+	# Zero-floor events (currently Zhushui's negative-metric warnings) have no deeper demand:
+	# once the real value is back at or beyond zero, the concern is already fully satisfied.
+	if event.full_target == 0 and event.baseline_value < 0:
+		_resolve(event, context.state)
+		return
 	event.phase = EventState.Phase.RELIEVING
 	event.growth_progress = maxf(
 		0.0,
@@ -227,4 +238,4 @@ func _fail(event: EventState, context: RunContext) -> void:
 	event.phase = EventState.Phase.FAILED
 	event.known = true
 	event.published = true
-	context.state.pending_collapse_delta += context.balance.event_failure_collapse
+	context.collapse_system.increase(context)

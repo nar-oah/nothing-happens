@@ -74,8 +74,7 @@ export function areProposalsGameplayEquivalent(first: Proposal, second: Proposal
 	if (
 		first.source_group.display_name !== second.source_group.display_name ||
 		!areMetricVectorsEqual(first.base_effect, second.base_effect) ||
-		first.lag_months !== second.lag_months ||
-		!isApproximatelyEqual(first.collapse_impact, second.collapse_impact)
+		first.lag_months !== second.lag_months
 	) {
 		return false;
 	}

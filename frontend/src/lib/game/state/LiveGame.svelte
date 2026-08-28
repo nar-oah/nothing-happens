@@ -251,6 +251,11 @@
 		});
 	}
 
+	function unlockConstitutionColumn(columnIndex: number): void {
+		selectedConstitutionArticle = undefined;
+		mutate('constitution.column.unlock', { column_index: columnIndex });
+	}
+
 	function mergeProposals(confirmation: SynthesisConfirmation): void {
 		mutate('proposal.merge', {
 			hand_indices: confirmation.refs.map((ref) => ref.index),
@@ -312,7 +317,9 @@
 			onNewspaperOpen={openNewspaper}
 			title={snapshot.constitution.title}
 			{constitution}
+			columns={snapshot.constitution.columns}
 			onArticleSelectionChange={selectConstitutionArticle}
+			onColumnUnlock={unlockConstitutionColumn}
 			onSubmit={submitConstitution}
 		/>
 	{:else}

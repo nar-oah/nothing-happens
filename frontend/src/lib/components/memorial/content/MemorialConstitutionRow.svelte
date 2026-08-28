@@ -2,6 +2,7 @@
 	import type { MemorialConstitutionRowData } from '../types';
 
 	type Props = MemorialConstitutionRowData & {
+		empty?: boolean;
 		onclick?: () => void;
 		onSelectedChange?: (selected: boolean) => void;
 	};
@@ -11,11 +12,13 @@
 		number,
 		selected = $bindable(),
 		selectable,
+		empty = false,
 		onclick,
 		onSelectedChange
 	}: Props = $props();
 
 	function handleClick() {
+		if (empty) return;
 		if (selectable) {
 			selected = !selected;
 			onSelectedChange?.(selected);
@@ -26,9 +29,12 @@
 
 <button
 	class="flex w-[99px] flex-col items-end overflow-hidden border-0 bg-transparent p-0 text-left"
+	class:invisible={empty}
 	type="button"
-	aria-pressed={selectable ? selected : undefined}
-	aria-label={`查看${text}`}
+	aria-hidden={empty ? true : undefined}
+	aria-pressed={!empty && selectable ? selected : undefined}
+	aria-label={empty ? undefined : `查看${text}`}
+	disabled={empty}
 	onclick={handleClick}
 >
 	<div

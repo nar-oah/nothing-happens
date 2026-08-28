@@ -20,7 +20,9 @@ var annual_settlement_system: AnnualSettlementSystem
 var race_definitions: Array[RaceDefinition] = []
 var interest_groups: Array[InterestGroupDefinition] = []
 var seat_definitions: Array[SeatDefinition] = []
+var constitution_board: ConstitutionBoardDefinition
 var constitution_articles: Array[ConstitutionArticleDefinition] = []
+var meta_progression: MetaProgressionState
 
 
 func setup(

@@ -5,7 +5,6 @@ var source_group: InterestGroupDefinition
 var base_effect: MetricVector
 var positive_effect: MetricVector
 var lag_months: int = 1
-var collapse_impact: int = 0
 var donation_offer: float = 0.0
 var bonus_choice_resolved: bool = true
 var positive_trait_accepted: bool = true
@@ -42,7 +41,6 @@ func copy() -> ProposalInstance:
 	result.base_effect = base_effect.copy()
 	result.positive_effect = positive_effect.copy()
 	result.lag_months = lag_months
-	result.collapse_impact = collapse_impact
 	result.donation_offer = donation_offer
 	result.bonus_choice_resolved = bonus_choice_resolved
 	result.positive_trait_accepted = positive_trait_accepted

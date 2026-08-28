@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ConstitutionColumnDefinition" format=3]
+
+[ext_resource type="Script" path="res://definitions/constitution_column_definition.gd" id="1"]
+[ext_resource type="Resource" path="res://data/constitutions/内附.tres" id="2"]
+[ext_resource type="Resource" path="res://data/constitutions/比翼化.tres" id="3"]
+[ext_resource type="Resource" path="res://data/constitutions/开放.tres" id="4"]
+[ext_resource type="Resource" path="res://data/constitutions/合作社.tres" id="5"]
+
+[resource]
+script = ExtResource("1")
+id = &"new"
+display_name = "新制"
+unlock_cost_months = 12
+articles = Array[ConstitutionArticleDefinition]([ExtResource("2"), ExtResource("3"), ExtResource("4"), ExtResource("5")])

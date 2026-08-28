@@ -74,7 +74,6 @@ func _test_proposal_gameplay_equivalence(t: BackendTestContext) -> void:
 	proposal.base_effect.tax = 8
 	proposal.positive_effect.wage = 5
 	proposal.lag_months = 4
-	proposal.collapse_impact = 2
 	proposal.donation_offer = 5.0
 	proposal.bonus_choice_resolved = true
 	proposal.positive_trait_accepted = true
@@ -105,7 +104,6 @@ func _test_proposal_gameplay_equivalence(t: BackendTestContext) -> void:
 	var ordinary := t.make_proposal(group)
 	ordinary.base_effect.tax = 8
 	ordinary.lag_months = 4
-	ordinary.collapse_impact = 2
 	var converted := ordinary.copy()
 	converted.donation_offer = 20.0
 	converted.positive_trait_accepted = false
@@ -218,6 +216,7 @@ func _test_merge_uses_group_resource_identity(t: BackendTestContext) -> void:
 	t.check(merged.source_group == group, "merged proposal keeps source Resource")
 	t.check_equal(merged.base_effect.tax, 7, "merge keeps selected negative base")
 	t.check_equal(merged.positive_effect.wage, 14, "discarded trait converts by balance ratio")
+	t.check(state.saved_bills.is_empty(), "proposal synthesis does not save a bill")
 
 	var pending := t.make_proposal(group)
 	pending.positive_effect.wage = 5
@@ -252,7 +251,7 @@ func _test_pending_choice_blocks_submission(t: BackendTestContext) -> void:
 	)
 	var result := session.submit_draft()
 	t.check(not result.submitted, "unresolved positive choice cannot be submitted")
-	t.check(not session.state.has_intervened, "rejected pending choice records no intervention")
+	t.check(session.state.saved_bills.is_empty(), "rejected pending choice saves no bill")
 	session.free()
 
 
@@ -280,10 +279,15 @@ func _test_failed_draft_does_not_record_sources(t: BackendTestContext) -> void:
 	var seated := t.make_group("seated")
 	var source := t.make_group("source")
 	var session := t.make_session([race], [seated, source], t.make_seats(1, "failure"))
+	# This test is about source accounting after a failed vote, not random group assignment.
+	# Disable proposal-source support so the otherwise neutral single seat deterministically abstains.
+	session.balance.proposal_support = 0.0
 	var proposal := t.make_proposal(source)
 	session.state.draft_bill.proposals.append(proposal)
 	var result := session.submit_draft()
 	t.check(result.submitted and not result.passed, "neutral draft fails its vote")
+	t.check_equal(session.state.saved_bills.size(), 1, "failed vote still saves the submitted bill")
+	t.check_equal(session.state.collapse_level, 0, "submitting a bill does not itself add collapse")
 	t.check(session.state.annual_proposal_slot_counts.is_empty(), "failed draft records no source")
 	var enacted := DraftBillState.new()
 	enacted.proposals.append(proposal)

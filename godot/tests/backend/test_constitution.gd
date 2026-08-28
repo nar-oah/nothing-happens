@@ -5,12 +5,12 @@ const BackendTestContext = preload("res://tests/backend/backend_test_context.gd"
 
 func run(t: BackendTestContext) -> void:
 	_test_three_seat_condition_scopes(t)
-	_test_direct_prerequisite_and_clicked_history(t)
+	_test_legacy_flat_article_revision_compatibility(t)
 	_test_policy_union_and_resource_deduplication(t)
 	_test_influence_rule_modes(t)
 	_test_revision_preserves_annual_group_layer(t)
 	_test_local_autonomy_runtime_resources(t)
-	_test_human_petition_runtime_and_anchor_safety(t)
+	_test_human_petition_runtime(t)
 
 
 func _test_three_seat_condition_scopes(t: BackendTestContext) -> void:
@@ -51,39 +51,32 @@ func _test_three_seat_condition_scopes(t: BackendTestContext) -> void:
 	session.free()
 
 
-func _test_direct_prerequisite_and_clicked_history(t: BackendTestContext) -> void:
-	var race := t.make_race("history")
+func _test_legacy_flat_article_revision_compatibility(t: BackendTestContext) -> void:
+	var race := t.make_race("legacy")
 	var initial := t.make_article(race)
 	initial.display_name = "initial"
 	var next := t.make_article(race, false)
 	next.display_name = "next"
-	next.prerequisite = initial
-	var sibling := t.make_article(race, false)
-	sibling.display_name = "sibling"
-	sibling.prerequisite = initial
 	var session := t.make_session(
-		[race], [t.make_group("group")], t.make_seats(2, "history"),
-		[initial, next, sibling]
+		[race], [t.make_group("group")], t.make_seats(2, "legacy"), [initial, next]
 	)
-	t.check(session.state.constitution.was_clicked(initial), "initial Resource enters clicked history")
-	t.check(session.constitution_system.can_revise(session.context, next), "direct prerequisite permits revision")
-	t.check(session.revise_constitution(next), "revision activates the selected Resource")
+	t.check(
+		session.state.constitution.get_active_article(race) == initial,
+		"legacy flat content still selects its marked initial article"
+	)
+	t.check(
+		session.constitution_system.can_revise(session.context, next),
+		"legacy flat content can still revise without board navigation"
+	)
+	var collapse_before_revision := session.state.collapse_level
+	t.check(session.revise_constitution(next), "legacy revision activates the selected Resource")
+	t.check_equal(session.state.collapse_level, collapse_before_revision, "constitution revision adds no collapse")
+	t.check(session.state.saved_bills.is_empty(), "constitution revision does not save a bill")
 	t.check(
 		session.state.constitution.get_active_article(race) == next,
-		"active article is keyed by race Resource"
+		"legacy active article remains queryable by race Resource"
 	)
-	t.check(session.state.constitution.was_clicked(next), "revision records clicked Resource")
-	session.state.constitution.revision_available = true
-	t.check(
-		session.constitution_system.can_revise(session.context, sibling),
-		"inactive prerequisite remains valid because it was clicked"
-	)
-	var locked := t.make_article(race, false)
-	locked.prerequisite = ConstitutionArticleDefinition.new()
-	t.check(
-		not session.constitution_system.can_revise(session.context, locked),
-		"an unclicked prerequisite Resource remains locked"
-	)
+	t.check(not session.state.constitution.revision_available, "legacy revision still consumes annual revision")
 	session.free()
 
 
@@ -106,7 +99,7 @@ func _test_policy_union_and_resource_deduplication(t: BackendTestContext) -> voi
 	)
 	var available := session.constitution_system.get_available_policies(session.context)
 	t.check_equal(available.size(), 2, "active article policies form a Resource union")
-	t.check(shared in available and distinct in available, "unique policy names remain available")
+	t.check(shared in available and distinct in available, "unique policy Resources remain available")
 	t.check(
 		session.draft_bill_system.add_available_policy(session.context, shared),
 		"available policy enters draft"
@@ -268,9 +261,9 @@ func _test_revision_preserves_annual_group_layer(t: BackendTestContext) -> void:
 	session.free()
 
 
-func _test_human_petition_runtime_and_anchor_safety(t: BackendTestContext) -> void:
+func _test_human_petition_runtime(t: BackendTestContext) -> void:
 	var human := t.make_race("human")
-	var donor := t.make_race("anchored donor")
+	var donor := t.make_race("donor")
 	var filler := t.make_race("filler")
 	var human_article := HumanConstitutionArticleDefinition.new()
 	human_article.display_name = "petition constitution"
@@ -281,7 +274,6 @@ func _test_human_petition_runtime_and_anchor_safety(t: BackendTestContext) -> vo
 	var donor_article := t.make_article(donor)
 	var filler_article := t.make_article(filler)
 	var definitions := t.make_seats(4, "petition")
-	definitions[0].anchor_race = donor
 	var session := t.make_session(
 		[human, donor, filler], [t.make_group("group")], definitions,
 		[human_article, donor_article, filler_article]
@@ -289,23 +281,23 @@ func _test_human_petition_runtime_and_anchor_safety(t: BackendTestContext) -> vo
 	t.check_equal(session.state.petition_limit, 2, "petition limit comes from active Human article")
 	t.check(session.state.petition_race == human, "petition race is a direct Resource")
 	t.check_equal(t.count_race_seats(session.state, human), 2, "fixture starts below petition max")
-	t.check_equal(t.count_race_seats(session.state, donor), 1, "donor starts at anchor minimum")
-	t.check(session.use_petition(), "petition immediately reassigns a legal seat")
+	var collapse_before_petition := session.state.collapse_level
+	t.check(session.use_petition(), "petition immediately reassigns a legal variable seat")
+	t.check_equal(session.state.collapse_level, collapse_before_petition, "imperial petition adds no collapse")
+	t.check(session.state.saved_bills.is_empty(), "imperial petition does not save a bill")
 	t.check_equal(t.count_race_seats(session.state, human), 3, "petition changes the current parliament")
 	t.check_equal(session.state.petition_used_this_year, 1, "State records annual petition usage")
-	t.check(session.state.seats[0].race == donor, "petition does not steal another race's anchor")
 	t.check(not session.use_petition(), "petition fails when target is at active max")
 	t.check_equal(session.state.petition_used_this_year, 1, "failed petition consumes no use")
 
 	var next := HumanConstitutionArticleDefinition.new()
 	next.display_name = "expanded petition"
 	next.race = human
-	next.prerequisite = human_article
 	next.petition_limit = 3
 	next.race_max_seat_rate = 1.0
 	session.context.constitution_articles.append(next)
 	session.state.constitution.revision_available = true
-	t.check(session.revise_constitution(next), "Human constitution can change midyear")
+	t.check(session.revise_constitution(next), "Human constitution can change in legacy compatibility mode")
 	t.check_equal(session.state.petition_limit, 3, "new article refreshes petition limit")
 	t.check_equal(session.state.petition_used_this_year, 1, "midyear revision does not reset usage")
 	session.free()

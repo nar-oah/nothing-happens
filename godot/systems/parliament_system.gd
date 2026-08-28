@@ -5,7 +5,7 @@ class_name ParliamentSystem
 func initialize_seats(
 	state: RunState,
 	definitions: Array[SeatDefinition],
-	races: Array[RaceDefinition]
+	traces: Array[RaceDefinition]
 ) -> bool:
 	state.seats.clear()
 	var seen: Dictionary[SeatDefinition, bool] = {}
@@ -15,12 +15,18 @@ func initialize_seats(
 			push_error("Seat definitions must be unique non-null Resources.")
 			return false
 		seen[definition] = true
-		if definition.anchor_race == null:
-			continue
-		if definition.anchor_race not in races or anchor_races.has(definition.anchor_race):
-			push_error("Each content race can own at most one anchor seat.")
-			return false
-		anchor_races[definition.anchor_race] = true
+		if definition.anchor_race != null:
+			if definition.anchor_race not in traces or anchor_races.has(definition.anchor_race):
+				push_error("Each content race can own at most one opening anchor seat.")
+				return false
+			anchor_races[definition.anchor_race] = true
+		if definition.fixed_race != null:
+			if definition.fixed_race not in traces:
+				push_error("A fixed race seat must belong to a configured content race.")
+				return false
+			if definition.anchor_race != definition.fixed_race:
+				push_error("A permanent fixed seat must use the same race as its opening anchor.")
+				return false
 	for definition in definitions:
 		state.seats.append(SeatState.new(definition))
 	return true
@@ -42,10 +48,45 @@ func get_race_seats(state: RunState, race: RaceDefinition) -> Array[SeatState]:
 	return result
 
 
+func get_fixed_seats(
+	state: RunState, race: RaceDefinition = null
+) -> Array[SeatState]:
+	var result: Array[SeatState] = []
+	for seat in state.seats:
+		if seat.fixed_race == null:
+			continue
+		if race == null or seat.fixed_race == race:
+			result.append(seat)
+	return result
+
+
+func get_fixed_seat_count(state: RunState, race: RaceDefinition) -> int:
+	return get_fixed_seats(state, race).size()
+
+
+func get_variable_seats(
+	state: RunState, race: RaceDefinition = null
+) -> Array[SeatState]:
+	var result: Array[SeatState] = []
+	for seat in state.seats:
+		if seat.fixed_race != null:
+			continue
+		if race == null or seat.race == race:
+			result.append(seat)
+	return result
+
+
 func get_race_seat_rate(state: RunState, race: RaceDefinition) -> float:
-	if state.seats.is_empty():
+	if state == null:
 		return 0.0
-	return float(get_race_seat_count(state, race)) / float(state.seats.size())
+	var variable := get_variable_seats(state)
+	if variable.is_empty():
+		return 0.0
+	var count := 0
+	for seat in variable:
+		if seat.race == race:
+			count += 1
+	return float(count) / float(variable.size())
 
 
 func get_influenceable_seats(
@@ -53,7 +94,12 @@ func get_influenceable_seats(
 ) -> Array[SeatState]:
 	var result: Array[SeatState] = []
 	for seat in state.seats:
-		if seat.base_group == null and seat.actual_group == null:
+		if seat.race == null or seat.race is ZhushuiRaceDefinition:
+			continue
+		# A race-fixed group identity (currently Yano -> 造身公所) is not part of the
+		# proposal-driven influence algorithm. These seats still display their fixed group,
+		# but they do not contribute to interest-group influence counts or rates.
+		if seat.race.fixed_interest_group != null:
 			continue
 		if race == null or seat.race == race:
 			result.append(seat)
@@ -119,49 +165,77 @@ func allocate_base_columns(
 
 
 func initialize_base_groups(
-	state: RunState, groups: Array[InterestGroupDefinition]
+	context: RunContext, groups: Array[InterestGroupDefinition]
 ) -> bool:
-	var influenceable_seats: Array[SeatState] = []
-	for seat in state.seats:
-		if seat.race is ZhushuiRaceDefinition:
-			seat.base_group = null
-			seat.annual_group = null
-			seat.actual_group = null
-			continue
-		influenceable_seats.append(seat)
-	var allocation := allocate_base_columns(influenceable_seats.size(), groups)
-	var allocated_count := 0
-	for count in allocation.values():
-		allocated_count += int(count)
-	if allocated_count != influenceable_seats.size():
-		push_error("Interest-group columns did not fill the influenceable seat pool.")
+	if context == null:
 		return false
-	var seat_index := 0
+	for seat in context.state.seats:
+		seat.base_group = null
+		seat.annual_group = null
+		seat.actual_group = null
+	for race in context.race_definitions:
+		var race_seats := get_race_seats(context.state, race)
+		if race_seats.is_empty():
+			continue
+		if race is ZhushuiRaceDefinition:
+			continue
+		if race.fixed_interest_group != null:
+			for seat in race_seats:
+				seat.base_group = race.fixed_interest_group
+				seat.annual_group = race.fixed_interest_group
+				seat.actual_group = _resolve_group(context.state, race.fixed_interest_group)
+			continue
+		var allocation := allocate_base_columns(race_seats.size(), groups)
+		var allocated_count := 0
+		for count in allocation.values():
+			allocated_count += int(count)
+		if allocated_count != race_seats.size():
+			push_error("Interest-group columns did not fill a race row.")
+			return false
+		var seat_index := 0
+		for group in groups:
+			var count: int = allocation.get(group, 0)
+			for _index in range(count):
+				race_seats[seat_index].base_group = group
+				seat_index += 1
+		for seat in race_seats:
+			var initial := _sample_base_weight_group(groups, context.random_system)
+			seat.annual_group = initial
+			seat.actual_group = _resolve_group(context.state, initial)
+	return true
+
+
+func _sample_base_weight_group(
+	groups: Array[InterestGroupDefinition], random_system: RandomSystem
+) -> InterestGroupDefinition:
+	var weights: Array[float] = []
 	for group in groups:
-		var count: int = allocation.get(group, 0)
-		for index in range(count):
-			if seat_index >= influenceable_seats.size():
-				return false
-			influenceable_seats[seat_index].base_group = group
-			influenceable_seats[seat_index].annual_group = group
-			influenceable_seats[seat_index].actual_group = group
-			seat_index += 1
-	return seat_index == influenceable_seats.size()
+		weights.append(float(group.base_column_weight))
+	var index := random_system.weighted_index(weights)
+	return null if index < 0 else groups[index]
 
 
 func assign_race_distribution(
 	state: RunState,
-	races: Array[RaceDefinition],
+	traces: Array[RaceDefinition],
 	target_counts: Dictionary[RaceDefinition, int]
 ) -> bool:
 	var remaining := target_counts.duplicate()
 	var reserved: Dictionary[SeatState, bool] = {}
+	# Fixed race seats are unconditional assignments, not preferences. They never enter the
+	# variable pool while their runtime fixed_race binding is active.
 	for seat in state.seats:
-		var anchor := seat.definition.anchor_race
-		if anchor != null and int(remaining.get(anchor, 0)) > 0:
-			seat.race = anchor
-			remaining[anchor] = int(remaining[anchor]) - 1
-			reserved[seat] = true
+		var fixed := seat.fixed_race
+		if fixed == null:
+			continue
+		if int(remaining.get(fixed, 0)) <= 0:
+			push_error("Race distribution cannot remove an active fixed race seat.")
+			return false
+		seat.race = fixed
+		remaining[fixed] = int(remaining[fixed]) - 1
+		reserved[seat] = true
+	# Preserve existing variable assignments where possible to avoid unnecessary identity
+	# churn when only quotas change.
 	for seat in state.seats:
 		if reserved.has(seat):
 			continue
@@ -172,34 +246,42 @@ func assign_race_distribution(
 		if reserved.has(seat):
 			continue
 		seat.race = null
-		for race in races:
+		for race in traces:
 			if int(remaining.get(race, 0)) <= 0:
 				continue
 			seat.race = race
 			remaining[race] = int(remaining[race]) - 1
 			break
 		if seat.race == null:
-			push_error("Race distribution did not fill every permanent seat.")
+			push_error("Race distribution did not fill every seat.")
 			return false
-	for race in races:
+	for race in traces:
 		if int(remaining.get(race, 0)) != 0:
 			push_error("Race distribution has an unassigned quota.")
 			return false
-	return validate_anchor_invariants(state, races)
+	return validate_fixed_seat_invariants(state, traces)
 
 
-func validate_anchor_invariants(
-	state: RunState, races: Array[RaceDefinition]
+func validate_fixed_seat_invariants(
+	state: RunState, traces: Array[RaceDefinition]
 ) -> bool:
-	for race in races:
-		var count := get_race_seat_count(state, race)
-		if count != 1:
-			continue
-		var anchor := _get_anchor_seat(state, race)
-		if anchor != null and anchor.race != race:
-			push_error("A race's final seat must occupy its anchor.")
+	for seat in state.seats:
+		if seat.fixed_race != null and seat.fixed_race in traces and seat.race != seat.fixed_race:
+			push_error("A fixed race seat must remain in its owning race.")
 			return false
 	return true
+
+
+func revoke_fixed_seat(context: RunContext, race: RaceDefinition) -> bool:
+	if context == null or race == null:
+		return false
+	var changed := false
+	for seat in context.state.seats:
+		if seat.fixed_race != race:
+			continue
+		seat.fixed_race = null
+		changed = true
+	return changed
 
 
 func record_authorized_proposal_slots(
@@ -230,12 +312,7 @@ func get_annual_source_shares(
 
 
 func apply_annual_coloring(context: RunContext) -> void:
-	for seat in context.state.seats:
-		seat.annual_group = seat.base_group
-		seat.actual_group = _resolve_group(context.state, seat.annual_group)
 	var shares := get_annual_source_shares(context.state)
-	if shares.is_empty():
-		return
 	var groups := _get_stable_groups(context)
 	var sources: Array[InterestGroupDefinition] = []
 	var weights: Array[float] = []
@@ -243,15 +320,53 @@ func apply_annual_coloring(context: RunContext) -> void:
 		if shares.has(group):
 			sources.append(group)
 			weights.append(shares[group])
-	for seat in get_influenceable_seats(context.state):
-		if sources.is_empty() or not context.random_system.chance(
-			context.balance.annual_group_coloring_rate
-		):
+	for seat in context.state.seats:
+		if seat.race == null:
+			seat.annual_group = null
+			seat.actual_group = null
 			continue
-		var index := context.random_system.weighted_index(weights)
-		if index >= 0:
-			seat.annual_group = sources[index]
-			seat.actual_group = _resolve_group(context.state, seat.annual_group)
+		if seat.race is ZhushuiRaceDefinition:
+			seat.annual_group = null
+			seat.actual_group = null
+			continue
+		if seat.race.fixed_interest_group != null:
+			seat.annual_group = seat.race.fixed_interest_group
+			seat.actual_group = _resolve_group(context.state, seat.race.fixed_interest_group)
+			continue
+		seat.annual_group = seat.base_group
+		if not sources.is_empty() and context.random_system.chance(context.balance.annual_group_coloring_rate):
+			var source_index := context.random_system.weighted_index(weights)
+			if source_index >= 0:
+				seat.annual_group = sources[source_index]
+		seat.annual_group = _apply_race_group_bias(context, seat.race, seat.annual_group)
+		seat.actual_group = _resolve_group(context.state, seat.annual_group)
+
+
+func _apply_race_group_bias(
+	context: RunContext,
+	race: RaceDefinition,
+	fallback: InterestGroupDefinition
+) -> InterestGroupDefinition:
+	var biases := context.constitution_system.get_group_biases_for_race(context, race)
+	if biases.is_empty():
+		return fallback
+	var total_probability := 0.0
+	for bias in biases:
+		if bias == null or bias.interest_group == null:
+			continue
+		total_probability += clampf(bias.probability, 0.0, 1.0)
+	if total_probability > 1.00001:
+		push_error("Constitution group-bias probabilities cannot sum above 100%.")
+		return fallback
+	var roll := context.random_system.random_float(0.0, 1.0)
+	var accumulated := 0.0
+	for bias in biases:
+		if bias == null or bias.interest_group == null:
+			continue
+		accumulated += clampf(bias.probability, 0.0, 1.0)
+		if roll < accumulated:
+			return _resolve_group(context.state, bias.interest_group)
+	return fallback
 
 
 func can_reassign_seat(
@@ -263,18 +378,13 @@ func can_reassign_seat(
 		or target not in context.race_definitions
 		or seat not in context.state.seats
 		or seat.race == target
-		or seat.race is ZhushuiRaceDefinition
-		or target is ZhushuiRaceDefinition
+		or seat.fixed_race != null
+		or not context.constitution_system.race_participates_in_variable_seat_allocation(context, target)
 	):
 		return false
-	var target_constraint := context.constitution_system.get_race_seat_constraint(
-		context, target
-	)
+	var target_constraint := context.constitution_system.get_race_seat_constraint(context, target)
 	var target_count := get_race_seat_count(context.state, target)
 	if target_constraint.maximum_count >= 0 and target_count >= target_constraint.maximum_count:
-		return false
-	var target_anchor := _get_anchor_seat(context.state, target)
-	if target_count == 0 and target_anchor != null and seat != target_anchor:
 		return false
 	var donor := seat.race
 	if donor == null:
@@ -283,10 +393,6 @@ func can_reassign_seat(
 	var donor_count := get_race_seat_count(context.state, donor)
 	if donor_count - 1 < donor_constraint.minimum_count:
 		return false
-	if donor_count - 1 == 1:
-		var anchor := _get_anchor_seat(context.state, donor)
-		if anchor != null and (anchor == seat or anchor.race != donor):
-			return false
 	return true
 
 
@@ -297,7 +403,7 @@ func reassign_seat(
 		return false
 	var previous := seat.race
 	seat.race = target
-	if validate_anchor_invariants(context.state, context.race_definitions):
+	if validate_fixed_seat_invariants(context.state, context.race_definitions):
 		return true
 	seat.race = previous
 	return false
@@ -317,17 +423,7 @@ func use_petition(context: RunContext) -> bool:
 	if not reassign_seat(context, selected, state.petition_race):
 		return false
 	state.petition_used_this_year += 1
-	context.collapse_system.record_intervention(
-		context, &"imperial_petition", context.balance.petition_intervention_pressure
-	)
 	return true
-
-
-func _get_anchor_seat(state: RunState, race: RaceDefinition) -> SeatState:
-	for seat in state.seats:
-		if seat.definition.anchor_race == race:
-			return seat
-	return null
 
 
 func _resolve_group(
@@ -348,10 +444,11 @@ func _get_stable_groups(context: RunContext) -> Array[InterestGroupDefinition]:
 	for group in context.interest_groups:
 		if group != null and group not in result:
 			result.append(group)
+	for race in context.race_definitions:
+		if race != null and race.fixed_interest_group != null and race.fixed_interest_group not in result:
+			result.append(race.fixed_interest_group)
 	for seat in context.state.seats:
-		var local: InterestGroupDefinition = context.state.constitution.local_interest_groups.get(
-			seat.definition
-		)
+		var local: InterestGroupDefinition = context.state.constitution.local_interest_groups.get(seat.definition)
 		if local != null and local not in result:
 			result.append(local)
 	return result

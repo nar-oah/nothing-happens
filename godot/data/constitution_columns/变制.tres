@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ConstitutionColumnDefinition" format=3]
+
+[ext_resource type="Script" path="res://definitions/constitution_column_definition.gd" id="1"]
+[ext_resource type="Resource" path="res://data/constitutions/自由贸易.tres" id="2"]
+[ext_resource type="Resource" path="res://data/constitutions/封闭.tres" id="3"]
+[ext_resource type="Resource" path="res://data/constitutions/言论自由.tres" id="4"]
+
+[resource]
+script = ExtResource("1")
+id = &"reform"
+display_name = "变制"
+unlock_cost_months = 24
+articles = Array[ConstitutionArticleDefinition]([ExtResource("2"), ExtResource("3"), ExtResource("4")])

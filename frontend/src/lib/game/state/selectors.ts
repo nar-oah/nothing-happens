@@ -31,11 +31,7 @@ export type GameStateDisplayProps = {
 	secondary: { text: string; value: number; limit: number; isRow: false };
 };
 
-export type LiveConstitutionRow = MemorialConstitutionRowContentData & {
-	articleRef: number;
-};
-
-export type LiveConstitutionMemorialData = Record<string, number | LiveConstitutionRow[]>;
+export type LiveConstitutionMemorialData = MemorialConstitutionData;
 
 export type DialoguePresentation = {
 	hand_index: number;
@@ -151,16 +147,35 @@ export function deriveDraftPreviewMetrics(
 	});
 }
 
-export function deriveConstitutionMemorial(
-	state: LiveGameState
-): LiveConstitutionMemorialData & MemorialConstitutionData {
-	const sections: LiveConstitutionMemorialData = {};
-	for (const article of state.constitution.articles) {
-		const rows = sections[article.race_display_name];
-		const row = articleToMemorialRow(article);
-		sections[article.race_display_name] = Array.isArray(rows) ? [...rows, row] : [row];
+export function deriveConstitutionMemorial(state: LiveGameState): LiveConstitutionMemorialData {
+	const result: LiveConstitutionMemorialData = {};
+	result[''] = state.constitution.rows.map((row) => {
+		const active = state.constitution.articles.find(
+			(candidate) => candidate.article_index === row.active_article_index
+		);
+		return {
+			text: row.display_name,
+			number: active?.requirement_percent ?? '',
+			selected: false,
+			selectable: false,
+			contents: [],
+			policies: []
+		};
+	});
+	for (const column of state.constitution.columns) {
+		if (!column.unlocked) {
+			result[column.display_name] = column.unlock_cost_months / 12;
+			continue;
+		}
+		result[column.display_name] = state.constitution.rows.map((row) => {
+			const article = state.constitution.articles.find(
+				(candidate) =>
+					candidate.row_index === row.row_index && candidate.column_index === column.column_index
+			);
+			return article ? articleToMemorialRow(article) : emptyConstitutionCell();
+		});
 	}
-	return sections;
+	return result;
 }
 
 export function deriveDialoguePresentation(
@@ -183,15 +198,28 @@ export function deriveDialoguePresentation(
 	};
 }
 
-function articleToMemorialRow(article: ConstitutionArticleStateDto): LiveConstitutionRow {
+function articleToMemorialRow(
+	article: ConstitutionArticleStateDto
+): MemorialConstitutionRowContentData {
 	return {
 		articleRef: article.article_index,
 		text: article.display_name,
-		number: '',
+		number: article.requirement_percent ?? '',
 		selected: article.selected,
 		selectable: article.eligible,
-		contents: [{ body: article.content }],
+		contents: [{ title: article.row_display_name, body: article.content }],
 		policies: article.policies.map(policyToMemorialContent)
+	};
+}
+
+function emptyConstitutionCell(): MemorialConstitutionRowContentData {
+	return {
+		text: '',
+		number: '',
+		selected: false,
+		selectable: false,
+		contents: [],
+		policies: []
 	};
 }
 

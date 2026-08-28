@@ -5,6 +5,7 @@
 	import NewspaperEntry from '$lib/components/newspaper/NewspaperEntry.svelte';
 	import GameStateDisplay from '$lib/components/state/GameStateDisplay.svelte';
 	import Top from '$lib/components/top/Top.svelte';
+	import type { ConstitutionColumnDto } from '$lib/game/state/types';
 	import type { ViewFrameProps } from './types';
 
 	type Props = Pick<
@@ -13,7 +14,9 @@
 	> & {
 		title: string;
 		constitution: MemorialConstitutionData;
+		columns: ConstitutionColumnDto[];
 		onArticleSelectionChange?: (articleRef: number, selected: boolean) => void;
+		onColumnUnlock?: (columnIndex: number) => void;
 		onSubmit?: () => void;
 	};
 
@@ -27,15 +30,26 @@
 		onNewspaperOpen,
 		title,
 		constitution,
+		columns,
 		onArticleSelectionChange,
+		onColumnUnlock,
 		onSubmit
 	}: Props = $props();
 	let confirmMode = $state(false);
+	let unlockableSections = $derived(
+		columns.filter((column) => !column.unlocked && column.can_unlock).map((column) => column.display_name)
+	);
 
 	function submitRevision(isConfirm: boolean) {
 		if (!isConfirm) return;
 		onSubmit?.();
 		queueMicrotask(() => (confirmMode = false));
+	}
+
+	function unlockSection(sectionTitle: string) {
+		const column = columns.find((candidate) => candidate.display_name === sectionTitle);
+		if (!column || column.unlocked || !column.can_unlock) return;
+		onColumnUnlock?.(column.column_index);
 	}
 </script>
 
@@ -56,7 +70,13 @@
 						onSwitchChange={submitRevision}
 					/>
 				</div>
-				<MemorialVerticalConstitution {title} {constitution} {onArticleSelectionChange} />
+				<MemorialVerticalConstitution
+					{title}
+					{constitution}
+					{unlockableSections}
+					{onArticleSelectionChange}
+					onSectionUnlock={unlockSection}
+				/>
 			</div>
 		</div>
 	</div>

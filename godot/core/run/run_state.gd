@@ -1,11 +1,22 @@
 extends RefCounted
 class_name RunState
 
+enum RunPhase {
+	RUNNING,
+	TERM_ENDED,
+}
+
+enum TermOutcome {
+	NONE,
+	COLLAPSE,
+	NOTHING_HAPPENS,
+}
+
 const NEW_BILL_INDEX: int = -1
 
 var term: int = 1
 var year: int = 1
-var month: int = 1
+var month: int = 0
 var metrics: MetricValues
 var year_start_metrics: MetricValues
 var month_report_year: int = 0
@@ -33,13 +44,10 @@ var petition_limit: int = 0
 var petition_used_this_year: int = 0
 var donation_detection_probability: float = 0.0
 var event_early_reveal_bonus_probability: float = 0.0
-var intervention_records: Array[InterventionRecordState] = []
 var collapse_level: int = 0
-var regulation_pressure: float = 0.0
-var pending_collapse_delta: int = 0
-var has_intervened: bool = false
-var run_failed: bool = false
-var ending_id: StringName
+var run_phase: RunPhase = RunPhase.RUNNING
+var term_outcome: TermOutcome = TermOutcome.NONE
+var governing_months: int = 0
 
 
 func _init() -> void:
@@ -109,6 +117,3 @@ func _track_current_hand_order() -> void:
 		if proposal not in proposal_acquisition_order:
 			proposal_acquisition_order.append(proposal)
 
-
-func absolute_month() -> int:
-	return (year - 1) * 12 + month - 1

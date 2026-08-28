@@ -1,16 +1,23 @@
 extends RefCounted
 class_name ConstitutionState
 
-var active_articles: Dictionary[RaceDefinition, ConstitutionArticleDefinition] = {}
-var clicked_articles: Dictionary[ConstitutionArticleDefinition, bool] = {}
+var active_articles: Dictionary[ConstitutionRowDefinition, ConstitutionArticleDefinition] = {}
 var revision_available: bool = true
+var terminal_article: ConstitutionArticleDefinition
 var group_mergers: Dictionary[InterestGroupDefinition, InterestGroupDefinition] = {}
 var local_interest_groups: Dictionary[SeatDefinition, InterestGroupDefinition] = {}
 
 
+func get_active_article_for_row(
+	row: ConstitutionRowDefinition
+) -> ConstitutionArticleDefinition:
+	return active_articles.get(row)
+
+
 func get_active_article(race: RaceDefinition) -> ConstitutionArticleDefinition:
-	return active_articles.get(race)
-
-
-func was_clicked(article: ConstitutionArticleDefinition) -> bool:
-	return article != null and clicked_articles.has(article)
+	if race == null:
+		return null
+	for row in active_articles:
+		if row != null and row.race == race:
+			return active_articles[row]
+	return null

@@ -1,6 +1,8 @@
 [gd_resource type="Resource" script_class="NankeConstitutionArticleDefinition" format=3 uid="uid://clin7vlpgfkgw"]
 
 [ext_resource type="Script" uid="uid://jgr73t04ui0t" path="res://definitions/nanke_constitution_article_definition.gd" id="1_article_script"]
+[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="1_i68hm"]
+[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_laevt"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
 [ext_resource type="Resource" uid="uid://bto7mkhf8cqca" path="res://data/races/nanke.tres" id="3_race_nanke"]
 [ext_resource type="Resource" path="res://data/interest_groups/槐安公所.tres" id="4_group_1"]
@@ -8,6 +10,7 @@
 [ext_resource type="Resource" uid="uid://fpu0irq6iwaf" path="res://data/policies/集体议价.tres" id="6_policy_1"]
 [ext_resource type="Resource" uid="uid://kdxjll3s3s55" path="res://data/policies/轮班限制.tres" id="7_policy_2"]
 [ext_resource type="Resource" uid="uid://dwyif7m5k2san" path="res://data/policies/生活津贴.tres" id="8_policy_3"]
+[ext_resource type="Resource" path="res://data/constitution_rows/团体.tres" id="row"]
 
 [sub_resource type="Resource" id="Resource_influence_1"]
 script = ExtResource("5_influence_rule_script")
@@ -22,7 +25,7 @@ absence_probability = 0.05
 strike_enabled = true
 strike_group = ExtResource("4_group_1")
 display_name = "工会"
+row = ExtResource("row")
 race = ExtResource("3_race_nanke")
-is_initial = true
 policies = Array[ExtResource("2_policy_script")]([ExtResource("6_policy_1"), ExtResource("7_policy_2"), ExtResource("8_policy_3")])
 influence_rules = Array[ExtResource("5_influence_rule_script")]([SubResource("Resource_influence_1")])

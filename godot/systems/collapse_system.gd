@@ -2,47 +2,30 @@ extends RefCounted
 class_name CollapseSystem
 
 
-func record_intervention(context: RunContext, kind: StringName, pressure: float) -> void:
+func increase(context: RunContext) -> void:
 	var state := context.state
-	state.has_intervened = true
-	state.intervention_records.append(
-		InterventionRecordState.new(kind, state.absolute_month(), maxf(pressure, 0.0))
-	)
-
-
-func settle_month(context: RunContext) -> void:
-	var state := context.state
-	var balance := context.balance
-	if state.run_failed or state.ending_id != &"":
+	if state.run_phase != RunState.RunPhase.RUNNING:
 		return
-	state.regulation_pressure = _calculate_regulation_pressure(state, balance)
-	var pressure_delta := roundi(state.regulation_pressure * balance.pressure_to_collapse)
-	var delta: int = state.pending_collapse_delta + maxi(pressure_delta, 0)
-	if _has_negative_metric(state.metrics):
-		delta += balance.negative_metric_monthly_pressure
-	state.pending_collapse_delta = 0
 	state.collapse_level = clampi(
-		state.collapse_level + maxi(delta, 0),
+		state.collapse_level + context.balance.collapse_step,
 		0,
-		balance.max_collapse
+		context.balance.max_collapse
 	)
-	if state.collapse_level >= balance.max_collapse:
-		state.run_failed = true
+	if state.collapse_level < context.balance.max_collapse:
+		return
+	state.run_phase = RunState.RunPhase.TERM_ENDED
+	state.term_outcome = (
+		RunState.TermOutcome.NOTHING_HAPPENS
+		if state.saved_bills.is_empty()
+		else RunState.TermOutcome.COLLAPSE
+	)
 
 
-func _calculate_regulation_pressure(
-	state: RunState, balance: GameBalanceDefinition
-) -> float:
-	var result := 0.0
-	var current_month := state.absolute_month()
-	for record in state.intervention_records:
-		var age := maxi(current_month - record.month_index, 0)
-		result += record.pressure * pow(balance.pressure_decay_per_month, age)
-	return result
-
-
-func _has_negative_metric(values: MetricValues) -> bool:
-	for metric in Metric.all_ids():
-		if values.get_value(metric) < 0:
-			return true
-	return false
+func recover_annual(context: RunContext) -> void:
+	var state := context.state
+	if state.run_phase != RunState.RunPhase.RUNNING:
+		return
+	state.collapse_level = maxi(
+		state.collapse_level - maxi(context.balance.annual_collapse_recovery, 0),
+		0
+	)

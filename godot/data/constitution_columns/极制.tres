@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ConstitutionColumnDefinition" format=3]
+
+[ext_resource type="Script" path="res://definitions/constitution_column_definition.gd" id="1"]
+[ext_resource type="Resource" path="res://data/constitutions/行省.tres" id="2"]
+[ext_resource type="Resource" path="res://data/constitutions/法团.tres" id="3"]
+[ext_resource type="Resource" path="res://data/constitutions/理想国.tres" id="4"]
+
+[resource]
+script = ExtResource("1")
+id = &"extreme"
+display_name = "极制"
+unlock_cost_months = 36
+articles = Array[ConstitutionArticleDefinition]([ExtResource("2"), ExtResource("3"), ExtResource("4")])

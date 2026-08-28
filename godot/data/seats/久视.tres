@@ -7,4 +7,5 @@
 script = ExtResource("1_qxpgu")
 display_name = "久视"
 anchor_race = ExtResource("1_l0n4x")
+fixed_race = ExtResource("1_l0n4x")
 metadata/_custom_type_script = "uid://of78ek0nhty6"
