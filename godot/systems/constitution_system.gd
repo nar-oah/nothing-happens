@@ -257,7 +257,7 @@ func modify_vote(vote_context: VoteContext) -> void:
 func race_participates_in_variable_seat_allocation(
 	context: RunContext, race: RaceDefinition
 ) -> bool:
-	if race == null:
+	if race == null or race is ZhushuiRaceDefinition:
 		return false
 	var article := context.state.constitution.get_active_article(race)
 	return true if article == null else article.participates_in_variable_seat_allocation
@@ -269,14 +269,17 @@ func get_race_seat_constraint(context: RunContext, race: RaceDefinition) -> Race
 	var fixed_count := context.parliament_system.get_fixed_seat_count(context.state, race)
 	if not race_participates_in_variable_seat_allocation(context, race):
 		return RaceSeatConstraint.new(fixed_count, fixed_count)
-	var total := context.state.seats.size()
+	var variable_pool := context.parliament_system.get_variable_seats(context.state).size()
 	var article := context.state.constitution.get_active_article(race)
-	var minimum := fixed_count
-	var maximum := total
+	var minimum_variable := 0
+	var maximum_variable := variable_pool
 	if article != null:
-		minimum = maxi(ceili(article.race_min_seat_rate * total), fixed_count)
-		maximum = maxi(floori(article.race_max_seat_rate * total), fixed_count)
-	return RaceSeatConstraint.new(minimum, maximum)
+		minimum_variable = ceili(article.race_min_seat_rate * variable_pool)
+		maximum_variable = floori(article.race_max_seat_rate * variable_pool)
+	return RaceSeatConstraint.new(
+		fixed_count + minimum_variable,
+		fixed_count + maximum_variable
+	)
 
 
 func get_variable_race_seat_constraint(
