@@ -127,8 +127,6 @@ func _start_term(term_number: int) -> bool:
 		push_error("Failed to allocate opening race seats.")
 		return false
 	for race in race_definitions:
-		if race is ZhushuiRaceDefinition:
-			continue
 		if not race_system.enforce_constitution_constraints(context, race):
 			push_error("Failed to apply opening constitution seat constraints.")
 			return false
@@ -136,6 +134,8 @@ func _start_term(term_number: int) -> bool:
 		return false
 	constitution_system.apply_influence_rules(context)
 	constitution_system.activate_initial_articles(context)
+	# First-year expectations use the same constitution-driven month-0 formula as later years.
+	race_system.rebuild_annual_expectations(context)
 	flow_controller = FlowController.new()
 	flow_controller.setup(context)
 	return true
