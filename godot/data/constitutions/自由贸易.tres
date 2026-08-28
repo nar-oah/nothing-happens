@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://cuee63qimx3p2" path="res://definitions/free_trade_merger_constitution_article_definition.gd" id="1_article_script"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
 [ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/human.tres" id="3_race_human"]
+[ext_resource type="Resource" path="res://data/constitution_rows/外交.tres" id="row"]
 [ext_resource type="Resource" path="res://data/constitutions/朝贡.tres" id="4_prereq"]
 [ext_resource type="Resource" path="res://data/interest_groups/永乐轮运局.tres" id="5_group_1"]
 [ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="6_influence_rule_script"]
@@ -19,6 +20,7 @@ rate = 1.0
 [resource]
 script = ExtResource("1_article_script")
 display_name = "自由贸易"
+row = ExtResource("row")
 race = ExtResource("3_race_human")
 prerequisite = ExtResource("4_prereq")
 race_max_seat_rate = 0.0
