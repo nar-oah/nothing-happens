@@ -44,6 +44,7 @@ export type ConstitutionArticleStateDto = ConstitutionArticleDto & {
 	selected: boolean;
 	eligible: boolean;
 	is_terminal: boolean;
+	requirement_percent: number | null;
 };
 
 export type ConstitutionDto = {
