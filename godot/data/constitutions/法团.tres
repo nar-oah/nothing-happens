@@ -61,6 +61,7 @@ script = ExtResource("1_article_script")
 yin_yang_adjustment_rate = 0.1
 display_name = "法团"
 row = ExtResource("row")
+is_terminal = true
 race = ExtResource("3_race_biyi")
 prerequisite = ExtResource("8_prereq")
 seat_condition = SubResource("Resource_seat_condition")
