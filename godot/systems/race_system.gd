@@ -45,36 +45,43 @@ func rebuild_annual_expectations(context: RunContext) -> void:
 func allocate_opening_seats(context: RunContext) -> bool:
 	if context == null or context.state == null or context.state.seats.is_empty():
 		return false
-	var variable_pool := context.parliament_system.get_variable_seats(context.state).size()
+	# Opening anchors are physical starting assignments, not permanent constraints. Only
+	# unanchored variable seats participate in the random opening draw; anchored variable
+	# seats remain available to later annual reallocation.
+	var random_seats: Array[SeatState] = []
+	for seat in context.parliament_system.get_variable_seats(context.state):
+		if seat.definition == null or seat.definition.anchor_race == null:
+			random_seats.append(seat)
+	var random_pool := random_seats.size()
 	var eligible: Array[RaceDefinition] = []
-	var fixed_counts: Dictionary[RaceDefinition, int] = {}
 	for race in context.race_definitions:
-		fixed_counts[race] = context.parliament_system.get_fixed_seat_count(context.state, race)
 		if context.constitution_system.race_participates_in_variable_seat_allocation(context, race):
 			eligible.append(race)
-	if variable_pool > 0 and eligible.is_empty():
-		push_error("Opening parliament has variable seats but no eligible race.")
+	if random_pool > 0 and eligible.is_empty():
+		push_error("Opening parliament has random seats but no eligible race.")
 		return false
-	# The opening 60% cap applies to the random/variable pool itself. Fixed seats are
-	# outside the random draw and therefore must not enlarge a race's random allowance.
-	var variable_cap := floori(float(variable_pool) * context.balance.opening_max_race_seat_rate)
+	# The opening cap applies only to the twenty random seats. Race anchors guarantee the
+	# formal opening representation independently of the random distribution.
+	var random_cap := floori(float(random_pool) * context.balance.opening_max_race_seat_rate)
 	var caps: Dictionary[RaceDefinition, int] = {}
 	for race in eligible:
-		caps[race] = variable_cap
+		caps[race] = random_cap
 	var legal: Array[Dictionary] = []
-	_collect_opening_distributions(eligible, caps, 0, variable_pool, {}, legal)
+	_collect_opening_distributions(eligible, caps, 0, random_pool, {}, legal)
 	if legal.is_empty():
-		push_error("Opening race-seat constraints have no legal distribution.")
+		push_error("Opening race-seat constraints have no legal random distribution.")
 		return false
 	var selected: Dictionary = legal[context.random_system.random_int(0, legal.size() - 1)]
-	var final_counts: Dictionary[RaceDefinition, int] = {}
-	for race in context.race_definitions:
-		final_counts[race] = int(fixed_counts.get(race, 0))
-		if race in eligible:
-			final_counts[race] += int(selected.get(race, 0))
-	return context.parliament_system.assign_race_distribution(
-		context.state, context.race_definitions, final_counts
-	)
+	var seat_index := 0
+	for race in eligible:
+		var count := int(selected.get(race, 0))
+		for _index in range(count):
+			if seat_index >= random_seats.size():
+				push_error("Opening random distribution exceeded the random seat pool.")
+				return false
+			random_seats[seat_index].race = race
+			seat_index += 1
+	return seat_index == random_seats.size()
 
 
 func _collect_opening_distributions(
