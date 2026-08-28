@@ -104,10 +104,6 @@ class FlowCollapseSystem:
 	func settle_month(_context: RunContext) -> void:
 		call_log.record(&"collapse")
 
-	func recover_annual(context: RunContext) -> void:
-		call_log.record(&"collapse_recovery")
-		super.recover_annual(context)
-
 
 class FlowProposalSystem:
 	extends ProposalSystem
@@ -295,7 +291,6 @@ func _test_complete_month_flow_order(t: BackendTestContext) -> void:
 		&"proposal_visit",
 		&"annual",
 		&"time",
-		&"collapse_recovery",
 	]
 	t.check_equal(call_log.entries, expected, "monthly flow order is stable through annual settlement")
 	session.free()
