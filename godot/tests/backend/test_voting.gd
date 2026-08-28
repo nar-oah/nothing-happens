@@ -35,7 +35,7 @@ func _test_donation_pool_spending_and_detection(t: BackendTestContext) -> void:
 	balance.event_spawn_count_min = 0
 	balance.event_spawn_count_max = 0
 	balance.donation_detection_probability = 0.0
-	balance.donation_detection_collapse = 7.0
+	balance.donation_detection_collapse = 7
 	var session := t.make_session(
 		[race], [group], t.make_seats(1, "donation"), [], balance
 	)
@@ -59,7 +59,7 @@ func _test_donation_pool_spending_and_detection(t: BackendTestContext) -> void:
 	session.state.donation_detection_probability = 1.0
 	t.check(session.vote_system.set_donation(session.context, seat, 4.0), "allocation can be increased")
 	t.check_approx(session.state.political_donation_pool, 1.0, "only incremental donation is charged")
-	t.check_approx(session.state.pending_collapse_delta, 7.0, "certain detection adds configured collapse")
+	t.check_equal(session.state.pending_collapse_delta, 7, "certain detection adds configured integer collapse")
 	session.vote_system.clear_donations(session.state)
 	t.check(session.state.vote_donations.is_empty(), "vote completion clears allocations")
 	session.free()

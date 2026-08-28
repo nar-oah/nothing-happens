@@ -307,7 +307,6 @@ func _test_balance_controls_automatic_draw_count(t: BackendTestContext) -> void:
 	var session := t.make_session(
 		[race], [group], t.make_seats(1, "draw"), [], balance
 	)
-	session.proposal_system.draw_automatic_proposals(session.context)
 	t.check_equal(session.state.proposal_hand.size(), 2, "automatic draw count comes from balance")
 	for proposal in session.state.proposal_hand:
 		t.check(proposal.source_group == group, "automatic proposal keeps group Resource")

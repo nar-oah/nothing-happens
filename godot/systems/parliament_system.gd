@@ -121,24 +121,32 @@ func allocate_base_columns(
 func initialize_base_groups(
 	state: RunState, groups: Array[InterestGroupDefinition]
 ) -> bool:
-	var allocation := allocate_base_columns(state.seats.size(), groups)
+	var influenceable_seats: Array[SeatState] = []
+	for seat in state.seats:
+		if seat.race is ZhushuiRaceDefinition:
+			seat.base_group = null
+			seat.annual_group = null
+			seat.actual_group = null
+			continue
+		influenceable_seats.append(seat)
+	var allocation := allocate_base_columns(influenceable_seats.size(), groups)
 	var allocated_count := 0
 	for count in allocation.values():
 		allocated_count += int(count)
-	if allocated_count != state.seats.size():
-		push_error("Interest-group columns did not fill the permanent seat pool.")
+	if allocated_count != influenceable_seats.size():
+		push_error("Interest-group columns did not fill the influenceable seat pool.")
 		return false
 	var seat_index := 0
 	for group in groups:
 		var count: int = allocation.get(group, 0)
 		for index in range(count):
-			if seat_index >= state.seats.size():
+			if seat_index >= influenceable_seats.size():
 				return false
-			state.seats[seat_index].base_group = group
-			state.seats[seat_index].annual_group = group
-			state.seats[seat_index].actual_group = group
+			influenceable_seats[seat_index].base_group = group
+			influenceable_seats[seat_index].annual_group = group
+			influenceable_seats[seat_index].actual_group = group
 			seat_index += 1
-	return seat_index == state.seats.size()
+	return seat_index == influenceable_seats.size()
 
 
 func assign_race_distribution(
@@ -255,6 +263,8 @@ func can_reassign_seat(
 		or target not in context.race_definitions
 		or seat not in context.state.seats
 		or seat.race == target
+		or seat.race is ZhushuiRaceDefinition
+		or target is ZhushuiRaceDefinition
 	):
 		return false
 	var target_constraint := context.constitution_system.get_race_seat_constraint(

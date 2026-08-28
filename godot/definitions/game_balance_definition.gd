@@ -4,6 +4,9 @@ class_name GameBalanceDefinition
 @export_group("基础")
 @export_range(1, 999999, 1) var initial_metric_value: int = 100
 
+@export_group("年度期望")
+@export_range(0.0, 1.0, 0.01) var race_expectation_growth_per_year: float = 0.10
+
 @export_group("提案")
 @export_range(0, 999, 1) var automatic_draw_count: int = 3
 @export_range(0, 999999, 1) var proposal_negative_magnitude_min: int = 8
@@ -14,7 +17,7 @@ class_name GameBalanceDefinition
 @export_range(1, 999, 1) var proposal_lag_months_max: int = 12
 @export_range(0.0, 1.0, 0.01) var proposal_magnitude_growth_per_year: float = 0.10
 @export_range(0.0, 100.0, 0.5) var proposal_support: float = 1.0
-@export var proposal_collapse_impact: float = 0.0
+@export_range(0, 999999, 1) var proposal_collapse_impact: int = 0
 @export_range(0.0, 100.0, 0.05) var proposal_draw_base_weight: float = 1.0
 @export_range(0.0, 100.0, 0.05) var proposal_draw_reverse_factor: float = 3.0
 @export_range(0.0, 100.0, 0.05) var proposal_draw_min_weight: float = 0.5
@@ -32,7 +35,7 @@ class_name GameBalanceDefinition
 @export_range(0.0, 100.0, 0.5) var group_stance_score: float = 4.0
 @export_range(0.0, 100.0, 0.5) var support_threshold: float = 1.0
 @export_range(0.0, 1.0, 0.01) var donation_detection_probability: float = 0.25
-@export_range(0.0, 100.0, 0.5) var donation_detection_collapse: float = 5.0
+@export_range(0, 100, 1) var donation_detection_collapse: int = 5
 
 @export_group("南柯")
 @export_range(0.0, 1.0, 0.01) var normal_absence_probability: float = 0.15
@@ -43,7 +46,7 @@ class_name GameBalanceDefinition
 @export_range(1, 999, 1) var event_lifetime_months: int = 12
 @export_range(0, 999, 1) var event_public_remaining_months: int = 3
 @export_range(0.0, 1.0, 0.01) var event_early_reveal_probability_per_seat: float = 0.05
-@export_range(0.0, 100.0, 0.5) var event_failure_collapse: float = 1.0
+@export_range(0, 100, 1) var event_failure_collapse: int = 1
 @export_range(0.0, 1.0, 0.01) var event_pause_satisfaction_threshold: float = 0.8
 @export_range(0.0, 1.0, 0.01) var event_relief_satisfaction_threshold: float = 1.0
 @export_range(0.0, 1.0, 0.01) var event_relief_progress_per_month: float = 0.50
@@ -54,11 +57,10 @@ class_name GameBalanceDefinition
 @export_range(0.0, 1.0, 0.01) var annual_group_coloring_rate: float = 0.65
 
 @export_group("崩溃")
-@export_range(1.0, 999999.0, 1.0) var max_collapse: float = 100.0
+@export_range(1, 999999, 1) var max_collapse: int = 100
 @export_range(0.0, 1.0, 0.01) var pressure_decay_per_month: float = 0.75
 @export_range(0.0, 100.0, 0.01) var pressure_to_collapse: float = 0.12
-@export_range(0.0, 100.0, 0.1) var negative_metric_monthly_pressure: float = 1.0
-@export_range(0.0, 999999.0, 0.5) var silent_recovery_per_month: float = 8.0
+@export_range(0, 100, 1) var negative_metric_monthly_pressure: int = 1
 
 @export_group("干预")
 @export_range(0.0, 100.0, 0.5) var constitution_revision_pressure: float = 3.0

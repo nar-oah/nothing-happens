@@ -22,33 +22,59 @@ func initialize_races(
 	return true
 
 
-func advance_expectations(state: RunState) -> void:
+func advance_expectations(
+	state: RunState, balance: GameBalanceDefinition = null
+) -> void:
 	for race in state.races:
 		if race.definition == null:
 			continue
+		var growth_rate := race.expectation_growth_rate
+		if is_zero_approx(growth_rate) and balance != null:
+			growth_rate = balance.race_expectation_growth_per_year
 		for metric in race.definition.get_stance_metrics():
 			var previous := race.get_expectation(metric)
 			var direction := race.definition.get_stance(metric)
 			if direction == Metric.Direction.HIGHER:
 				race.expectation_targets[metric] = roundi(
-					float(previous) * (1.0 + race.expectation_growth_rate)
+					float(previous) * (1.0 + growth_rate)
 				)
 			elif direction == Metric.Direction.LOWER:
 				race.expectation_targets[metric] = roundi(
-					float(previous) * (1.0 - race.expectation_growth_rate)
+					float(previous) * (1.0 - growth_rate)
 				)
 
 
 func allocate_seats(context: RunContext) -> bool:
-	var races := context.race_definitions
+	var all_races := context.race_definitions
 	var pool := context.state.seats.size()
+	if all_races.is_empty() and pool > 0:
+		return false
+	var fixed_zhushui: RaceDefinition
+	var races: Array[RaceDefinition] = []
+	for race in all_races:
+		if race is ZhushuiRaceDefinition:
+			if fixed_zhushui != null:
+				push_error("Only one Zhushui race definition can own the permanent executive seat.")
+				return false
+			fixed_zhushui = race
+		else:
+			races.append(race)
+	var counts: Dictionary[RaceDefinition, int] = {}
+	if fixed_zhushui != null:
+		if pool <= 0:
+			push_error("Zhushui requires one permanent executive seat.")
+			return false
+		counts[fixed_zhushui] = 1
+		pool -= 1
 	if races.is_empty() and pool > 0:
 		return false
-	var constraints := context.constitution_system.get_race_seat_constraints(context)
+	var all_constraints := context.constitution_system.get_race_seat_constraints(context)
+	var constraints: Dictionary[RaceDefinition, RaceSeatConstraint] = {}
+	for race in races:
+		constraints[race] = all_constraints[race]
 	if not _validate_constraints(races, constraints, pool):
 		return false
 	var quotas := _calculate_bounded_quotas(context, races, constraints, pool)
-	var counts: Dictionary[RaceDefinition, int] = {}
 	var assigned := 0
 	for race in races:
 		var count := floori(float(quotas.get(race, 0.0)))
@@ -70,7 +96,9 @@ func allocate_seats(context: RunContext) -> bool:
 			return false
 		counts[selected] += 1
 		assigned += 1
-	return context.parliament_system.assign_race_distribution(context.state, races, counts)
+	return context.parliament_system.assign_race_distribution(
+		context.state, all_races, counts
+	)
 
 
 func get_effective_expectation(

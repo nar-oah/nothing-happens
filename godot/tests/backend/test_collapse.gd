@@ -5,6 +5,7 @@ const BackendTestContext = preload("res://tests/backend/backend_test_context.gd"
 
 func run(t: BackendTestContext) -> void:
 	_test_configurable_collapse_routes(t)
+	_test_integer_monotonic_collapse(t)
 	_test_pressure_decay_and_negative_metric(t)
 	_test_bill_digestion_and_market_movement(t)
 	_test_policy_trigger_chain(t)
@@ -27,27 +28,55 @@ func _test_configurable_collapse_routes(t: BackendTestContext) -> void:
 	balance.automatic_draw_count = 0
 	balance.event_spawn_count_min = 0
 	balance.event_spawn_count_max = 0
-	balance.max_collapse = 10.0
-	balance.silent_recovery_per_month = 5.0
+	balance.max_collapse = 10
 	balance.pressure_to_collapse = 0.0
-	balance.negative_metric_monthly_pressure = 0.0
-	var silent := _make_collapse_session(t, balance)
-	silent.state.collapse_level = 9.0
-	silent.state.pending_collapse_delta = 1.0
-	silent.collapse_system.settle_month(silent.context)
-	t.check(silent.state.silent_observation, "unintervened max collapse enters observation")
-	silent.collapse_system.settle_month(silent.context)
-	t.check_approx(silent.state.collapse_level, 5.0, "silent recovery uses balance amount")
-	silent.collapse_system.settle_month(silent.context)
-	t.check_equal(silent.state.ending_id, &"nothing_happens", "silent recovery reaches ending")
-	silent.free()
+	balance.negative_metric_monthly_pressure = 0
+	var ordinary := _make_collapse_session(t, balance)
+	ordinary.state.collapse_level = 9
+	ordinary.state.pending_collapse_delta = 1
+	ordinary.collapse_system.settle_month(ordinary.context)
+	t.check_equal(ordinary.state.collapse_level, 10, "collapse reaches the configured integer maximum")
+	t.check(ordinary.state.run_failed, "maximum collapse always ends the current term")
+	t.check_equal(ordinary.state.ending_id, &"", "maximum collapse no longer enters a recovery ending route")
+	ordinary.free()
 
-	var failed := _make_collapse_session(t, balance)
-	failed.collapse_system.record_intervention(failed.context, &"test_intervention", 0.0)
-	failed.state.pending_collapse_delta = 10.0
-	failed.collapse_system.settle_month(failed.context)
-	t.check(failed.state.run_failed, "intervened max collapse fails the run")
-	failed.free()
+	var intervened := _make_collapse_session(t, balance)
+	intervened.collapse_system.record_intervention(intervened.context, &"test_intervention", 0.0)
+	intervened.state.pending_collapse_delta = 10
+	intervened.collapse_system.settle_month(intervened.context)
+	t.check(intervened.state.run_failed, "intervened max collapse also fails the run")
+	intervened.free()
+
+
+func _test_integer_monotonic_collapse(t: BackendTestContext) -> void:
+	var balance := GameBalanceDefinition.new()
+	balance.automatic_draw_count = 0
+	balance.event_spawn_count_min = 0
+	balance.event_spawn_count_max = 0
+	balance.max_collapse = 100
+	balance.pressure_to_collapse = 0.12
+	balance.pressure_decay_per_month = 0.75
+	balance.negative_metric_monthly_pressure = 0
+	var session := _make_collapse_session(t, balance)
+	t.check_equal(typeof(session.state.collapse_level), TYPE_INT, "collapse level is stored as int")
+	t.check_equal(
+		typeof(session.state.pending_collapse_delta),
+		TYPE_INT,
+		"pending collapse delta is stored as int"
+	)
+	session.collapse_system.record_intervention(session.context, &"fractional_pressure", 5.0)
+	session.collapse_system.settle_month(session.context)
+	t.check_equal(session.state.collapse_level, 1, "fractional pressure conversion is rounded once to int")
+	t.check_equal(typeof(session.state.collapse_level), TYPE_INT, "pressure cannot produce float collapse")
+	session.state.month = 2
+	session.collapse_system.settle_month(session.context)
+	t.check_equal(session.state.collapse_level, 1, "decaying pressure never reduces collapse")
+	session.state.regulation_pressure = 0.0
+	session.state.intervention_records.clear()
+	session.state.pending_collapse_delta = -3
+	session.collapse_system.settle_month(session.context)
+	t.check_equal(session.state.collapse_level, 1, "negative deltas cannot reduce collapse")
+	session.free()
 
 
 func _test_pressure_decay_and_negative_metric(t: BackendTestContext) -> void:
@@ -55,23 +84,23 @@ func _test_pressure_decay_and_negative_metric(t: BackendTestContext) -> void:
 	balance.automatic_draw_count = 0
 	balance.event_spawn_count_min = 0
 	balance.event_spawn_count_max = 0
-	balance.max_collapse = 100.0
+	balance.max_collapse = 100
 	balance.pressure_decay_per_month = 0.5
 	balance.pressure_to_collapse = 1.0
-	balance.negative_metric_monthly_pressure = 3.0
+	balance.negative_metric_monthly_pressure = 3
 	var session := _make_collapse_session(t, balance)
 	session.collapse_system.record_intervention(session.context, &"configured", 4.0)
 	session.collapse_system.settle_month(session.context)
 	t.check_approx(session.state.regulation_pressure, 4.0, "fresh intervention contributes full pressure")
-	t.check_approx(session.state.collapse_level, 4.0, "pressure conversion reads balance")
+	t.check_equal(session.state.collapse_level, 4, "pressure conversion produces integer collapse")
 	session.state.month = 2
 	session.collapse_system.settle_month(session.context)
 	t.check_approx(session.state.regulation_pressure, 2.0, "pressure decays by configured ratio")
-	t.check_approx(session.state.collapse_level, 6.0, "decayed pressure still converts")
+	t.check_equal(session.state.collapse_level, 6, "decayed pressure still converts to integer collapse")
 	balance.pressure_to_collapse = 0.0
 	session.state.metrics.tax = -1
 	session.collapse_system.settle_month(session.context)
-	t.check_approx(session.state.collapse_level, 9.0, "negative metric adds configured pressure")
+	t.check_equal(session.state.collapse_level, 9, "negative metric adds configured integer collapse")
 	session.free()
 
 
@@ -163,4 +192,4 @@ func _test_policy_trigger_chain(t: BackendTestContext) -> void:
 	t.check_equal(state.metrics.trade, 20, "second policy triggers from first policy result")
 	t.check(state.active_bill.policies[0].triggered, "first policy is marked triggered")
 	t.check(state.active_bill.policies[1].triggered, "second policy is marked triggered")
-	t.check_approx(state.pending_collapse_delta, 0.0, "policies do not add collapse")
+	t.check_equal(state.pending_collapse_delta, 0, "policies do not add collapse")
