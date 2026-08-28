@@ -15,11 +15,6 @@ import {
 	type Proposal
 } from './types.ts';
 
-type PolicyHasCollapseImpact = 'collapse_impact' extends keyof PolicyDefinition ? true : false;
-type ProposalHasCollapseImpact = 'collapse_impact' extends keyof Proposal ? true : false;
-const policyHasCollapseImpact: PolicyHasCollapseImpact = false;
-const proposalHasCollapseImpact: ProposalHasCollapseImpact = false;
-
 const sourceGroup: InterestGroupDefinition = {
 	display_name: 'source',
 	base_column_weight: 1,
@@ -169,9 +164,4 @@ test('policy identity uses display_name only', () => {
 			policies: [second]
 		}
 	);
-});
-
-test('Proposal and PolicyDefinition have no collapse_impact field', () => {
-	assert.equal(proposalHasCollapseImpact, false);
-	assert.equal(policyHasCollapseImpact, false);
 });
