@@ -5,7 +5,7 @@ const BackendTestContext = preload("res://tests/backend/backend_test_context.gd"
 
 func run(t: BackendTestContext) -> void:
 	_test_permanent_seats_survive_annual_allocation(t)
-	_test_anchor_and_zero_max_constraints(t)
+	_test_legacy_anchor_does_not_override_zero_max(t)
 	_test_resolved_events_are_the_only_dynamic_race_weight(t)
 	_test_annual_group_coloring_and_archives(t)
 
@@ -40,7 +40,7 @@ func _test_permanent_seats_survive_annual_allocation(t: BackendTestContext) -> v
 	session.free()
 
 
-func _test_anchor_and_zero_max_constraints(t: BackendTestContext) -> void:
+func _test_legacy_anchor_does_not_override_zero_max(t: BackendTestContext) -> void:
 	var anchored := t.make_race("anchored")
 	var removable := t.make_race("removable")
 	var filler := t.make_race("filler")
@@ -57,14 +57,13 @@ func _test_anchor_and_zero_max_constraints(t: BackendTestContext) -> void:
 		definitions,
 		[anchored_article, removable_article, filler_article]
 	)
-	t.check_equal(t.count_race_seats(session.state, anchored), 1, "anchor survives max rate zero")
-	t.check(session.state.seats[0].race == anchored, "last anchored seat occupies its location")
+	# Ordinary anchors are opening placement hints only. In the legacy flat-article path,
+	# annual allocation is authoritative, so a zero active maximum removes that race even
+	# when a SeatDefinition still carries an old anchor_race value.
+	t.check_equal(t.count_race_seats(session.state, anchored), 0, "legacy anchor cannot override max rate zero")
+	t.check(session.state.seats[0].race == filler, "legacy anchor location remains reallocatable")
 	t.check_equal(t.count_race_seats(session.state, removable), 0, "unanchored max zero disappears")
-	t.check_equal(t.count_race_seats(session.state, filler), 4, "remaining race fills permanent pool")
-	t.check(
-		session.parliament_system.validate_anchor_invariants(session.state, [anchored, removable, filler]),
-		"allocated parliament satisfies anchor invariant"
-	)
+	t.check_equal(t.count_race_seats(session.state, filler), 5, "eligible race fills the variable pool")
 	session.free()
 
 
