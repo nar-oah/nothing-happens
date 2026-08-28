@@ -47,6 +47,7 @@ export type OutboundPayloads = {
 		accept_trait: boolean;
 	};
 	'constitution.revise': { state_version: number; article_index: number };
+	'constitution.column.unlock': { state_version: number; column_index: number };
 	'month.advance': { state_version: number };
 	'term.next': { state_version: number };
 };
