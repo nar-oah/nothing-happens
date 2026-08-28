@@ -127,18 +127,29 @@ func revise(context: RunContext, definition: ConstitutionArticleDefinition) -> b
 	if row == null:
 		return false
 	var previous := context.state.constitution.get_active_article_for_row(row)
-	context.state.constitution.active_articles[row] = definition
 	var target_race := definition.get_race()
-	if target_race != null and not (target_race is ZhushuiRaceDefinition):
-		if not context.race_system.enforce_constitution_constraints(context, target_race):
-			context.state.constitution.active_articles[row] = previous
-			refresh_runtime(context)
-			return false
+	var race_snapshot: Dictionary[SeatState, RaceDefinition] = {}
+	var fixed_snapshot: Dictionary[SeatState, RaceDefinition] = {}
+	for seat in context.state.seats:
+		race_snapshot[seat] = seat.race
+		fixed_snapshot[seat] = seat.fixed_race
+	context.state.constitution.active_articles[row] = definition
+	if target_race != null and definition.revoke_fixed_seat:
+		context.parliament_system.revoke_fixed_seat(context, target_race)
+	if target_race != null and not context.race_system.enforce_constitution_constraints(context, target_race):
+		context.state.constitution.active_articles[row] = previous
+		for seat in context.state.seats:
+			seat.race = race_snapshot.get(seat)
+			seat.fixed_race = fixed_snapshot.get(seat)
+		refresh_runtime(context)
+		return false
 	if previous != null:
 		previous.on_deactivate(context)
 	_restore_constitution_base_groups(context)
 	apply_influence_rules(context)
 	refresh_runtime(context)
+	# A month-0 revision changes this year's expectation formula but not its baseline.
+	context.race_system.rebuild_annual_expectations(context)
 	context.state.constitution.revision_available = false
 	if definition.is_terminal:
 		context.state.constitution.terminal_article = definition
@@ -168,6 +179,8 @@ func refresh_runtime(context: RunContext) -> void:
 	state.donation_detection_probability = context.balance.donation_detection_probability
 	state.event_early_reveal_bonus_probability = 0.0
 	for race in state.races:
+		# Formal Board content always supplies an active article for every race row. Zero is a
+		# real growth rate, so there is deliberately no fallback to GameBalanceDefinition.
 		race.expectation_growth_rate = 0.0
 		race.visit_probability = 0.0
 		race.absence_probability = context.balance.normal_absence_probability
@@ -214,6 +227,9 @@ func get_effective_groups(context: RunContext) -> Array[InterestGroupDefinition]
 	var result: Array[InterestGroupDefinition] = []
 	for group in context.interest_groups:
 		_append_effective_group(result, context.state, group)
+	for race in context.race_definitions:
+		if race != null:
+			_append_effective_group(result, context.state, race.fixed_interest_group)
 	for seat in context.state.seats:
 		_append_effective_group(result, context.state, seat.base_group)
 		_append_effective_group(result, context.state, seat.annual_group)
@@ -238,17 +254,46 @@ func modify_vote(vote_context: VoteContext) -> void:
 		article.modify_vote(vote_context)
 
 
-func get_race_seat_constraint(context: RunContext, race: RaceDefinition) -> RaceSeatConstraint:
-	if race is ZhushuiRaceDefinition:
-		return RaceSeatConstraint.new(1, 1)
-	var pool := context.parliament_system.get_variable_seats(context.state).size()
+func race_participates_in_variable_seat_allocation(
+	context: RunContext, race: RaceDefinition
+) -> bool:
+	if race == null:
+		return false
 	var article := context.state.constitution.get_active_article(race)
-	var minimum := 0 if article == null else ceili(article.race_min_seat_rate * pool)
-	var maximum := pool if article == null else floori(article.race_max_seat_rate * pool)
-	if _has_anchor(context, race):
-		minimum = maxi(minimum, 1)
-		maximum = maxi(maximum, 1)
+	return true if article == null else article.participates_in_variable_seat_allocation
+
+
+func get_race_seat_constraint(context: RunContext, race: RaceDefinition) -> RaceSeatConstraint:
+	if race == null:
+		return RaceSeatConstraint.new(0, 0)
+	var fixed_count := context.parliament_system.get_fixed_seat_count(context.state, race)
+	if not race_participates_in_variable_seat_allocation(context, race):
+		return RaceSeatConstraint.new(fixed_count, fixed_count)
+	var total := context.state.seats.size()
+	var article := context.state.constitution.get_active_article(race)
+	var minimum := fixed_count
+	var maximum := total
+	if article != null:
+		minimum = maxi(ceili(article.race_min_seat_rate * total), fixed_count)
+		maximum = maxi(floori(article.race_max_seat_rate * total), fixed_count)
 	return RaceSeatConstraint.new(minimum, maximum)
+
+
+func get_variable_race_seat_constraint(
+	context: RunContext, race: RaceDefinition
+) -> RaceSeatConstraint:
+	if not race_participates_in_variable_seat_allocation(context, race):
+		return RaceSeatConstraint.new(0, 0)
+	var final_constraint := get_race_seat_constraint(context, race)
+	var fixed_count := context.parliament_system.get_fixed_seat_count(context.state, race)
+	var variable_pool := context.parliament_system.get_variable_seats(context.state).size()
+	var minimum := maxi(final_constraint.minimum_count - fixed_count, 0)
+	var maximum := (
+		variable_pool
+		if final_constraint.maximum_count < 0
+		else maxi(final_constraint.maximum_count - fixed_count, 0)
+	)
+	return RaceSeatConstraint.new(minimum, mini(maximum, variable_pool))
 
 
 func get_race_seat_constraints(context: RunContext) -> Dictionary[RaceDefinition, RaceSeatConstraint]:
@@ -314,6 +359,8 @@ func _fallback_group(
 	seat: SeatState,
 	excluded: InterestGroupDefinition
 ) -> InterestGroupDefinition:
+	if seat.race != null and seat.race.fixed_interest_group != null:
+		return _resolve_merger(context.state, seat.race.fixed_interest_group)
 	var underlying := seat.annual_group
 	if underlying == null:
 		underlying = seat.base_group
@@ -349,14 +396,15 @@ func _resolve_merger(state: RunState, group: InterestGroupDefinition) -> Interes
 
 func _restore_constitution_base_groups(context: RunContext) -> void:
 	for seat in context.state.seats:
+		if seat.race == null or seat.race is ZhushuiRaceDefinition:
+			seat.actual_group = null
+			continue
+		if seat.race.fixed_interest_group != null:
+			seat.base_group = seat.race.fixed_interest_group
+			seat.annual_group = seat.race.fixed_interest_group
+			seat.actual_group = _resolve_merger(context.state, seat.race.fixed_interest_group)
+			continue
 		var underlying := seat.annual_group
 		if underlying == null:
 			underlying = seat.base_group
 		seat.actual_group = _resolve_merger(context.state, underlying)
-
-
-func _has_anchor(context: RunContext, race: RaceDefinition) -> bool:
-	for definition in context.seat_definitions:
-		if definition != null and definition.anchor_race == race:
-			return true
-	return false
