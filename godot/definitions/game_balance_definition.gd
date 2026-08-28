@@ -15,6 +15,7 @@ class_name GameBalanceDefinition
 @export_range(0, 999999, 1) var proposal_positive_magnitude_max: int = 8
 @export_range(1, 999, 1) var proposal_lag_months_min: int = 6
 @export_range(1, 999, 1) var proposal_lag_months_max: int = 12
+@export_range(0.0, 1.0, 0.01) var proposal_digestion_variance: float = 0.35
 @export_range(0.0, 1.0, 0.01) var proposal_magnitude_growth_per_year: float = 0.10
 @export_range(0.0, 100.0, 0.5) var proposal_support: float = 1.0
 @export_range(0.0, 100.0, 0.05) var proposal_draw_base_weight: float = 1.0
@@ -24,10 +25,6 @@ class_name GameBalanceDefinition
 @export_range(0.0, 100.0, 0.05) var merge_conversion_ratio: float = 0.5
 @export_range(0.0, 100.0, 0.05) var merge_upgrade_exponent: float = 1.0
 @export_range(0.0, 100.0, 0.05) var donation_per_positive_point: float = 1.0
-
-@export_group("市场")
-@export_range(0.0, 100.0, 0.01) var market_response_ratio: float = 0.35
-@export_range(0.0, 100.0, 0.01) var market_noise_ratio: float = 1.10
 
 @export_group("投票与政治献金")
 @export_range(0.0, 100.0, 0.5) var race_expectation_score: float = 6.0
@@ -49,6 +46,7 @@ class_name GameBalanceDefinition
 @export_range(0.0, 1.0, 0.01) var event_relief_progress_per_month: float = 0.50
 
 @export_group("年度议会")
+@export_range(0.0, 1.0, 0.01) var opening_max_race_seat_rate: float = 0.60
 @export_range(0.0, 100.0, 0.1) var race_seat_base_weight: float = 1.0
 @export_range(0.0, 100.0, 0.1) var race_resolved_event_weight: float = 1.0
 @export_range(0.0, 1.0, 0.01) var annual_group_coloring_rate: float = 0.65
