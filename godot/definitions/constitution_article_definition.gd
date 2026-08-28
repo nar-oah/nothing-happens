@@ -3,6 +3,7 @@ class_name ConstitutionArticleDefinition
 
 @export var display_name: String
 @export var row: ConstitutionRowDefinition
+@export var is_terminal: bool = false
 
 # Legacy serialized fields are kept only so existing .tres files remain loadable while
 # their topology is migrated to ConstitutionBoardDefinition. Runtime navigation no longer
