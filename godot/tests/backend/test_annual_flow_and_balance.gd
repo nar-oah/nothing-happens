@@ -94,17 +94,6 @@ class FlowEventSystem:
 		call_log.record(&"event_information")
 
 
-class FlowCollapseSystem:
-	extends CollapseSystem
-	var call_log: FlowCallLog
-
-	func _init(source_log: FlowCallLog = null) -> void:
-		call_log = source_log
-
-	func settle_month(_context: RunContext) -> void:
-		call_log.record(&"collapse")
-
-
 class FlowProposalSystem:
 	extends ProposalSystem
 	var call_log: FlowCallLog
@@ -145,7 +134,7 @@ class FlowTimeSystem:
 
 
 func run(t: BackendTestContext) -> void:
-	_test_recursive_expectation_growth(t)
+	_test_annual_expectations_rebuild_from_month_zero_economy(t)
 	_test_zero_growth_still_allows_gap_event(t)
 	_test_biyi_adjustment_is_proportional(t)
 	_test_month_hook_order(t)
@@ -153,7 +142,7 @@ func run(t: BackendTestContext) -> void:
 	_test_balance_controls_automatic_draw_count(t)
 
 
-func _test_recursive_expectation_growth(t: BackendTestContext) -> void:
+func _test_annual_expectations_rebuild_from_month_zero_economy(t: BackendTestContext) -> void:
 	var higher := t.make_race("higher")
 	higher.increase_trade = true
 	var higher_article := t.make_article(higher, true, 0.10)
@@ -161,11 +150,12 @@ func _test_recursive_expectation_growth(t: BackendTestContext) -> void:
 		[higher], [t.make_group("group")], t.make_seats(1, "higher"), [higher_article]
 	)
 	var higher_state := higher_session.state.get_race(higher)
-	t.check_equal(higher_state.get_expectation(Metric.Id.TRADE), 100, "first year starts at initial value")
+	t.check_equal(higher_state.get_expectation(Metric.Id.TRADE), 110, "first year uses the active constitution rate")
 	higher_session.annual_settlement_system.settle_year(higher_session.context)
-	t.check_equal(higher_state.get_expectation(Metric.Id.TRADE), 110, "higher target grows from prior value")
+	t.check_equal(higher_state.get_expectation(Metric.Id.TRADE), 110, "unchanged month-zero economy rebuilds the same target")
+	higher_session.state.metrics.trade = 200
 	higher_session.annual_settlement_system.settle_year(higher_session.context)
-	t.check_equal(higher_state.get_expectation(Metric.Id.TRADE), 121, "higher target compounds recursively")
+	t.check_equal(higher_state.get_expectation(Metric.Id.TRADE), 220, "new month-zero economy becomes the next target baseline")
 	higher_session.free()
 
 	var lower := t.make_race("lower")
@@ -175,10 +165,10 @@ func _test_recursive_expectation_growth(t: BackendTestContext) -> void:
 		[lower], [t.make_group("group")], t.make_seats(1, "lower"), [lower_article]
 	)
 	var lower_state := lower_session.state.get_race(lower)
+	t.check_equal(lower_state.get_expectation(Metric.Id.TAX), 90, "lower stance applies the constitution rate to the opening economy")
+	lower_session.state.metrics.tax = 80
 	lower_session.annual_settlement_system.settle_year(lower_session.context)
-	t.check_equal(lower_state.get_expectation(Metric.Id.TAX), 90, "lower target shrinks from prior value")
-	lower_session.annual_settlement_system.settle_year(lower_session.context)
-	t.check_equal(lower_state.get_expectation(Metric.Id.TAX), 81, "lower target compounds recursively")
+	t.check_equal(lower_state.get_expectation(Metric.Id.TAX), 72, "lower target rebuilds from the new month-zero economy")
 	lower_session.free()
 
 	var balance := GameBalanceDefinition.new()
@@ -186,7 +176,7 @@ func _test_recursive_expectation_growth(t: BackendTestContext) -> void:
 	t.check_approx(
 		InflationSystem.new().get_proposal_magnitude_multiplier(3, balance),
 		1.21,
-		"proposal era magnitude uses independent compound growth"
+		"proposal era magnitude keeps its independent compound growth"
 	)
 
 
@@ -198,8 +188,7 @@ func _test_zero_growth_still_allows_gap_event(t: BackendTestContext) -> void:
 		[race], [t.make_group("group")], t.make_seats(1, "stable"), [article]
 	)
 	var race_state := session.state.get_race(race)
-	session.race_system.advance_expectations(session.state)
-	t.check_equal(race_state.get_expectation(Metric.Id.WAGE), 100, "zero growth preserves target")
+	t.check_equal(race_state.get_expectation(Metric.Id.WAGE), 100, "zero growth preserves the month-zero target")
 	session.state.metrics.wage = 50
 	var event := session.event_system.spawn_event(session.context, race, Metric.Id.WAGE)
 	t.check(event != null, "real metric regression still creates an event at zero growth")
@@ -272,7 +261,6 @@ func _test_complete_month_flow_order(t: BackendTestContext) -> void:
 	session.context.market_system = FlowMarketSystem.new(call_log)
 	session.context.policy_system = FlowPolicySystem.new(call_log)
 	session.context.event_system = FlowEventSystem.new(call_log)
-	session.context.collapse_system = FlowCollapseSystem.new(call_log)
 	session.context.proposal_system = FlowProposalSystem.new(call_log)
 	session.context.annual_settlement_system = FlowAnnualSettlementSystem.new(call_log)
 	session.context.time_system = FlowTimeSystem.new(call_log)
@@ -286,7 +274,6 @@ func _test_complete_month_flow_order(t: BackendTestContext) -> void:
 		&"event_generate",
 		&"event_settle",
 		&"event_information",
-		&"collapse",
 		&"proposal_draw",
 		&"proposal_visit",
 		&"annual",
