@@ -85,19 +85,19 @@ func _collect_opening_distributions(
 	current: Dictionary,
 	result: Array[Dictionary]
 ) -> void:
-	if index >= traces.size():
+	if index >= races.size():
 		if remaining == 0:
 			result.append(current.duplicate())
 		return
-	var race := traces[index]
+	var race := races[index]
 	var max_for_race := mini(int(caps.get(race, 0)), remaining)
 	var remaining_cap := 0
-	for next_index in range(index + 1, traces.size()):
-		remaining_cap += int(caps.get(traces[next_index], 0))
+	for next_index in range(index + 1, races.size()):
+		remaining_cap += int(caps.get(races[next_index], 0))
 	var minimum := maxi(remaining - remaining_cap, 0)
 	for count in range(minimum, max_for_race + 1):
 		current[race] = count
-		_collect_opening_distributions(traces, caps, index + 1, remaining - count, current, result)
+		_collect_opening_distributions(races, caps, index + 1, remaining - count, current, result)
 	current.erase(race)
 
 
@@ -216,11 +216,11 @@ func _validate_constraints(
 	constraints: Dictionary[RaceDefinition, RaceSeatConstraint],
 	pool: int
 ) -> bool:
-	if traces.is_empty():
+	if races.is_empty():
 		return pool == 0
 	var minimum_total := 0
 	var maximum_total := 0
-	for race in traces:
+	for race in races:
 		var constraint: RaceSeatConstraint = constraints.get(race)
 		if constraint == null or constraint.minimum_count < 0:
 			push_error("Every eligible race requires a valid variable-seat constraint.")
@@ -243,7 +243,7 @@ func _calculate_bounded_quotas(
 	pool: int
 ) -> Dictionary[RaceDefinition, float]:
 	var result: Dictionary[RaceDefinition, float] = {}
-	var active := traces.duplicate()
+	var active := races.duplicate()
 	var remaining_pool := float(pool)
 	while not active.is_empty():
 		var total_weight := 0.0
