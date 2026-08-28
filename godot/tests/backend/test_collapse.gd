@@ -112,8 +112,7 @@ func _test_bill_digestion_and_market_movement(t: BackendTestContext) -> void:
 	balance.automatic_draw_count = 0
 	balance.event_spawn_count_min = 0
 	balance.event_spawn_count_max = 0
-	balance.market_response_ratio = 1.0
-	balance.market_noise_ratio = 0.0
+	balance.proposal_digestion_variance = 0.0
 	var session := t.make_session(
 		[race], [group], t.make_seats(1, "market"), [], balance
 	)
@@ -131,7 +130,7 @@ func _test_bill_digestion_and_market_movement(t: BackendTestContext) -> void:
 		0.25,
 		"a four-month lag digests one quarter per month"
 	)
-	t.check_equal(session.state.metrics.tax, 105, "market reaches the one-quarter anchor")
+	t.check_equal(session.state.metrics.tax, 105, "market directly reaches the one-quarter digested anchor")
 	session.market_system.settle_month(session.context)
 	session.market_system.settle_month(session.context)
 	t.check(
@@ -149,7 +148,7 @@ func _test_bill_digestion_and_market_movement(t: BackendTestContext) -> void:
 		1.0,
 		"a four-month lag completes on the fourth month"
 	)
-	t.check_equal(session.state.metrics.tax, 120, "market reaches fully-digested anchor")
+	t.check_equal(session.state.metrics.tax, 120, "market reaches fully-digested target without a second response layer")
 	session.free()
 
 
