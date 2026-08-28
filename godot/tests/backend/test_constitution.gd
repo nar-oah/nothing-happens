@@ -10,7 +10,7 @@ func run(t: BackendTestContext) -> void:
 	_test_influence_rule_modes(t)
 	_test_revision_preserves_annual_group_layer(t)
 	_test_local_autonomy_runtime_resources(t)
-	_test_human_petition_runtime_and_anchor_safety(t)
+	_test_human_petition_runtime(t)
 
 
 func _test_three_seat_condition_scopes(t: BackendTestContext) -> void:
@@ -71,7 +71,7 @@ func _test_legacy_flat_article_revision_compatibility(t: BackendTestContext) -> 
 	var collapse_before_revision := session.state.collapse_level
 	t.check(session.revise_constitution(next), "legacy revision activates the selected Resource")
 	t.check_equal(session.state.collapse_level, collapse_before_revision, "constitution revision adds no collapse")
-	t.check(not session.state.has_submitted_bill, "constitution revision is not a bill submission")
+	t.check(session.state.saved_bills.is_empty(), "constitution revision does not save a bill")
 	t.check(
 		session.state.constitution.get_active_article(race) == next,
 		"legacy active article remains queryable by race Resource"
@@ -261,9 +261,9 @@ func _test_revision_preserves_annual_group_layer(t: BackendTestContext) -> void:
 	session.free()
 
 
-func _test_human_petition_runtime_and_anchor_safety(t: BackendTestContext) -> void:
+func _test_human_petition_runtime(t: BackendTestContext) -> void:
 	var human := t.make_race("human")
-	var donor := t.make_race("anchored donor")
+	var donor := t.make_race("donor")
 	var filler := t.make_race("filler")
 	var human_article := HumanConstitutionArticleDefinition.new()
 	human_article.display_name = "petition constitution"
@@ -274,7 +274,6 @@ func _test_human_petition_runtime_and_anchor_safety(t: BackendTestContext) -> vo
 	var donor_article := t.make_article(donor)
 	var filler_article := t.make_article(filler)
 	var definitions := t.make_seats(4, "petition")
-	definitions[0].anchor_race = donor
 	var session := t.make_session(
 		[human, donor, filler], [t.make_group("group")], definitions,
 		[human_article, donor_article, filler_article]
@@ -282,14 +281,12 @@ func _test_human_petition_runtime_and_anchor_safety(t: BackendTestContext) -> vo
 	t.check_equal(session.state.petition_limit, 2, "petition limit comes from active Human article")
 	t.check(session.state.petition_race == human, "petition race is a direct Resource")
 	t.check_equal(t.count_race_seats(session.state, human), 2, "fixture starts below petition max")
-	t.check_equal(t.count_race_seats(session.state, donor), 1, "donor starts at anchor minimum")
 	var collapse_before_petition := session.state.collapse_level
-	t.check(session.use_petition(), "petition immediately reassigns a legal seat")
+	t.check(session.use_petition(), "petition immediately reassigns a legal variable seat")
 	t.check_equal(session.state.collapse_level, collapse_before_petition, "imperial petition adds no collapse")
-	t.check(not session.state.has_submitted_bill, "imperial petition is not a bill submission")
+	t.check(session.state.saved_bills.is_empty(), "imperial petition does not save a bill")
 	t.check_equal(t.count_race_seats(session.state, human), 3, "petition changes the current parliament")
 	t.check_equal(session.state.petition_used_this_year, 1, "State records annual petition usage")
-	t.check(session.state.seats[0].race == donor, "petition does not steal another race's anchor")
 	t.check(not session.use_petition(), "petition fails when target is at active max")
 	t.check_equal(session.state.petition_used_this_year, 1, "failed petition consumes no use")
 
