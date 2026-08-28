@@ -149,7 +149,24 @@ export function deriveDraftPreviewMetrics(
 
 export function deriveConstitutionMemorial(state: LiveGameState): LiveConstitutionMemorialData {
 	const result: LiveConstitutionMemorialData = {};
+	result[''] = state.constitution.rows.map((row) => {
+		const active = state.constitution.articles.find(
+			(candidate) => candidate.article_index === row.active_article_index
+		);
+		return {
+			text: row.display_name,
+			number: active?.requirement_percent ?? '',
+			selected: false,
+			selectable: false,
+			contents: [],
+			policies: []
+		};
+	});
 	for (const column of state.constitution.columns) {
+		if (!column.unlocked) {
+			result[column.display_name] = column.unlock_cost_months / 12;
+			continue;
+		}
 		result[column.display_name] = state.constitution.rows.map((row) => {
 			const article = state.constitution.articles.find(
 				(candidate) =>
@@ -187,7 +204,7 @@ function articleToMemorialRow(
 	return {
 		articleRef: article.article_index,
 		text: article.display_name,
-		number: '',
+		number: article.requirement_percent ?? '',
 		selected: article.selected,
 		selectable: article.eligible,
 		contents: [{ title: article.row_display_name, body: article.content }],
