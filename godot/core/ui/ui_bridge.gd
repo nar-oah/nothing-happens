@@ -479,14 +479,31 @@ func _handle_constitution_revise(message: Dictionary, messages: Array[Dictionary
 	messages.append(_full_state(message["request_id"]))
 
 
-func _advance_month_and_refresh_mode() -> void:
-	run_session.advance_month()
+func _handle_term_next(message: Dictionary, messages: Array[Dictionary]) -> void:
+	if not run_session.start_next_term():
+		_append_mutation_error(
+			messages,
+			{"code": "term_not_ended", "message": "The current term has not ended."},
+			message["request_id"]
+		)
+		return
+	state_version += 1
+	set_ui_mode("constitution", false)
+	messages.append(_full_state(message["request_id"]))
+
+
+func _advance_month_and_refresh_mode() -> bool:
+	if not run_session.advance_month():
+		return false
+	if run_session.state.run_phase == RunState.RunPhase.TERM_ENDED:
+		return true
 	if run_session.state.month == 0:
 		set_ui_mode("constitution", false)
-		return
+		return true
 	_refresh_dialogue_mode()
 	if ui_mode != "dialogue":
 		set_ui_mode("office", false)
+	return true
 
 
 func _finish_draft_mutation(messages: Array[Dictionary], request_id: Variant) -> void:
@@ -524,6 +541,8 @@ func _append_mutation_error(
 
 func _refresh_dialogue_mode() -> void:
 	if run_session == null or run_session.state == null:
+		return
+	if run_session.state.run_phase == RunState.RunPhase.TERM_ENDED:
 		return
 	var has_pending := _serializer.pending_dialogue(run_session.state) != null
 	if has_pending:
