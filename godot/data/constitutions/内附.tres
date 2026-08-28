@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="1_hmahs"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
 [ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/human.tres" id="3_race_human"]
+[ext_resource type="Resource" path="res://data/constitution_rows/外交.tres" id="row"]
 [ext_resource type="Resource" path="res://data/constitutions/外藩.tres" id="4_prereq"]
 [ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="5_seat_condition_script"]
 [ext_resource type="Resource" uid="uid://dsi8n5oqa2wbs" path="res://data/policies/官运调拨.tres" id="6_policy_1"]
@@ -19,6 +20,7 @@ required_rate = 0.5
 script = ExtResource("1_article_script")
 petition_limit = 5
 display_name = "内附"
+row = ExtResource("row")
 race = ExtResource("3_race_human")
 prerequisite = ExtResource("4_prereq")
 seat_condition = SubResource("Resource_seat_condition")
