@@ -71,6 +71,19 @@ jobs:
           "$GODOT_BIN" --version
           echo "GODOT_BIN=$GODOT_BIN" >> "$GITHUB_ENV"
 
+      - name: Check backend test scripts
+        run: |
+          set -euo pipefail
+          while IFS= read -r test_script; do
+            relative_path="${test_script#${GODOT_DIR}/}"
+            echo "Checking res://${relative_path}"
+            "$GODOT_BIN" \
+              --headless \
+              --path "$GODOT_DIR" \
+              --check-only \
+              --script "res://${relative_path}"
+          done < <(find "$GODOT_DIR/tests/backend" -maxdepth 1 -name '*.gd' -type f | sort)
+
       - name: Run backend system tests
         run: |
           set -euo pipefail
