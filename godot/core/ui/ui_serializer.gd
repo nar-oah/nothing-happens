@@ -316,6 +316,7 @@ func constitution(session: RunSession) -> Dictionary:
 		data["selected"] = is_active
 		data["eligible"] = session.constitution_system.can_revise(session.context, current)
 		data["is_terminal"] = current != null and current.is_terminal
+		data["requirement_percent"] = _article_requirement_percent(current)
 		articles.append(data)
 	return {
 		"title": "蓬莱约法",
@@ -337,6 +338,9 @@ func races(session: RunSession) -> Array:
 		var current := session.state.races[index]
 		if current == null or current.definition == null:
 			continue
+		var seat_count := session.parliament_system.get_race_seat_count(session.state, current.definition)
+		if seat_count <= 0:
+			continue
 		var expectations: Array = []
 		for metric in current.definition.get_stance_metrics():
 			expectations.append(
@@ -350,7 +354,7 @@ func races(session: RunSession) -> Array:
 			{
 				"race_index": index,
 				"display_name": current.definition.display_name,
-				"seat_count": session.parliament_system.get_race_seat_count(session.state, current.definition),
+				"seat_count": seat_count,
 				"expectations": expectations,
 				"resolved_events_this_year": current.resolved_events_this_year,
 				"last_year_resolved_events": current.last_year_resolved_events,
@@ -443,6 +447,20 @@ func _article(definition: ConstitutionArticleDefinition, article_index: int) -> 
 		"content": "",
 		"policies": _policies(definition.policies),
 	}
+
+
+func _article_requirement_percent(definition: ConstitutionArticleDefinition) -> Variant:
+	if definition == null:
+		return null
+	var condition := definition.seat_condition
+	if condition == null:
+		for current in definition.conditions:
+			if current is ConstitutionSeatCondition:
+				condition = current
+				break
+	if condition == null:
+		return null
+	return condition.required_rate * 100.0
 
 
 func _proposals(values: Array[ProposalInstance]) -> Array:
