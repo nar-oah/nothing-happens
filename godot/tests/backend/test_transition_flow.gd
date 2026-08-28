@@ -11,7 +11,7 @@ func run(t: BackendTestContext) -> void:
 	_test_normal_month_creates_newspaper_report(t)
 	_test_month_report_serializes_events(t)
 	_test_global_expectation_growth_uses_balance(t)
-	_test_opening_draw_and_failed_term_reset(t)
+	_test_opening_draw_and_term_lifecycle(t)
 	_test_zhushui_fixed_executive_seat(t)
 
 
@@ -101,6 +101,7 @@ func _test_normal_month_creates_newspaper_report(t: BackendTestContext) -> void:
 	var race := t.make_race("newspaper report race")
 	var group := t.make_group("newspaper report group")
 	var session := t.make_session([race], [group], t.make_seats(1, "newspaper report"))
+	session.state.month = 1
 	session.state.metrics.tax = 37
 	var bridge := UiBridge.new()
 	bridge.setup(session)
@@ -174,7 +175,7 @@ func _test_global_expectation_growth_uses_balance(t: BackendTestContext) -> void
 	session.free()
 
 
-func _test_opening_draw_and_failed_term_reset(t: BackendTestContext) -> void:
+func _test_opening_draw_and_term_lifecycle(t: BackendTestContext) -> void:
 	var race := t.make_race("term reset race")
 	var group := t.make_group("term reset group")
 	group.decrease_tax = true
@@ -187,18 +188,55 @@ func _test_opening_draw_and_failed_term_reset(t: BackendTestContext) -> void:
 	var session := t.make_session(
 		[race], [group], t.make_seats(2, "term reset"), [], balance
 	)
-	t.check_equal(session.state.proposal_hand.size(), 2, "a new term draws proposals immediately")
-	session.state.has_intervened = true
-	session.state.pending_collapse_delta = balance.max_collapse
-	session.advance_month()
-	t.check_equal(session.state.term, 2, "ordinary collapse starts the next term")
-	t.check_equal(session.state.year, 1, "new term returns to year one")
-	t.check_equal(session.state.month, 1, "new term returns to month one")
-	t.check_approx(session.state.collapse_level, 0.0, "new term resets collapse")
-	t.check_equal(session.state.events.size(), 0, "new term starts without stale events")
-	t.check_equal(session.state.proposal_hand.size(), 2, "new term receives its opening proposals")
-	var full := UiSerializer.new().full_state(session, "office", "office", 0)
-	t.check_equal(full["term"], 2, "serialized state exposes the new term number")
+	t.check_equal(session.state.term, 1, "a new run starts its first term")
+	t.check_equal(session.state.year, 1, "a new term starts in year one")
+	t.check_equal(session.state.month, 0, "a new term starts in month zero")
+	t.check_equal(session.state.proposal_hand.size(), 0, "month zero has no opening proposals yet")
+	t.check(session.advance_month(), "the player can confirm month zero")
+	t.check_equal(session.state.month, 1, "confirming month zero enters January")
+	t.check_equal(session.state.governing_months, 0, "month zero is not a governing month")
+	t.check_equal(session.state.proposal_hand.size(), 2, "January receives the opening proposals")
+
+	session.state.metrics.tax = -1
+	session.state.collapse_level = balance.max_collapse - balance.collapse_step
+	var ended_state := session.state
+	t.check(session.advance_month(), "the terminal normal month settles")
+	t.check_equal(session.state.run_phase, RunState.RunPhase.TERM_ENDED, "collapse maximum ends the term")
+	t.check_equal(
+		session.state.term_outcome,
+		RunState.TermOutcome.NOTHING_HAPPENS,
+		"no submitted bill produces Nothing Happens"
+	)
+	t.check_equal(session.state.governing_months, 1, "the terminal normal month counts as governing")
+	var ended_month := session.state.month
+	t.check(not session.advance_month(), "advance_month is blocked after the term ends")
+	t.check(session.state == ended_state, "blocked advance preserves the complete ended state")
+	t.check_equal(session.state.month, ended_month, "blocked advance does not move the month")
+	t.check_equal(session.state.term, 1, "blocked advance does not create the next term")
+
+	t.check(session.start_next_term(), "the next term starts only through the explicit API")
+	t.check(session.state != ended_state, "the explicit API creates a fresh RunState")
+	t.check_equal(session.state.term, 2, "the explicit next term increments the term number")
+	t.check_equal(session.state.year, 1, "the next term resets to year one")
+	t.check_equal(session.state.month, 0, "the next term resets to month zero")
+	t.check_equal(session.state.collapse_level, 0, "the next term resets collapse")
+	t.check_equal(session.state.governing_months, 0, "the next term resets governing duration")
+	t.check(not session.state.has_submitted_bill, "the next term resets submission history")
+	t.check_equal(session.state.proposal_hand.size(), 0, "the next term waits until January to draw")
+	t.check_equal(session.state.events.size(), 0, "the next term starts without stale events")
+
+	var submitted := t.make_session(
+		[race], [group], t.make_seats(2, "submitted outcome"), [], balance
+	)
+	submitted.state.has_submitted_bill = true
+	submitted.state.collapse_level = balance.max_collapse - balance.collapse_step
+	submitted.collapse_system.increase(submitted.context)
+	t.check_equal(
+		submitted.state.term_outcome,
+		RunState.TermOutcome.COLLAPSE,
+		"a term with a submitted bill receives the collapse outcome"
+	)
+	submitted.free()
 	session.free()
 
 

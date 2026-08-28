@@ -104,6 +104,10 @@ class FlowCollapseSystem:
 	func settle_month(_context: RunContext) -> void:
 		call_log.record(&"collapse")
 
+	func recover_annual(context: RunContext) -> void:
+		call_log.record(&"collapse_recovery")
+		super.recover_annual(context)
+
 
 class FlowProposalSystem:
 	extends ProposalSystem
@@ -139,8 +143,9 @@ class FlowTimeSystem:
 	func _init(source_log: FlowCallLog = null) -> void:
 		call_log = source_log
 
-	func advance_month(_state: RunState) -> void:
+	func advance_month(state: RunState) -> void:
 		call_log.record(&"time")
+		super.advance_month(state)
 
 
 func run(t: BackendTestContext) -> void:
@@ -247,6 +252,7 @@ func _test_month_hook_order(t: BackendTestContext) -> void:
 	var session := t.make_session(
 		[race], [t.make_group("group")], t.make_seats(1, "hooks"), [article]
 	)
+	session.state.month = 1
 	session.advance_month()
 	t.check_equal(race.month_calls, 1, "FlowController invokes race month hook")
 	t.check_equal(article.month_calls, 1, "FlowController invokes article month hook")
@@ -289,6 +295,7 @@ func _test_complete_month_flow_order(t: BackendTestContext) -> void:
 		&"proposal_visit",
 		&"annual",
 		&"time",
+		&"collapse_recovery",
 	]
 	t.check_equal(call_log.entries, expected, "monthly flow order is stable through annual settlement")
 	session.free()
@@ -307,7 +314,9 @@ func _test_balance_controls_automatic_draw_count(t: BackendTestContext) -> void:
 	var session := t.make_session(
 		[race], [group], t.make_seats(1, "draw"), [], balance
 	)
-	t.check_equal(session.state.proposal_hand.size(), 2, "automatic draw count comes from balance")
+	t.check_equal(session.state.proposal_hand.size(), 0, "month zero defers the automatic opening draw")
+	session.advance_month()
+	t.check_equal(session.state.proposal_hand.size(), 2, "automatic opening draw count comes from balance")
 	for proposal in session.state.proposal_hand:
 		t.check(proposal.source_group == group, "automatic proposal keeps group Resource")
 		t.check_equal(proposal.base_effect.price, 3, "configured proposal magnitude is applied")
