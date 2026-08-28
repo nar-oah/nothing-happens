@@ -28,6 +28,14 @@
 		deriveLeftItems,
 		deriveTopItems
 	} from './selectors';
+	import {
+		coverNewspaperTransition,
+		createNewspaperTransitionState,
+		finishNewspaperTransition,
+		leaveNewspaperTransition,
+		openNewspaperTransition,
+		type DisplayedNewspaperData
+	} from './newspaper-transition';
 	import { createGameStore, EMPTY_GAME_STORE, type GameStoreValue } from './store';
 	import type { LiveGameState, MonthReportEventPhase } from './types';
 
@@ -81,14 +89,33 @@
 		});
 	}
 
+	function deriveNewspaperData(state: LiveGameState): DisplayedNewspaperData {
+		const common = {
+			term: state.term,
+			year: state.year,
+			month: state.month,
+			metrics: deriveNewspaperMetrics(state),
+			comment: { title: '', comment: '' }
+		};
+		if (state.run_phase === 'TERM_ENDED') {
+			return {
+				...common,
+				mode: 'TERM_END',
+				termOutcome:
+					state.term_outcome === 'NOTHING_HAPPENS' ? 'NOTHING_HAPPENS' : 'COLLAPSE',
+				governingMonths: state.governing_months,
+				events: []
+			};
+		}
+		return { ...common, mode: 'MONTHLY', events: deriveNewspaperEvents(state) };
+	}
+
 	const gameStore = createGameStore();
 	let storeValue = $state<GameStoreValue>(EMPTY_GAME_STORE);
 	let client: CefIpcClient | null = null;
 	let mutationQueue = Promise.resolve();
 	let selectedConstitutionArticle = $state<number>();
-	let newspaperOpen = $state(true);
-	let newspaperBusy = $state(false);
-	let newspaperLeaving = $state(false);
+	let newspaperTransition = $state(createNewspaperTransitionState());
 	let pendingNewspaperAction: NewspaperTransitionAction | null = null;
 	const unsubscribe = gameStore.subscribe((value) => (storeValue = value));
 	let snapshot = $derived(storeValue.snapshot);
@@ -104,8 +131,6 @@
 	let pendingDialogue = $derived(
 		snapshot ? deriveDialoguePresentation(snapshot.pending_dialogue) : null
 	);
-	let newspaperMetrics = $derived(snapshot ? deriveNewspaperMetrics(snapshot) : []);
-	let newspaperEvents = $derived(snapshot ? deriveNewspaperEvents(snapshot) : []);
 	let frame = $derived(
 		snapshot && gameState
 			? {
@@ -171,70 +196,88 @@
 	}
 
 	function openNewspaper(): void {
-		if (newspaperOpen) return;
+		if (newspaperTransition.open || !snapshot) return;
 		pendingNewspaperAction = null;
-		newspaperBusy = false;
-		newspaperLeaving = false;
-		newspaperOpen = true;
+		newspaperTransition = openNewspaperTransition(
+			newspaperTransition,
+			deriveNewspaperData(snapshot)
+		);
 	}
 
 	function transitionThroughNewspaper(action: NewspaperTransitionAction): void {
-		if (newspaperOpen || newspaperBusy) return;
+		if (newspaperTransition.open || newspaperTransition.busy || !snapshot) return;
 		pendingNewspaperAction = action;
-		newspaperBusy = true;
-		newspaperLeaving = false;
-		newspaperOpen = true;
+		newspaperTransition = openNewspaperTransition(
+			newspaperTransition,
+			deriveNewspaperData(snapshot),
+			true
+		);
 	}
 
 	async function handleNewspaperCovered(): Promise<void> {
+		newspaperTransition = coverNewspaperTransition(newspaperTransition);
 		const action = pendingNewspaperAction;
 		if (!action) return;
 		pendingNewspaperAction = null;
 		try {
 			await action();
 			await tick();
-			newspaperLeaving = true;
+			const latest = storeValue.snapshot;
+			newspaperTransition = leaveNewspaperTransition(
+				newspaperTransition,
+				latest ? deriveNewspaperData(latest) : null
+			);
 		} catch (error: unknown) {
 			console.error('Newspaper transition failed', error);
-			newspaperBusy = false;
+			newspaperTransition = { ...newspaperTransition, busy: false };
 		}
 	}
 
 	async function advanceFromNewspaper(): Promise<void> {
-		if (newspaperBusy || newspaperLeaving) return;
-		newspaperBusy = true;
+		if (newspaperTransition.busy || newspaperTransition.leaving) return;
+		const displayed = newspaperTransition.displayedNewspaperData;
+		if (!displayed) return;
+		newspaperTransition = { ...newspaperTransition, busy: true };
 		try {
-			await requestMutation('month.advance', {});
+			if (displayed.mode === 'TERM_END') await requestMutation('term.next', {});
+			else await requestMutation('month.advance', {});
 			await tick();
-			newspaperLeaving = true;
+			const latest = storeValue.snapshot;
+			newspaperTransition = leaveNewspaperTransition(
+				newspaperTransition,
+				latest ? deriveNewspaperData(latest) : null
+			);
 		} catch (error: unknown) {
-			console.error('Month advance failed', error);
-			newspaperBusy = false;
+			console.error('Newspaper advance failed', error);
+			newspaperTransition = { ...newspaperTransition, busy: false };
 		}
 	}
 
 	async function requestNewspaperClose(): Promise<void> {
-		if (newspaperBusy || newspaperLeaving) return;
-		newspaperBusy = true;
+		if (
+			newspaperTransition.busy ||
+			newspaperTransition.leaving ||
+			newspaperTransition.displayedNewspaperData?.mode === 'TERM_END'
+		)
+			return;
+		newspaperTransition = { ...newspaperTransition, busy: true };
 		const requestClient = client;
 		if (!requestClient) {
-			newspaperLeaving = true;
+			newspaperTransition = leaveNewspaperTransition(newspaperTransition);
 			return;
 		}
 		try {
 			await requestClient.request('ui.newspaper.close', {});
 			await tick();
-			newspaperLeaving = true;
+			newspaperTransition = leaveNewspaperTransition(newspaperTransition);
 		} catch (error: unknown) {
 			console.error('Newspaper close sync failed', error);
-			newspaperBusy = false;
+			newspaperTransition = { ...newspaperTransition, busy: false };
 		}
 	}
 
 	function finishNewspaperClose(): void {
-		newspaperOpen = false;
-		newspaperBusy = false;
-		newspaperLeaving = false;
+		newspaperTransition = finishNewspaperTransition(newspaperTransition);
 		pendingNewspaperAction = null;
 	}
 
@@ -319,18 +362,30 @@
 		<OfficeView {...frame} onNewspaperOpen={openNewspaper} onSynthesisConfirm={mergeProposals} />
 	{/if}
 
-	{#if newspaperOpen}
+	{#if newspaperTransition.open && newspaperTransition.displayedNewspaperData}
 		<NewspaperView
-			year={snapshot.year}
-			month={snapshot.month}
-			metrics={newspaperMetrics}
-			events={newspaperEvents}
-			comment={{ title: '', comment: '' }}
-			busy={newspaperBusy}
-			leaving={newspaperLeaving}
+			mode={newspaperTransition.displayedNewspaperData.mode}
+			term={newspaperTransition.displayedNewspaperData.term}
+			year={newspaperTransition.displayedNewspaperData.year}
+			month={newspaperTransition.displayedNewspaperData.month}
+			governingMonths={newspaperTransition.displayedNewspaperData.mode === 'TERM_END'
+				? newspaperTransition.displayedNewspaperData.governingMonths
+				: undefined}
+			termOutcome={newspaperTransition.displayedNewspaperData.mode === 'TERM_END'
+				? newspaperTransition.displayedNewspaperData.termOutcome
+				: undefined}
+			metrics={newspaperTransition.displayedNewspaperData.metrics}
+			events={newspaperTransition.displayedNewspaperData.events}
+			comment={newspaperTransition.displayedNewspaperData.comment}
+			entryCycle={newspaperTransition.entryCycle}
+			backgroundCovered={newspaperTransition.backgroundCovered}
+			busy={newspaperTransition.busy}
+			leaving={newspaperTransition.leaving}
 			onCovered={handleNewspaperCovered}
 			onAdvance={advanceFromNewspaper}
-			onRequestClose={requestNewspaperClose}
+			onRequestClose={newspaperTransition.displayedNewspaperData.mode === 'MONTHLY'
+				? requestNewspaperClose
+				: undefined}
 			onClosed={finishNewspaperClose}
 		/>
 	{/if}
