@@ -138,7 +138,8 @@ export function makeLiveState(stateVersion = 1): LiveGameState {
 					active: true,
 					selected: true,
 					eligible: false,
-					is_terminal: false
+					is_terminal: false,
+					requirement_percent: 50
 				}
 			]
 		},
