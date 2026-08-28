@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="1_pi8wa"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
 [ext_resource type="Resource" uid="uid://bw162ei21njtt" path="res://data/races/biyi.tres" id="3_race_biyi"]
+[ext_resource type="Resource" path="res://data/constitution_rows/文化.tres" id="row"]
 [ext_resource type="Resource" path="res://data/constitutions/包容.tres" id="4_prereq"]
 [ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="5_seat_condition_script"]
 [ext_resource type="Resource" uid="uid://cevrii67ltmsg" path="res://data/policies/阴历平准.tres" id="6_policy_1"]
@@ -19,6 +20,7 @@ required_rate = 0.5
 script = ExtResource("1_article_script")
 yin_yang_adjustment_rate = 0.1
 display_name = "比翼化"
+row = ExtResource("row")
 race = ExtResource("3_race_biyi")
 prerequisite = ExtResource("4_prereq")
 seat_condition = SubResource("Resource_seat_condition")
