@@ -71,6 +71,15 @@ jobs:
           "$GODOT_BIN" --version
           echo "GODOT_BIN=$GODOT_BIN" >> "$GITHUB_ENV"
 
+      - name: Initialize Godot project
+        run: |
+          set -euo pipefail
+          "$GODOT_BIN" \
+            --headless \
+            --editor \
+            --path "$GODOT_DIR" \
+            --quit
+
       - name: Check backend test scripts
         run: |
           set -euo pipefail
