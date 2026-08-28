@@ -25,6 +25,16 @@
 
 	type ViewName = 'Office' | 'Dialogue' | 'Parliament' | 'Newspaper' | 'Constitution';
 	const views: ViewName[] = ['Office', 'Dialogue', 'Parliament', 'Newspaper', 'Constitution'];
+	const mockConstitutionColumns = Object.keys(mockConstitutionMemorial).map(
+		(display_name, column_index) => ({
+			column_index,
+			id: `mock-${column_index}`,
+			display_name,
+			unlock_cost_months: 0,
+			unlocked: true,
+			can_unlock: false
+		})
+	);
 	const initialDraftProposal = mockProposalItems[0];
 	const mockNewspaper = {
 		year: 3,
@@ -211,6 +221,9 @@
 			onNewspaperOpen={openNewspaper}
 			title={mockConstitution.title}
 			constitution={mockConstitutionMemorial}
+			columns={mockConstitutionColumns}
+			availableGoverningMonths={0}
+			lifetimeGoverningMonths={0}
 		/>
 	{/if}
 
