@@ -279,6 +279,9 @@ func _test_failed_draft_does_not_record_sources(t: BackendTestContext) -> void:
 	var seated := t.make_group("seated")
 	var source := t.make_group("source")
 	var session := t.make_session([race], [seated, source], t.make_seats(1, "failure"))
+	# This test is about source accounting after a failed vote, not random group assignment.
+	# Disable proposal-source support so the otherwise neutral single seat deterministically abstains.
+	session.balance.proposal_support = 0.0
 	var proposal := t.make_proposal(source)
 	session.state.draft_bill.proposals.append(proposal)
 	var result := session.submit_draft()
