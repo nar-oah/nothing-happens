@@ -44,8 +44,9 @@ func configure_content(
 	interest_groups = groups
 	seat_definitions = seats
 	constitution_articles = articles
-	if board != null:
-		constitution_board = board
+	# configure_content is an explicit content override. Passing no board intentionally
+	# selects the legacy flat-article path instead of retaining the exported default board.
+	constitution_board = board
 
 
 func start_new_run() -> void:
