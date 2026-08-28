@@ -3,17 +3,16 @@
 	import { formatNewspaperNumber } from './types';
 
 	type Props = {
-		mode?: 'MONTHLY' | 'TERM_END';
 		year: number;
 		month: number;
 		disabled?: boolean;
 		onAdvance?: () => void;
 	};
 
-	let { mode = 'MONTHLY', year, month, disabled = false, onAdvance }: Props = $props();
+	let { year, month, disabled = false, onAdvance }: Props = $props();
 	let hovering = $state(false);
-	const nextMonth = $derived(mode === 'TERM_END' ? month : month >= 12 ? 0 : month + 1);
-	const nextYear = $derived(mode === 'TERM_END' ? year : month >= 12 ? year + 1 : year);
+	const nextMonth = $derived(month >= 12 ? 0 : month + 1);
+	const nextYear = $derived(month >= 12 ? year + 1 : year);
 	const displayMonth = $derived(hovering && !disabled ? nextMonth : month);
 	const displayYear = $derived(hovering && !disabled ? nextYear : year);
 	const monthText = $derived(formatNewspaperNumber(displayMonth));
@@ -28,7 +27,7 @@
 <button
 	class="flex h-full w-full flex-col gap-[3px] overflow-hidden border-0 bg-transparent px-8 py-5 text-left"
 	type="button"
-	aria-label={mode === 'TERM_END' ? '进入下一任' : '进入次月'}
+	aria-label="进入次月"
 	{disabled}
 	onmouseenter={() => setHovering(true)}
 	onmouseleave={() => setHovering(false)}
@@ -41,9 +40,7 @@
 	<div class="flex w-full shrink-0 items-start gap-12 overflow-hidden text-ink-primary">
 		<div class="flex min-w-0 flex-1 flex-col items-start overflow-hidden">
 			<p class="typo-newspaper-masthead w-full">
-				<MorphText
-					text={hovering && !disabled ? (mode === 'TERM_END' ? '次任' : '次月') : '弦外'}
-				/>
+				<MorphText text={hovering && !disabled ? '次月' : '弦外'} />
 			</p>
 			<p class="typo-newspaper-caption w-full">XIANWAI · THE OUT-OF-DISTRIBUTION TIMES</p>
 		</div>
