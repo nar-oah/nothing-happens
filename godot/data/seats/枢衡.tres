@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="SeatDefinition" format=3 uid="uid://dsoj6jgtl8v27"]
+
+[ext_resource type="Script" uid="uid://of78ek0nhty6" path="res://definitions/seat_definition.gd" id="1_mniet"]
+[ext_resource type="Resource" uid="uid://c2eco18e42n34" path="res://data/races/yano.tres" id="1_yj4ml"]
+
+[resource]
+script = ExtResource("1_mniet")
+display_name = "枢衡"
+anchor_race = ExtResource("1_yj4ml")
+metadata/_custom_type_script = "uid://of78ek0nhty6"

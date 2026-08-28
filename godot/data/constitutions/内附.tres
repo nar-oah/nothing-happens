@@ -2,14 +2,17 @@
 
 [ext_resource type="Script" uid="uid://tmkjsuwecnwg" path="res://definitions/human_constitution_article_definition.gd" id="1_article_script"]
 [ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="1_hmahs"]
+[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="1_oldk7"]
+[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_8su0c"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
 [ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/human.tres" id="3_race_human"]
-[ext_resource type="Resource" path="res://data/constitution_rows/外交.tres" id="row"]
 [ext_resource type="Resource" path="res://data/constitutions/外藩.tres" id="4_prereq"]
 [ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="5_seat_condition_script"]
 [ext_resource type="Resource" uid="uid://dsi8n5oqa2wbs" path="res://data/policies/官运调拨.tres" id="6_policy_1"]
 [ext_resource type="Resource" uid="uid://beqtc06vjai47" path="res://data/policies/差役折银.tres" id="7_policy_2"]
 [ext_resource type="Resource" uid="uid://cjjgw67nkrsnt" path="res://data/policies/官市优先.tres" id="8_policy_3"]
+[ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="12_i7dc2"]
+[ext_resource type="Resource" path="res://data/constitution_rows/外交.tres" id="row"]
 
 [sub_resource type="Resource" id="Resource_seat_condition"]
 script = ExtResource("5_seat_condition_script")

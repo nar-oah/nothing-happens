@@ -1,9 +1,10 @@
 [gd_resource type="Resource" script_class="BiyiConstitutionArticleDefinition" format=3 uid="uid://c7e0ktm2k2jge"]
 
 [ext_resource type="Script" uid="uid://dtldpcolvfdl0" path="res://definitions/biyi_constitution_article_definition.gd" id="1_article_script"]
+[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="1_g07qx"]
+[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_h7c4m"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
 [ext_resource type="Resource" uid="uid://bw162ei21njtt" path="res://data/races/biyi.tres" id="3_race_biyi"]
-[ext_resource type="Resource" path="res://data/constitution_rows/文化.tres" id="row"]
 [ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/human.tres" id="4_race_human"]
 [ext_resource type="Resource" uid="uid://bto7mkhf8cqca" path="res://data/races/nanke.tres" id="5_race_nanke"]
 [ext_resource type="Resource" uid="uid://b4e7rdu770lrv" path="res://data/races/peach_blossom.tres" id="6_race_peach"]
@@ -15,6 +16,8 @@
 [ext_resource type="Resource" uid="uid://chxghf2sqjvqh" path="res://data/policies/统一配给.tres" id="12_policy_1"]
 [ext_resource type="Resource" uid="uid://c7452f4lwguyl" path="res://data/policies/总量调配.tres" id="13_policy_2"]
 [ext_resource type="Resource" uid="uid://dc38kbujj2mej" path="res://data/policies/集中征购.tres" id="14_policy_3"]
+[ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="17_uqi7b"]
+[ext_resource type="Resource" path="res://data/constitution_rows/文化.tres" id="row"]
 
 [sub_resource type="Resource" id="Resource_influence_1"]
 script = ExtResource("11_influence_rule_script")

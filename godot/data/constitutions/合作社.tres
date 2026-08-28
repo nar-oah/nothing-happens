@@ -1,9 +1,10 @@
 [gd_resource type="Resource" script_class="NankeConstitutionArticleDefinition" format=3 uid="uid://dgtt2bc8wps1"]
 
+[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="1_a1qwq"]
 [ext_resource type="Script" uid="uid://jgr73t04ui0t" path="res://definitions/nanke_constitution_article_definition.gd" id="1_article_script"]
+[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_n80al"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
 [ext_resource type="Resource" uid="uid://bto7mkhf8cqca" path="res://data/races/nanke.tres" id="3_race_nanke"]
-[ext_resource type="Resource" path="res://data/constitution_rows/团体.tres" id="row"]
 [ext_resource type="Resource" uid="uid://clin7vlpgfkgw" path="res://data/constitutions/工会.tres" id="4_prereq"]
 [ext_resource type="Resource" path="res://data/interest_groups/槐安公所.tres" id="5_group_1"]
 [ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="6_seat_condition_script"]
@@ -11,6 +12,8 @@
 [ext_resource type="Resource" uid="uid://5jgynpvrk6lo" path="res://data/policies/盈余返工.tres" id="8_policy_1"]
 [ext_resource type="Resource" uid="uid://vgb0eaxgnklm" path="res://data/policies/共担订单.tres" id="9_policy_2"]
 [ext_resource type="Resource" uid="uid://b0ptugehrabq0" path="res://data/policies/合作采购.tres" id="10_policy_3"]
+[ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="13_rxdq4"]
+[ext_resource type="Resource" path="res://data/constitution_rows/团体.tres" id="row"]
 
 [sub_resource type="Resource" id="Resource_influence_1"]
 script = ExtResource("7_influence_rule_script")

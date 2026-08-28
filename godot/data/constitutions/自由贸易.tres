@@ -1,15 +1,17 @@
 [gd_resource type="Resource" script_class="FreeTradeMergerConstitutionArticleDefinition" format=3 uid="uid://culfnut5w8uh2"]
 
 [ext_resource type="Script" uid="uid://cuee63qimx3p2" path="res://definitions/free_trade_merger_constitution_article_definition.gd" id="1_article_script"]
+[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="1_w8iph"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
+[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_siktm"]
 [ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/human.tres" id="3_race_human"]
-[ext_resource type="Resource" path="res://data/constitution_rows/外交.tres" id="row"]
 [ext_resource type="Resource" path="res://data/constitutions/朝贡.tres" id="4_prereq"]
 [ext_resource type="Resource" path="res://data/interest_groups/永乐轮运局.tres" id="5_group_1"]
 [ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="6_influence_rule_script"]
 [ext_resource type="Resource" uid="uid://cycomgnbb7lqs" path="res://data/policies/竞价通商.tres" id="7_policy_1"]
 [ext_resource type="Resource" uid="uid://d3k0p8rtxf85j" path="res://data/policies/裁撤关卡.tres" id="8_policy_2"]
 [ext_resource type="Resource" uid="uid://dgamx4ym0hwv0" path="res://data/policies/航路套利.tres" id="9_policy_3"]
+[ext_resource type="Resource" path="res://data/constitution_rows/外交.tres" id="row"]
 
 [sub_resource type="Resource" id="Resource_influence_1"]
 script = ExtResource("6_influence_rule_script")
