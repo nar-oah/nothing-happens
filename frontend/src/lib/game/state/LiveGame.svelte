@@ -101,8 +101,7 @@
 			return {
 				...common,
 				mode: 'TERM_END',
-				termOutcome:
-					state.term_outcome === 'NOTHING_HAPPENS' ? 'NOTHING_HAPPENS' : 'COLLAPSE',
+				termOutcome: state.term_outcome === 'NOTHING_HAPPENS' ? 'NOTHING_HAPPENS' : 'COLLAPSE',
 				governingMonths: state.governing_months,
 				events: []
 			};
