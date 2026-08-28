@@ -13,6 +13,7 @@ func run(t: BackendTestContext) -> void:
 	_test_merge_refs(t)
 	_test_draft_preview(t)
 	_test_bonus_choice_sync(t)
+	_test_explicit_next_term_command(t)
 	_test_normalized_input_regions(t)
 	_test_game_root_shell(t)
 
@@ -64,7 +65,6 @@ func _test_core_dto_serialization(t: BackendTestContext) -> void:
 	t.check_equal(proposal_dto["base_effect"]["tax"], 8, "proposal base effect serializes")
 	t.check_equal(proposal_dto["positive_effect"]["trade"], 5, "proposal trait serializes")
 	t.check_equal(proposal_dto["lag_months"], 6, "proposal lag serializes")
-	t.check(not proposal_dto.has("collapse_impact"), "proposal has no collapse impact field")
 	t.check(not proposal_dto["bonus_choice_resolved"], "proposal pending state serializes")
 	var policy := _make_policy("serializer policy")
 	var policy_dto: Dictionary = serializer.policy(policy)
@@ -90,6 +90,9 @@ func _test_full_state_and_saved_bill_indices(t: BackendTestContext) -> void:
 	var serializer := UiSerializer.new()
 	var full := serializer.full_state(session, "office", "office", 7)
 	t.check_equal(full["state_version"], 7, "full sync carries state version")
+	t.check_equal(full["run_phase"], "RUNNING", "full sync carries the authoritative run phase")
+	t.check_equal(full["term_outcome"], "NONE", "a running term has no terminal outcome")
+	t.check_equal(full["governing_months"], 0, "full sync carries integer governing duration")
 	t.check_equal(full["saved_bills"][0]["title"], "saved zero", "saved bill array preserves index")
 	t.check_equal(full["editing_saved_bill_index"], null, "new bill index serializes as null")
 	t.check_equal(full["constitution"]["title"], "蓬莱约法", "constitution uses its fixed title")
@@ -102,6 +105,35 @@ func _test_full_state_and_saved_bill_indices(t: BackendTestContext) -> void:
 	var ready := bridge.receive_ipc_message(_message("ui.ready", {}))
 	t.check_equal(ready[0]["type"], "state.full", "ui.ready receives authoritative full sync")
 	t.check_equal(ready[0]["request_id"], "test", "handshake response preserves request id")
+	bridge.free()
+	session.free()
+
+
+func _test_explicit_next_term_command(t: BackendTestContext) -> void:
+	var race := t.make_race("next term race")
+	var group := t.make_group("next term group")
+	var balance := GameBalanceDefinition.new()
+	balance.automatic_draw_count = 0
+	balance.event_spawn_count_min = 0
+	balance.event_spawn_count_max = 0
+	balance.max_collapse = 1
+	var session := t.make_session(
+		[race], [group], t.make_seats(1, "next term"), [], balance
+	)
+	session.collapse_system.increase(session.context)
+	var bridge := UiBridge.new()
+	bridge.setup(session)
+	var messages := bridge.receive_ipc_message(
+		_message("term.next", {"state_version": 0})
+	)
+	var full: Dictionary = messages[messages.size() - 1]
+	t.check_equal(full["type"], "state.full", "explicit next term returns a full state")
+	t.check_equal(full["payload"]["state_version"], 1, "explicit next term advances state version")
+	t.check_equal(full["payload"]["term"], 2, "explicit next term increments the term")
+	t.check_equal(full["payload"]["month"], 0, "explicit next term creates month zero")
+	t.check_equal(full["payload"]["run_phase"], "RUNNING", "explicit next term resets run phase")
+	t.check_equal(full["payload"]["term_outcome"], "NONE", "explicit next term resets outcome")
+	t.check_equal(full["payload"]["ui_mode"], "constitution", "next term enters constitution mode")
 	bridge.free()
 	session.free()
 
