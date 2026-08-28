@@ -97,20 +97,48 @@ export function makeLiveState(stateVersion = 1): LiveGameState {
 		constitution: {
 			title: '蓬莱约法',
 			revision_available: true,
+			center_column_index: 0,
+			available_governing_months: 24,
+			lifetime_governing_months: 48,
+			terminal_article_index: -1,
+			columns: [
+				{
+					column_index: 0,
+					id: 'normal',
+					display_name: '常制',
+					unlock_cost_months: 0,
+					unlocked: true,
+					can_unlock: false
+				}
+			],
+			rows: [
+				{
+					row_index: 0,
+					id: 'diplomacy',
+					display_name: '外交',
+					race_display_name: '人类',
+					free_navigation: false,
+					ignores_column_unlocks: false,
+					active_article_index: 0
+				}
+			],
 			active_articles: [
 				{ article_index: 0, display_name: '外藩', content: '', policies: [testPolicy] }
 			],
 			articles: [
 				{
 					article_index: 0,
+					row_index: 0,
+					column_index: 0,
+					row_display_name: '外交',
 					race_display_name: '人类',
 					display_name: '外藩',
 					content: '',
 					policies: [testPolicy],
 					active: true,
 					selected: true,
-					clicked: true,
-					eligible: false
+					eligible: false,
+					is_terminal: false
 				}
 			]
 		},
