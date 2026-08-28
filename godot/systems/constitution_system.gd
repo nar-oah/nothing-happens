@@ -241,7 +241,7 @@ func modify_vote(vote_context: VoteContext) -> void:
 func get_race_seat_constraint(context: RunContext, race: RaceDefinition) -> RaceSeatConstraint:
 	if race is ZhushuiRaceDefinition:
 		return RaceSeatConstraint.new(1, 1)
-	var pool := context.state.seats.size()
+	var pool := context.parliament_system.get_variable_seats(context.state).size()
 	var article := context.state.constitution.get_active_article(race)
 	var minimum := 0 if article == null else ceili(article.race_min_seat_rate * pool)
 	var maximum := pool if article == null else floori(article.race_max_seat_rate * pool)
