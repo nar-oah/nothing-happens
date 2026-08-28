@@ -3,6 +3,7 @@ class_name ConstitutionState
 
 var active_articles: Dictionary[ConstitutionRowDefinition, ConstitutionArticleDefinition] = {}
 var revision_available: bool = true
+var terminal_article: ConstitutionArticleDefinition
 var group_mergers: Dictionary[InterestGroupDefinition, InterestGroupDefinition] = {}
 var local_interest_groups: Dictionary[SeatDefinition, InterestGroupDefinition] = {}
 
