@@ -100,7 +100,7 @@
 	});
 
 	$effect(() => {
-		entryCycle;
+		if (entryCycle < 0) return;
 		motionPhase = 'entering';
 	});
 
