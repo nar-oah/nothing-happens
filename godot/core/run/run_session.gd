@@ -119,7 +119,12 @@ func _start_term(term_number: int) -> bool:
 		return false
 	if not constitution_system.initialize(context):
 		return false
-	if not race_system.allocate_opening_seats(context):
+	var allocated := (
+		race_system.allocate_opening_seats(context)
+		if constitution_board != null
+		else race_system.allocate_annual_seats(context)
+	)
+	if not allocated:
 		push_error("Failed to allocate opening race seats.")
 		return false
 	for race in race_definitions:
