@@ -65,7 +65,9 @@ func submit_draft(draft: DraftBillState) -> VoteResultState:
 		or not context.draft_bill_system.is_ready_to_submit(context, draft)
 	):
 		return result
-	context.state.has_submitted_bill = true
+	# Saving happens before the vote, so saved_bills is the authoritative record that the
+	# player has ever submitted a bill this term. Collapse uses the array itself to decide
+	# whether the "nothing happens" outcome is still possible.
 	context.draft_bill_system.save_draft(context.state, draft)
 	result = context.vote_system.calculate_vote(draft, context, true)
 	result.submitted = true
