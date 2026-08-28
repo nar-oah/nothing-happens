@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://definitions/constitution_article_definition.gd" id="1_article_script"]
 [ext_resource type="Script" path="res://definitions/policy_definition.gd" id="2_policy_script"]
 [ext_resource type="Resource" path="res://data/races/peach_blossom.tres" id="3_race_peach"]
+[ext_resource type="Resource" path="res://data/constitution_rows/桃源.tres" id="row"]
 [ext_resource type="Resource" path="res://data/constitutions/自治.tres" id="4_prereq"]
 [ext_resource type="Resource" path="res://data/policies/开山通路.tres" id="5_policy_1"]
 [ext_resource type="Resource" path="res://data/policies/外货竞价.tres" id="6_policy_2"]
@@ -11,6 +12,7 @@
 [resource]
 script = ExtResource("1_article_script")
 display_name = "开放"
+row = ExtResource("row")
 race = ExtResource("3_race_peach")
 prerequisite = ExtResource("4_prereq")
 policies = Array[ExtResource("2_policy_script")]([ExtResource("5_policy_1"), ExtResource("6_policy_2"), ExtResource("7_policy_3")])
