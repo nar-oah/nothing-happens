@@ -119,34 +119,47 @@ func allocate_base_columns(
 
 
 func initialize_base_groups(
-	state: RunState, groups: Array[InterestGroupDefinition]
+	context: RunContext, groups: Array[InterestGroupDefinition]
 ) -> bool:
-	var influenceable_seats: Array[SeatState] = []
-	for seat in state.seats:
+	if context == null:
+		return false
+	for seat in context.state.seats:
 		if seat.race is ZhushuiRaceDefinition:
 			seat.base_group = null
 			seat.annual_group = null
 			seat.actual_group = null
+	for race in context.race_definitions:
+		if race is ZhushuiRaceDefinition:
 			continue
-		influenceable_seats.append(seat)
-	var allocation := allocate_base_columns(influenceable_seats.size(), groups)
-	var allocated_count := 0
-	for count in allocation.values():
-		allocated_count += int(count)
-	if allocated_count != influenceable_seats.size():
-		push_error("Interest-group columns did not fill the influenceable seat pool.")
-		return false
-	var seat_index := 0
+		var race_seats := get_race_seats(context.state, race)
+		var allocation := allocate_base_columns(race_seats.size(), groups)
+		var allocated_count := 0
+		for count in allocation.values():
+			allocated_count += int(count)
+		if allocated_count != race_seats.size():
+			push_error("Interest-group columns did not fill a race row.")
+			return false
+		var seat_index := 0
+		for group in groups:
+			var count: int = allocation.get(group, 0)
+			for _index in range(count):
+				race_seats[seat_index].base_group = group
+				seat_index += 1
+		for seat in race_seats:
+			var initial := _sample_base_weight_group(groups, context.random_system)
+			seat.annual_group = initial
+			seat.actual_group = _resolve_group(context.state, initial)
+	return true
+
+
+func _sample_base_weight_group(
+	groups: Array[InterestGroupDefinition], random_system: RandomSystem
+) -> InterestGroupDefinition:
+	var weights: Array[float] = []
 	for group in groups:
-		var count: int = allocation.get(group, 0)
-		for index in range(count):
-			if seat_index >= influenceable_seats.size():
-				return false
-			influenceable_seats[seat_index].base_group = group
-			influenceable_seats[seat_index].annual_group = group
-			influenceable_seats[seat_index].actual_group = group
-			seat_index += 1
-	return seat_index == influenceable_seats.size()
+		weights.append(float(group.base_column_weight))
+	var index := random_system.weighted_index(weights)
+	return null if index < 0 else groups[index]
 
 
 func assign_race_distribution(
@@ -192,12 +205,9 @@ func validate_anchor_invariants(
 	state: RunState, races: Array[RaceDefinition]
 ) -> bool:
 	for race in races:
-		var count := get_race_seat_count(state, race)
-		if count != 1:
-			continue
 		var anchor := _get_anchor_seat(state, race)
 		if anchor != null and anchor.race != race:
-			push_error("A race's final seat must occupy its anchor.")
+			push_error("A race anchor seat must always remain in its owning race.")
 			return false
 	return true
 
@@ -230,12 +240,7 @@ func get_annual_source_shares(
 
 
 func apply_annual_coloring(context: RunContext) -> void:
-	for seat in context.state.seats:
-		seat.annual_group = seat.base_group
-		seat.actual_group = _resolve_group(context.state, seat.annual_group)
 	var shares := get_annual_source_shares(context.state)
-	if shares.is_empty():
-		return
 	var groups := _get_stable_groups(context)
 	var sources: Array[InterestGroupDefinition] = []
 	var weights: Array[float] = []
@@ -243,15 +248,45 @@ func apply_annual_coloring(context: RunContext) -> void:
 		if shares.has(group):
 			sources.append(group)
 			weights.append(shares[group])
-	for seat in get_influenceable_seats(context.state):
-		if sources.is_empty() or not context.random_system.chance(
-			context.balance.annual_group_coloring_rate
-		):
+	for seat in context.state.seats:
+		if seat.race is ZhushuiRaceDefinition:
+			seat.annual_group = null
+			seat.actual_group = null
 			continue
-		var index := context.random_system.weighted_index(weights)
-		if index >= 0:
-			seat.annual_group = sources[index]
-			seat.actual_group = _resolve_group(context.state, seat.annual_group)
+		seat.annual_group = seat.base_group
+		if not sources.is_empty() and context.random_system.chance(context.balance.annual_group_coloring_rate):
+			var source_index := context.random_system.weighted_index(weights)
+			if source_index >= 0:
+				seat.annual_group = sources[source_index]
+		seat.annual_group = _apply_race_group_bias(context, seat.race, seat.annual_group)
+		seat.actual_group = _resolve_group(context.state, seat.annual_group)
+
+
+func _apply_race_group_bias(
+	context: RunContext,
+	race: RaceDefinition,
+	fallback: InterestGroupDefinition
+) -> InterestGroupDefinition:
+	var biases := context.constitution_system.get_group_biases_for_race(context, race)
+	if biases.is_empty():
+		return fallback
+	var total_probability := 0.0
+	for bias in biases:
+		if bias == null or bias.interest_group == null:
+			continue
+		total_probability += clampf(bias.probability, 0.0, 1.0)
+	if total_probability > 1.00001:
+		push_error("Constitution group-bias probabilities cannot sum above 100%.")
+		return fallback
+	var roll := context.random_system.random_float(0.0, 1.0)
+	var accumulated := 0.0
+	for bias in biases:
+		if bias == null or bias.interest_group == null:
+			continue
+		accumulated += clampf(bias.probability, 0.0, 1.0)
+		if roll < accumulated:
+			return _resolve_group(context.state, bias.interest_group)
+	return fallback
 
 
 func can_reassign_seat(
@@ -267,9 +302,7 @@ func can_reassign_seat(
 		or target is ZhushuiRaceDefinition
 	):
 		return false
-	var target_constraint := context.constitution_system.get_race_seat_constraint(
-		context, target
-	)
+	var target_constraint := context.constitution_system.get_race_seat_constraint(context, target)
 	var target_count := get_race_seat_count(context.state, target)
 	if target_constraint.maximum_count >= 0 and target_count >= target_constraint.maximum_count:
 		return false
@@ -283,10 +316,8 @@ func can_reassign_seat(
 	var donor_count := get_race_seat_count(context.state, donor)
 	if donor_count - 1 < donor_constraint.minimum_count:
 		return false
-	if donor_count - 1 == 1:
-		var anchor := _get_anchor_seat(context.state, donor)
-		if anchor != null and (anchor == seat or anchor.race != donor):
-			return false
+	if seat.definition.anchor_race == donor:
+		return false
 	return true
 
 
@@ -346,9 +377,7 @@ func _get_stable_groups(context: RunContext) -> Array[InterestGroupDefinition]:
 		if group != null and group not in result:
 			result.append(group)
 	for seat in context.state.seats:
-		var local: InterestGroupDefinition = context.state.constitution.local_interest_groups.get(
-			seat.definition
-		)
+		var local: InterestGroupDefinition = context.state.constitution.local_interest_groups.get(seat.definition)
 		if local != null and local not in result:
 			result.append(local)
 	return result
