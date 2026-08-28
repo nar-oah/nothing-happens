@@ -48,6 +48,7 @@ func _test_donation_pool_spending_and_detection(t: BackendTestContext) -> void:
 	t.check(session.vote_system.set_donation(session.context, second_seat, 2.0), "a second donation can be drafted")
 	t.check_equal(session.random_system.rng.state, rng_before_edit, "editing donation values performs no detection")
 	t.check_equal(session.state.collapse_level, 0, "editing donation values adds no collapse")
+	t.check(not session.state.has_submitted_bill, "editing donations is not a bill submission")
 	t.check_approx(session.state.political_donation_pool, 4.0, "only final donation increments are charged")
 	t.check_approx(session.state.vote_donations[first_seat.definition], 4.0, "allocation key is SeatDefinition")
 	t.check(

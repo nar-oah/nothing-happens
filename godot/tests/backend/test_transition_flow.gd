@@ -34,6 +34,8 @@ func _test_constitution_uses_parliament_world(t: BackendTestContext) -> void:
 	var session := t.make_session([race], [group], t.make_seats(1, "constitution world"))
 	var bridge := UiBridge.new()
 	bridge.setup(session)
+	t.check_equal(bridge.ui_mode, "constitution", "a new month-zero term opens constitution mode")
+	t.check_equal(bridge.world_scene, "parliament", "a new month-zero term uses parliament world")
 	t.check(bridge.set_ui_mode("constitution", false), "constitution mode is accepted")
 	t.check_equal(bridge.ui_mode, "constitution", "constitution mode remains authoritative")
 	t.check_equal(bridge.world_scene, "parliament", "constitution mode uses parliament world")
@@ -47,6 +49,7 @@ func _test_year_boundary_enters_constitution(t: BackendTestContext) -> void:
 	var session := t.make_session([race], [group], t.make_seats(1, "year boundary"))
 	session.state.year = 1
 	session.state.month = 12
+	session.state.collapse_level = 2
 	var bridge := UiBridge.new()
 	bridge.setup(session)
 	var messages := bridge.receive_ipc_message(
@@ -56,6 +59,7 @@ func _test_year_boundary_enters_constitution(t: BackendTestContext) -> void:
 	t.check_equal(full["type"], "state.full", "month advance returns a full state")
 	t.check_equal(full["payload"]["year"], 2, "year boundary advances the year")
 	t.check_equal(full["payload"]["month"], 0, "year boundary enters month zero")
+	t.check_equal(full["payload"]["collapse_level"], 1, "entering month zero applies annual recovery")
 	t.check_equal(full["payload"]["ui_mode"], "constitution", "month zero enters constitution view")
 	t.check_equal(full["payload"]["world_scene"], "parliament", "month zero keeps parliament world")
 	bridge.free()

@@ -123,6 +123,11 @@ func _test_explicit_next_term_command(t: BackendTestContext) -> void:
 	session.collapse_system.increase(session.context)
 	var bridge := UiBridge.new()
 	bridge.setup(session)
+	var blocked := bridge.receive_ipc_message(
+		_message("month.advance", {"state_version": 0})
+	)
+	t.check_equal(blocked[0]["payload"]["state_version"], 0, "ended term advance does not change version")
+	t.check_equal(blocked[0]["payload"]["term"], 1, "ended term advance preserves the old term")
 	var messages := bridge.receive_ipc_message(
 		_message("term.next", {"state_version": 0})
 	)
