@@ -4,6 +4,8 @@ class_name ConstitutionSeatCondition
 enum Comparison {
 	AT_LEAST,
 	AT_MOST,
+	GREATER_THAN,
+	LESS_THAN,
 }
 
 enum MatchMode {
@@ -50,6 +52,12 @@ func _get_groups() -> Array[InterestGroupDefinition]:
 
 
 func _compare(rate: float) -> bool:
-	if comparison == Comparison.AT_MOST:
-		return rate <= required_rate
-	return rate >= required_rate
+	match comparison:
+		Comparison.AT_MOST:
+			return rate <= required_rate
+		Comparison.GREATER_THAN:
+			return rate > required_rate
+		Comparison.LESS_THAN:
+			return rate < required_rate
+		_:
+			return rate >= required_rate
