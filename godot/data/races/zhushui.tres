@@ -5,3 +5,8 @@
 [resource]
 script = ExtResource("2_mb808")
 display_name = "驻岁"
+increase_tax = true
+increase_price = true
+increase_wage = true
+increase_employment = true
+increase_trade = true
