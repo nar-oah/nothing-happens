@@ -1,9 +1,7 @@
 [gd_resource type="Resource" script_class="FreeTradeMergerConstitutionArticleDefinition" format=3 uid="uid://culfnut5w8uh2"]
 
 [ext_resource type="Script" uid="uid://cuee63qimx3p2" path="res://definitions/free_trade_merger_constitution_article_definition.gd" id="1_article_script"]
-[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="1_w8iph"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
-[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_siktm"]
 [ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/human.tres" id="3_race_human"]
 [ext_resource type="Resource" path="res://data/constitutions/朝贡.tres" id="4_prereq"]
 [ext_resource type="Resource" path="res://data/interest_groups/永乐轮运局.tres" id="5_group_1"]
@@ -26,5 +24,6 @@ row = ExtResource("row")
 race = ExtResource("3_race_human")
 prerequisite = ExtResource("4_prereq")
 race_max_seat_rate = 0.0
+participates_in_variable_seat_allocation = false
 policies = Array[ExtResource("2_policy_script")]([ExtResource("7_policy_1"), ExtResource("8_policy_2"), ExtResource("9_policy_3")])
 influence_rules = Array[ExtResource("6_influence_rule_script")]([SubResource("Resource_influence_1")])
