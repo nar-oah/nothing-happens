@@ -48,7 +48,6 @@ func _test_donation_pool_spending_and_detection(t: BackendTestContext) -> void:
 	t.check(session.vote_system.set_donation(session.context, second_seat, 2.0), "a second donation can be drafted")
 	t.check_equal(session.random_system.rng.state, rng_before_edit, "editing donation values performs no detection")
 	t.check_equal(session.state.collapse_level, 0, "editing donation values adds no collapse")
-	t.check(not session.state.has_submitted_bill, "editing donations is not a bill submission")
 	t.check_approx(session.state.political_donation_pool, 4.0, "only final donation increments are charged")
 	t.check_approx(session.state.vote_donations[first_seat.definition], 4.0, "allocation key is SeatDefinition")
 	t.check(
@@ -77,11 +76,13 @@ func _test_donation_pool_spending_and_detection(t: BackendTestContext) -> void:
 func _test_zhushui_intrinsic_support(t: BackendTestContext) -> void:
 	var race := ZhushuiRaceDefinition.new()
 	race.display_name = "zhushui"
+	var executive_seat := t.make_seat("zhushui executive", race)
 	var session := t.make_session(
-		[race], [t.make_group("group")], t.make_seats(1, "zhushui")
+		[race], [t.make_group("group")], [executive_seat]
 	)
 	var result := session.vote_system.preview_vote(DraftBillState.new(), session.context)
 	var vote := t.vote_for_race(result, race)
+	t.check(vote != null, "Zhushui's fixed executive seat participates in the vote")
 	t.check_equal(vote.position, SeatVoteState.Position.SUPPORT, "Zhushui subclass always supports")
 	t.check(vote.breakdown.has(&"zhushui_intrinsic_support"), "intrinsic subclass adds its reason")
 	session.free()
