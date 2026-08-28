@@ -55,7 +55,7 @@ test('authoritative draft preview becomes existing Memorial metric props', () =>
 	);
 });
 
-test('constitution presentation uses board columns and preserves blank row slots', () => {
+test('constitution presentation keeps one aligned row grid and turns locked columns into year pages', () => {
 	const state = makeLiveState();
 	state.constitution.columns.push({
 		column_index: 1,
@@ -75,16 +75,21 @@ test('constitution presentation uses board columns and preserves blank row slots
 		active_article_index: -1
 	});
 	const constitution = deriveConstitutionMemorial(state);
+	const rowLabels = Array.isArray(constitution['']) ? constitution[''] : [];
 	const normalRows = Array.isArray(constitution['常制']) ? constitution['常制'] : [];
-	const newRows = Array.isArray(constitution['新制']) ? constitution['新制'] : [];
+	assert.equal(rowLabels.length, 2);
+	assert.equal(rowLabels[0]?.text, '外交');
+	assert.equal(rowLabels[0]?.number, 50);
+	assert.equal(rowLabels[0]?.selectable, false);
+	assert.equal(rowLabels[1]?.text, '文化');
+	assert.equal(rowLabels[1]?.number, '');
 	assert.equal(normalRows.length, 2);
 	assert.equal(normalRows[0]?.articleRef, 0);
+	assert.equal(normalRows[0]?.number, 50);
 	assert.equal(normalRows[0]?.selected, true);
 	assert.equal(normalRows[0]?.selectable, false);
 	assert.equal(normalRows[1]?.articleRef, undefined);
-	assert.equal(newRows.length, 2);
-	assert.equal(newRows[0]?.articleRef, undefined);
-	assert.equal(newRows[1]?.articleRef, undefined);
+	assert.equal(constitution['新制'], 1);
 });
 
 test('dialogue presentation retains authoritative values', () => {
