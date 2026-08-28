@@ -5,7 +5,7 @@ class_name ParliamentSystem
 func initialize_seats(
 	state: RunState,
 	definitions: Array[SeatDefinition],
-	races: Array[RaceDefinition]
+	traces: Array[RaceDefinition]
 ) -> bool:
 	state.seats.clear()
 	var seen: Dictionary[SeatDefinition, bool] = {}
@@ -17,7 +17,7 @@ func initialize_seats(
 		seen[definition] = true
 		if definition.anchor_race == null:
 			continue
-		if definition.anchor_race not in races or anchor_races.has(definition.anchor_race):
+		if definition.anchor_race not in traces or anchor_races.has(definition.anchor_race):
 			push_error("Each content race can own at most one anchor seat.")
 			return false
 		anchor_races[definition.anchor_race] = true
@@ -42,22 +42,33 @@ func get_race_seats(state: RunState, race: RaceDefinition) -> Array[SeatState]:
 	return result
 
 
+func get_variable_seats(
+	state: RunState, race: RaceDefinition = null
+) -> Array[SeatState]:
+	var result: Array[SeatState] = []
+	for seat in state.seats:
+		if seat.race is ZhushuiRaceDefinition:
+			continue
+		if race == null or seat.race == race:
+			result.append(seat)
+	return result
+
+
 func get_race_seat_rate(state: RunState, race: RaceDefinition) -> float:
-	if state.seats.is_empty():
+	var seats := get_variable_seats(state)
+	if seats.is_empty():
 		return 0.0
-	return float(get_race_seat_count(state, race)) / float(state.seats.size())
+	var count := 0
+	for seat in seats:
+		if seat.race == race:
+			count += 1
+	return float(count) / float(seats.size())
 
 
 func get_influenceable_seats(
 	state: RunState, race: RaceDefinition = null
 ) -> Array[SeatState]:
-	var result: Array[SeatState] = []
-	for seat in state.seats:
-		if seat.base_group == null and seat.actual_group == null:
-			continue
-		if race == null or seat.race == race:
-			result.append(seat)
-	return result
+	return get_variable_seats(state, race)
 
 
 func get_group_influence_count(
@@ -164,7 +175,7 @@ func _sample_base_weight_group(
 
 func assign_race_distribution(
 	state: RunState,
-	races: Array[RaceDefinition],
+	traces: Array[RaceDefinition],
 	target_counts: Dictionary[RaceDefinition, int]
 ) -> bool:
 	var remaining := target_counts.duplicate()
@@ -185,7 +196,7 @@ func assign_race_distribution(
 		if reserved.has(seat):
 			continue
 		seat.race = null
-		for race in races:
+		for race in traces:
 			if int(remaining.get(race, 0)) <= 0:
 				continue
 			seat.race = race
@@ -194,17 +205,17 @@ func assign_race_distribution(
 		if seat.race == null:
 			push_error("Race distribution did not fill every permanent seat.")
 			return false
-	for race in races:
+	for race in traces:
 		if int(remaining.get(race, 0)) != 0:
 			push_error("Race distribution has an unassigned quota.")
 			return false
-	return validate_anchor_invariants(state, races)
+	return validate_anchor_invariants(state, traces)
 
 
 func validate_anchor_invariants(
-	state: RunState, races: Array[RaceDefinition]
+	state: RunState, traces: Array[RaceDefinition]
 ) -> bool:
-	for race in races:
+	for race in traces:
 		var anchor := _get_anchor_seat(state, race)
 		if anchor != null and anchor.race != race:
 			push_error("A race anchor seat must always remain in its owning race.")
