@@ -4,10 +4,11 @@ const BackendTestContext = preload("res://tests/backend/backend_test_context.gd"
 
 
 func run(t: BackendTestContext) -> void:
-	_test_monthly_negative_metric_step(t)
-	_test_monthly_collapse_never_decreases(t)
-	_test_year_boundary_never_reduces_collapse(t)
-	_test_december_collapse_ends_term(t)
+	_test_negative_metrics_do_not_directly_add_collapse(t)
+	_test_annual_recovery(t)
+	_test_event_failure_adds_shared_collapse_step(t)
+	_test_maximum_without_submitted_bill_is_nothing_happens(t)
+	_test_maximum_with_submitted_bill_is_collapse(t)
 	_test_bill_digestion_and_market_movement(t)
 	_test_policy_trigger_chain(t)
 
@@ -24,64 +25,66 @@ func _make_collapse_session(
 	)
 
 
-func _test_monthly_negative_metric_step(t: BackendTestContext) -> void:
+func _test_negative_metrics_do_not_directly_add_collapse(t: BackendTestContext) -> void:
 	var balance := GameBalanceDefinition.new()
 	balance.automatic_draw_count = 0
 	balance.event_spawn_count_min = 0
 	balance.event_spawn_count_max = 0
 	balance.max_collapse = 100
 	balance.collapse_step = 3
-	var no_negative := _make_collapse_session(t, balance)
-	no_negative.collapse_system.settle_month(no_negative.context)
-	t.check_equal(typeof(no_negative.state.collapse_level), TYPE_INT, "collapse level is stored as int")
-	t.check_equal(no_negative.state.collapse_level, 0, "a month without negative metrics adds no collapse")
-	no_negative.free()
-
-	var one_negative := _make_collapse_session(t, balance)
-	one_negative.state.metrics.tax = -1
-	one_negative.collapse_system.settle_month(one_negative.context)
-	t.check_equal(one_negative.state.collapse_level, 3, "one negative metric adds one collapse step")
-	one_negative.free()
-
-	var five_negative := _make_collapse_session(t, balance)
-	for metric in Metric.all_ids():
-		five_negative.state.metrics.set_value(metric, -1)
-	five_negative.collapse_system.settle_month(five_negative.context)
-	t.check_equal(five_negative.state.collapse_level, 3, "five negative metrics still add one collapse step")
-	t.check_equal(typeof(five_negative.state.collapse_level), TYPE_INT, "collapse remains int after settlement")
-	five_negative.free()
-
-
-func _test_monthly_collapse_never_decreases(t: BackendTestContext) -> void:
-	var balance := GameBalanceDefinition.new()
-	balance.automatic_draw_count = 0
-	balance.event_spawn_count_min = 0
-	balance.event_spawn_count_max = 0
 	var session := _make_collapse_session(t, balance)
-	session.state.collapse_level = 7
+	for metric in Metric.all_ids():
+		session.state.metrics.set_value(metric, -1)
 	for month in range(1, 13):
 		session.state.month = month
-		session.collapse_system.settle_month(session.context)
-		t.check_equal(session.state.collapse_level, 7, "normal months never reduce collapse")
+		t.check(session.advance_month(), "a negative-metric month still advances")
+		if session.state.month == 0:
+			# Month zero is not a normal gameplay month; resume at month one for this direct-risk test.
+			session.state.month = 1
+	t.check_equal(session.state.collapse_level, 0, "negative metrics never directly add collapse")
+	t.check_equal(typeof(session.state.collapse_level), TYPE_INT, "collapse level remains an integer")
 	session.free()
 
 
-func _test_year_boundary_never_reduces_collapse(t: BackendTestContext) -> void:
+func _test_annual_recovery(t: BackendTestContext) -> void:
 	var balance := GameBalanceDefinition.new()
 	balance.automatic_draw_count = 0
 	balance.event_spawn_count_min = 0
 	balance.event_spawn_count_max = 0
+	balance.annual_collapse_recovery = 2
 	var session := _make_collapse_session(t, balance)
-	session.state.month = 12
 	session.state.collapse_level = 7
-	t.check(session.advance_month(), "December without a terminal collapse settles")
-	t.check_equal(session.state.year, 2, "December advances into the next year")
-	t.check_equal(session.state.month, 0, "December enters constitution month zero")
-	t.check_equal(session.state.collapse_level, 7, "year boundary never reduces collapse")
+	session.collapse_system.recover_annual(session.context)
+	t.check_equal(session.state.collapse_level, 5, "annual recovery subtracts its configured integer amount")
+	session.state.collapse_level = 1
+	session.collapse_system.recover_annual(session.context)
+	t.check_equal(session.state.collapse_level, 0, "annual recovery floors collapse at zero")
 	session.free()
 
 
-func _test_december_collapse_ends_term(t: BackendTestContext) -> void:
+func _test_event_failure_adds_shared_collapse_step(t: BackendTestContext) -> void:
+	var balance := GameBalanceDefinition.new()
+	balance.automatic_draw_count = 0
+	balance.event_spawn_count_min = 0
+	balance.event_spawn_count_max = 0
+	balance.event_lifetime_months = 4
+	balance.event_public_remaining_months = 1
+	balance.collapse_step = 3
+	balance.max_collapse = 100
+	var race := t.make_race("event")
+	var session := t.make_session(
+		[race], [t.make_group("group")], t.make_seats(1, "event"), [], balance
+	)
+	var event := EventState.new(race, Metric.Id.TAX, 100, 110)
+	event.months_alive = balance.event_lifetime_months - 1
+	session.state.events.append(event)
+	session.event_system.settle_month(session.context)
+	t.check_equal(event.phase, EventState.Phase.FAILED, "an expired event fails")
+	t.check_equal(session.state.collapse_level, 3, "event failure adds the shared collapse step")
+	session.free()
+
+
+func _test_maximum_without_submitted_bill_is_nothing_happens(t: BackendTestContext) -> void:
 	var balance := GameBalanceDefinition.new()
 	balance.automatic_draw_count = 0
 	balance.event_spawn_count_min = 0
@@ -89,14 +92,35 @@ func _test_december_collapse_ends_term(t: BackendTestContext) -> void:
 	balance.max_collapse = 3
 	balance.collapse_step = 1
 	var session := _make_collapse_session(t, balance)
-	session.state.month = 12
 	session.state.collapse_level = 2
-	session.state.metrics.tax = -1
-	t.check(session.advance_month(), "December settlement runs")
-	t.check_equal(session.state.collapse_level, 3, "December reaches collapse maximum")
-	t.check_equal(session.state.run_phase, RunState.RunPhase.TERM_ENDED, "December maximum ends the term")
-	t.check_equal(session.state.year, 1, "failed December does not enter the next year")
-	t.check_equal(session.state.month, 12, "failed December does not enter month zero")
+	t.check(session.state.saved_bills.is_empty(), "fresh term has no submitted/saved bills")
+	session.collapse_system.increase(session.context)
+	t.check_equal(session.state.collapse_level, 3, "collapse reaches maximum")
+	t.check_equal(session.state.run_phase, RunState.RunPhase.TERM_ENDED, "maximum ends the term")
+	t.check_equal(
+		session.state.term_outcome,
+		RunState.TermOutcome.NOTHING_HAPPENS,
+		"maximum with an empty submitted-bill array triggers nothing happens"
+	)
+	session.free()
+
+
+func _test_maximum_with_submitted_bill_is_collapse(t: BackendTestContext) -> void:
+	var balance := GameBalanceDefinition.new()
+	balance.automatic_draw_count = 0
+	balance.event_spawn_count_min = 0
+	balance.event_spawn_count_max = 0
+	balance.max_collapse = 3
+	balance.collapse_step = 1
+	var session := _make_collapse_session(t, balance)
+	session.state.saved_bills.append(SavedBillState.new())
+	session.state.collapse_level = 2
+	session.collapse_system.increase(session.context)
+	t.check_equal(
+		session.state.term_outcome,
+		RunState.TermOutcome.COLLAPSE,
+		"maximum with any submitted/saved bill triggers collapse"
+	)
 	session.free()
 
 
