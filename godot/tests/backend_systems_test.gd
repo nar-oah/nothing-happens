@@ -4,6 +4,7 @@ const TestContextScript = preload("res://tests/backend/backend_test_context.gd")
 const ParliamentAndProposalTests = preload("res://tests/backend/test_parliament_and_proposals.gd")
 const EventTests = preload("res://tests/backend/test_events.gd")
 const ConstitutionTests = preload("res://tests/backend/test_constitution.gd")
+const ConstitutionBoardTests = preload("res://tests/backend/test_constitution_board.gd")
 const ConstitutionInvariantTests = preload("res://tests/backend/test_constitution_invariants.gd")
 const VotingTests = preload("res://tests/backend/test_voting.gd")
 const AnnualFlowAndBalanceTests = preload("res://tests/backend/test_annual_flow_and_balance.gd")
@@ -23,6 +24,7 @@ func _run() -> void:
 		ParliamentAndProposalTests.new(),
 		EventTests.new(),
 		ConstitutionTests.new(),
+		ConstitutionBoardTests.new(),
 		ConstitutionInvariantTests.new(),
 		VotingTests.new(),
 		AnnualFlowAndBalanceTests.new(),
