@@ -6,8 +6,9 @@ class_name BiyiConstitutionArticleDefinition
 
 func apply_runtime(context) -> void:
 	super.apply_runtime(context)
-	if race == null:
+	var target_race := get_race()
+	if target_race == null:
 		return
-	var race_state = context.state.get_race(race)
+	var race_state = context.state.get_race(target_race)
 	if race_state != null:
 		race_state.yin_yang_adjustment_rate = yin_yang_adjustment_rate
