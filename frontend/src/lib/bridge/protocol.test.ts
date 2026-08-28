@@ -21,7 +21,20 @@ test('IPC envelope encodes and decodes discriminated messages', () => {
 		JSON.parse(encodeOutboundMessage({ type: 'term.next', payload: { state_version: 4 } })),
 		{ type: 'term.next', payload: { state_version: 4 } }
 	);
+	assert.deepEqual(
+		JSON.parse(
+			encodeOutboundMessage({
+				type: 'constitution.column.unlock',
+				payload: { state_version: 4, column_index: 2 }
+			})
+		),
+		{
+			type: 'constitution.column.unlock',
+			payload: { state_version: 4, column_index: 2 }
+		}
+	);
 	assert.equal(isOutboundType('term.next'), true);
+	assert.equal(isOutboundType('constitution.column.unlock'), true);
 
 	const decoded = decodeInboundMessage(
 		JSON.stringify({ type: 'state.full', request_id: 'ui-1', payload: makeLiveState(4) })
@@ -55,6 +68,35 @@ test('IPC validates authoritative term lifecycle and integer collapse status', (
 	delete missingPhase.run_phase;
 	assert.deepEqual(
 		decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: missingPhase })),
+		{ ok: false, error: 'Invalid payload for state.full' }
+	);
+});
+
+test('IPC rejects the legacy flat constitution payload shape', () => {
+	const state = makeLiveState(7);
+	const legacyState: Record<string, unknown> = {
+		...state,
+		constitution: {
+			title: '蓬莱约法',
+			revision_available: true,
+			active_articles: state.constitution.active_articles,
+			articles: [
+				{
+					article_index: 0,
+					race_display_name: '人类',
+					display_name: '外藩',
+					content: '',
+					policies: [],
+					active: true,
+					selected: true,
+					clicked: true,
+					eligible: false
+				}
+			]
+		}
+	};
+	assert.deepEqual(
+		decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: legacyState })),
 		{ ok: false, error: 'Invalid payload for state.full' }
 	);
 });
