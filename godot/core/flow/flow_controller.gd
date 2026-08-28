@@ -70,14 +70,13 @@ func submit_draft(draft: DraftBillState) -> VoteResultState:
 	context.draft_bill_system.save_draft(context.state, draft)
 	result = context.vote_system.calculate_vote(draft, context, true)
 	result.submitted = true
+	if result.passed:
+		enact_bill(draft)
+		context.draft_bill_system.consume_draft_proposals(context.state, draft)
+		context.state.draft_bill = DraftBillState.new()
+		context.state.editing_saved_bill_index = RunState.NEW_BILL_INDEX
 	context.vote_system.resolve_donation_detection(context)
 	context.vote_system.clear_donations(context.state)
-	if not result.passed:
-		return result
-	enact_bill(draft)
-	context.draft_bill_system.consume_draft_proposals(context.state, draft)
-	context.state.draft_bill = DraftBillState.new()
-	context.state.editing_saved_bill_index = RunState.NEW_BILL_INDEX
 	return result
 
 
