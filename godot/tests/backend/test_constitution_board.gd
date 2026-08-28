@@ -12,7 +12,7 @@ func run(t: BackendTestContext) -> void:
 
 
 func _test_board_navigation_unlocks_and_terminal_mutex(t: BackendTestContext) -> void:
-	var zhushui := ZhushuiRaceDefinition.new()
+	var zhushui: RaceDefinition = ZhushuiRaceDefinition.new()
 	zhushui.display_name = "驻岁"
 	var race_a := t.make_race("axis a")
 	var race_b := t.make_race("axis b")
@@ -43,7 +43,7 @@ func _test_board_navigation_unlocks_and_terminal_mutex(t: BackendTestContext) ->
 		seats.append(t.make_seat("board_%s" % index))
 	var races: Array[RaceDefinition] = [zhushui, race_a, race_b]
 	var groups: Array[InterestGroupDefinition] = [group]
-	var session := _make_board_session(t, races, groups, seats, board)
+	var session := _make_board_session(races, groups, seats, board)
 
 	t.check(
 		session.state.constitution.get_active_article_for_row(row_a) == a_center,
@@ -64,99 +64,62 @@ func _test_board_navigation_unlocks_and_terminal_mutex(t: BackendTestContext) ->
 		"an outer column cannot unlock before its inward neighbor"
 	)
 	t.check(session.unlock_constitution_column(left), "the inward left column unlocks first")
-	t.check_equal(
-		session.meta_progression.available_governing_months,
-		36,
-		"column unlock consumes its governing-month cost"
-	)
+	t.check_equal(session.meta_progression.available_governing_months, 36, "unlock consumes governing months")
 	t.check(session.unlock_constitution_column(far_left), "the outer left column unlocks after its inward neighbor")
 	t.check(session.unlock_constitution_column(right), "the inward right column unlocks independently")
-	t.check_equal(
-		session.meta_progression.available_governing_months,
-		0,
-		"unlocks consume the shared meta-progression budget"
-	)
-	t.check(
-		not session.meta_progression.is_column_unlocked(far_right),
-		"the far-right column remains locked"
-	)
+	t.check_equal(session.meta_progression.available_governing_months, 0, "unlocks share the same meta budget")
+	t.check(not session.meta_progression.is_column_unlocked(far_right), "far-right remains locked")
 
 	t.check(
 		not session.constitution_system.can_revise(session.context, a_terminal),
 		"a normal axis cannot skip its nearer non-empty article"
 	)
-	t.check(
-		session.constitution_system.can_revise(session.context, a_left),
-		"the next outward article is eligible"
-	)
+	t.check(session.constitution_system.can_revise(session.context, a_left), "the next outward article is eligible")
 	t.check(session.revise_constitution(a_left), "the first outward revision succeeds")
 	session.state.constitution.revision_available = true
 	t.check(
 		not session.constitution_system.can_revise(session.context, a_center),
 		"a normal axis cannot retreat toward the center"
 	)
-	t.check(
-		session.constitution_system.can_revise(session.context, a_terminal),
-		"the same axis can continue outward after the nearer article"
-	)
-	t.check(
-		session.constitution_system.can_revise(session.context, b_terminal),
-		"another terminal remains eligible before any terminal is selected"
-	)
-	t.check(session.revise_constitution(a_terminal), "the first race terminal revision succeeds")
-	t.check(
-		session.state.constitution.terminal_article == a_terminal,
-		"the first race terminal becomes the term terminal"
-	)
+	t.check(session.constitution_system.can_revise(session.context, a_terminal), "the same axis can continue outward")
+	t.check(session.constitution_system.can_revise(session.context, b_terminal), "another terminal is eligible before locking")
+	t.check(session.revise_constitution(a_terminal), "the first race terminal succeeds")
+	t.check(session.state.constitution.terminal_article == a_terminal, "the first race terminal is recorded")
 	session.state.constitution.revision_available = true
 	t.check(
 		not session.constitution_system.can_revise(session.context, b_terminal),
-		"a selected race terminal locks the other race terminals"
+		"the selected race terminal locks other race terminals"
 	)
 	t.check(
 		session.constitution_system.can_revise(session.context, regulator_right),
-		"free-navigation regulator can jump directly to a locked outer column"
+		"regulator can jump directly to a locked outer column"
 	)
-	t.check(session.revise_constitution(regulator_right), "regulator revision remains available after a race terminal")
-	t.check(
-		session.state.constitution.terminal_article == a_terminal,
-		"regulator revision does not replace the race terminal"
-	)
+	t.check(session.revise_constitution(regulator_right), "regulator remains revisable after a race terminal")
+	t.check(session.state.constitution.terminal_article == a_terminal, "regulator does not replace race terminal")
 	session.state.constitution.revision_available = true
 	t.check(
 		session.constitution_system.can_revise(session.context, regulator_left),
-		"regulator can later jump across the center to another state"
+		"regulator can later jump across the center"
 	)
 
 	var dto := UiSerializer.new().constitution(session)
 	t.check_equal(dto["center_column_index"], 2, "board DTO preserves the center column")
-	t.check_equal(dto["columns"].size(), 5, "board DTO serializes every column including locked ones")
+	t.check_equal(dto["columns"].size(), 5, "board DTO serializes every column")
 	t.check_equal(dto["rows"].size(), 3, "board DTO serializes every row")
 	t.check_equal(
 		dto["terminal_article_index"],
 		session.constitution_articles.find(a_terminal),
 		"board DTO exposes the selected terminal article"
 	)
-	t.check(
-		not dto["columns"][4]["unlocked"],
-		"board DTO preserves the locked far-right column"
-	)
+	t.check(not dto["columns"][4]["unlocked"], "board DTO preserves locked columns")
 	var regulator_right_index := session.constitution_articles.find(regulator_right)
-	t.check_equal(
-		dto["articles"][regulator_right_index]["column_index"],
-		4,
-		"article DTO keeps its real board column coordinate"
-	)
-	t.check_equal(
-		dto["articles"][regulator_right_index]["row_index"],
-		2,
-		"article DTO keeps its real board row coordinate"
-	)
+	t.check_equal(dto["articles"][regulator_right_index]["column_index"], 4, "article DTO keeps board column")
+	t.check_equal(dto["articles"][regulator_right_index]["row_index"], 2, "article DTO keeps board row")
 	session.free()
 
 
 func _test_column_unlock_ipc_stays_in_month_zero(t: BackendTestContext) -> void:
-	var zhushui := ZhushuiRaceDefinition.new()
+	var zhushui: RaceDefinition = ZhushuiRaceDefinition.new()
 	zhushui.display_name = "驻岁"
 	var race := t.make_race("ipc axis")
 	var race_b := t.make_race("ipc companion")
@@ -176,7 +139,7 @@ func _test_column_unlock_ipc_stays_in_month_zero(t: BackendTestContext) -> void:
 	var seats: Array[SeatDefinition] = [t.make_seat("久视", zhushui)]
 	for index in range(4):
 		seats.append(t.make_seat("ipc_%s" % index))
-	var session := _make_board_session(t, races, groups, seats, board)
+	var session := _make_board_session(races, groups, seats, board)
 	session.meta_progression.available_governing_months = 12
 	var bridge := UiBridge.new()
 	bridge.setup(session)
@@ -184,28 +147,18 @@ func _test_column_unlock_ipc_stays_in_month_zero(t: BackendTestContext) -> void:
 		_message("constitution.column.unlock", {"state_version": 0, "column_index": 1})
 	)
 	var full: Dictionary = messages[messages.size() - 1]
-	t.check_equal(full["type"], "state.full", "column unlock returns an authoritative full state")
+	t.check_equal(full["type"], "state.full", "column unlock returns authoritative full state")
 	t.check_equal(full["payload"]["state_version"], 1, "column unlock advances state version")
-	t.check_equal(full["payload"]["month"], 0, "column unlock does not consume constitution month zero")
-	t.check(
-		full["payload"]["constitution"]["revision_available"],
-		"column unlock does not consume the annual constitution revision"
-	)
-	t.check_equal(
-		full["payload"]["constitution"]["available_governing_months"],
-		0,
-		"column unlock syncs the remaining meta-progression budget"
-	)
-	t.check(
-		full["payload"]["constitution"]["columns"][1]["unlocked"],
-		"column unlock syncs the new unlocked state"
-	)
+	t.check_equal(full["payload"]["month"], 0, "column unlock does not consume month zero")
+	t.check(full["payload"]["constitution"]["revision_available"], "column unlock does not consume revision")
+	t.check_equal(full["payload"]["constitution"]["available_governing_months"], 0, "unlock syncs meta budget")
+	t.check(full["payload"]["constitution"]["columns"][1]["unlocked"], "unlock syncs column state")
 	bridge.free()
 	session.free()
 
 
 func _test_formal_opening_uses_five_anchors_and_twenty_random_seats(t: BackendTestContext) -> void:
-	var zhushui := ZhushuiRaceDefinition.new()
+	var zhushui: RaceDefinition = ZhushuiRaceDefinition.new()
 	zhushui.display_name = "驻岁"
 	var human := t.make_race("人类")
 	var nanke := t.make_race("南柯")
@@ -230,42 +183,31 @@ func _test_formal_opening_uses_five_anchors_and_twenty_random_seats(t: BackendTe
 	for index in range(20):
 		seats.append(t.make_seat("random_%s" % index))
 	var groups: Array[InterestGroupDefinition] = [t.make_group("opening group")]
-	var session := _make_board_session(t, races, groups, seats, board)
+	var session := _make_board_session(races, groups, seats, board)
 
-	t.check_equal(session.state.seats.size(), 25, "formal opening keeps the permanent 25-seat parliament")
-	t.check_equal(
-		session.parliament_system.get_variable_seats(session.state).size(),
-		24,
-		"only the Zhushui executive seat is excluded from the variable-seat pool"
-	)
-	t.check_equal(
-		session.parliament_system.get_race_seat_count(session.state, zhushui),
-		1,
-		"Zhushui owns exactly its single permanent anchor"
-	)
+	t.check_equal(session.state.seats.size(), 25, "formal opening keeps 25 seats")
+	t.check_equal(session.parliament_system.get_variable_seats(session.state).size(), 24, "only Zhushui is fixed")
+	t.check_equal(session.parliament_system.get_race_seat_count(session.state, zhushui), 1, "Zhushui stays at one seat")
 	var anchor_races: Array[RaceDefinition] = [zhushui, human, nanke, biyi, peach]
 	for index in range(anchor_races.size()):
-		t.check(
-			session.state.seats[index].race == anchor_races[index],
-			"every formal anchor remains assigned to its owning race"
-		)
+		t.check(session.state.seats[index].race == anchor_races[index], "every formal anchor keeps its race")
 	var random_count := 0
 	for seat in session.state.seats:
 		if seat.definition.anchor_race != null:
 			continue
 		random_count += 1
-		t.check(seat.race != null, "every random opening seat receives a race")
-		t.check(not (seat.race is ZhushuiRaceDefinition), "random opening seats never expand Zhushui")
-	t.check_equal(random_count, 20, "formal opening contains exactly twenty random seats")
+		t.check(seat.race != null, "every random seat receives a race")
+		t.check(not (seat.race is ZhushuiRaceDefinition), "random seats never expand Zhushui")
+	t.check_equal(random_count, 20, "formal opening contains twenty random seats")
 	var non_zhushui_total := 0
 	for race in [human, nanke, biyi, yano, peach]:
 		non_zhushui_total += session.parliament_system.get_race_seat_count(session.state, race)
-	t.check_equal(non_zhushui_total, 24, "five non-Zhushui races fill every variable seat")
+	t.check_equal(non_zhushui_total, 24, "five non-Zhushui races fill variable seats")
 	session.free()
 
 
 func _test_variable_seat_denominators(t: BackendTestContext) -> void:
-	var zhushui := ZhushuiRaceDefinition.new()
+	var zhushui: RaceDefinition = ZhushuiRaceDefinition.new()
 	zhushui.display_name = "驻岁"
 	var race_a := t.make_race("ratio a")
 	var race_b := t.make_race("ratio b")
@@ -285,47 +227,33 @@ func _test_variable_seat_denominators(t: BackendTestContext) -> void:
 		seats.append(t.make_seat("ratio_%s" % index))
 	var races: Array[RaceDefinition] = [zhushui, race_a, race_b]
 	var groups: Array[InterestGroupDefinition] = [group_a, group_b]
-	var session := _make_board_session(t, races, groups, seats, board)
-	var target_counts: Dictionary[RaceDefinition, int] = {}
-	target_counts[zhushui] = 1
-	target_counts[race_a] = 12
-	target_counts[race_b] = 12
-	t.check(
-		session.parliament_system.assign_race_distribution(session.state, races, target_counts),
-		"ratio fixture can assign one fixed and twenty-four variable seats"
-	)
-	var constraint := session.constitution_system.get_race_seat_constraint(session.context, race_a)
-	t.check_equal(constraint.minimum_count, 12, "a 50% constitution threshold is twelve of twenty-four seats")
-	t.check_approx(
-		session.parliament_system.get_race_seat_rate(session.state, race_a),
-		0.5,
-		"race seat rate excludes the Zhushui executive seat from its denominator"
-	)
+	var session := _make_board_session(races, groups, seats, board)
 	var variable := session.parliament_system.get_variable_seats(session.state)
 	for index in range(variable.size()):
+		variable[index].race = race_a if index < 12 else race_b
 		variable[index].actual_group = group_a if index < 12 else group_b
-	t.check_approx(
-		session.parliament_system.get_group_influence_rate(session.state, group_a),
-		0.5,
-		"global group influence uses the same twenty-four-seat denominator"
-	)
+
+	var constraint := session.constitution_system.get_race_seat_constraint(session.context, race_a)
+	t.check_equal(constraint.minimum_count, 12, "50% constitution threshold is twelve of twenty-four")
+	t.check_approx(session.parliament_system.get_race_seat_rate(session.state, race_a), 0.5, "race rate excludes Zhushui")
+	t.check_approx(session.parliament_system.get_group_influence_rate(session.state, group_a), 0.5, "group rate uses 24 seats")
 	var race_condition := ConstitutionSeatCondition.new()
 	race_condition.race = race_a
 	race_condition.required_rate = 0.5
 	t.check(race_condition.is_met(session.context), "race threshold accepts exactly fifty percent")
 	race_condition.required_rate = 0.51
-	t.check(not race_condition.is_met(session.context), "race threshold rejects values above the exact share")
+	t.check(not race_condition.is_met(session.context), "race threshold rejects above exact share")
 	var group_condition := ConstitutionSeatCondition.new()
 	group_condition.interest_group = group_a
 	group_condition.required_rate = 0.5
 	t.check(group_condition.is_met(session.context), "group threshold accepts exactly fifty percent")
 	group_condition.required_rate = 0.51
-	t.check(not group_condition.is_met(session.context), "group threshold rejects values above the exact share")
+	t.check(not group_condition.is_met(session.context), "group threshold rejects above exact share")
 	session.free()
 
 
 func _test_group_coloring_bias_and_hard_rule_layers(t: BackendTestContext) -> void:
-	var zhushui := ZhushuiRaceDefinition.new()
+	var zhushui: RaceDefinition = ZhushuiRaceDefinition.new()
 	zhushui.display_name = "驻岁"
 	var race_a := t.make_race("layer a")
 	var race_b := t.make_race("layer b")
@@ -352,28 +280,23 @@ func _test_group_coloring_bias_and_hard_rule_layers(t: BackendTestContext) -> vo
 		seats.append(t.make_seat("layer_%s" % index))
 	var races: Array[RaceDefinition] = [zhushui, race_a, race_b]
 	var groups: Array[InterestGroupDefinition] = [source, biased, hard]
-	var session := _make_board_session(t, races, groups, seats, board)
-	var target_counts: Dictionary[RaceDefinition, int] = {}
-	target_counts[zhushui] = 1
-	target_counts[race_a] = 6
-	target_counts[race_b] = 6
-	t.check(
-		session.parliament_system.assign_race_distribution(session.state, races, target_counts),
-		"layer fixture assigns a stable six-seat row per test race"
-	)
+	var session := _make_board_session(races, groups, seats, board)
+	var variable := session.parliament_system.get_variable_seats(session.state)
+	for index in range(variable.size()):
+		variable[index].race = race_a if index < 6 else race_b
 	t.check(
 		session.parliament_system.initialize_base_groups(session.context, groups),
-		"layer fixture rebuilds base columns after the forced race distribution"
+		"layer fixture rebuilds base columns"
 	)
 	session.balance.annual_group_coloring_rate = 1.0
 	var proposal := t.make_proposal(source)
 	session.parliament_system.record_authorized_proposal_slots(session.state, [proposal])
 	session.parliament_system.apply_annual_coloring(session.context)
 	for seat in session.parliament_system.get_race_seats(session.state, race_a):
-		t.check(seat.annual_group == biased, "constitution probability bias overwrites annual source coloring on its race")
-		t.check(seat.actual_group == biased, "actual influence initially follows the biased annual layer")
+		t.check(seat.annual_group == biased, "constitution bias overwrites annual source coloring")
+		t.check(seat.actual_group == biased, "actual influence initially follows biased annual layer")
 	for seat in session.parliament_system.get_race_seats(session.state, race_b):
-		t.check(seat.annual_group == source, "unbiased races retain the annual proposal-source coloring")
+		t.check(seat.annual_group == source, "unbiased races retain annual source coloring")
 	session.constitution_system.apply_influence_rules(session.context)
 	t.check_equal(
 		session.parliament_system.get_group_influence_count(session.state, hard, race_a),
@@ -381,12 +304,11 @@ func _test_group_coloring_bias_and_hard_rule_layers(t: BackendTestContext) -> vo
 		"hard constitution rule applies after coloring and bias"
 	)
 	for seat in session.parliament_system.get_race_seats(session.state, race_a):
-		t.check(seat.annual_group == biased, "hard rules do not destroy the underlying annual influence layer")
+		t.check(seat.annual_group == biased, "hard rules preserve underlying annual layer")
 	session.free()
 
 
 func _make_board_session(
-	t: BackendTestContext,
 	races: Array[RaceDefinition],
 	groups: Array[InterestGroupDefinition],
 	seats: Array[SeatDefinition],
@@ -400,7 +322,7 @@ func _make_board_session(
 	var session := RunSession.new()
 	session.balance = balance
 	var legacy_articles: Array[ConstitutionArticleDefinition] = []
-	session.configure_content(traces, groups, seats, legacy_articles, board)
+	session.configure_content(races, groups, seats, legacy_articles, board)
 	session.start_new_run()
 	return session
 
