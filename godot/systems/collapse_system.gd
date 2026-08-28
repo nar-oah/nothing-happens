@@ -15,9 +15,9 @@ func increase(context: RunContext) -> void:
 		return
 	state.run_phase = RunState.RunPhase.TERM_ENDED
 	state.term_outcome = (
-		RunState.TermOutcome.COLLAPSE
-		if state.has_submitted_bill
-		else RunState.TermOutcome.NOTHING_HAPPENS
+		RunState.TermOutcome.NOTHING_HAPPENS
+		if state.saved_bills.is_empty()
+		else RunState.TermOutcome.COLLAPSE
 	)
 
 
