@@ -22,6 +22,9 @@ func _initialize_from_board(context: RunContext) -> bool:
 		if initial.get_race() != row.race:
 			push_error("Constitution row race must match its center article race.")
 			return false
+		if initial.is_terminal:
+			push_error("A center constitution article cannot be terminal.")
+			return false
 		context.state.constitution.active_articles[row] = initial
 	context.constitution_articles = board.get_articles()
 	refresh_runtime(context)
@@ -65,6 +68,10 @@ func activate_initial_articles(context: RunContext) -> void:
 func can_revise(context: RunContext, definition: ConstitutionArticleDefinition) -> bool:
 	if definition == null or not context.state.constitution.revision_available:
 		return false
+	if definition.is_terminal:
+		var selected_terminal := context.state.constitution.terminal_article
+		if selected_terminal != null and selected_terminal != definition:
+			return false
 	if context.constitution_board == null:
 		return _can_revise_legacy(context, definition)
 	if context.state.month != 0 or definition.row == null:
@@ -133,6 +140,8 @@ func revise(context: RunContext, definition: ConstitutionArticleDefinition) -> b
 	apply_influence_rules(context)
 	refresh_runtime(context)
 	context.state.constitution.revision_available = false
+	if definition.is_terminal:
+		context.state.constitution.terminal_article = definition
 	definition.on_activate(context)
 	return true
 
