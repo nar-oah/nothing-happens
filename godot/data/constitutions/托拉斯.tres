@@ -13,6 +13,7 @@
 script = ExtResource("1_article_script")
 display_name = "托拉斯"
 row = ExtResource("row")
+is_terminal = true
 race = ExtResource("3_race_yano")
 prerequisite = ExtResource("4_prereq")
 policies = Array[ExtResource("2_policy_script")]([ExtResource("5_policy_1"), ExtResource("6_policy_2"), ExtResource("7_policy_3")])
