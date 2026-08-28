@@ -59,7 +59,7 @@ func _test_year_boundary_enters_constitution(t: BackendTestContext) -> void:
 	t.check_equal(full["type"], "state.full", "month advance returns a full state")
 	t.check_equal(full["payload"]["year"], 2, "year boundary advances the year")
 	t.check_equal(full["payload"]["month"], 0, "year boundary enters month zero")
-	t.check_equal(full["payload"]["collapse_level"], 1, "entering month zero applies annual recovery")
+	t.check_equal(full["payload"]["collapse_level"], 2, "year boundary preserves monotonic collapse")
 	t.check_equal(full["payload"]["ui_mode"], "constitution", "month zero enters constitution view")
 	t.check_equal(full["payload"]["world_scene"], "parliament", "month zero keeps parliament world")
 	bridge.free()
@@ -188,7 +188,6 @@ func _test_opening_draw_and_term_lifecycle(t: BackendTestContext) -> void:
 	balance.event_spawn_count_min = 0
 	balance.event_spawn_count_max = 0
 	balance.event_early_reveal_probability_per_seat = 0.0
-	balance.market_noise_ratio = 0.0
 	var session := t.make_session(
 		[race], [group], t.make_seats(2, "term reset"), [], balance
 	)
