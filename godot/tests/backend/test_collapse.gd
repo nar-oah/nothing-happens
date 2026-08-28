@@ -6,8 +6,8 @@ const BackendTestContext = preload("res://tests/backend/backend_test_context.gd"
 func run(t: BackendTestContext) -> void:
 	_test_monthly_negative_metric_step(t)
 	_test_monthly_collapse_never_decreases(t)
-	_test_annual_recovery(t)
-	_test_december_collapse_precedes_recovery(t)
+	_test_year_boundary_never_reduces_collapse(t)
+	_test_december_collapse_ends_term(t)
 	_test_bill_digestion_and_market_movement(t)
 	_test_policy_trigger_chain(t)
 
@@ -66,39 +66,34 @@ func _test_monthly_collapse_never_decreases(t: BackendTestContext) -> void:
 	session.free()
 
 
-func _test_annual_recovery(t: BackendTestContext) -> void:
+func _test_year_boundary_never_reduces_collapse(t: BackendTestContext) -> void:
 	var balance := GameBalanceDefinition.new()
 	balance.automatic_draw_count = 0
 	balance.event_spawn_count_min = 0
 	balance.event_spawn_count_max = 0
-	balance.annual_collapse_recovery = 2
 	var session := _make_collapse_session(t, balance)
-	session.state.month = 1
-	session.state.collapse_level = 3
-	session.collapse_system.recover_annual(session.context)
-	t.check_equal(session.state.collapse_level, 3, "annual recovery cannot run in a normal month")
-	session.state.month = 0
-	session.collapse_system.recover_annual(session.context)
-	t.check_equal(session.state.collapse_level, 1, "month zero applies annual collapse recovery")
-	session.collapse_system.recover_annual(session.context)
-	t.check_equal(session.state.collapse_level, 0, "annual recovery cannot reduce collapse below zero")
+	session.state.month = 12
+	session.state.collapse_level = 7
+	t.check(session.advance_month(), "December without a terminal collapse settles")
+	t.check_equal(session.state.year, 2, "December advances into the next year")
+	t.check_equal(session.state.month, 0, "December enters constitution month zero")
+	t.check_equal(session.state.collapse_level, 7, "year boundary never reduces collapse")
 	session.free()
 
 
-func _test_december_collapse_precedes_recovery(t: BackendTestContext) -> void:
+func _test_december_collapse_ends_term(t: BackendTestContext) -> void:
 	var balance := GameBalanceDefinition.new()
 	balance.automatic_draw_count = 0
 	balance.event_spawn_count_min = 0
 	balance.event_spawn_count_max = 0
 	balance.max_collapse = 3
 	balance.collapse_step = 1
-	balance.annual_collapse_recovery = 3
 	var session := _make_collapse_session(t, balance)
 	session.state.month = 12
 	session.state.collapse_level = 2
 	session.state.metrics.tax = -1
 	t.check(session.advance_month(), "December settlement runs")
-	t.check_equal(session.state.collapse_level, 3, "December reaches collapse maximum before recovery")
+	t.check_equal(session.state.collapse_level, 3, "December reaches collapse maximum")
 	t.check_equal(session.state.run_phase, RunState.RunPhase.TERM_ENDED, "December maximum ends the term")
 	t.check_equal(session.state.year, 1, "failed December does not enter the next year")
 	t.check_equal(session.state.month, 12, "failed December does not enter month zero")
