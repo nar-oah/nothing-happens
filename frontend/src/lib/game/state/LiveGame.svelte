@@ -294,6 +294,7 @@
 	}
 
 	function unlockConstitutionColumn(columnIndex: number): void {
+		selectedConstitutionArticle = undefined;
 		mutate('constitution.column.unlock', { column_index: columnIndex });
 	}
 
@@ -338,7 +339,8 @@
 			{preview}
 			voteCanPass={snapshot.draft_preview.vote.passed}
 			onAddProposal={(handIndex) => mutate('draft.proposal.add', { hand_index: handIndex })}
-			onRemoveProposal={(draftIndex) => mutate('draft.proposal.remove', { draft_index: draftIndex })}
+			onRemoveProposal={(draftIndex) =>
+				mutate('draft.proposal.remove', { draft_index: draftIndex })}
 			onAddPolicy={(displayName) => mutate('draft.policy.add', { display_name: displayName })}
 			onRemovePolicy={(draftIndex) => mutate('draft.policy.remove', { draft_index: draftIndex })}
 			onTitleChange={(title) => mutate('draft.title.set', { title })}
@@ -394,4 +396,4 @@
 			onClosed={finishNewspaperClose}
 		/>
 	{/if}
-{/if}
+{/if>
