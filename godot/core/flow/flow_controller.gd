@@ -12,6 +12,8 @@ func advance_month() -> bool:
 	if context.state.run_phase != RunState.RunPhase.RUNNING:
 		return false
 	if context.state.month == 0:
+		# Leaving month 0 without revising explicitly forfeits this year's revision.
+		context.state.constitution.revision_available = false
 		context.time_system.advance_month(context.state)
 		if context.state.year == 1 and context.state.governing_months == 0:
 			context.proposal_system.draw_automatic_proposals(context)
