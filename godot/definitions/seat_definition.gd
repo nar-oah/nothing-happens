@@ -2,7 +2,9 @@ extends Resource
 class_name SeatDefinition
 
 @export var display_name: String
-# Historical field name retained for serialized resources. Semantically this is a fixed
-# race binding, not a preference: the seat is removed from ordinary race allocation and
-# always belongs to this race unless a constitution explicitly revokes the runtime binding.
+# Opening anchor: this seat starts the term assigned to the race, but remains part of the
+# ordinary variable-seat pool unless fixed_race is also set.
 @export var anchor_race: RaceDefinition
+# Permanent binding: non-null seats never enter ordinary race reallocation. In the formal
+# opening content this is used only by the Zhushui executive seat.
+@export var fixed_race: RaceDefinition
