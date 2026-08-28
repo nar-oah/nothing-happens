@@ -3,14 +3,17 @@ class_name RunSession
 
 @export_group("配置")
 @export var balance: GameBalanceDefinition
+@export var constitution_board: ConstitutionBoardDefinition = preload("res://data/constitutions/constitution_board.tres")
 
 @export_group("游戏内容")
 @export var race_definitions: Array[RaceDefinition] = []
 @export var interest_groups: Array[InterestGroupDefinition] = []
 @export var seat_definitions: Array[SeatDefinition] = []
+# Legacy flat content is retained for tests and external callers without a board.
 @export var constitution_articles: Array[ConstitutionArticleDefinition] = []
 
 var state: RunState
+var meta_progression := MetaProgressionState.new()
 var context: RunContext
 var time_system: TimeSystem
 var random_system: RandomSystem
@@ -27,18 +30,22 @@ var constitution_system: ConstitutionSystem
 var collapse_system: CollapseSystem
 var annual_settlement_system: AnnualSettlementSystem
 var flow_controller: FlowController
+var _last_awarded_term: int = 0
 
 
 func configure_content(
 	races: Array[RaceDefinition],
 	groups: Array[InterestGroupDefinition],
 	seats: Array[SeatDefinition],
-	articles: Array[ConstitutionArticleDefinition] = []
+	articles: Array[ConstitutionArticleDefinition] = [],
+	board: ConstitutionBoardDefinition = null
 ) -> void:
 	race_definitions = races
 	interest_groups = groups
 	seat_definitions = seats
 	constitution_articles = articles
+	if board != null:
+		constitution_board = board
 
 
 func start_new_run() -> void:
@@ -68,7 +75,6 @@ func _start_term(term_number: int) -> bool:
 	inflation_system = InflationSystem.new()
 	inflation_system.initialize_metrics(state.metrics, balance)
 	state.year_start_metrics = state.metrics.copy()
-
 	parliament_system = ParliamentSystem.new()
 	race_system = RaceSystem.new()
 	draft_bill_system = DraftBillSystem.new()
@@ -77,7 +83,6 @@ func _start_term(term_number: int) -> bool:
 	constitution_system = ConstitutionSystem.new()
 	collapse_system = CollapseSystem.new()
 	annual_settlement_system = AnnualSettlementSystem.new()
-
 	context = RunContext.new()
 	context.setup(
 		state,
@@ -100,34 +105,53 @@ func _start_term(term_number: int) -> bool:
 	context.race_definitions = race_definitions
 	context.interest_groups = interest_groups
 	context.seat_definitions = seat_definitions
-	context.constitution_articles = constitution_articles
+	context.constitution_board = constitution_board
+	context.constitution_articles = (
+		constitution_board.get_articles()
+		if constitution_board != null
+		else constitution_articles
+	)
+	context.meta_progression = meta_progression
 	if not race_system.initialize_races(state, race_definitions, balance):
 		return false
 	if not parliament_system.initialize_seats(state, seat_definitions, race_definitions):
 		return false
 	if not constitution_system.initialize(context):
 		return false
-	if not race_system.allocate_seats(context):
-		push_error("Failed to allocate initial race seats.")
+	if not race_system.allocate_opening_seats(context):
+		push_error("Failed to allocate opening race seats.")
 		return false
-	if not parliament_system.initialize_base_groups(state, interest_groups):
+	for race in race_definitions:
+		if race is ZhushuiRaceDefinition:
+			continue
+		if not race_system.enforce_constitution_constraints(context, race):
+			push_error("Failed to apply opening constitution seat constraints.")
+			return false
+	if not parliament_system.initialize_base_groups(context, interest_groups):
 		return false
 	constitution_system.apply_influence_rules(context)
 	constitution_system.activate_initial_articles(context)
-
 	flow_controller = FlowController.new()
 	flow_controller.setup(context)
 	return true
 
 
 func advance_month() -> bool:
-	return flow_controller.advance_month()
+	var advanced := flow_controller.advance_month()
+	if advanced and state.run_phase == RunState.RunPhase.TERM_ENDED and _last_awarded_term != state.term:
+		meta_progression.add_governing_months(state.governing_months)
+		_last_awarded_term = state.term
+	return advanced
 
 
 func start_next_term() -> bool:
 	if state == null or state.run_phase != RunState.RunPhase.TERM_ENDED:
 		return false
 	return _start_term(state.term + 1)
+
+
+func unlock_constitution_column(column: ConstitutionColumnDefinition) -> bool:
+	return meta_progression.unlock_column(constitution_board, column)
 
 
 func enact_bill(draft: DraftBillState) -> void:
