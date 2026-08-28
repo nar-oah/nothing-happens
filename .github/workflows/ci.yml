@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  GODOT_VERSION: 4.7.1-stable
+  WEB_DIR: frontend
+  GODOT_DIR: godot
+
+jobs:
+  frontend:
+    name: Frontend tests and checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: ${{ env.WEB_DIR }}/pnpm-lock.yaml
+
+      - name: Install frontend dependencies
+        working-directory: ${{ env.WEB_DIR }}
+        run: pnpm install --frozen-lockfile
+
+      - name: Run frontend tests
+        working-directory: ${{ env.WEB_DIR }}
+        run: pnpm test
+
+      - name: Run Svelte and TypeScript checks
+        working-directory: ${{ env.WEB_DIR }}
+        run: pnpm check
+
+  backend:
+    name: Godot backend tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Install Godot
+        run: |
+          set -euo pipefail
+          GODOT_ZIP="$RUNNER_TEMP/godot.zip"
+          curl --fail --location --retry 3 \
+            "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_linux.x86_64.zip" \
+            --output "$GODOT_ZIP"
+          unzip -q "$GODOT_ZIP" -d "$RUNNER_TEMP/godot-bin"
+          GODOT_BIN="$RUNNER_TEMP/godot-bin/Godot_v${GODOT_VERSION}_linux.x86_64"
+          chmod +x "$GODOT_BIN"
+          "$GODOT_BIN" --version
+          echo "GODOT_BIN=$GODOT_BIN" >> "$GITHUB_ENV"
+
+      - name: Run backend system tests
+        run: |
+          set -euo pipefail
+          "$GODOT_BIN" \
+            --headless \
+            --path "$GODOT_DIR" \
+            --script res://tests/backend_systems_test.gd
