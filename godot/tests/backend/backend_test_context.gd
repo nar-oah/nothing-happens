@@ -70,8 +70,8 @@ func make_seat(display_name: String, anchor: RaceDefinition = null) -> SeatDefin
 	var result := SeatDefinition.new()
 	result.display_name = display_name
 	result.anchor_race = anchor
-	# Test fixtures use the same formal-opening convention as production content: only
-	# Zhushui's executive anchor is a permanent seat; other race anchors remain variable.
+	# Formal opening convention: only Zhushui's executive anchor is permanent. Other
+	# race anchors are opening assignments and remain part of the annual variable pool.
 	if anchor is ZhushuiRaceDefinition:
 		result.fixed_race = anchor
 	return result
@@ -132,5 +132,15 @@ func count_race_seats(state: RunState, race: RaceDefinition) -> int:
 	var result := 0
 	for seat in state.seats:
 		if seat.race == race:
+			result += 1
+	return result
+
+
+func count_group_seats(
+	state: RunState, group: InterestGroupDefinition, race: RaceDefinition = null
+) -> int:
+	var result := 0
+	for seat in state.seats:
+		if seat.actual_group == group and (race == null or seat.race == race):
 			result += 1
 	return result
