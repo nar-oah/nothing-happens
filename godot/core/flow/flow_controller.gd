@@ -31,7 +31,6 @@ func advance_month() -> bool:
 	context.event_system.try_generate_month(context)
 	context.event_system.settle_month(context)
 	context.event_system.update_information(context)
-	context.collapse_system.settle_month(context)
 	context.state.governing_months += 1
 	_record_month_report(report_year, report_month, report_previous_metrics)
 	if context.state.run_phase == RunState.RunPhase.TERM_ENDED:
