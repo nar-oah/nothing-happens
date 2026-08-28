@@ -233,6 +233,9 @@ func full_state(
 		"term": state.term,
 		"year": state.year,
 		"month": state.month,
+		"run_phase": _run_phase(state.run_phase),
+		"term_outcome": _term_outcome(state.term_outcome),
+		"governing_months": state.governing_months,
 		"metrics": metric_values(state.metrics),
 		"month_report": month_report(state),
 		"proposal_hand": _proposals(state.proposal_hand),
@@ -375,11 +378,28 @@ func game_status(session: RunSession) -> Dictionary:
 		"term": session.state.term,
 		"year": session.state.year,
 		"month": session.state.month,
+		"run_phase": _run_phase(session.state.run_phase),
+		"term_outcome": _term_outcome(session.state.term_outcome),
+		"governing_months": session.state.governing_months,
 		"metrics": metric_values(session.state.metrics),
 		"political_donation_pool": session.state.political_donation_pool,
 		"collapse_level": session.state.collapse_level,
 		"max_collapse": session.balance.max_collapse,
 	}
+
+
+func _run_phase(value: RunState.RunPhase) -> String:
+	return "TERM_ENDED" if value == RunState.RunPhase.TERM_ENDED else "RUNNING"
+
+
+func _term_outcome(value: RunState.TermOutcome) -> String:
+	match value:
+		RunState.TermOutcome.COLLAPSE:
+			return "COLLAPSE"
+		RunState.TermOutcome.NOTHING_HAPPENS:
+			return "NOTHING_HAPPENS"
+		_:
+			return "NONE"
 
 
 func _article(definition: ConstitutionArticleDefinition, article_index: int) -> Dictionary:
