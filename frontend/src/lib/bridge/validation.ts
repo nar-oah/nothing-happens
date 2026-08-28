@@ -13,6 +13,8 @@ import type {
 	BillResultDto,
 	ConstitutionArticleDto,
 	ConstitutionArticleStateDto,
+	ConstitutionColumnDto,
+	ConstitutionRowDto,
 	DraftPreviewDto,
 	DraftSyncDto,
 	GameStatusDto,
@@ -58,6 +60,7 @@ const outboundTypes = new Set<OutboundType>([
 	'proposal.merge',
 	'proposal.bonus.resolve',
 	'constitution.revise',
+	'constitution.column.unlock',
 	'month.advance',
 	'term.next'
 ]);
@@ -283,15 +286,43 @@ function isConstitutionArticle(value: unknown): value is ConstitutionArticleDto 
 	);
 }
 
+function isConstitutionColumn(value: unknown): value is ConstitutionColumnDto {
+	return (
+		isRecord(value) &&
+		isNonnegativeInteger(value.column_index) &&
+		typeof value.id === 'string' &&
+		typeof value.display_name === 'string' &&
+		isNonnegativeInteger(value.unlock_cost_months) &&
+		typeof value.unlocked === 'boolean' &&
+		typeof value.can_unlock === 'boolean'
+	);
+}
+
+function isConstitutionRow(value: unknown): value is ConstitutionRowDto {
+	return (
+		isRecord(value) &&
+		isNonnegativeInteger(value.row_index) &&
+		typeof value.id === 'string' &&
+		typeof value.display_name === 'string' &&
+		typeof value.race_display_name === 'string' &&
+		typeof value.free_navigation === 'boolean' &&
+		typeof value.ignores_column_unlocks === 'boolean' &&
+		isIndexOrMinusOne(value.active_article_index)
+	);
+}
+
 function isConstitutionArticleState(value: unknown): value is ConstitutionArticleStateDto {
 	const state = value as Record<string, unknown>;
 	return (
 		isConstitutionArticle(value) &&
+		isIndexOrMinusOne(state.row_index) &&
+		isIndexOrMinusOne(state.column_index) &&
+		typeof state.row_display_name === 'string' &&
 		typeof state.race_display_name === 'string' &&
 		typeof state.active === 'boolean' &&
 		typeof state.selected === 'boolean' &&
-		typeof state.clicked === 'boolean' &&
-		typeof state.eligible === 'boolean'
+		typeof state.eligible === 'boolean' &&
+		typeof state.is_terminal === 'boolean'
 	);
 }
 
@@ -300,6 +331,12 @@ function isConstitution(value: unknown): boolean {
 		isRecord(value) &&
 		typeof value.title === 'string' &&
 		typeof value.revision_available === 'boolean' &&
+		isIndexOrMinusOne(value.center_column_index) &&
+		isNonnegativeInteger(value.available_governing_months) &&
+		isNonnegativeInteger(value.lifetime_governing_months) &&
+		isIndexOrMinusOne(value.terminal_article_index) &&
+		isArrayOf(value.columns, isConstitutionColumn) &&
+		isArrayOf(value.rows, isConstitutionRow) &&
 		isArrayOf(value.active_articles, isConstitutionArticle) &&
 		isArrayOf(value.articles, isConstitutionArticleState)
 	);
@@ -384,10 +421,7 @@ function isVoteResult(value: unknown): value is VoteResultDto {
 				typeof vote.seat_display_name === 'string' &&
 				typeof vote.race_display_name === 'string' &&
 				typeof vote.interest_group_display_name === 'string' &&
-				(vote.position === 0 ||
-					vote.position === 1 ||
-					vote.position === 2 ||
-					vote.position === 3) &&
+				(vote.position === 0 || vote.position === 1 || vote.position === 2 || vote.position === 3) &&
 				isNumber(vote.score) &&
 				isNumberRecord(vote.breakdown)
 		)
@@ -466,9 +500,7 @@ function isEffectFormula(value: unknown): boolean {
 }
 
 function isUiMode(value: unknown): boolean {
-	return (
-		value === 'office' || value === 'dialogue' || value === 'parliament' || value === 'constitution'
-	);
+	return value === 'office' || value === 'dialogue' || value === 'parliament' || value === 'constitution';
 }
 
 function isWorldScene(value: unknown): boolean {
@@ -493,6 +525,10 @@ function isNumber(value: unknown): value is number {
 
 function isNonnegativeInteger(value: unknown): value is number {
 	return isNumber(value) && Number.isInteger(value) && value >= 0;
+}
+
+function isIndexOrMinusOne(value: unknown): value is number {
+	return isNumber(value) && Number.isInteger(value) && value >= -1;
 }
 
 function isVersion(value: unknown): value is number {
