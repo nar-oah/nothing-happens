@@ -38,7 +38,6 @@ func make_session(
 		configured_balance.event_spawn_count_min = 0
 		configured_balance.event_spawn_count_max = 0
 		configured_balance.event_early_reveal_probability_per_seat = 0.0
-		configured_balance.market_noise_ratio = 0.0
 	session.balance = configured_balance
 	var complete_articles: Array[ConstitutionArticleDefinition] = articles.duplicate()
 	for race in races:
