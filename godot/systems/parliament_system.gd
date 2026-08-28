@@ -317,9 +317,6 @@ func use_petition(context: RunContext) -> bool:
 	if not reassign_seat(context, selected, state.petition_race):
 		return false
 	state.petition_used_this_year += 1
-	context.collapse_system.record_intervention(
-		context, &"imperial_petition", context.balance.petition_intervention_pressure
-	)
 	return true
 
 

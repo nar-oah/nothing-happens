@@ -227,4 +227,4 @@ func _fail(event: EventState, context: RunContext) -> void:
 	event.phase = EventState.Phase.FAILED
 	event.known = true
 	event.published = true
-	context.state.pending_collapse_delta += context.balance.event_failure_collapse
+	context.collapse_system.increase(context)

@@ -73,9 +73,6 @@ func revise(context: RunContext, definition: ConstitutionArticleDefinition) -> b
 	refresh_runtime(context)
 	context.state.constitution.clicked_articles[definition] = true
 	context.state.constitution.revision_available = false
-	context.collapse_system.record_intervention(
-		context, &"constitution_revision", context.balance.constitution_revision_pressure
-	)
 	definition.on_activate(context)
 	return true
 

@@ -48,7 +48,6 @@ func proposal(value: ProposalInstance) -> Variant:
 		"base_effect": metric_vector(value.base_effect),
 		"positive_effect": metric_vector(value.positive_effect),
 		"lag_months": value.lag_months,
-		"collapse_impact": value.collapse_impact,
 		"donation_offer": value.donation_offer,
 		"bonus_choice_resolved": value.bonus_choice_resolved,
 		"positive_trait_accepted": value.positive_trait_accepted,

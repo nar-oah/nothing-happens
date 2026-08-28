@@ -45,19 +45,19 @@ func start_new_run() -> void:
 	_start_term(1)
 
 
-func _start_term(term_number: int) -> void:
+func _start_term(term_number: int) -> bool:
 	if balance == null:
 		push_error("RunSession requires GameBalanceDefinition.")
-		return
+		return false
 	if race_definitions.is_empty():
 		push_error("RunSession requires race definitions.")
-		return
+		return false
 	if interest_groups.is_empty():
 		push_error("RunSession requires interest group definitions.")
-		return
+		return false
 	if seat_definitions.is_empty():
 		push_error("RunSession requires seat definitions.")
-		return
+		return false
 	state = RunState.new()
 	state.term = maxi(term_number, 1)
 	time_system = TimeSystem.new()
@@ -102,28 +102,32 @@ func _start_term(term_number: int) -> void:
 	context.seat_definitions = seat_definitions
 	context.constitution_articles = constitution_articles
 	if not race_system.initialize_races(state, race_definitions, balance):
-		return
+		return false
 	if not parliament_system.initialize_seats(state, seat_definitions, race_definitions):
-		return
+		return false
 	if not constitution_system.initialize(context):
-		return
+		return false
 	if not race_system.allocate_seats(context):
 		push_error("Failed to allocate initial race seats.")
-		return
+		return false
 	if not parliament_system.initialize_base_groups(state, interest_groups):
-		return
+		return false
 	constitution_system.apply_influence_rules(context)
 	constitution_system.activate_initial_articles(context)
-	proposal_system.draw_automatic_proposals(context)
 
 	flow_controller = FlowController.new()
 	flow_controller.setup(context)
+	return true
 
 
-func advance_month() -> void:
-	flow_controller.advance_month()
-	if state.run_failed and state.ending_id == &"":
-		_start_term(state.term + 1)
+func advance_month() -> bool:
+	return flow_controller.advance_month()
+
+
+func start_next_term() -> bool:
+	if state == null or state.run_phase != RunState.RunPhase.TERM_ENDED:
+		return false
+	return _start_term(state.term + 1)
 
 
 func enact_bill(draft: DraftBillState) -> void:

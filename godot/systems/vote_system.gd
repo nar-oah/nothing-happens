@@ -37,11 +37,20 @@ func set_donation(context: RunContext, seat: SeatState, support_amount: float) -
 		return false
 	context.state.political_donation_pool -= additional
 	context.state.vote_donations[seat.definition] = support_amount
-	if additional > 0.0 and context.random_system.chance(
-		context.state.donation_detection_probability
-	):
-		context.state.pending_collapse_delta += context.balance.donation_detection_collapse
 	return true
+
+
+func resolve_donation_detection(context: RunContext) -> int:
+	var detected := 0
+	for seat_definition in context.state.vote_donations:
+		var amount: float = context.state.vote_donations[seat_definition]
+		if amount <= 0.0:
+			continue
+		if not context.random_system.chance(context.state.donation_detection_probability):
+			continue
+		detected += 1
+		context.collapse_system.increase(context)
+	return detected
 
 
 func clear_donations(state: RunState) -> void:
