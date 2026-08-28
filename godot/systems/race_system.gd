@@ -16,69 +16,64 @@ func initialize_races(
 			return false
 		seen[definition] = true
 		var race := RaceState.new(definition)
+		# The real annual targets are rebuilt after the active constitution runtime is known.
+		# Keep a deterministic temporary value so incomplete/legacy content remains readable.
 		for metric in definition.get_stance_metrics():
 			race.expectation_targets[metric] = balance.initial_metric_value
 		state.races.append(race)
 	return true
 
 
-func advance_expectations(
-	state: RunState, balance: GameBalanceDefinition = null
-) -> void:
-	for race in state.races:
-		if race.definition == null:
+func rebuild_annual_expectations(context: RunContext) -> void:
+	if context == null or context.state == null:
+		return
+	var baseline := context.state.year_start_metrics
+	if baseline == null:
+		baseline = context.state.metrics
+	for race_state in context.state.races:
+		if race_state == null or race_state.definition == null:
 			continue
-		var growth_rate := race.expectation_growth_rate
-		if is_zero_approx(growth_rate) and balance != null:
-			growth_rate = balance.race_expectation_growth_per_year
-		for metric in race.definition.get_stance_metrics():
-			var previous := race.get_expectation(metric)
-			var direction := race.definition.get_stance(metric)
+		race_state.expectation_targets.clear()
+		var growth_rate := clampf(race_state.expectation_growth_rate, -1.0, 1.0)
+		for metric in race_state.definition.get_stance_metrics():
+			var base := baseline.get_value(metric)
+			var direction := race_state.definition.get_stance(metric)
 			if direction == Metric.Direction.HIGHER:
-				race.expectation_targets[metric] = roundi(float(previous) * (1.0 + growth_rate))
+				race_state.expectation_targets[metric] = roundi(float(base) * (1.0 + growth_rate))
 			elif direction == Metric.Direction.LOWER:
-				race.expectation_targets[metric] = roundi(float(previous) * (1.0 - growth_rate))
+				race_state.expectation_targets[metric] = roundi(float(base) * (1.0 - growth_rate))
 
 
 func allocate_opening_seats(context: RunContext) -> bool:
-	var total_seats := context.state.seats.size()
-	if total_seats <= 0:
+	if context == null or context.state == null or context.state.seats.is_empty():
 		return false
-	var anchor_counts: Dictionary[RaceDefinition, int] = {}
-	var anchor_total := 0
-	for definition in context.seat_definitions:
-		if definition == null or definition.anchor_race == null:
-			continue
-		anchor_counts[definition.anchor_race] = int(anchor_counts.get(definition.anchor_race, 0)) + 1
-		anchor_total += 1
-	var random_races: Array[RaceDefinition] = []
-	var zhushui: RaceDefinition
+	var variable_pool := context.parliament_system.get_variable_seats(context.state).size()
+	var eligible: Array[RaceDefinition] = []
+	var fixed_counts: Dictionary[RaceDefinition, int] = {}
 	for race in context.race_definitions:
-		if race is ZhushuiRaceDefinition:
-			zhushui = race
-		else:
-			random_races.append(race)
-	if zhushui == null or int(anchor_counts.get(zhushui, 0)) != 1:
-		push_error("Opening parliament requires exactly one Zhushui anchor seat.")
+		fixed_counts[race] = context.parliament_system.get_fixed_seat_count(context.state, race)
+		if context.constitution_system.race_participates_in_variable_seat_allocation(context, race):
+			eligible.append(race)
+	if variable_pool > 0 and eligible.is_empty():
+		push_error("Opening parliament has variable seats but no eligible race.")
 		return false
-	var random_pool := total_seats - anchor_total
-	if random_pool < 0 or random_races.is_empty():
-		return false
-	var final_cap := floori(float(total_seats) * context.balance.opening_max_race_seat_rate)
+	var final_cap := floori(
+		float(context.state.seats.size()) * context.balance.opening_max_race_seat_rate
+	)
 	var caps: Dictionary[RaceDefinition, int] = {}
-	for race in random_races:
-		caps[race] = maxi(final_cap - int(anchor_counts.get(race, 0)), 0)
+	for race in eligible:
+		caps[race] = maxi(final_cap - int(fixed_counts.get(race, 0)), 0)
 	var legal: Array[Dictionary] = []
-	_collect_opening_distributions(random_races, caps, 0, random_pool, {}, legal)
+	_collect_opening_distributions(eligible, caps, 0, variable_pool, {}, legal)
 	if legal.is_empty():
 		push_error("Opening race-seat constraints have no legal distribution.")
 		return false
 	var selected: Dictionary = legal[context.random_system.random_int(0, legal.size() - 1)]
 	var final_counts: Dictionary[RaceDefinition, int] = {}
 	for race in context.race_definitions:
-		final_counts[race] = int(anchor_counts.get(race, 0))
-	for race in random_races:
-		final_counts[race] += int(selected.get(race, 0))
+		final_counts[race] = int(fixed_counts.get(race, 0))
+		if race in eligible:
+			final_counts[race] += int(selected.get(race, 0))
 	return context.parliament_system.assign_race_distribution(
 		context.state, context.race_definitions, final_counts
 	)
@@ -113,69 +108,63 @@ func allocate_seats(context: RunContext) -> bool:
 
 
 func allocate_annual_seats(context: RunContext) -> bool:
-	var all_races := context.race_definitions
-	var pool := context.state.seats.size()
-	if all_races.is_empty() and pool > 0:
+	if context == null or context.state == null:
 		return false
-	var fixed_zhushui: RaceDefinition
+	var variable_pool := context.parliament_system.get_variable_seats(context.state).size()
 	var races: Array[RaceDefinition] = []
-	for race in all_races:
-		if race is ZhushuiRaceDefinition:
-			if fixed_zhushui != null:
-				push_error("Only one Zhushui race definition can own the permanent executive seat.")
-				return false
-			fixed_zhushui = race
-		else:
-			races.append(race)
 	var counts: Dictionary[RaceDefinition, int] = {}
-	if fixed_zhushui != null:
-		if pool <= 0:
-			push_error("Zhushui requires one permanent executive seat.")
-			return false
-		counts[fixed_zhushui] = 1
-		pool -= 1
-	if races.is_empty() and pool > 0:
-		return false
-	var all_constraints := context.constitution_system.get_race_seat_constraints(context)
 	var constraints: Dictionary[RaceDefinition, RaceSeatConstraint] = {}
-	for race in races:
-		constraints[race] = all_constraints[race]
-	if not _validate_constraints(races, constraints, pool):
+	for race in context.race_definitions:
+		counts[race] = context.parliament_system.get_fixed_seat_count(context.state, race)
+		if not context.constitution_system.race_participates_in_variable_seat_allocation(context, race):
+			continue
+		races.append(race)
+		constraints[race] = context.constitution_system.get_variable_race_seat_constraint(context, race)
+	if variable_pool > 0 and races.is_empty():
+		push_error("Variable seat pool has no eligible race.")
 		return false
-	var quotas := _calculate_bounded_quotas(context, races, constraints, pool)
+	if not _validate_constraints(races, constraints, variable_pool):
+		return false
+	var quotas := _calculate_bounded_quotas(context, races, constraints, variable_pool)
 	var assigned := 0
+	var variable_counts: Dictionary[RaceDefinition, int] = {}
 	for race in races:
 		var count := floori(float(quotas.get(race, 0.0)))
-		counts[race] = count
+		variable_counts[race] = count
 		assigned += count
-	while assigned < pool:
+	while assigned < variable_pool:
 		var selected: RaceDefinition
 		var best_remainder := -1.0
 		for race in races:
 			var constraint: RaceSeatConstraint = constraints[race]
-			if constraint.maximum_count >= 0 and counts[race] >= constraint.maximum_count:
+			var current_count := int(variable_counts.get(race, 0))
+			if constraint.maximum_count >= 0 and current_count >= constraint.maximum_count:
 				continue
-			var remainder := float(quotas.get(race, 0.0)) - float(counts[race])
+			var remainder := float(quotas.get(race, 0.0)) - float(current_count)
 			if remainder > best_remainder:
 				selected = race
 				best_remainder = remainder
 		if selected == null:
-			push_error("Seat constraints leave no race for a remaining seat.")
+			push_error("Seat constraints leave no race for a remaining variable seat.")
 			return false
-		counts[selected] += 1
+		variable_counts[selected] = int(variable_counts.get(selected, 0)) + 1
 		assigned += 1
-	return context.parliament_system.assign_race_distribution(context.state, all_races, counts)
+	for race in races:
+		counts[race] = int(counts.get(race, 0)) + int(variable_counts.get(race, 0))
+	return context.parliament_system.assign_race_distribution(
+		context.state, context.race_definitions, counts
+	)
 
 
 func enforce_constitution_constraints(context: RunContext, changed_race: RaceDefinition) -> bool:
-	if changed_race == null or changed_race is ZhushuiRaceDefinition:
-		return true
+	if context == null or changed_race == null:
+		return false
 	var constraint := context.constitution_system.get_race_seat_constraint(context, changed_race)
 	var count := context.parliament_system.get_race_seat_count(context.state, changed_race)
 	while count < constraint.minimum_count:
 		var candidates: Array[SeatState] = []
 		for seat in context.state.seats:
-			if seat.race == changed_race or seat.race is ZhushuiRaceDefinition:
+			if seat.race == changed_race or seat.fixed_race != null:
 				continue
 			if context.parliament_system.can_reassign_seat(context, seat, changed_race):
 				candidates.append(seat)
@@ -189,10 +178,10 @@ func enforce_constitution_constraints(context: RunContext, changed_race: RaceDef
 		var moved := false
 		var source_seats := context.parliament_system.get_race_seats(context.state, changed_race)
 		for source in source_seats:
-			if source.definition.anchor_race == changed_race:
+			if source.fixed_race != null:
 				continue
 			for target in context.race_definitions:
-				if target == changed_race or target is ZhushuiRaceDefinition:
+				if target == changed_race:
 					continue
 				if context.parliament_system.reassign_seat(context, source, target):
 					moved = true
@@ -215,6 +204,8 @@ func get_effective_expectation(
 
 
 func get_annual_weight(race: RaceState, balance: GameBalanceDefinition) -> float:
+	if race == null:
+		return 0.0
 	return maxf(
 		balance.race_seat_base_weight
 		+ float(race.resolved_events_this_year) * balance.race_resolved_event_weight,
@@ -227,12 +218,14 @@ func _validate_constraints(
 	constraints: Dictionary[RaceDefinition, RaceSeatConstraint],
 	pool: int
 ) -> bool:
+	if traces.is_empty():
+		return pool == 0
 	var minimum_total := 0
 	var maximum_total := 0
 	for race in races:
 		var constraint: RaceSeatConstraint = constraints.get(race)
 		if constraint == null or constraint.minimum_count < 0:
-			push_error("Every race requires a valid seat constraint.")
+			push_error("Every eligible race requires a valid variable-seat constraint.")
 			return false
 		if constraint.maximum_count >= 0 and constraint.maximum_count < constraint.minimum_count:
 			push_error("Race maximum cannot be lower than its minimum.")
@@ -240,7 +233,7 @@ func _validate_constraints(
 		minimum_total += constraint.minimum_count
 		maximum_total += pool if constraint.maximum_count < 0 else constraint.maximum_count
 	if minimum_total > pool or maximum_total < pool:
-		push_error("Race seat constraints cannot fill the permanent seat pool.")
+		push_error("Race seat constraints cannot fill the variable seat pool.")
 		return false
 	return true
 
@@ -264,7 +257,11 @@ func _calculate_bounded_quotas(
 		var constrained: RaceDefinition
 		var constrained_value := 0.0
 		for definition in active:
-			var race_weight := 1.0 if equal else get_annual_weight(context.state.get_race(definition), context.balance)
+			var race_weight := (
+				1.0
+				if equal
+				else get_annual_weight(context.state.get_race(definition), context.balance)
+			)
 			var quota := remaining_pool * race_weight / total_weight
 			var constraint: RaceSeatConstraint = constraints[definition]
 			var maximum := float(pool) if constraint.maximum_count < 0 else float(constraint.maximum_count)
@@ -282,7 +279,11 @@ func _calculate_bounded_quotas(
 			active.erase(constrained)
 			continue
 		for definition in active:
-			var race_weight := 1.0 if equal else get_annual_weight(context.state.get_race(definition), context.balance)
+			var race_weight := (
+				1.0
+				if equal
+				else get_annual_weight(context.state.get_race(definition), context.balance)
+			)
 			result[definition] = remaining_pool * race_weight / total_weight
 		break
 	return result
