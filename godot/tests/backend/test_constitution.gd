@@ -67,7 +67,10 @@ func _test_direct_prerequisite_and_clicked_history(t: BackendTestContext) -> voi
 	)
 	t.check(session.state.constitution.was_clicked(initial), "initial Resource enters clicked history")
 	t.check(session.constitution_system.can_revise(session.context, next), "direct prerequisite permits revision")
+	var collapse_before_revision := session.state.collapse_level
 	t.check(session.revise_constitution(next), "revision activates the selected Resource")
+	t.check_equal(session.state.collapse_level, collapse_before_revision, "constitution revision adds no collapse")
+	t.check(not session.state.has_submitted_bill, "constitution revision is not a bill submission")
 	t.check(
 		session.state.constitution.get_active_article(race) == next,
 		"active article is keyed by race Resource"
@@ -290,7 +293,10 @@ func _test_human_petition_runtime_and_anchor_safety(t: BackendTestContext) -> vo
 	t.check(session.state.petition_race == human, "petition race is a direct Resource")
 	t.check_equal(t.count_race_seats(session.state, human), 2, "fixture starts below petition max")
 	t.check_equal(t.count_race_seats(session.state, donor), 1, "donor starts at anchor minimum")
+	var collapse_before_petition := session.state.collapse_level
 	t.check(session.use_petition(), "petition immediately reassigns a legal seat")
+	t.check_equal(session.state.collapse_level, collapse_before_petition, "imperial petition adds no collapse")
+	t.check(not session.state.has_submitted_bill, "imperial petition is not a bill submission")
 	t.check_equal(t.count_race_seats(session.state, human), 3, "petition changes the current parliament")
 	t.check_equal(session.state.petition_used_this_year, 1, "State records annual petition usage")
 	t.check(session.state.seats[0].race == donor, "petition does not steal another race's anchor")

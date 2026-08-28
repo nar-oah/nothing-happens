@@ -216,6 +216,7 @@ func _test_merge_uses_group_resource_identity(t: BackendTestContext) -> void:
 	t.check(merged.source_group == group, "merged proposal keeps source Resource")
 	t.check_equal(merged.base_effect.tax, 7, "merge keeps selected negative base")
 	t.check_equal(merged.positive_effect.wage, 14, "discarded trait converts by balance ratio")
+	t.check(not state.has_submitted_bill, "proposal synthesis does not record a bill submission")
 
 	var pending := t.make_proposal(group)
 	pending.positive_effect.wage = 5
@@ -283,6 +284,7 @@ func _test_failed_draft_does_not_record_sources(t: BackendTestContext) -> void:
 	var result := session.submit_draft()
 	t.check(result.submitted and not result.passed, "neutral draft fails its vote")
 	t.check(session.state.has_submitted_bill, "failed vote still records a real submission")
+	t.check_equal(session.state.collapse_level, 0, "submitting a bill does not itself add collapse")
 	t.check(session.state.annual_proposal_slot_counts.is_empty(), "failed draft records no source")
 	var enacted := DraftBillState.new()
 	enacted.proposals.append(proposal)
