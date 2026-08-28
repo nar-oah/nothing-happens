@@ -21,6 +21,7 @@ script = ExtResource("1_article_script")
 petition_limit = 5
 display_name = "行省"
 row = ExtResource("row")
+is_terminal = true
 race = ExtResource("3_race_human")
 prerequisite = ExtResource("4_prereq")
 seat_condition = SubResource("Resource_seat_condition")
