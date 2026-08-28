@@ -6,5 +6,5 @@ class_name HumanConstitutionArticleDefinition
 
 func apply_runtime(context) -> void:
 	super.apply_runtime(context)
-	context.state.petition_race = race
+	context.state.petition_race = get_race()
 	context.state.petition_limit = petition_limit
