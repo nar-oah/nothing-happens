@@ -1,32 +1,55 @@
-extends Resource
+extends ConstitutionCondition
 class_name ConstitutionSeatCondition
 
+enum Comparison {
+	AT_LEAST,
+	AT_MOST,
+}
+
+enum MatchMode {
+	ALL,
+	ANY,
+}
+
 @export var race: RaceDefinition
+@export var interest_groups: Array[InterestGroupDefinition] = []
 @export var interest_group: InterestGroupDefinition
+@export var comparison: Comparison = Comparison.AT_LEAST
+@export var match_mode: MatchMode = MatchMode.ALL
 @export_range(0.0, 1.0, 0.01) var required_rate: float = 0.0
 
 
-func is_met(context) -> bool:
+func is_met(context: RunContext) -> bool:
 	if context == null or context.state == null:
 		return false
-	if race == null and interest_group == null:
-		return false
-	var eligible_count := 0
-	var matching_count := 0
-	for seat in context.state.seats:
-		if seat.race is ZhushuiRaceDefinition:
-			continue
-		if race != null and interest_group == null:
-			eligible_count += 1
-			matching_count += 1 if seat.race == race else 0
-		elif race == null:
-			if seat.base_group == null and seat.actual_group == null:
-				continue
-			eligible_count += 1
-			matching_count += 1 if seat.actual_group == interest_group else 0
-		elif seat.race == race:
-			eligible_count += 1
-			matching_count += 1 if seat.actual_group == interest_group else 0
-	if eligible_count == 0:
-		return required_rate <= 0.0
-	return float(matching_count) / float(eligible_count) >= required_rate
+	var groups := _get_groups()
+	if groups.is_empty():
+		if race == null:
+			return false
+		return _compare(context.parliament_system.get_race_seat_rate(context.state, race))
+	var matched := 0
+	for group in groups:
+		var rate := context.parliament_system.get_group_influence_rate(
+			context.state, group, race
+		)
+		if _compare(rate):
+			matched += 1
+	if match_mode == MatchMode.ANY:
+		return matched > 0
+	return matched == groups.size()
+
+
+func _get_groups() -> Array[InterestGroupDefinition]:
+	var result: Array[InterestGroupDefinition] = []
+	for group in interest_groups:
+		if group != null and group not in result:
+			result.append(group)
+	if interest_group != null and interest_group not in result:
+		result.append(interest_group)
+	return result
+
+
+func _compare(rate: float) -> bool:
+	if comparison == Comparison.AT_MOST:
+		return rate <= required_rate
+	return rate >= required_rate
