@@ -41,8 +41,6 @@ func advance_month() -> bool:
 	if context.state.month == 12:
 		context.annual_settlement_system.settle_year(context)
 	context.time_system.advance_month(context.state)
-	if context.state.month == 0:
-		context.collapse_system.recover_annual(context)
 	return true
 
 
