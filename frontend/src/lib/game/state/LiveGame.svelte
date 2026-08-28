@@ -396,4 +396,4 @@
 			onClosed={finishNewspaperClose}
 		/>
 	{/if}
-{/if>
+{/if}
