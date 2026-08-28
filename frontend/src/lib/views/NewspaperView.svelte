@@ -13,17 +13,11 @@
 
 	type NewspaperMotionPhase = 'entering' | 'active' | 'leaving';
 	type Props = {
-		mode?: 'MONTHLY' | 'TERM_END';
-		term: number;
 		year: number;
 		month: number;
-		governingMonths?: number;
-		termOutcome?: 'COLLAPSE' | 'NOTHING_HAPPENS';
 		metrics: NewspaperMetricData[];
 		events: NewspaperEventData[];
 		comment: NewspaperCommentData;
-		entryCycle?: number;
-		backgroundCovered?: boolean;
 		busy?: boolean;
 		leaving?: boolean;
 		onCommentClick?: () => void;
@@ -38,17 +32,11 @@
 	const ROTATION_COS = Math.cos(ROTATION_RADIANS);
 
 	let {
-		mode = 'MONTHLY',
-		term,
 		year,
 		month,
-		governingMonths,
-		termOutcome,
 		metrics,
 		events,
 		comment,
-		entryCycle = 0,
-		backgroundCovered = false,
 		busy = false,
 		leaving = false,
 		onCommentClick,
@@ -61,6 +49,7 @@
 	let viewportHeight = $state(982);
 	let scrollPosition = $state(0);
 	let motionPhase = $state<NewspaperMotionPhase>('entering');
+	let backgroundCovered = $state(false);
 	let scrollElement: HTMLDivElement;
 	const pageCount = $derived(4 + events.length);
 	const baseHeight = $derived(pageCount * VERTICAL_FOLD_WIDTH);
@@ -83,6 +72,7 @@
 		if (event.target !== event.currentTarget) return;
 		if (motionPhase === 'entering') {
 			motionPhase = 'active';
+			backgroundCovered = true;
 			onCovered?.();
 			return;
 		}
@@ -96,12 +86,8 @@
 
 	$effect(() => {
 		if (!leaving || motionPhase === 'leaving') return;
+		backgroundCovered = false;
 		motionPhase = 'leaving';
-	});
-
-	$effect(() => {
-		if (entryCycle < 0) return;
-		motionPhase = 'entering';
 	});
 
 	$effect(() => {
@@ -120,9 +106,6 @@
 	class="newspaper-view"
 	class:bg-surface-amber={backgroundCovered}
 	aria-label="报纸界面"
-	data-newspaper-mode={mode}
-	data-term-outcome={termOutcome}
-	data-governing-months={governingMonths}
 	bind:clientWidth={viewportWidth}
 	bind:clientHeight={viewportHeight}
 	data-block-world-input
@@ -164,12 +147,8 @@
 								style:transform={`scale(${scale})`}
 							>
 								<Newspaper
-									{mode}
-									{term}
 									{year}
 									{month}
-									{governingMonths}
-									{termOutcome}
 									{metrics}
 									{events}
 									{comment}
