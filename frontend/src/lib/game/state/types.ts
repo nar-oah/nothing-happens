@@ -16,17 +16,45 @@ export type ConstitutionArticleDto = ConstitutionArticle & {
 	article_index: number;
 };
 
+export type ConstitutionColumnDto = {
+	column_index: number;
+	id: string;
+	display_name: string;
+	unlock_cost_months: number;
+	unlocked: boolean;
+	can_unlock: boolean;
+};
+
+export type ConstitutionRowDto = {
+	row_index: number;
+	id: string;
+	display_name: string;
+	race_display_name: string;
+	free_navigation: boolean;
+	ignores_column_unlocks: boolean;
+	active_article_index: number;
+};
+
 export type ConstitutionArticleStateDto = ConstitutionArticleDto & {
+	row_index: number;
+	column_index: number;
+	row_display_name: string;
 	race_display_name: string;
 	active: boolean;
 	selected: boolean;
-	clicked: boolean;
 	eligible: boolean;
+	is_terminal: boolean;
 };
 
 export type ConstitutionDto = {
 	title: string;
 	revision_available: boolean;
+	center_column_index: number;
+	available_governing_months: number;
+	lifetime_governing_months: number;
+	terminal_article_index: number;
+	columns: ConstitutionColumnDto[];
+	rows: ConstitutionRowDto[];
 	active_articles: ConstitutionArticleDto[];
 	articles: ConstitutionArticleStateDto[];
 };
