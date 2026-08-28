@@ -14,12 +14,19 @@ class_name ConstitutionArticleDefinition
 @export var seat_condition: ConstitutionSeatCondition
 @export var conditions: Array[ConstitutionCondition] = []
 
-@export_group("席位约束")
+@export_group("席位规则")
 @export_range(0.0, 1.0, 0.01) var race_min_seat_rate: float = 0.0
 @export_range(0.0, 1.0, 0.01) var race_max_seat_rate: float = 1.0
+# When false, this race receives zero seats from the ordinary variable-seat pool. Any
+# currently active fixed race seats are still kept, so this one rule supports Zhushui,
+# Free Trade humans and Limited Yano without race-specific allocation branches.
+@export var participates_in_variable_seat_allocation: bool = true
+# A constitution may revoke this race's runtime fixed-seat binding. The physical seat is
+# not deleted; it simply returns to the ordinary variable pool for the rest of the term.
+@export var revoke_fixed_seat: bool = false
 
 @export_group("种族运行参数")
-@export_range(0.0, 1.0, 0.01) var expectation_growth_rate: float = 0.0
+@export_range(-1.0, 1.0, 0.01) var expectation_growth_rate: float = 0.10
 @export_range(0.0, 1.0, 0.01) var visit_probability: float = 0.0
 
 @export_group("内容")
