@@ -16,8 +16,6 @@ func initialize_races(
 			return false
 		seen[definition] = true
 		var race := RaceState.new(definition)
-		# The real annual targets are rebuilt after the active constitution runtime is known.
-		# Keep a deterministic temporary value so incomplete/legacy content remains readable.
 		for metric in definition.get_stance_metrics():
 			race.expectation_targets[metric] = balance.initial_metric_value
 		state.races.append(race)
@@ -57,12 +55,12 @@ func allocate_opening_seats(context: RunContext) -> bool:
 	if variable_pool > 0 and eligible.is_empty():
 		push_error("Opening parliament has variable seats but no eligible race.")
 		return false
-	var final_cap := floori(
-		float(context.state.seats.size()) * context.balance.opening_max_race_seat_rate
-	)
+	# The opening 60% cap applies to the random/variable pool itself. Fixed seats are
+	# outside the random draw and therefore must not enlarge a race's random allowance.
+	var variable_cap := floori(float(variable_pool) * context.balance.opening_max_race_seat_rate)
 	var caps: Dictionary[RaceDefinition, int] = {}
 	for race in eligible:
-		caps[race] = maxi(final_cap - int(fixed_counts.get(race, 0)), 0)
+		caps[race] = variable_cap
 	var legal: Array[Dictionary] = []
 	_collect_opening_distributions(eligible, caps, 0, variable_pool, {}, legal)
 	if legal.is_empty():
@@ -87,19 +85,19 @@ func _collect_opening_distributions(
 	current: Dictionary,
 	result: Array[Dictionary]
 ) -> void:
-	if index >= races.size():
+	if index >= traces.size():
 		if remaining == 0:
 			result.append(current.duplicate())
 		return
-	var race := races[index]
+	var race := traces[index]
 	var max_for_race := mini(int(caps.get(race, 0)), remaining)
 	var remaining_cap := 0
-	for next_index in range(index + 1, races.size()):
-		remaining_cap += int(caps.get(races[next_index], 0))
+	for next_index in range(index + 1, traces.size()):
+		remaining_cap += int(caps.get(traces[next_index], 0))
 	var minimum := maxi(remaining - remaining_cap, 0)
 	for count in range(minimum, max_for_race + 1):
 		current[race] = count
-		_collect_opening_distributions(races, caps, index + 1, remaining - count, current, result)
+		_collect_opening_distributions(traces, caps, index + 1, remaining - count, current, result)
 	current.erase(race)
 
 
@@ -222,7 +220,7 @@ func _validate_constraints(
 		return pool == 0
 	var minimum_total := 0
 	var maximum_total := 0
-	for race in races:
+	for race in traces:
 		var constraint: RaceSeatConstraint = constraints.get(race)
 		if constraint == null or constraint.minimum_count < 0:
 			push_error("Every eligible race requires a valid variable-seat constraint.")
@@ -245,7 +243,7 @@ func _calculate_bounded_quotas(
 	pool: int
 ) -> Dictionary[RaceDefinition, float]:
 	var result: Dictionary[RaceDefinition, float] = {}
-	var active := races.duplicate()
+	var active := traces.duplicate()
 	var remaining_pool := float(pool)
 	while not active.is_empty():
 		var total_weight := 0.0
