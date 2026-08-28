@@ -293,6 +293,10 @@
 		});
 	}
 
+	function unlockConstitutionColumn(columnIndex: number): void {
+		mutate('constitution.column.unlock', { column_index: columnIndex });
+	}
+
 	function mergeProposals(confirmation: SynthesisConfirmation): void {
 		mutate('proposal.merge', {
 			hand_indices: confirmation.refs.map((ref) => ref.index),
@@ -334,13 +338,11 @@
 			{preview}
 			voteCanPass={snapshot.draft_preview.vote.passed}
 			onAddProposal={(handIndex) => mutate('draft.proposal.add', { hand_index: handIndex })}
-			onRemoveProposal={(draftIndex) =>
-				mutate('draft.proposal.remove', { draft_index: draftIndex })}
+			onRemoveProposal={(draftIndex) => mutate('draft.proposal.remove', { draft_index: draftIndex })}
 			onAddPolicy={(displayName) => mutate('draft.policy.add', { display_name: displayName })}
 			onRemovePolicy={(draftIndex) => mutate('draft.policy.remove', { draft_index: draftIndex })}
 			onTitleChange={(title) => mutate('draft.title.set', { title })}
-			onEditSavedBill={(savedBillIndex) =>
-				mutate('bill.edit', { saved_bill_index: savedBillIndex })}
+			onEditSavedBill={(savedBillIndex) => mutate('bill.edit', { saved_bill_index: savedBillIndex })}
 			onSubmit={submitBill}
 		/>
 	{:else if snapshot.ui_mode === 'constitution'}
@@ -354,7 +356,11 @@
 			onNewspaperOpen={openNewspaper}
 			title={snapshot.constitution.title}
 			{constitution}
+			columns={snapshot.constitution.columns}
+			availableGoverningMonths={snapshot.constitution.available_governing_months}
+			lifetimeGoverningMonths={snapshot.constitution.lifetime_governing_months}
 			onArticleSelectionChange={selectConstitutionArticle}
+			onColumnUnlock={unlockConstitutionColumn}
 			onSubmit={submitConstitution}
 		/>
 	{:else}
