@@ -28,14 +28,6 @@
 		deriveLeftItems,
 		deriveTopItems
 	} from './selectors';
-	import {
-		coverNewspaperTransition,
-		createNewspaperTransitionState,
-		finishNewspaperTransition,
-		leaveNewspaperTransition,
-		openNewspaperTransition,
-		type DisplayedNewspaperData
-	} from './newspaper-transition';
 	import { createGameStore, EMPTY_GAME_STORE, type GameStoreValue } from './store';
 	import type { LiveGameState, MonthReportEventPhase } from './types';
 
@@ -89,32 +81,14 @@
 		});
 	}
 
-	function deriveNewspaperData(state: LiveGameState): DisplayedNewspaperData {
-		const common = {
-			term: state.term,
-			year: state.year,
-			month: state.month,
-			metrics: deriveNewspaperMetrics(state),
-			comment: { title: '', comment: '' }
-		};
-		if (state.run_phase === 'TERM_ENDED') {
-			return {
-				...common,
-				mode: 'TERM_END',
-				termOutcome: state.term_outcome === 'NOTHING_HAPPENS' ? 'NOTHING_HAPPENS' : 'COLLAPSE',
-				governingMonths: state.governing_months,
-				events: []
-			};
-		}
-		return { ...common, mode: 'MONTHLY', events: deriveNewspaperEvents(state) };
-	}
-
 	const gameStore = createGameStore();
 	let storeValue = $state<GameStoreValue>(EMPTY_GAME_STORE);
 	let client: CefIpcClient | null = null;
 	let mutationQueue = Promise.resolve();
 	let selectedConstitutionArticle = $state<number>();
-	let newspaperTransition = $state(createNewspaperTransitionState());
+	let newspaperOpen = $state(true);
+	let newspaperBusy = $state(false);
+	let newspaperLeaving = $state(false);
 	let pendingNewspaperAction: NewspaperTransitionAction | null = null;
 	const unsubscribe = gameStore.subscribe((value) => (storeValue = value));
 	let snapshot = $derived(storeValue.snapshot);
@@ -130,6 +104,8 @@
 	let pendingDialogue = $derived(
 		snapshot ? deriveDialoguePresentation(snapshot.pending_dialogue) : null
 	);
+	let newspaperMetrics = $derived(snapshot ? deriveNewspaperMetrics(snapshot) : []);
+	let newspaperEvents = $derived(snapshot ? deriveNewspaperEvents(snapshot) : []);
 	let frame = $derived(
 		snapshot && gameState
 			? {
@@ -195,88 +171,70 @@
 	}
 
 	function openNewspaper(): void {
-		if (newspaperTransition.open || !snapshot) return;
+		if (newspaperOpen) return;
 		pendingNewspaperAction = null;
-		newspaperTransition = openNewspaperTransition(
-			newspaperTransition,
-			deriveNewspaperData(snapshot)
-		);
+		newspaperBusy = false;
+		newspaperLeaving = false;
+		newspaperOpen = true;
 	}
 
 	function transitionThroughNewspaper(action: NewspaperTransitionAction): void {
-		if (newspaperTransition.open || newspaperTransition.busy || !snapshot) return;
+		if (newspaperOpen || newspaperBusy) return;
 		pendingNewspaperAction = action;
-		newspaperTransition = openNewspaperTransition(
-			newspaperTransition,
-			deriveNewspaperData(snapshot),
-			true
-		);
+		newspaperBusy = true;
+		newspaperLeaving = false;
+		newspaperOpen = true;
 	}
 
 	async function handleNewspaperCovered(): Promise<void> {
-		newspaperTransition = coverNewspaperTransition(newspaperTransition);
 		const action = pendingNewspaperAction;
 		if (!action) return;
 		pendingNewspaperAction = null;
 		try {
 			await action();
 			await tick();
-			const latest = storeValue.snapshot;
-			newspaperTransition = leaveNewspaperTransition(
-				newspaperTransition,
-				latest ? deriveNewspaperData(latest) : null
-			);
+			newspaperLeaving = true;
 		} catch (error: unknown) {
 			console.error('Newspaper transition failed', error);
-			newspaperTransition = { ...newspaperTransition, busy: false };
+			newspaperBusy = false;
 		}
 	}
 
 	async function advanceFromNewspaper(): Promise<void> {
-		if (newspaperTransition.busy || newspaperTransition.leaving) return;
-		const displayed = newspaperTransition.displayedNewspaperData;
-		if (!displayed) return;
-		newspaperTransition = { ...newspaperTransition, busy: true };
+		if (newspaperBusy || newspaperLeaving) return;
+		newspaperBusy = true;
 		try {
-			if (displayed.mode === 'TERM_END') await requestMutation('term.next', {});
-			else await requestMutation('month.advance', {});
+			await requestMutation('month.advance', {});
 			await tick();
-			const latest = storeValue.snapshot;
-			newspaperTransition = leaveNewspaperTransition(
-				newspaperTransition,
-				latest ? deriveNewspaperData(latest) : null
-			);
+			newspaperLeaving = true;
 		} catch (error: unknown) {
-			console.error('Newspaper advance failed', error);
-			newspaperTransition = { ...newspaperTransition, busy: false };
+			console.error('Month advance failed', error);
+			newspaperBusy = false;
 		}
 	}
 
 	async function requestNewspaperClose(): Promise<void> {
-		if (
-			newspaperTransition.busy ||
-			newspaperTransition.leaving ||
-			newspaperTransition.displayedNewspaperData?.mode === 'TERM_END'
-		)
-			return;
-		newspaperTransition = { ...newspaperTransition, busy: true };
+		if (newspaperBusy || newspaperLeaving) return;
+		newspaperBusy = true;
 		const requestClient = client;
 		if (!requestClient) {
-			newspaperTransition = leaveNewspaperTransition(newspaperTransition);
+			newspaperLeaving = true;
 			return;
 		}
 		try {
 			await requestClient.request('ui.newspaper.close', {});
 			await tick();
-			newspaperTransition = leaveNewspaperTransition(newspaperTransition);
+			newspaperLeaving = true;
 		} catch (error: unknown) {
 			console.error('Newspaper close sync failed', error);
-			newspaperTransition = { ...newspaperTransition, busy: false };
+			newspaperBusy = false;
 		}
 	}
 
 	function finishNewspaperClose(): void {
-		newspaperTransition = finishNewspaperTransition(newspaperTransition);
+		newspaperOpen = false;
+		newspaperBusy = false;
+		newspaperLeaving = false;
 		pendingNewspaperAction = null;
 	}
 
@@ -344,7 +302,8 @@
 			onAddPolicy={(displayName) => mutate('draft.policy.add', { display_name: displayName })}
 			onRemovePolicy={(draftIndex) => mutate('draft.policy.remove', { draft_index: draftIndex })}
 			onTitleChange={(title) => mutate('draft.title.set', { title })}
-			onEditSavedBill={(savedBillIndex) => mutate('bill.edit', { saved_bill_index: savedBillIndex })}
+			onEditSavedBill={(savedBillIndex) =>
+				mutate('bill.edit', { saved_bill_index: savedBillIndex })}
 			onSubmit={submitBill}
 		/>
 	{:else if snapshot.ui_mode === 'constitution'}
@@ -359,8 +318,6 @@
 			title={snapshot.constitution.title}
 			{constitution}
 			columns={snapshot.constitution.columns}
-			availableGoverningMonths={snapshot.constitution.available_governing_months}
-			lifetimeGoverningMonths={snapshot.constitution.lifetime_governing_months}
 			onArticleSelectionChange={selectConstitutionArticle}
 			onColumnUnlock={unlockConstitutionColumn}
 			onSubmit={submitConstitution}
@@ -369,30 +326,18 @@
 		<OfficeView {...frame} onNewspaperOpen={openNewspaper} onSynthesisConfirm={mergeProposals} />
 	{/if}
 
-	{#if newspaperTransition.open && newspaperTransition.displayedNewspaperData}
+	{#if newspaperOpen}
 		<NewspaperView
-			mode={newspaperTransition.displayedNewspaperData.mode}
-			term={newspaperTransition.displayedNewspaperData.term}
-			year={newspaperTransition.displayedNewspaperData.year}
-			month={newspaperTransition.displayedNewspaperData.month}
-			governingMonths={newspaperTransition.displayedNewspaperData.mode === 'TERM_END'
-				? newspaperTransition.displayedNewspaperData.governingMonths
-				: undefined}
-			termOutcome={newspaperTransition.displayedNewspaperData.mode === 'TERM_END'
-				? newspaperTransition.displayedNewspaperData.termOutcome
-				: undefined}
-			metrics={newspaperTransition.displayedNewspaperData.metrics}
-			events={newspaperTransition.displayedNewspaperData.events}
-			comment={newspaperTransition.displayedNewspaperData.comment}
-			entryCycle={newspaperTransition.entryCycle}
-			backgroundCovered={newspaperTransition.backgroundCovered}
-			busy={newspaperTransition.busy}
-			leaving={newspaperTransition.leaving}
+			year={snapshot.year}
+			month={snapshot.month}
+			metrics={newspaperMetrics}
+			events={newspaperEvents}
+			comment={{ title: '', comment: '' }}
+			busy={newspaperBusy}
+			leaving={newspaperLeaving}
 			onCovered={handleNewspaperCovered}
 			onAdvance={advanceFromNewspaper}
-			onRequestClose={newspaperTransition.displayedNewspaperData.mode === 'MONTHLY'
-				? requestNewspaperClose
-				: undefined}
+			onRequestClose={requestNewspaperClose}
 			onClosed={finishNewspaperClose}
 		/>
 	{/if}
