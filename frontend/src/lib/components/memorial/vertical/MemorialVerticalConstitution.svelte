@@ -44,7 +44,8 @@
 			if (
 				typeof content === 'number' ||
 				expandedRow?.sectionTitle !== sectionTitle ||
-				!content[expandedRow.rowIndex]
+				!content[expandedRow.rowIndex] ||
+				content[expandedRow.rowIndex].articleRef === undefined
 			) {
 				return [sectionPage];
 			}
@@ -65,7 +66,8 @@
 		pendingSelection = undefined;
 	});
 
-	function openRow(sectionTitle: string, rowIndex: number) {
+	function openRow(sectionTitle: string, rowIndex: number, row: MemorialConstitutionRowContentData) {
+		if (row.articleRef === undefined) return;
 		expandedRow = { sectionTitle, rowIndex };
 	}
 
@@ -134,13 +136,17 @@
 					{:else}
 						<div class="flex h-full flex-col items-center gap-[20px] pt-10">
 							{#each currentPage.content as row, rowIndex (`${currentPage.title}-${row.text}-${rowIndex}`)}
-								<MemorialConstitutionRow
-									{...row}
-									selected={getRowSelected(currentPage.title, rowIndex, row)}
-									onSelectedChange={(selected) =>
-										setRowSelected(currentPage.title, rowIndex, row, selected)}
-									onclick={() => openRow(currentPage.title, rowIndex)}
-								/>
+								{#if row.articleRef === undefined}
+									<div class="h-[44px] w-[99px]" aria-hidden="true"></div>
+								{:else}
+									<MemorialConstitutionRow
+										{...row}
+										selected={getRowSelected(currentPage.title, rowIndex, row)}
+										onSelectedChange={(selected) =>
+											setRowSelected(currentPage.title, rowIndex, row, selected)}
+										onclick={() => openRow(currentPage.title, rowIndex, row)}
+									/>
+								{/if}
 							{/each}
 						</div>
 					{/if}
