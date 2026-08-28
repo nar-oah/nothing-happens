@@ -58,7 +58,8 @@ const outboundTypes = new Set<OutboundType>([
 	'proposal.merge',
 	'proposal.bonus.resolve',
 	'constitution.revise',
-	'month.advance'
+	'month.advance',
+	'term.next'
 ]);
 
 export function encodeOutboundMessage(message: OutboundMessage): string {
@@ -189,14 +190,18 @@ function isCommandError(value: unknown): value is CommandErrorDto {
 function isGameStatus(value: unknown): value is GameStatusDto {
 	return (
 		isRecord(value) &&
+		isNonnegativeInteger(value.term) &&
 		isNonnegativeInteger(value.year) &&
 		isNonnegativeInteger(value.month) &&
+		isNonnegativeInteger(value.governing_months) &&
+		(value.run_phase === 'RUNNING' || value.run_phase === 'TERM_ENDED') &&
+		(value.term_outcome === 'NONE' ||
+			value.term_outcome === 'COLLAPSE' ||
+			value.term_outcome === 'NOTHING_HAPPENS') &&
 		isMetricValues(value.metrics) &&
 		isNumber(value.political_donation_pool) &&
-		isNumber(value.collapse_level) &&
-		isNumber(value.max_collapse) &&
-		(value.run_failed === undefined || typeof value.run_failed === 'boolean') &&
-		(value.ending_id === undefined || typeof value.ending_id === 'string')
+		isNonnegativeInteger(value.collapse_level) &&
+		isNonnegativeInteger(value.max_collapse)
 	);
 }
 
@@ -231,7 +236,6 @@ function isProposal(value: unknown): value is Proposal {
 		isMetricValues(value.base_effect) &&
 		isMetricValues(value.positive_effect) &&
 		isNonnegativeInteger(value.lag_months) &&
-		isNumber(value.collapse_impact) &&
 		isNumber(value.donation_offer) &&
 		typeof value.bonus_choice_resolved === 'boolean' &&
 		typeof value.positive_trait_accepted === 'boolean'

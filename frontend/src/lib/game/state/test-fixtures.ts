@@ -32,7 +32,6 @@ export const testProposal: Proposal = {
 	base_effect: { ...zeroMetrics(), price: 8 },
 	positive_effect: { ...zeroMetrics(), trade: 8 },
 	lag_months: 6,
-	collapse_impact: 2,
 	donation_offer: 5,
 	bonus_choice_resolved: false,
 	positive_trait_accepted: false
@@ -86,6 +85,9 @@ export function makeLiveState(stateVersion = 1): LiveGameState {
 		term: 1,
 		year: 3,
 		month: 7,
+		governing_months: 30,
+		run_phase: 'RUNNING',
+		term_outcome: 'NONE',
 		metrics: current,
 		proposal_hand: [testProposal],
 		saved_bills: [{ title: '旧法案', proposals: [testProposal], policies: [testPolicy] }],

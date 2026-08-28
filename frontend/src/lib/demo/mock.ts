@@ -84,7 +84,6 @@ const makeProposal = (
 		base_effect: vector(base_effect),
 		positive_effect: positive,
 		lag_months,
-		collapse_impact: 0,
 		donation_offer: hasPositive ? 5 : 0,
 		bonus_choice_resolved: true,
 		positive_trait_accepted: hasPositive

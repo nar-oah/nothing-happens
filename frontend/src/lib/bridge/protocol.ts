@@ -48,6 +48,7 @@ export type OutboundPayloads = {
 	};
 	'constitution.revise': { state_version: number; article_index: number };
 	'month.advance': { state_version: number };
+	'term.next': { state_version: number };
 };
 
 export type OutboundType = keyof OutboundPayloads;

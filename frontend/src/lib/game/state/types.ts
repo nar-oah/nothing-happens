@@ -149,22 +149,26 @@ export type MonthReportDto = {
 	events: MonthReportEventDto[];
 };
 
+export type RunPhase = 'RUNNING' | 'TERM_ENDED';
+export type TermOutcome = 'NONE' | 'COLLAPSE' | 'NOTHING_HAPPENS';
+
 export type GameStatusDto = {
+	term: number;
 	year: number;
 	month: number;
+	governing_months: number;
+	run_phase: RunPhase;
+	term_outcome: TermOutcome;
 	metrics: MetricValues;
 	political_donation_pool: number;
 	collapse_level: number;
 	max_collapse: number;
-	run_failed?: boolean;
-	ending_id?: string;
 };
 
 export type LiveGameState = GameStatusDto & {
 	state_version: number;
 	ui_mode: UiMode;
 	world_scene: WorldScene;
-	term: number;
 	proposal_hand: Proposal[];
 	saved_bills: Bill[];
 	draft_bill: Bill;

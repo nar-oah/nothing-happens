@@ -73,7 +73,6 @@ export type Proposal = {
 	base_effect: MetricVector;
 	positive_effect: MetricVector;
 	lag_months: number;
-	collapse_impact: number;
 	donation_offer: number;
 	bonus_choice_resolved: boolean;
 	positive_trait_accepted: boolean;
