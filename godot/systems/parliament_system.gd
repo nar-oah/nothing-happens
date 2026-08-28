@@ -9,7 +9,7 @@ func initialize_seats(
 ) -> bool:
 	state.seats.clear()
 	var seen: Dictionary[SeatDefinition, bool] = {}
-	var anchor_races: Dictionary[RaceDefinition, bool] = {}
+	var fixed_races: Dictionary[RaceDefinition, bool] = {}
 	for definition in definitions:
 		if definition == null or seen.has(definition):
 			push_error("Seat definitions must be unique non-null Resources.")
@@ -17,10 +17,10 @@ func initialize_seats(
 		seen[definition] = true
 		if definition.anchor_race == null:
 			continue
-		if definition.anchor_race not in traces or anchor_races.has(definition.anchor_race):
-			push_error("Each content race can own at most one anchor seat.")
+		if definition.anchor_race not in traces or fixed_races.has(definition.anchor_race):
+			push_error("Each content race can own at most one fixed race seat.")
 			return false
-		anchor_races[definition.anchor_race] = true
+		fixed_races[definition.anchor_race] = true
 	for definition in definitions:
 		state.seats.append(SeatState.new(definition))
 	return true
@@ -42,12 +42,28 @@ func get_race_seats(state: RunState, race: RaceDefinition) -> Array[SeatState]:
 	return result
 
 
+func get_fixed_seats(
+	state: RunState, race: RaceDefinition = null
+) -> Array[SeatState]:
+	var result: Array[SeatState] = []
+	for seat in state.seats:
+		if seat.fixed_race == null:
+			continue
+		if race == null or seat.fixed_race == race:
+			result.append(seat)
+	return result
+
+
+func get_fixed_seat_count(state: RunState, race: RaceDefinition) -> int:
+	return get_fixed_seats(state, race).size()
+
+
 func get_variable_seats(
 	state: RunState, race: RaceDefinition = null
 ) -> Array[SeatState]:
 	var result: Array[SeatState] = []
 	for seat in state.seats:
-		if seat.race is ZhushuiRaceDefinition:
+		if seat.fixed_race != null:
 			continue
 		if race == null or seat.race == race:
 			result.append(seat)
@@ -55,20 +71,26 @@ func get_variable_seats(
 
 
 func get_race_seat_rate(state: RunState, race: RaceDefinition) -> float:
-	var seats := get_variable_seats(state)
-	if seats.is_empty():
+	if state == null or state.seats.is_empty():
 		return 0.0
-	var count := 0
-	for seat in seats:
-		if seat.race == race:
-			count += 1
-	return float(count) / float(seats.size())
+	return float(get_race_seat_count(state, race)) / float(state.seats.size())
 
 
 func get_influenceable_seats(
 	state: RunState, race: RaceDefinition = null
 ) -> Array[SeatState]:
-	return get_variable_seats(state, race)
+	var result: Array[SeatState] = []
+	for seat in state.seats:
+		if seat.race == null or seat.race is ZhushuiRaceDefinition:
+			continue
+		# A race-fixed group identity (currently Yano -> 造身公所) is not part of the
+		# proposal-driven influence algorithm. These seats still display their fixed group,
+		# but they do not contribute to interest-group influence counts or rates.
+		if seat.race.fixed_interest_group != null:
+			continue
+		if race == null or seat.race == race:
+			result.append(seat)
+	return result
 
 
 func get_group_influence_count(
@@ -135,14 +157,21 @@ func initialize_base_groups(
 	if context == null:
 		return false
 	for seat in context.state.seats:
-		if seat.race is ZhushuiRaceDefinition:
-			seat.base_group = null
-			seat.annual_group = null
-			seat.actual_group = null
+		seat.base_group = null
+		seat.annual_group = null
+		seat.actual_group = null
 	for race in context.race_definitions:
+		var race_seats := get_race_seats(context.state, race)
+		if race_seats.is_empty():
+			continue
 		if race is ZhushuiRaceDefinition:
 			continue
-		var race_seats := get_race_seats(context.state, race)
+		if race.fixed_interest_group != null:
+			for seat in race_seats:
+				seat.base_group = race.fixed_interest_group
+				seat.annual_group = race.fixed_interest_group
+				seat.actual_group = _resolve_group(context.state, race.fixed_interest_group)
+			continue
 		var allocation := allocate_base_columns(race_seats.size(), groups)
 		var allocated_count := 0
 		for count in allocation.values():
@@ -180,12 +209,20 @@ func assign_race_distribution(
 ) -> bool:
 	var remaining := target_counts.duplicate()
 	var reserved: Dictionary[SeatState, bool] = {}
+	# Fixed race seats are unconditional assignments, not preferences. They never enter the
+	# variable pool while their runtime fixed_race binding is active.
 	for seat in state.seats:
-		var anchor := seat.definition.anchor_race
-		if anchor != null and int(remaining.get(anchor, 0)) > 0:
-			seat.race = anchor
-			remaining[anchor] = int(remaining[anchor]) - 1
-			reserved[seat] = true
+		var fixed := seat.fixed_race
+		if fixed == null:
+			continue
+		if int(remaining.get(fixed, 0)) <= 0:
+			push_error("Race distribution cannot remove an active fixed race seat.")
+			return false
+		seat.race = fixed
+		remaining[fixed] = int(remaining[fixed]) - 1
+		reserved[seat] = true
+	# Preserve existing variable assignments where possible to avoid unnecessary identity
+	# churn when only quotas change.
 	for seat in state.seats:
 		if reserved.has(seat):
 			continue
@@ -203,24 +240,35 @@ func assign_race_distribution(
 			remaining[race] = int(remaining[race]) - 1
 			break
 		if seat.race == null:
-			push_error("Race distribution did not fill every permanent seat.")
+			push_error("Race distribution did not fill every seat.")
 			return false
 	for race in traces:
 		if int(remaining.get(race, 0)) != 0:
 			push_error("Race distribution has an unassigned quota.")
 			return false
-	return validate_anchor_invariants(state, traces)
+	return validate_fixed_seat_invariants(state, traces)
 
 
-func validate_anchor_invariants(
+func validate_fixed_seat_invariants(
 	state: RunState, traces: Array[RaceDefinition]
 ) -> bool:
-	for race in traces:
-		var anchor := _get_anchor_seat(state, race)
-		if anchor != null and anchor.race != race:
-			push_error("A race anchor seat must always remain in its owning race.")
+	for seat in state.seats:
+		if seat.fixed_race != null and seat.fixed_race in traces and seat.race != seat.fixed_race:
+			push_error("A fixed race seat must remain in its owning race.")
 			return false
 	return true
+
+
+func revoke_fixed_seat(context: RunContext, race: RaceDefinition) -> bool:
+	if context == null or race == null:
+		return false
+	var changed := false
+	for seat in context.state.seats:
+		if seat.fixed_race != race:
+			continue
+		seat.fixed_race = null
+		changed = true
+	return changed
 
 
 func record_authorized_proposal_slots(
@@ -260,9 +308,17 @@ func apply_annual_coloring(context: RunContext) -> void:
 			sources.append(group)
 			weights.append(shares[group])
 	for seat in context.state.seats:
+		if seat.race == null:
+			seat.annual_group = null
+			seat.actual_group = null
+			continue
 		if seat.race is ZhushuiRaceDefinition:
 			seat.annual_group = null
 			seat.actual_group = null
+			continue
+		if seat.race.fixed_interest_group != null:
+			seat.annual_group = seat.race.fixed_interest_group
+			seat.actual_group = _resolve_group(context.state, seat.race.fixed_interest_group)
 			continue
 		seat.annual_group = seat.base_group
 		if not sources.is_empty() and context.random_system.chance(context.balance.annual_group_coloring_rate):
@@ -309,16 +365,13 @@ func can_reassign_seat(
 		or target not in context.race_definitions
 		or seat not in context.state.seats
 		or seat.race == target
-		or seat.race is ZhushuiRaceDefinition
-		or target is ZhushuiRaceDefinition
+		or seat.fixed_race != null
+		or not context.constitution_system.race_participates_in_variable_seat_allocation(context, target)
 	):
 		return false
 	var target_constraint := context.constitution_system.get_race_seat_constraint(context, target)
 	var target_count := get_race_seat_count(context.state, target)
 	if target_constraint.maximum_count >= 0 and target_count >= target_constraint.maximum_count:
-		return false
-	var target_anchor := _get_anchor_seat(context.state, target)
-	if target_count == 0 and target_anchor != null and seat != target_anchor:
 		return false
 	var donor := seat.race
 	if donor == null:
@@ -326,8 +379,6 @@ func can_reassign_seat(
 	var donor_constraint := context.constitution_system.get_race_seat_constraint(context, donor)
 	var donor_count := get_race_seat_count(context.state, donor)
 	if donor_count - 1 < donor_constraint.minimum_count:
-		return false
-	if seat.definition.anchor_race == donor:
 		return false
 	return true
 
@@ -339,7 +390,7 @@ func reassign_seat(
 		return false
 	var previous := seat.race
 	seat.race = target
-	if validate_anchor_invariants(context.state, context.race_definitions):
+	if validate_fixed_seat_invariants(context.state, context.race_definitions):
 		return true
 	seat.race = previous
 	return false
@@ -362,13 +413,6 @@ func use_petition(context: RunContext) -> bool:
 	return true
 
 
-func _get_anchor_seat(state: RunState, race: RaceDefinition) -> SeatState:
-	for seat in state.seats:
-		if seat.definition.anchor_race == race:
-			return seat
-	return null
-
-
 func _resolve_group(
 	state: RunState, group: InterestGroupDefinition
 ) -> InterestGroupDefinition:
@@ -387,6 +431,9 @@ func _get_stable_groups(context: RunContext) -> Array[InterestGroupDefinition]:
 	for group in context.interest_groups:
 		if group != null and group not in result:
 			result.append(group)
+	for race in context.race_definitions:
+		if race != null and race.fixed_interest_group != null and race.fixed_interest_group not in result:
+			result.append(race.fixed_interest_group)
 	for seat in context.state.seats:
 		var local: InterestGroupDefinition = context.state.constitution.local_interest_groups.get(seat.definition)
 		if local != null and local not in result:
