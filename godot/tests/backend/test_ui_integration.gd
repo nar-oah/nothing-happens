@@ -56,7 +56,6 @@ func _test_core_dto_serialization(t: BackendTestContext) -> void:
 	proposal.base_effect.tax = 8
 	proposal.positive_effect.trade = 5
 	proposal.lag_months = 6
-	proposal.collapse_impact = 2
 	proposal.donation_offer = 5.0
 	proposal.bonus_choice_resolved = false
 	proposal.positive_trait_accepted = false
@@ -65,7 +64,7 @@ func _test_core_dto_serialization(t: BackendTestContext) -> void:
 	t.check_equal(proposal_dto["base_effect"]["tax"], 8, "proposal base effect serializes")
 	t.check_equal(proposal_dto["positive_effect"]["trade"], 5, "proposal trait serializes")
 	t.check_equal(proposal_dto["lag_months"], 6, "proposal lag serializes")
-	t.check_equal(proposal_dto["collapse_impact"], 2, "proposal collapse impact serializes as int")
+	t.check(not proposal_dto.has("collapse_impact"), "proposal has no collapse impact field")
 	t.check(not proposal_dto["bonus_choice_resolved"], "proposal pending state serializes")
 	var policy := _make_policy("serializer policy")
 	var policy_dto: Dictionary = serializer.policy(policy)
