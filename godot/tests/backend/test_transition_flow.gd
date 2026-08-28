@@ -10,7 +10,7 @@ func run(t: BackendTestContext) -> void:
 	_test_constitution_month_returns_to_office(t)
 	_test_normal_month_creates_newspaper_report(t)
 	_test_month_report_serializes_events(t)
-	_test_global_expectation_growth_uses_balance(t)
+	_test_constitution_expectation_growth_uses_month_zero_economy(t)
 	_test_opening_draw_and_term_lifecycle(t)
 	_test_zhushui_fixed_executive_seat(t)
 
@@ -59,7 +59,7 @@ func _test_year_boundary_enters_constitution(t: BackendTestContext) -> void:
 	t.check_equal(full["type"], "state.full", "month advance returns a full state")
 	t.check_equal(full["payload"]["year"], 2, "year boundary advances the year")
 	t.check_equal(full["payload"]["month"], 0, "year boundary enters month zero")
-	t.check_equal(full["payload"]["collapse_level"], 2, "year boundary preserves monotonic collapse")
+	t.check_equal(full["payload"]["collapse_level"], 1, "year boundary applies the configured annual recovery")
 	t.check_equal(full["payload"]["ui_mode"], "constitution", "month zero enters constitution view")
 	t.check_equal(full["payload"]["world_scene"], "parliament", "month zero keeps parliament world")
 	bridge.free()
@@ -156,25 +156,23 @@ func _test_month_report_serializes_events(t: BackendTestContext) -> void:
 	t.check_equal(report["events"][0]["value"], 42, "newspaper event keeps its requirement")
 
 
-func _test_global_expectation_growth_uses_balance(t: BackendTestContext) -> void:
-	var race := t.make_race("global growth race")
+func _test_constitution_expectation_growth_uses_month_zero_economy(t: BackendTestContext) -> void:
+	var race := t.make_race("constitution growth race")
 	race.increase_wage = true
-	var group := t.make_group("global growth group")
-	var balance := GameBalanceDefinition.new()
-	balance.automatic_draw_count = 0
-	balance.event_spawn_count_min = 0
-	balance.event_spawn_count_max = 0
-	balance.race_expectation_growth_per_year = 0.10
+	var group := t.make_group("constitution growth group")
+	var article := t.make_article(race, true, 0.10)
 	var session := t.make_session(
-		[race], [group], t.make_seats(1, "global growth"), [], balance
+		[race], [group], t.make_seats(1, "constitution growth"), [article]
 	)
 	var race_state := session.state.get_race(race)
-	t.check_approx(race_state.expectation_growth_rate, 0.0, "initial article has no race-local growth")
+	t.check_approx(race_state.expectation_growth_rate, 0.10, "active article supplies race-local growth")
+	t.check_equal(race_state.get_expectation(Metric.Id.WAGE), 110, "opening target uses the month-zero economy")
+	session.state.metrics.wage = 200
 	session.annual_settlement_system.settle_year(session.context)
 	t.check_equal(
 		race_state.get_expectation(Metric.Id.WAGE),
-		110,
-		"annual settlement falls back to global expectation growth"
+		220,
+		"annual settlement rebuilds expectation from the new month-zero economy"
 	)
 	session.free()
 
@@ -200,17 +198,15 @@ func _test_opening_draw_and_term_lifecycle(t: BackendTestContext) -> void:
 	t.check_equal(session.state.governing_months, 0, "month zero is not a governing month")
 	t.check_equal(session.state.proposal_hand.size(), 2, "January receives the opening proposals")
 
-	session.state.metrics.tax = -1
 	session.state.collapse_level = balance.max_collapse - balance.collapse_step
 	var ended_state := session.state
-	t.check(session.advance_month(), "the terminal normal month settles")
+	session.collapse_system.increase(session.context)
 	t.check_equal(session.state.run_phase, RunState.RunPhase.TERM_ENDED, "collapse maximum ends the term")
 	t.check_equal(
 		session.state.term_outcome,
 		RunState.TermOutcome.NOTHING_HAPPENS,
-		"no submitted bill produces Nothing Happens"
+		"a term with no saved submission receives Nothing Happens"
 	)
-	t.check_equal(session.state.governing_months, 1, "the terminal normal month counts as governing")
 	var ended_month := session.state.month
 	t.check(not session.advance_month(), "advance_month is blocked after the term ends")
 	t.check(session.state == ended_state, "blocked advance preserves the complete ended state")
@@ -224,20 +220,19 @@ func _test_opening_draw_and_term_lifecycle(t: BackendTestContext) -> void:
 	t.check_equal(session.state.month, 0, "the next term resets to month zero")
 	t.check_equal(session.state.collapse_level, 0, "the next term resets collapse")
 	t.check_equal(session.state.governing_months, 0, "the next term resets governing duration")
-	t.check(not session.state.has_submitted_bill, "the next term resets submission history")
 	t.check_equal(session.state.proposal_hand.size(), 0, "the next term waits until January to draw")
 	t.check_equal(session.state.events.size(), 0, "the next term starts without stale events")
 
 	var submitted := t.make_session(
 		[race], [group], t.make_seats(2, "submitted outcome"), [], balance
 	)
-	submitted.state.has_submitted_bill = true
+	submitted.state.saved_bills.append(SavedBillState.new())
 	submitted.state.collapse_level = balance.max_collapse - balance.collapse_step
 	submitted.collapse_system.increase(submitted.context)
 	t.check_equal(
 		submitted.state.term_outcome,
 		RunState.TermOutcome.COLLAPSE,
-		"a term with a submitted bill receives the collapse outcome"
+		"a term with a saved submission receives the collapse outcome"
 	)
 	submitted.free()
 	session.free()
