@@ -19,12 +19,8 @@
 		| { kind: 'calendar' }
 		| { kind: 'comment' };
 	type Props = {
-		mode?: 'MONTHLY' | 'TERM_END';
-		term: number;
 		year: number;
 		month: number;
-		governingMonths?: number;
-		termOutcome?: 'COLLAPSE' | 'NOTHING_HAPPENS';
 		metrics: NewspaperMetricData[];
 		events: NewspaperEventData[];
 		comment: NewspaperCommentData;
@@ -34,12 +30,8 @@
 	};
 
 	let {
-		mode = 'MONTHLY',
-		term,
 		year,
 		month,
-		governingMonths,
-		termOutcome,
 		metrics,
 		events,
 		comment,
@@ -82,10 +74,7 @@
 	class="newspaper relative h-$height w-$width overflow-visible text-ink-primary"
 	style:--width={`${NEWSPAPER_FOLD_WIDTH}px`}
 	style:--height={`${pages.length * NEWSPAPER_FOLD_HEIGHT}px`}
-	aria-label={mode === 'TERM_END' ? `第 ${term} 任任期终局报` : `第 ${year} 年 ${month} 月弦外报`}
-	data-newspaper-mode={mode}
-	data-term-outcome={termOutcome}
-	data-governing-months={governingMonths}
+	aria-label={`第 ${year} 年 ${month} 月弦外报`}
 >
 	{#each pages as page, index (index)}
 		<MemorialHorizontalFold
@@ -98,7 +87,7 @@
 			height={NEWSPAPER_FOLD_HEIGHT}
 		>
 			{#if page.kind === 'top'}
-				<Top {mode} {year} {month} {disabled} {onAdvance} />
+				<Top {year} {month} {disabled} {onAdvance} />
 			{:else if page.kind === 'metrics'}
 				<PublicMetrics {metrics} />
 			{:else if page.kind === 'front'}
