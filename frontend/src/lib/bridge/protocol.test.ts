@@ -4,7 +4,7 @@ import { makeDraftSync, makeLiveState } from '../game/state/test-fixtures.ts';
 import { CefIpcClient, type CefBridgeWindow } from './client.ts';
 import { normalizeInputRegions } from './input-regions.ts';
 import { CommandError } from './protocol.ts';
-import { decodeInboundMessage, encodeOutboundMessage } from './validation.ts';
+import { decodeInboundMessage, encodeOutboundMessage, isOutboundType } from './validation.ts';
 
 test('IPC envelope encodes and decodes discriminated messages', () => {
 	const encoded = encodeOutboundMessage({
@@ -17,6 +17,11 @@ test('IPC envelope encodes and decodes discriminated messages', () => {
 		request_id: 'ui-1',
 		payload: { state_version: 4, hand_index: 2 }
 	});
+	assert.deepEqual(
+		JSON.parse(encodeOutboundMessage({ type: 'term.next', payload: { state_version: 4 } })),
+		{ type: 'term.next', payload: { state_version: 4 } }
+	);
+	assert.equal(isOutboundType('term.next'), true);
 
 	const decoded = decodeInboundMessage(
 		JSON.stringify({ type: 'state.full', request_id: 'ui-1', payload: makeLiveState(4) })
@@ -26,6 +31,32 @@ test('IPC envelope encodes and decodes discriminated messages', () => {
 		assert.equal(decoded.value.type, 'state.full');
 		assert.equal(decoded.value.request_id, 'ui-1');
 	}
+});
+
+test('IPC validates authoritative term lifecycle and integer collapse status', () => {
+	const ended = makeLiveState(4);
+	ended.run_phase = 'TERM_ENDED';
+	ended.term_outcome = 'NOTHING_HAPPENS';
+	ended.governing_months = 19;
+	const decoded = decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: ended }));
+	assert.equal(decoded.ok, true);
+	if (decoded.ok && decoded.value.type === 'state.full') {
+		assert.equal(decoded.value.payload.run_phase, 'TERM_ENDED');
+		assert.equal(decoded.value.payload.term_outcome, 'NOTHING_HAPPENS');
+		assert.equal(decoded.value.payload.governing_months, 19);
+	}
+
+	const fractionalCollapse = { ...makeLiveState(5), collapse_level: 1.5 };
+	assert.deepEqual(
+		decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: fractionalCollapse })),
+		{ ok: false, error: 'Invalid payload for state.full' }
+	);
+	const missingPhase: Record<string, unknown> = { ...makeLiveState(6) };
+	delete missingPhase.run_phase;
+	assert.deepEqual(
+		decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: missingPhase })),
+		{ ok: false, error: 'Invalid payload for state.full' }
+	);
 });
 
 test('IPC decode rejects malformed JSON, unknown types, and invalid payloads', () => {
