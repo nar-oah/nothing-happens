@@ -2,6 +2,7 @@ extends Resource
 class_name SeatDefinition
 
 @export var display_name: String
+@export_multiline var description: String
 # Opening anchor: this seat starts the term assigned to the race, but remains part of the
 # ordinary variable-seat pool unless fixed_race is also set.
 @export var anchor_race: RaceDefinition
