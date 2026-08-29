@@ -53,6 +53,7 @@ func configure_content(
 
 func start_new_run() -> void:
 	term_report.clear()
+	_last_awarded_term = 0
 	_start_term(1)
 
 
