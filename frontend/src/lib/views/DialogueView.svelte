@@ -2,6 +2,7 @@
 	import ChoreSwitch from '$lib/components/chore/ChoreSwitch.svelte';
 	import Dialog from '$lib/components/dialog/Dialog.svelte';
 	import TopDialog from '$lib/components/dialog/TopDialog.svelte';
+	import { createInterestGroupDialogueContent } from '$lib/components/dialog/content';
 	import NewspaperEntry from '$lib/components/newspaper/NewspaperEntry.svelte';
 	import type { DialoguePresentation, ViewFrameProps } from './types';
 
@@ -12,8 +13,12 @@
 
 	let { term, year, month, onNewspaperOpen, dialogue, onResolveBonus }: Props = $props();
 	let donationChoice = $state(false);
-	let dialogueText = $derived(
-		`${dialogue.groupName}愿意给出一个优惠的提案，\n您可以选择给我手上的这张提案添加一个优惠条款，或收下我们的一点心意`
+	const content = $derived(
+		createInterestGroupDialogueContent(
+			dialogue.groupName,
+			dialogue.positiveEffect,
+			dialogue.donationOffer
+		)
 	);
 
 	function advanceDialogue() {
@@ -29,7 +34,7 @@
 	<NewspaperEntry {term} {year} {month} onOpen={onNewspaperOpen} />
 
 	<div class="top-dialog">
-		<TopDialog text={`${dialogue.groupName}代表来访。`} />
+		<TopDialog text={content.visitor} />
 	</div>
 
 	<div class="dialog-area">
@@ -40,7 +45,7 @@
 				bind:isSwitch={donationChoice}
 			/>
 		</div>
-		<Dialog text={dialogueText} onclick={advanceDialogue} />
+		<Dialog text={content.body} onclick={advanceDialogue} />
 	</div>
 </main>
 
