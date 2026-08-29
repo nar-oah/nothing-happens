@@ -24,6 +24,7 @@ var month_report_month: int = 0
 var month_report_previous_metrics: MetricValues
 var month_report_current_metrics: MetricValues
 var month_report_events: Array[Dictionary] = []
+var pending_event_intel: Array[Dictionary] = []
 var active_bill: ActiveBillState
 var proposal_hand: Array[ProposalInstance] = []
 var proposal_acquisition_order: Array[ProposalInstance] = []
@@ -116,4 +117,3 @@ func _track_current_hand_order() -> void:
 	for proposal in proposal_hand:
 		if proposal not in proposal_acquisition_order:
 			proposal_acquisition_order.append(proposal)
-
