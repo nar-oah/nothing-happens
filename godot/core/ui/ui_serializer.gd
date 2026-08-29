@@ -219,6 +219,16 @@ func month_report(state: RunState) -> Variant:
 	}
 
 
+func term_report(session: RunSession) -> Variant:
+	if session.term_report.is_empty():
+		return null
+	return {
+		"outcome": _term_outcome(session.term_report["outcome"]),
+		"previous_governing_months": session.term_report["previous_governing_months"],
+		"current_governing_months": session.term_report["current_governing_months"],
+	}
+
+
 func full_state(
 	session: RunSession, ui_mode: String, world_scene: String, state_version: int
 ) -> Dictionary:
@@ -235,6 +245,7 @@ func full_state(
 		"governing_months": state.governing_months,
 		"metrics": metric_values(state.metrics),
 		"month_report": month_report(state),
+		"term_report": term_report(session),
 		"proposal_hand": _proposals(state.proposal_hand),
 		"saved_bills": _bills(state.saved_bills),
 		"draft_bill": bill(state.draft_bill),

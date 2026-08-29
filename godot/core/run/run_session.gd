@@ -31,6 +31,7 @@ var constitution_system: ConstitutionSystem
 var collapse_system: CollapseSystem
 var annual_settlement_system: AnnualSettlementSystem
 var flow_controller: FlowController
+var term_report: Dictionary = {}
 var _last_awarded_term: int = 0
 
 
@@ -51,6 +52,7 @@ func configure_content(
 
 
 func start_new_run() -> void:
+	term_report.clear()
 	_start_term(1)
 
 
@@ -142,17 +144,35 @@ func _start_term(term_number: int) -> bool:
 
 
 func advance_month() -> bool:
-	var advanced := flow_controller.advance_month()
-	if advanced and state.run_phase == RunState.RunPhase.TERM_ENDED and _last_awarded_term != state.term:
-		meta_progression.add_governing_months(state.governing_months)
-		_last_awarded_term = state.term
-	return advanced
+	var advanced := true if state.run_phase == RunState.RunPhase.TERM_ENDED else flow_controller.advance_month()
+	if not advanced:
+		return false
+	return _settle_and_start_next_term() if state.run_phase == RunState.RunPhase.TERM_ENDED else true
 
 
 func start_next_term() -> bool:
 	if state == null or state.run_phase != RunState.RunPhase.TERM_ENDED:
 		return false
-	return _start_term(state.term + 1)
+	return _settle_and_start_next_term()
+
+
+func clear_term_report() -> void:
+	term_report.clear()
+
+
+func _settle_and_start_next_term() -> bool:
+	var ended_state := state
+	var previous_governing_months := meta_progression.available_governing_months
+	if _last_awarded_term != ended_state.term:
+		var elapsed_months := maxi((ended_state.year - 1) * 12 + ended_state.month, 0)
+		meta_progression.add_governing_months(elapsed_months)
+		_last_awarded_term = ended_state.term
+	term_report = {
+		"outcome": ended_state.term_outcome,
+		"previous_governing_months": previous_governing_months,
+		"current_governing_months": meta_progression.available_governing_months,
+	}
+	return _start_term(ended_state.term + 1)
 
 
 func unlock_constitution_column(column: ConstitutionColumnDefinition) -> bool:
