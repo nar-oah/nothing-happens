@@ -5,4 +5,5 @@
 [resource]
 script = ExtResource("1_qxpgu")
 display_name = "长桥"
+description = "最初因跨越峡谷的大桥而得名，后来又成为引弦管路、货运线路和人员迁移的重要节点。几乎所有要求蓬莱“再快一点”的计划都会经过长桥，因此当地也最熟悉所谓临时加速最后如何变成永久负担。"
 metadata/_custom_type_script = "uid://of78ek0nhty6"

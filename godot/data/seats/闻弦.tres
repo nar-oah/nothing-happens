@@ -5,4 +5,5 @@
 [resource]
 script = ExtResource("1_qxpgu")
 display_name = "闻弦"
+description = "围绕数座异常活跃的古老听弦塔形成的城市，也是南柯最早系统研究取能技术的地方之一。塔鸣在当地从来不是奇观，而是一种像潮声一样习以为常、又时时提醒居民“空气里又积了多少担忧”的背景声。"
 metadata/_custom_type_script = "uid://of78ek0nhty6"

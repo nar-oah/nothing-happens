@@ -5,4 +5,5 @@
 [resource]
 script = ExtResource("1_qxpgu")
 display_name = "云津"
+description = "连接内陆水路、山地驿道与沿海运输网的大型转运节点。这里常常什么都不生产，却几乎什么都经过，因此一次桥断、封路或货运延误，都能被报纸迅速写成全岛性的危机预兆。"
 metadata/_custom_type_script = "uid://of78ek0nhty6"

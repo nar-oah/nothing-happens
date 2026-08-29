@@ -5,4 +5,5 @@
 [resource]
 script = ExtResource("1_qxpgu")
 display_name = "定海"
+description = "位于蓬莱近海航路上的运输城镇，负责把各地货物汇入会同，却无法承担真正的远洋巨船。当地人靠海吃饭，却也最厌烦永乐港把所有对外贸易都称作自己的功劳。"
 metadata/_custom_type_script = "uid://of78ek0nhty6"

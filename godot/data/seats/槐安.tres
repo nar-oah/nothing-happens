@@ -6,5 +6,6 @@
 [resource]
 script = ExtResource("1_qxpgu")
 display_name = "槐安"
+description = "蓬莱最大的未然工程与听弦塔维护中心，也是槐安公所及其后继组织的根基。塔工、制胆师、维修者和从理想国醒来的试制者挤在同一座城里，因此这里既最接近南柯梦中的未来，也最清楚现实中的工钱和夜班是什么样子。"
 anchor_race = ExtResource("1_6u7af")
 metadata/_custom_type_script = "uid://of78ek0nhty6"

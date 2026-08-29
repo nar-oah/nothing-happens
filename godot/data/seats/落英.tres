@@ -5,4 +5,5 @@
 [resource]
 script = ExtResource("1_qxpgu")
 display_name = "落英"
+description = "桃林、果园和生命资料生产极为集中的富庶地区，大量食物与植物原料从这里运往全岛。它在报纸上常以“丰收之地”出现，当地人却更熟悉另一面：丰收通常只意味着下一年别人会要求他们交出更多。"
 metadata/_custom_type_script = "uid://of78ek0nhty6"

@@ -5,4 +5,5 @@
 [resource]
 script = ExtResource("1_qxpgu")
 display_name = "石门"
+description = "控制山岭通道的交通咽喉，许多桃源腹地与内陆城市都必须从这里出入。石门本身不大，却频繁出现在全岛政治中，因为开放一座关口，在别处往往意味着商贸，在这里却意味着究竟由谁决定道路可以通向哪里。"
 metadata/_custom_type_script = "uid://of78ek0nhty6"

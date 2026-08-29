@@ -5,4 +5,5 @@
 [resource]
 script = ExtResource("1_qxpgu")
 display_name = "承平"
+description = "一座没有特别传奇历史、也没有单一支柱产业的繁荣内陆城市。它最大的叙事价值恰恰在于平凡：这里已经多年没有真正发生过严重灾害，却始终有人能列出十条理由说明承平马上就要撑不下去了。"
 metadata/_custom_type_script = "uid://of78ek0nhty6"

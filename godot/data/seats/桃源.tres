@@ -6,5 +6,6 @@
 [resource]
 script = ExtResource("1_qxpgu")
 display_name = "桃源"
+description = "古老桃林围绕的封闭谷地，也是桃花妖祖地。外界把这里当作未经现代化破坏的田园遗存，当地人则更倾向认为，是外界主动把自己卷进了本来可以避免的麻烦。"
 anchor_race = ExtResource("1_or4ty")
 metadata/_custom_type_script = "uid://of78ek0nhty6"

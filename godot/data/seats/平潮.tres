@@ -5,4 +5,5 @@
 [resource]
 script = ExtResource("1_qxpgu")
 display_name = "平潮"
+description = "位于沿海航线与岛内商路交汇处的混居商业城市，没有哪个种族能够真正把它称为自己的地方。当地最重要的能力不是生产某一种东西，而是让来自完全不同地方的人在同一张账簿上把东西换走。"
 metadata/_custom_type_script = "uid://of78ek0nhty6"

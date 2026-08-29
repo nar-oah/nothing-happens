@@ -5,4 +5,5 @@
 [resource]
 script = ExtResource("1_qxpgu")
 display_name = "未央"
+description = "现代化后迅速扩张的大型综合城市，工场、学校、商号、移民社区和官署新区彼此混杂。它的名字原本只是祝愿繁盛不尽，如今却获得了另一层意思——工程永远没有完工的一天，指标永远还有下一年的标准，所有人都生活在“还没结束”的状态里。"
 metadata/_custom_type_script = "uid://of78ek0nhty6"

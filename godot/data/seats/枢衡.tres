@@ -6,5 +6,7 @@
 [resource]
 script = ExtResource("1_mniet")
 display_name = "枢衡"
+description = "蓬莱最大的造身与机谱中心，造身公所的总所设于此。新造行身在这里点醒、编号、入籍，旧行身也从全岛来到这里维修、换件、校验机谱与登记身契。枢衡从不是偃偶的祖地，却比任何地方都聚集着更多偃偶——对一具行身而言，这里往往既是它第一次被承认为人的地方，也是它第一次被登记为商品的地方。"
 anchor_race = ExtResource("1_yj4ml")
+fixed_race = ExtResource("1_yj4ml")
 metadata/_custom_type_script = "uid://of78ek0nhty6"

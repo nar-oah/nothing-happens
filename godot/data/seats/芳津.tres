@@ -5,4 +5,5 @@
 [resource]
 script = ExtResource("1_qxpgu")
 display_name = "芳津"
+description = "负责把桃源诸地的果蔬、木材、药材和其它生命资料运往岛内市场的河港。商贸让这里比多数桃花妖地区富裕，也让它成为桃源内部最难回答“究竟应该重新封路，还是继续卖东西”这一问题的地方。"
 metadata/_custom_type_script = "uid://of78ek0nhty6"

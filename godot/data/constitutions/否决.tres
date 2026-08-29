@@ -1,21 +1,24 @@
-[gd_resource type="Resource" script_class="ConstitutionArticleDefinition" format=3]
+[gd_resource type="Resource" script_class="ConstitutionArticleDefinition" format=3 uid="uid://dbb6wwew11528"]
 
-[ext_resource type="Script" path="res://definitions/constitution_article_definition.gd" id="1_article_script"]
-[ext_resource type="Script" path="res://definitions/policy_definition.gd" id="2_policy_script"]
-[ext_resource type="Resource" path="res://data/races/yano.tres" id="3_race_yano"]
-[ext_resource type="Resource" path="res://data/constitution_rows/偃偶.tres" id="row"]
-[ext_resource type="Resource" path="res://data/constitutions/有限.tres" id="4_prereq"]
-[ext_resource type="Script" path="res://definitions/constitution_seat_condition.gd" id="condition_script"]
+[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="1_403ck"]
+[ext_resource type="Script" uid="uid://dajy5425i5dpq" path="res://definitions/constitution_article_definition.gd" id="1_article_script"]
+[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_m58qp"]
+[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
+[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="3_2sxy4"]
+[ext_resource type="Resource" uid="uid://c2eco18e42n34" path="res://data/races/yano.tres" id="3_race_yano"]
+[ext_resource type="Resource" uid="uid://bp366yyqyg6le" path="res://data/constitutions/有限.tres" id="4_prereq"]
+[ext_resource type="Resource" uid="uid://ba45pd3y4pruo" path="res://data/policies/统配行身.tres" id="5_policy_1"]
+[ext_resource type="Resource" uid="uid://cxv77bihfeq72" path="res://data/policies/机谱统购.tres" id="6_policy_2"]
+[ext_resource type="Resource" uid="uid://bij6e8u1gn2rw" path="res://data/policies/身契转租.tres" id="7_policy_3"]
+[ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="13_ac3ox"]
+[ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="condition_script"]
 [ext_resource type="Resource" path="res://data/interest_groups/造身公所.tres" id="group"]
-[ext_resource type="Resource" path="res://data/policies/统配行身.tres" id="5_policy_1"]
-[ext_resource type="Resource" path="res://data/policies/机谱统购.tres" id="6_policy_2"]
-[ext_resource type="Resource" path="res://data/policies/身契转租.tres" id="7_policy_3"]
+[ext_resource type="Resource" path="res://data/constitution_rows/偃偶.tres" id="row"]
 
 [sub_resource type="Resource" id="Resource_condition"]
 script = ExtResource("condition_script")
 interest_group = ExtResource("group")
 comparison = 1
-required_rate = 0.0
 
 [resource]
 script = ExtResource("1_article_script")
