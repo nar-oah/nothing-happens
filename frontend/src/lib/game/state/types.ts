@@ -180,6 +180,12 @@ export type MonthReportDto = {
 export type RunPhase = 'RUNNING' | 'TERM_ENDED';
 export type TermOutcome = 'NONE' | 'COLLAPSE' | 'NOTHING_HAPPENS';
 
+export type TermReportDto = {
+	outcome: Exclude<TermOutcome, 'NONE'>;
+	previous_governing_months: number;
+	current_governing_months: number;
+};
+
 export type GameStatusDto = {
 	term: number;
 	year: number;
@@ -211,6 +217,7 @@ export type LiveGameState = GameStatusDto & {
 	draft_preview: DraftPreviewDto;
 	pending_dialogue: PendingDialogueDto | null;
 	month_report?: MonthReportDto | null;
+	term_report?: TermReportDto | null;
 };
 
 export type DraftSyncDto = {
