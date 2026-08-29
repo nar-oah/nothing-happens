@@ -144,18 +144,18 @@ func run(t: BackendTestContext) -> void:
 
 func _test_annual_expectations_rebuild_from_month_zero_economy(t: BackendTestContext) -> void:
 	var higher := t.make_race("higher")
-	higher.increase_trade = true
+	higher.increase_investment = true
 	var higher_article := t.make_article(higher, true, 0.10)
 	var higher_session := t.make_session(
 		[higher], [t.make_group("group")], t.make_seats(1, "higher"), [higher_article]
 	)
 	var higher_state := higher_session.state.get_race(higher)
-	t.check_equal(higher_state.get_expectation(Metric.Id.TRADE), 110, "first year uses the active constitution rate")
+	t.check_equal(higher_state.get_expectation(Metric.Id.INVESTMENT), 110, "first year uses the active constitution rate")
 	higher_session.annual_settlement_system.settle_year(higher_session.context)
-	t.check_equal(higher_state.get_expectation(Metric.Id.TRADE), 110, "unchanged month-zero economy rebuilds the same target")
-	higher_session.state.metrics.trade = 200
+	t.check_equal(higher_state.get_expectation(Metric.Id.INVESTMENT), 110, "unchanged month-zero economy rebuilds the same target")
+	higher_session.state.metrics.investment = 200
 	higher_session.annual_settlement_system.settle_year(higher_session.context)
-	t.check_equal(higher_state.get_expectation(Metric.Id.TRADE), 220, "new month-zero economy becomes the next target baseline")
+	t.check_equal(higher_state.get_expectation(Metric.Id.INVESTMENT), 220, "new month-zero economy becomes the next target baseline")
 	higher_session.free()
 
 	var lower := t.make_race("lower")
@@ -182,15 +182,15 @@ func _test_annual_expectations_rebuild_from_month_zero_economy(t: BackendTestCon
 
 func _test_zero_growth_still_allows_gap_event(t: BackendTestContext) -> void:
 	var race := t.make_race("stable expectation")
-	race.increase_wage = true
+	race.increase_production = true
 	var article := t.make_article(race, true, 0.0)
 	var session := t.make_session(
 		[race], [t.make_group("group")], t.make_seats(1, "stable"), [article]
 	)
 	var race_state := session.state.get_race(race)
-	t.check_equal(race_state.get_expectation(Metric.Id.WAGE), 100, "zero growth preserves the month-zero target")
-	session.state.metrics.wage = 50
-	var event := session.event_system.spawn_event(session.context, race, Metric.Id.WAGE)
+	t.check_equal(race_state.get_expectation(Metric.Id.PRODUCTION), 100, "zero growth preserves the month-zero target")
+	session.state.metrics.production = 50
+	var event := session.event_system.spawn_event(session.context, race, Metric.Id.PRODUCTION)
 	t.check(event != null, "real metric regression still creates an event at zero growth")
 	session.free()
 
@@ -286,7 +286,7 @@ func _test_complete_month_flow_order(t: BackendTestContext) -> void:
 func _test_balance_controls_automatic_draw_count(t: BackendTestContext) -> void:
 	var race := t.make_race("draw")
 	var group := t.make_group("draw group")
-	group.decrease_price = true
+	group.decrease_consumption = true
 	var balance := GameBalanceDefinition.new()
 	balance.automatic_draw_count = 2
 	balance.event_spawn_count_min = 0
@@ -301,5 +301,5 @@ func _test_balance_controls_automatic_draw_count(t: BackendTestContext) -> void:
 	t.check_equal(session.state.proposal_hand.size(), 2, "automatic opening draw count comes from balance")
 	for proposal in session.state.proposal_hand:
 		t.check(proposal.source_group == group, "automatic proposal keeps group Resource")
-		t.check_equal(proposal.base_effect.price, 3, "configured proposal magnitude is applied")
+		t.check_equal(proposal.base_effect.consumption, -3, "configured proposal magnitude is applied")
 	session.free()
