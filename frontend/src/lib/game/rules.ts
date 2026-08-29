@@ -13,26 +13,26 @@ import {
 
 export const METRICS: Metric[] = [
 	Metric.TAX,
-	Metric.PRICE,
-	Metric.WAGE,
+	Metric.CONSUMPTION,
+	Metric.PRODUCTION,
 	Metric.EMPLOYMENT,
-	Metric.TRADE
+	Metric.INVESTMENT
 ];
 
 const METRIC_KEYS: Record<Metric, keyof MetricValues> = {
 	[Metric.TAX]: 'tax',
-	[Metric.PRICE]: 'price',
-	[Metric.WAGE]: 'wage',
+	[Metric.CONSUMPTION]: 'consumption',
+	[Metric.PRODUCTION]: 'production',
 	[Metric.EMPLOYMENT]: 'employment',
-	[Metric.TRADE]: 'trade'
+	[Metric.INVESTMENT]: 'investment'
 };
 
 export const METRIC_DISPLAY_NAMES: Record<Metric, string> = {
-	[Metric.TAX]: '税課',
-	[Metric.PRICE]: '物價',
-	[Metric.WAGE]: '工錢',
-	[Metric.EMPLOYMENT]: '用工',
-	[Metric.TRADE]: '商貿'
+	[Metric.TAX]: '稅課',
+	[Metric.CONSUMPTION]: '消費',
+	[Metric.PRODUCTION]: '生產',
+	[Metric.EMPLOYMENT]: '就業',
+	[Metric.INVESTMENT]: '投資'
 };
 
 export function getMetricValue(values: MetricValues, metric: Metric): number {
