@@ -3,6 +3,7 @@ class_name RaceDefinition
 
 @export var display_name: String
 @export_multiline var description: String
+@export_multiline var event_description: String
 @export var fixed_interest_group: InterestGroupDefinition
 
 @export_group("希望提高")
