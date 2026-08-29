@@ -17,7 +17,7 @@
 		时间: false
 	});
 	let rightFilters = $state({
-		指标: { options: ['税课', '物价', '工钱', '用工', '商贸'], selected: ['商贸'], multiple: true },
+		指标: { options: ['税课', '消费', '生产', '就业', '投资'], selected: ['投资'], multiple: true },
 		数值: false
 	});
 	let galleryBill = $state(mockSavedBills[0]);
@@ -58,26 +58,28 @@
 		display: flex;
 		flex-direction: column;
 		gap: 36px;
-		padding: 48px;
-		background: #537087;
+		padding: 40px;
+		background: #f5f1e8;
+		color: #1e2e3b;
 	}
+
 	header {
 		display: flex;
 		align-items: baseline;
 		gap: 24px;
-		color: #1e2e3b;
-		font-family: 'RealTypeWriter';
 	}
+
 	header a {
-		color: #1e2e3b;
+		color: inherit;
 	}
+
 	section {
 		display: flex;
 		align-items: flex-start;
 		gap: 32px;
 	}
+
 	.wide {
-		overflow-x: auto;
-		padding-bottom: 20px;
+		width: 100%;
 	}
 </style>
