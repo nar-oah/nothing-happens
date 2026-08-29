@@ -86,6 +86,7 @@ func update_information(context: RunContext) -> void:
 		)
 		if context.random_system.chance(probability):
 			event.known = true
+			_queue_event_intel(event, context)
 			_update_known_event(event, context)
 
 
@@ -210,6 +211,17 @@ func _calculate_satisfaction(event: EventState, state: RunState) -> float:
 	var current := state.metrics.get_value(event.metric)
 	var achieved_change := maxf(float(current - event.baseline_value), 0.0)
 	return achieved_change / required_change
+
+
+func _queue_event_intel(event: EventState, context: RunContext) -> void:
+	context.state.pending_event_intel.append(
+		{
+			"race": event.race,
+			"metric": int(event.metric),
+			"value": get_current_requirement(event),
+			"strength": roundi(clampf(event.growth_progress, 0.0, 1.0) * 100.0),
+		}
+	)
 
 
 func _resolve(event: EventState, state: RunState) -> void:
