@@ -29,10 +29,16 @@ test('live race/group summaries derive Top without mock lore', () => {
 	const top = deriveTopItems(makeLiveState());
 	assert.equal(top.raceItems[0].item.text, '人类');
 	assert.equal(top.raceItems[0].item.value, 1);
+	assert.equal(top.raceItems[0].detail.leftLabel, '年度期望');
 	assert.match(top.raceItems[0].detail.leftBody, /商貿↑110/);
+	assert.equal(top.raceItems[0].detail.rightLabel, '种族简介');
+	assert.equal(top.raceItems[0].detail.rightBody, '人类简介');
 	assert.equal(top.interestGroupItems[0].item.text, '造身公所');
 	assert.equal(top.interestGroupItems[0].item.value, 1);
+	assert.equal(top.interestGroupItems[0].detail.leftLabel, '固定指标立场');
 	assert.match(top.interestGroupItems[0].detail.leftBody, /物價↓/);
+	assert.equal(top.interestGroupItems[0].detail.rightLabel, '利益集团简介');
+	assert.equal(top.interestGroupItems[0].detail.rightBody, '造身公所简介');
 });
 
 test('live status derives political donation and collapse values', () => {

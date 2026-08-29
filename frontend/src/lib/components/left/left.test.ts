@@ -22,11 +22,13 @@ import {
 	sortProposalItemsByValue,
 	toggleProposalSelection
 } from './left.ts';
+import { proposalToHorizontalContents } from '../memorial/presentation.ts';
 import type { LeftItem, ProposalLeftItem } from './types.ts';
 import { mockLeftItems, mockProposalItems } from '../../demo/mock.ts';
 
 const group = (display_name: string): InterestGroupDefinition => ({
 	display_name,
+	description: `${display_name}简介`,
 	base_column_weight: 1,
 	decrease_tax: false,
 	decrease_price: false,
@@ -119,6 +121,13 @@ const items: LeftItem[] = [
 	...proposals,
 	{ kind: 'policy', ref: { collection: 'policies', index: 0 }, policy }
 ];
+
+test('proposal details show the source interest group description', () => {
+	assert.deepEqual(proposalToHorizontalContents(proposals[0].proposal)[0], {
+		title: '商会',
+		body: '商会简介'
+	});
+});
 
 test('Left filters by discriminated kind without mutating input', () => {
 	const filtered = filterArchiveItems(items, {

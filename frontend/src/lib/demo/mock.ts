@@ -42,6 +42,7 @@ const makeGroup = (
 	decreases: Partial<Record<Metric, boolean>> = {}
 ): InterestGroupDefinition => ({
 	display_name,
+	description: `${display_name}简介`,
 	base_column_weight,
 	decrease_tax: decreases[Metric.TAX] ?? false,
 	decrease_price: decreases[Metric.PRICE] ?? false,

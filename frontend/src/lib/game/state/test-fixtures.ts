@@ -19,6 +19,7 @@ export const zeroMetrics = (): MetricValues => ({
 
 export const testGroup: InterestGroupDefinition = {
 	display_name: '造身公所',
+	description: '造身公所简介',
 	base_column_weight: 5,
 	decrease_tax: false,
 	decrease_price: true,
@@ -145,6 +146,7 @@ export function makeLiveState(stateVersion = 1): LiveGameState {
 			{
 				race_index: 0,
 				display_name: '人类',
+				description: '人类简介',
 				seat_count: 1,
 				expectations: [{ metric: Metric.TRADE, target: 110, direction: 1 }],
 				resolved_events_this_year: 2,
