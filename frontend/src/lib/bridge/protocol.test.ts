@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { makeDraftSync, makeLiveState } from '../game/state/test-fixtures.ts';
+import { deriveTermReportMetrics } from '../components/newspaper/term-report.ts';
 import { CefIpcClient, type CefBridgeWindow } from './client.ts';
 import { normalizeInputRegions } from './input-regions.ts';
 import { CommandError } from './protocol.ts';
@@ -70,6 +71,32 @@ test('IPC validates authoritative term lifecycle and integer collapse status', (
 		decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: missingPhase })),
 		{ ok: false, error: 'Invalid payload for state.full' }
 	);
+});
+
+test('IPC validates term settlement reports and derives year/month rollover metrics', () => {
+	const settled = {
+		...makeLiveState(5),
+		term_report: {
+			outcome: 'COLLAPSE' as const,
+			previous_governing_months: 11,
+			current_governing_months: 13
+		}
+	};
+	const decoded = decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: settled }));
+	assert.equal(decoded.ok, true);
+	assert.deepEqual(deriveTermReportMetrics(settled.term_report), [
+		{ metric: '執政年數', value: 0, change: 1 },
+		{ metric: '執政月數', value: 11, change: -10 }
+	]);
+
+	const invalid = {
+		...settled,
+		term_report: { ...settled.term_report, current_governing_months: 10 }
+	};
+	assert.deepEqual(decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: invalid })), {
+		ok: false,
+		error: 'Invalid payload for state.full'
+	});
 });
 
 test('IPC rejects the legacy flat constitution payload shape', () => {

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onDestroy } from 'svelte';
 	import { VERTICAL_FOLD_HEIGHT, VERTICAL_FOLD_WIDTH } from '../memorial/constants';
 	import MemorialHorizontalFold from '../memorial/horizontal/MemorialHorizontalFold.svelte';
 	import Calendar from './Calendar.svelte';
@@ -7,7 +8,12 @@
 	import Front from './Front.svelte';
 	import PublicMetrics from './PublicMetrics.svelte';
 	import Top from './Top.svelte';
-	import type { NewspaperCommentData, NewspaperEventData, NewspaperMetricData } from './types';
+	import type {
+		NewspaperCommentData,
+		NewspaperEventData,
+		NewspaperFrontData,
+		NewspaperMetricData
+	} from './types';
 
 	const NEWSPAPER_FOLD_WIDTH = VERTICAL_FOLD_HEIGHT;
 	const NEWSPAPER_FOLD_HEIGHT = VERTICAL_FOLD_WIDTH;
@@ -15,6 +21,7 @@
 		| { kind: 'top' }
 		| { kind: 'metrics' }
 		| { kind: 'front'; event: NewspaperEventData }
+		| { kind: 'summary'; front: NewspaperFrontData }
 		| { kind: 'event'; event: NewspaperEventData }
 		| { kind: 'calendar' }
 		| { kind: 'comment' };
@@ -22,17 +29,36 @@
 		year: number;
 		month: number;
 		metrics: NewspaperMetricData[];
+		front?: NewspaperFrontData;
 		events: NewspaperEventData[];
 		comment: NewspaperCommentData;
 		disabled?: boolean;
+		open?: boolean;
 		onAdvance?: () => void;
+		onFolded?: () => void;
 	};
 
-	let { year, month, metrics, events, comment, disabled = false, onAdvance }: Props = $props();
+	let {
+		year,
+		month,
+		metrics,
+		front,
+		events,
+		comment,
+		disabled = false,
+		open = true,
+		onAdvance,
+		onFolded
+	}: Props = $props();
+	let foldReported = false;
+	let foldTimer: ReturnType<typeof setTimeout> | undefined;
 	const sortedEvents = $derived([...events].sort((a, b) => a.countdown - b.countdown));
 	const pages = $derived.by((): NewspaperPage[] => {
 		const result: NewspaperPage[] = [{ kind: 'top' }, { kind: 'metrics' }];
-		if (sortedEvents.length > 0) {
+		if (front) {
+			result.push({ kind: 'summary', front });
+			for (const event of sortedEvents) result.push({ kind: 'event', event });
+		} else if (sortedEvents.length > 0) {
 			result.push({ kind: 'front', event: sortedEvents[0] });
 			for (const event of sortedEvents.slice(1)) result.push({ kind: 'event', event });
 		}
@@ -58,6 +84,37 @@
 			.slice(0, index)
 			.reduce((x, skew) => x + NEWSPAPER_FOLD_HEIGHT * Math.tan((skew * Math.PI) / 180), 0);
 	}
+
+	function finishFold(): void {
+		if (open || foldReported) return;
+		foldReported = true;
+		foldTimer = undefined;
+		onFolded?.();
+	}
+
+	function clearFoldTimer(): void {
+		if (foldTimer === undefined) return;
+		clearTimeout(foldTimer);
+		foldTimer = undefined;
+	}
+
+	function getFoldDuration(count: number): number {
+		const positionDuration = 520 + Math.max(0, count - 1) * 32;
+		const straightenDuration = 620 + 260;
+		return Math.max(positionDuration, straightenDuration) + 20;
+	}
+
+	$effect(() => {
+		clearFoldTimer();
+		if (open) {
+			foldReported = false;
+			return;
+		}
+		if (foldReported) return;
+		foldTimer = setTimeout(finishFold, getFoldDuration(pages.length));
+	});
+
+	onDestroy(clearFoldTimer);
 </script>
 
 <article
@@ -69,7 +126,7 @@
 	{#each pages as page, index (index)}
 		<MemorialHorizontalFold
 			x={getFoldX(index)}
-			open
+			{open}
 			{index}
 			count={pages.length}
 			skew={skews[index]}
@@ -82,6 +139,8 @@
 				<PublicMetrics {metrics} />
 			{:else if page.kind === 'front'}
 				<Front {...page.event} />
+			{:else if page.kind === 'summary'}
+				<Front {...page.front} />
 			{:else if page.kind === 'event'}
 				<Event {...page.event} />
 			{:else if page.kind === 'calendar'}

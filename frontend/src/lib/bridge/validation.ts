@@ -112,7 +112,20 @@ export function isLiveGameState(value: unknown): value is LiveGameState {
 		isParliamentSummary(state.parliament) &&
 		(state.active_bill === null || isActiveBill(state.active_bill)) &&
 		isDraftPreview(state.draft_preview) &&
-		(state.pending_dialogue === null || isPendingDialogue(state.pending_dialogue))
+		(state.pending_dialogue === null || isPendingDialogue(state.pending_dialogue)) &&
+		(state.term_report === undefined ||
+			state.term_report === null ||
+			isTermReport(state.term_report))
+	);
+}
+
+function isTermReport(value: unknown): boolean {
+	return (
+		isRecord(value) &&
+		(value.outcome === 'COLLAPSE' || value.outcome === 'NOTHING_HAPPENS') &&
+		isNonnegativeInteger(value.previous_governing_months) &&
+		isNonnegativeInteger(value.current_governing_months) &&
+		value.current_governing_months >= value.previous_governing_months
 	);
 }
 

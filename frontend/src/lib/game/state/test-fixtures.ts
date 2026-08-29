@@ -89,6 +89,7 @@ export function makeLiveState(stateVersion = 1): LiveGameState {
 		governing_months: 30,
 		run_phase: 'RUNNING',
 		term_outcome: 'NONE',
+		term_report: null,
 		metrics: current,
 		proposal_hand: [testProposal],
 		saved_bills: [{ title: '旧法案', proposals: [testProposal], policies: [testPolicy] }],

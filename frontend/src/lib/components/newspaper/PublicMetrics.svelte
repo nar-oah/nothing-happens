@@ -8,11 +8,12 @@
 
 	let { metrics }: Props = $props();
 	let hovering = $state(false);
-	const orderedMetrics = $derived(
-		NEWSPAPER_METRIC_ORDER.map((metric) => metrics.find((item) => item.metric === metric)).filter(
-			(item): item is NewspaperMetricData => item !== undefined
-		)
-	);
+	const orderedMetrics = $derived([
+		...NEWSPAPER_METRIC_ORDER.map((metric) =>
+			metrics.find((item) => item.metric === metric)
+		).filter((item): item is NewspaperMetricData => item !== undefined),
+		...metrics.filter((item) => typeof item.metric === 'string')
+	]);
 </script>
 
 <div

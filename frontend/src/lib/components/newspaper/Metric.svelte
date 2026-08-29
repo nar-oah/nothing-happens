@@ -2,7 +2,7 @@
 	import type { Metric } from '$lib/game/types';
 	import MorphText from '../text/MorphText.svelte';
 	import { getNewspaperMetricLabel } from './types';
-	type Props = { metric: Metric; value: number; change: number; changeMagnitude?: number };
+	type Props = { metric: Metric | string; value: number; change: number; changeMagnitude?: number };
 	let { metric, value, change, changeMagnitude }: Props = $props();
 	const direction = $derived(change > 0 ? '↑' : change < 0 ? '↓' : '—');
 	const magnitude = $derived(changeMagnitude ?? Math.abs(change));

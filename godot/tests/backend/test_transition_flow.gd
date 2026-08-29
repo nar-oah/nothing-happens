@@ -9,9 +9,11 @@ func run(t: BackendTestContext) -> void:
 	_test_year_boundary_enters_constitution(t)
 	_test_constitution_month_returns_to_office(t)
 	_test_normal_month_creates_newspaper_report(t)
+	_test_collapse_month_restarts_before_sync(t)
 	_test_month_report_serializes_events(t)
 	_test_constitution_expectation_growth_uses_month_zero_economy(t)
 	_test_opening_draw_and_term_lifecycle(t)
+	_test_term_settlement_resets_board_run_state(t)
 	_test_zhushui_fixed_executive_seat(t)
 
 
@@ -130,6 +132,54 @@ func _test_normal_month_creates_newspaper_report(t: BackendTestContext) -> void:
 	session.free()
 
 
+func _test_collapse_month_restarts_before_sync(t: BackendTestContext) -> void:
+	var balance := GameBalanceDefinition.new()
+	balance.automatic_draw_count = 0
+	balance.event_spawn_count_min = 0
+	balance.event_spawn_count_max = 0
+	balance.event_lifetime_months = 1
+	balance.max_collapse = 1
+	var race := t.make_race("settlement bridge race")
+	var group := t.make_group("settlement bridge group")
+	var session := t.make_session(
+		[race], [group], t.make_seats(1, "settlement bridge"), [], balance
+	)
+	session.state.month = 1
+	session.state.saved_bills.append(SavedBillState.new())
+	session.state.events.append(EventState.new(race, Metric.Id.TAX, 100, 200))
+	var bridge := UiBridge.new()
+	bridge.setup(session)
+	var messages := bridge.receive_ipc_message(
+		_message("month.advance", {"state_version": 0})
+	)
+	var full: Dictionary = messages[messages.size() - 1]
+	t.check_equal(full["type"], "state.full", "a collapsing month returns a full state")
+	t.check_equal(full["payload"]["state_version"], 1, "a collapsing month advances state version once")
+	t.check_equal(full["payload"]["term"], 2, "the collapse response already contains the next term")
+	t.check_equal(full["payload"]["year"], 1, "the collapse response resets the year")
+	t.check_equal(full["payload"]["month"], 0, "the collapse response resets to month zero")
+	t.check_equal(full["payload"]["ui_mode"], "constitution", "the collapse response opens constitution")
+	t.check_equal(full["payload"]["world_scene"], "parliament", "the next-term world is ready before sync")
+	t.check_equal(
+		full["payload"]["term_report"]["outcome"],
+		"COLLAPSE",
+		"the response preserves the old outcome"
+	)
+	t.check_equal(
+		full["payload"]["term_report"]["previous_governing_months"],
+		0,
+		"the report starts from old currency"
+	)
+	t.check_equal(
+		full["payload"]["term_report"]["current_governing_months"],
+		1,
+		"the report awards the elapsed month"
+	)
+	t.check_equal(full["payload"]["month_report"], null, "the fresh run has no stale monthly report")
+	bridge.free()
+	session.free()
+
+
 func _test_month_report_serializes_events(t: BackendTestContext) -> void:
 	var state := RunState.new()
 	state.month_report_year = 3
@@ -208,20 +258,25 @@ func _test_opening_draw_and_term_lifecycle(t: BackendTestContext) -> void:
 		"a term with no saved submission receives Nothing Happens"
 	)
 	var ended_month := session.state.month
-	t.check(not session.advance_month(), "advance_month is blocked after the term ends")
-	t.check(session.state == ended_state, "blocked advance preserves the complete ended state")
-	t.check_equal(session.state.month, ended_month, "blocked advance does not move the month")
-	t.check_equal(session.state.term, 1, "blocked advance does not create the next term")
-
-	t.check(session.start_next_term(), "the next term starts only through the explicit API")
-	t.check(session.state != ended_state, "the explicit API creates a fresh RunState")
-	t.check_equal(session.state.term, 2, "the explicit next term increments the term number")
+	t.check(session.advance_month(), "advancing an ended term settles it and starts the next term")
+	t.check(session.state != ended_state, "term settlement creates a fresh RunState")
+	t.check_equal(ended_state.month, ended_month, "term settlement preserves the ended snapshot")
+	t.check_equal(session.state.term, 2, "automatic term settlement increments the term number")
 	t.check_equal(session.state.year, 1, "the next term resets to year one")
 	t.check_equal(session.state.month, 0, "the next term resets to month zero")
 	t.check_equal(session.state.collapse_level, 0, "the next term resets collapse")
 	t.check_equal(session.state.governing_months, 0, "the next term resets governing duration")
 	t.check_equal(session.state.proposal_hand.size(), 0, "the next term waits until January to draw")
 	t.check_equal(session.state.events.size(), 0, "the next term starts without stale events")
+	t.check_equal(session.meta_progression.available_governing_months, 1, "the ended January becomes governing currency")
+	t.check_equal(
+		session.term_report["outcome"],
+		RunState.TermOutcome.NOTHING_HAPPENS,
+		"settlement preserves the outcome"
+	)
+	t.check_equal(session.term_report["previous_governing_months"], 0, "settlement records the previous currency")
+	t.check_equal(session.term_report["current_governing_months"], 1, "settlement records the awarded currency")
+	t.check(not session.start_next_term(), "the compatibility API cannot skip a running term")
 
 	var submitted := t.make_session(
 		[race], [group], t.make_seats(2, "submitted outcome"), [], balance
@@ -235,6 +290,105 @@ func _test_opening_draw_and_term_lifecycle(t: BackendTestContext) -> void:
 		"a term with a saved submission receives the collapse outcome"
 	)
 	submitted.free()
+	session.free()
+
+
+func _test_term_settlement_resets_board_run_state(t: BackendTestContext) -> void:
+	var race := t.make_race("board reset race")
+	var group := t.make_group("board reset group")
+	var row := ConstitutionRowDefinition.new()
+	row.display_name = "重置轴"
+	row.race = race
+	var center := ConstitutionColumnDefinition.new()
+	center.display_name = "中轴"
+	center.unlock_cost_months = 0
+	var outward := ConstitutionColumnDefinition.new()
+	outward.display_name = "外轴"
+	outward.unlock_cost_months = 1
+	var center_article := ConstitutionArticleDefinition.new()
+	center_article.display_name = "中轴约法"
+	center_article.row = row
+	center_article.race = race
+	center.articles.append(center_article)
+	var outward_article := ConstitutionArticleDefinition.new()
+	outward_article.display_name = "外轴约法"
+	outward_article.row = row
+	outward_article.race = race
+	outward.articles.append(outward_article)
+	var board := ConstitutionBoardDefinition.new()
+	board.columns.append(center)
+	board.columns.append(outward)
+	var balance := GameBalanceDefinition.new()
+	balance.automatic_draw_count = 0
+	balance.event_spawn_count_min = 0
+	balance.event_spawn_count_max = 0
+	balance.opening_max_race_seat_rate = 1.0
+	balance.max_collapse = 1
+	var session := RunSession.new()
+	session.balance = balance
+	session.configure_content(
+		[race], [group], t.make_seats(2, "board reset"), [], board
+	)
+	session.start_new_run()
+	session.meta_progression.available_governing_months = 5
+	t.check(session.unlock_constitution_column(outward), "the fixture unlocks an outward column")
+	t.check(session.revise_constitution(outward_article), "the old term moves away from the center")
+	var old_seats := session.state.seats.duplicate()
+	session.state.year = 2
+	session.state.month = 3
+	session.state.metrics.tax = 7
+	session.state.political_donation_pool = 9.0
+	session.state.proposal_hand.append(t.make_proposal(group))
+	session.state.saved_bills.append(SavedBillState.new())
+	session.state.draft_bill.proposals.append(t.make_proposal(group))
+	session.state.active_bill = ActiveBillState.new()
+	session.state.events.append(EventState.new(race, Metric.Id.TAX, 7, 20))
+	session.collapse_system.increase(session.context)
+	t.check(session.advance_month(), "the dirty ended run settles automatically")
+	t.check_equal(session.state.term, 2, "the reset starts the second term")
+	t.check_equal(session.state.year, 1, "the reset returns to year one")
+	t.check_equal(session.state.month, 0, "the reset returns to month zero")
+	t.check_equal(session.state.metrics.tax, balance.initial_metric_value, "the reset restores metrics")
+	t.check_equal(session.state.political_donation_pool, 0.0, "the reset clears political donations")
+	t.check_equal(session.state.collapse_level, 0, "the reset clears collapse")
+	t.check_equal(session.state.proposal_hand.size(), 0, "the reset clears proposals")
+	t.check_equal(session.state.saved_bills.size(), 0, "the reset clears saved bills")
+	t.check(session.state.draft_bill.is_empty(), "the reset clears the draft")
+	t.check_equal(session.state.active_bill, null, "the reset clears the active bill")
+	t.check_equal(session.state.events.size(), 0, "the reset clears events")
+	t.check(
+		session.state.constitution.get_active_article_for_row(row) == center_article,
+		"the reset returns every constitution row to the zero-cost center"
+	)
+	t.check(session.meta_progression.is_column_unlocked(outward), "unlocked columns persist between terms")
+	t.check_equal(
+		session.meta_progression.available_governing_months,
+		19,
+		"year two month three awards fifteen months"
+	)
+	t.check_equal(
+		session.meta_progression.lifetime_governing_months,
+		15,
+		"lifetime currency records the full term"
+	)
+	t.check_equal(
+		session.term_report["outcome"],
+		RunState.TermOutcome.COLLAPSE,
+		"the report keeps the old outcome"
+	)
+	t.check_equal(
+		session.term_report["previous_governing_months"],
+		4,
+		"the report uses spendable currency before settlement"
+	)
+	t.check_equal(
+		session.term_report["current_governing_months"],
+		19,
+		"the report uses spendable currency after settlement"
+	)
+	for seat in session.state.seats:
+		t.check(seat not in old_seats, "the reset creates a new randomized seat state")
+		t.check_equal(seat.race, race, "every new seat receives an opening allocation")
 	session.free()
 
 

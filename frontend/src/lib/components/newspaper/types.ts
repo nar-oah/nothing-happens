@@ -20,9 +20,14 @@ export const NewspaperEventState = {
 export type NewspaperEventState = (typeof NewspaperEventState)[keyof typeof NewspaperEventState];
 
 export type NewspaperMetricData = {
-	metric: Metric;
+	metric: Metric | string;
 	value: number;
 	change: number;
+};
+
+export type NewspaperFrontData = {
+	title: string;
+	content: string;
 };
 
 export type NewspaperEventData = {
@@ -79,8 +84,8 @@ const EVENT_STATE_LABELS: Record<NewspaperEventState, string> = {
 	[NewspaperEventState.CALM]: '平息 ↓'
 };
 
-export function getNewspaperMetricLabel(metric: Metric): string {
-	return METRIC_LABELS[metric];
+export function getNewspaperMetricLabel(metric: Metric | string): string {
+	return typeof metric === 'string' ? metric : METRIC_LABELS[metric];
 }
 
 export function getNewspaperRaceLabel(race: NewspaperRace): string {

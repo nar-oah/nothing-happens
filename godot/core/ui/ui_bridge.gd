@@ -199,6 +199,7 @@ func _handle_mode_set(message: Dictionary, messages: Array[Dictionary]) -> void:
 
 
 func _handle_newspaper_close(message: Dictionary, messages: Array[Dictionary]) -> void:
+	run_session.clear_term_report()
 	_refresh_dialogue_mode()
 	set_ui_mode(ui_mode, false)
 	messages.append(_full_state(message["request_id"]))
@@ -308,13 +309,14 @@ func _handle_bill_submit(message: Dictionary, messages: Array[Dictionary]) -> vo
 			message["request_id"]
 		)
 		return
+	var vote_payload := _serializer.vote_result(result, run_session.state)
 	_advance_month_and_refresh_mode()
 	state_version += 1
 	var payload := {
 		"state_version": state_version,
 		"submitted": result.submitted,
 		"passed": result.passed,
-		"vote": _serializer.vote_result(result, run_session.state),
+		"vote": vote_payload,
 		"saved_bills": _serialize_bills(),
 		"proposal_hand": _serialize_hand(),
 		"draft_bill": _serializer.bill(run_session.state.draft_bill),
