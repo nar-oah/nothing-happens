@@ -104,7 +104,6 @@ export function makeLiveState(stateVersion = 1): LiveGameState {
 			columns: [
 				{
 					column_index: 0,
-					id: 'normal',
 					display_name: '常制',
 					unlock_cost_months: 0,
 					unlocked: true,
@@ -114,7 +113,6 @@ export function makeLiveState(stateVersion = 1): LiveGameState {
 			rows: [
 				{
 					row_index: 0,
-					id: 'diplomacy',
 					display_name: '外交',
 					race_display_name: '人类',
 					free_navigation: false,
