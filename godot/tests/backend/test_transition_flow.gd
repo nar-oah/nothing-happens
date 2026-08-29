@@ -9,6 +9,7 @@ func run(t: BackendTestContext) -> void:
 	_test_year_boundary_enters_constitution(t)
 	_test_constitution_month_returns_to_office(t)
 	_test_normal_month_creates_newspaper_report(t)
+	_test_collapse_month_restarts_before_sync(t)
 	_test_month_report_serializes_events(t)
 	_test_constitution_expectation_growth_uses_month_zero_economy(t)
 	_test_opening_draw_and_term_lifecycle(t)
@@ -127,6 +128,42 @@ func _test_normal_month_creates_newspaper_report(t: BackendTestContext) -> void:
 		full["payload"]["metrics"]["tax"],
 		"newspaper report preserves post-settlement metrics"
 	)
+	bridge.free()
+	session.free()
+
+
+func _test_collapse_month_restarts_before_sync(t: BackendTestContext) -> void:
+	var balance := GameBalanceDefinition.new()
+	balance.automatic_draw_count = 0
+	balance.event_spawn_count_min = 0
+	balance.event_spawn_count_max = 0
+	balance.event_lifetime_months = 1
+	balance.max_collapse = 1
+	var race := t.make_race("settlement bridge race")
+	var group := t.make_group("settlement bridge group")
+	var session := t.make_session(
+		[race], [group], t.make_seats(1, "settlement bridge"), [], balance
+	)
+	session.state.month = 1
+	session.state.saved_bills.append(SavedBillState.new())
+	session.state.events.append(EventState.new(race, Metric.Id.TAX, 100, 200))
+	var bridge := UiBridge.new()
+	bridge.setup(session)
+	var messages := bridge.receive_ipc_message(
+		_message("month.advance", {"state_version": 0})
+	)
+	var full: Dictionary = messages[messages.size() - 1]
+	t.check_equal(full["type"], "state.full", "a collapsing month returns a full state")
+	t.check_equal(full["payload"]["state_version"], 1, "a collapsing month advances state version once")
+	t.check_equal(full["payload"]["term"], 2, "the collapse response already contains the next term")
+	t.check_equal(full["payload"]["year"], 1, "the collapse response resets the year")
+	t.check_equal(full["payload"]["month"], 0, "the collapse response resets to month zero")
+	t.check_equal(full["payload"]["ui_mode"], "constitution", "the collapse response opens constitution")
+	t.check_equal(full["payload"]["world_scene"], "parliament", "the next-term world is ready before sync")
+	t.check_equal(full["payload"]["term_report"]["outcome"], "COLLAPSE", "the response preserves the old outcome")
+	t.check_equal(full["payload"]["term_report"]["previous_governing_months"], 0, "the report starts from old currency")
+	t.check_equal(full["payload"]["term_report"]["current_governing_months"], 1, "the report awards the elapsed month")
+	t.check_equal(full["payload"]["month_report"], null, "the fresh run has no stale monthly report")
 	bridge.free()
 	session.free()
 
