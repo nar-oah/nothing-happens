@@ -1,8 +1,8 @@
-[gd_resource type="Resource" script_class="InterestGroupDefinition" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="InterestGroupDefinition" format=3 uid="uid://lr28x7rgd732"]
 
 [ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="1_script"]
 
 [resource]
 script = ExtResource("1_script")
-display_name = "官药局"
+display_name = "医学会"
 base_column_weight = 2

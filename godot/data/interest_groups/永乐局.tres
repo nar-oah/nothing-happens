@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="InterestGroupDefinition" format=3 uid="uid://cux21kxjuvshw"]
+
+[ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="1_8dbvb"]
+
+[resource]
+script = ExtResource("1_8dbvb")
+display_name = "永乐局"
+base_column_weight = 5
+decrease_employment = true
+decrease_trade = true

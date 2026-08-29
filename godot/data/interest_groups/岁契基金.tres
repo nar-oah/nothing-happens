@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1_script")
-display_name = "会同成衣会"
+display_name = "岁契基金"
 base_column_weight = 2
 decrease_wage = true
 decrease_trade = true
