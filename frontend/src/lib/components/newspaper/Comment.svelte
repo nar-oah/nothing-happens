@@ -23,7 +23,7 @@
 </script>
 
 <button
-	class="flex h-full w-full flex-col items-start gap-[3px] overflow-hidden border-0 bg-transparent px-8 py-5 text-left"
+	class="flex h-full w-full flex-col items-start gap-[3px] overflow-hidden border-0 bg-transparent px-8 py-5 text-left text-ink-primary"
 	type="button"
 	aria-label="切换报纸评论"
 	onmouseenter={() => (hovering = true)}
