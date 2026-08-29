@@ -12,6 +12,7 @@
 		NewspaperEventState,
 		NewspaperRace,
 		type NewspaperEventData,
+		type NewspaperFrontData,
 		type NewspaperMetricData
 	} from '$lib/components/newspaper/types';
 	import {
@@ -37,6 +38,13 @@
 
 	type MutationPayload<T extends GameplayCommandType> = Omit<OutboundPayloads[T], 'state_version'>;
 	type NewspaperTransitionAction = () => Promise<void>;
+	type NewspaperEdition = {
+		year: number;
+		month: number;
+		metrics: NewspaperMetricData[];
+		front?: NewspaperFrontData;
+		events: NewspaperEventData[];
+	};
 
 	const NEWSPAPER_RACE_BY_DISPLAY_NAME: Record<string, NewspaperRace> = {
 		驻岁: NewspaperRace.ZHUSHUI,
@@ -97,6 +105,17 @@
 		});
 	}
 
+	function deriveNewspaperEdition(state: LiveGameState): NewspaperEdition {
+		const report = state.term_report;
+		return {
+			year: state.year,
+			month: state.month,
+			metrics: report ? deriveTermReportMetrics(report) : deriveNewspaperMetrics(state),
+			...(report ? { front: deriveTermReportFront(report) } : {}),
+			events: report ? [] : deriveNewspaperEvents(state)
+		};
+	}
+
 	const gameStore = createGameStore();
 	let storeValue = $state<GameStoreValue>(EMPTY_GAME_STORE);
 	let client: CefIpcClient | null = null;
@@ -106,6 +125,7 @@
 	let newspaperBusy = $state(false);
 	let newspaperFolded = $state(false);
 	let newspaperLeaving = $state(false);
+	let newspaperEdition = $state<NewspaperEdition | null>(null);
 	let newspaperFoldResolver: (() => void) | null = null;
 	let pendingNewspaperAction: NewspaperTransitionAction | null = null;
 	const unsubscribe = gameStore.subscribe((value) => (storeValue = value));
@@ -122,16 +142,6 @@
 	let pendingDialogue = $derived(
 		snapshot ? deriveDialoguePresentation(snapshot.pending_dialogue) : null
 	);
-	let termReport = $derived(snapshot?.term_report ?? null);
-	let newspaperFront = $derived(termReport ? deriveTermReportFront(termReport) : undefined);
-	let newspaperMetrics = $derived(
-		snapshot
-			? termReport
-				? deriveTermReportMetrics(termReport)
-				: deriveNewspaperMetrics(snapshot)
-			: []
-	);
-	let newspaperEvents = $derived(snapshot && !termReport ? deriveNewspaperEvents(snapshot) : []);
 	let frame = $derived(
 		snapshot && gameState
 			? {
@@ -146,6 +156,12 @@
 				}
 			: null
 	);
+
+	$effect(() => {
+		const state = snapshot;
+		if (!state || newspaperBusy) return;
+		newspaperEdition = deriveNewspaperEdition(state);
+	});
 
 	onMount(() => {
 		client = createCefIpcClient({
@@ -221,12 +237,15 @@
 		const foldComplete = beginNewspaperFold();
 		try {
 			await Promise.all([foldComplete, action()]);
-			await tick();
-			if (storeValue.snapshot?.term_report) {
+			const state = storeValue.snapshot;
+			if (state?.term_report) {
+				newspaperEdition = deriveNewspaperEdition(state);
+				await tick();
 				newspaperFolded = false;
 				newspaperBusy = false;
 				return;
 			}
+			await tick();
 			newspaperLeaving = true;
 		} catch (error: unknown) {
 			await foldComplete;
@@ -242,12 +261,15 @@
 		const foldComplete = beginNewspaperFold();
 		try {
 			await Promise.all([foldComplete, requestMutation('month.advance', {})]);
-			await tick();
-			if (storeValue.snapshot?.term_report) {
+			const state = storeValue.snapshot;
+			if (state?.term_report) {
+				newspaperEdition = deriveNewspaperEdition(state);
+				await tick();
 				newspaperFolded = false;
 				newspaperBusy = false;
 				return;
 			}
+			await tick();
 			newspaperLeaving = true;
 		} catch (error: unknown) {
 			await foldComplete;
@@ -386,19 +408,19 @@
 		<OfficeView {...frame} onNewspaperOpen={openNewspaper} onSynthesisConfirm={mergeProposals} />
 	{/if}
 
-	{#if newspaperOpen}
+	{#if newspaperOpen && newspaperEdition}
 		<NewspaperView
-			year={snapshot.year}
-			month={snapshot.month}
-			metrics={newspaperMetrics}
-			front={newspaperFront}
-			events={newspaperEvents}
+			year={newspaperEdition.year}
+			month={newspaperEdition.month}
+			metrics={newspaperEdition.metrics}
+			front={newspaperEdition.front}
+			events={newspaperEdition.events}
 			comment={{ title: [''], comment: [''] }}
 			busy={newspaperBusy}
 			folded={newspaperFolded}
 			leaving={newspaperLeaving}
 			onCovered={handleNewspaperCovered}
-			onAdvance={termReport ? undefined : advanceFromNewspaper}
+			onAdvance={newspaperEdition.front ? undefined : advanceFromNewspaper}
 			onRequestClose={requestNewspaperClose}
 			onFolded={finishNewspaperFold}
 			onClosed={finishNewspaperClose}
