@@ -32,7 +32,7 @@ export type NewspaperFrontData = {
 
 export type NewspaperEventData = {
 	race: NewspaperRace;
-	description: string;
+	description?: string;
 	metric: Metric;
 	value: number;
 	countdown: number;
