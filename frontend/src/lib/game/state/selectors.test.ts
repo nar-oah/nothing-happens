@@ -59,7 +59,6 @@ test('constitution presentation keeps one aligned row grid and turns locked colu
 	const state = makeLiveState();
 	state.constitution.columns.push({
 		column_index: 1,
-		id: 'new',
 		display_name: '新制',
 		unlock_cost_months: 12,
 		unlocked: false,
@@ -67,7 +66,6 @@ test('constitution presentation keeps one aligned row grid and turns locked colu
 	});
 	state.constitution.rows.push({
 		row_index: 1,
-		id: 'culture',
 		display_name: '文化',
 		race_display_name: '比翼',
 		free_navigation: false,
