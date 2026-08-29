@@ -4,12 +4,13 @@
 
 [resource]
 script = ExtResource("2_7v15b")
-display_name = "比翼"
-increase_wage = true
-decrease_tax = true
-decrease_price = true
-decrease_trade = true
 yin_tax = true
 yin_price = true
 yang_wage = true
 yang_trade = true
+display_name = "比翼"
+description = "比翼曾替蓬莱保存文字、历法与知识，也因此长期把自己视为本土文化最可靠的解释者。汉语官署、印刷、海贸教育和外来技术让这种地位迅速消失，他们便把失业、传承断裂和机会减少理解成外来者夺走了原本属于自己的位置。于是，比翼越来越希望让本族语言、知识传统乃至政治组织重新成为蓬莱的中心。"
+increase_wage = true
+decrease_tax = true
+decrease_price = true
+decrease_trade = true

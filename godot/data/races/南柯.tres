@@ -5,5 +5,6 @@
 [resource]
 script = ExtResource("2_de8f7")
 display_name = "南柯"
+description = "南柯睡着时会进入一个已经实现其理想社会的“理想国”，醒来后却承担着蓬莱最繁重的取能、维修与未然工程。别人嘲笑他们贪睡，他们却比谁都清楚现实本可以有另一种活法。因此南柯要求更好的工钱与生活，并试图用工会、合作社，最终把梦里已经存在的制度真正造进现实。"
 increase_wage = true
 decrease_price = true
