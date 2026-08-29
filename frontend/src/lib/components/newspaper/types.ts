@@ -41,18 +41,18 @@ export type NewspaperCommentData = {
 
 export const NEWSPAPER_METRIC_ORDER: Metric[] = [
 	Metric.TAX,
-	Metric.PRICE,
-	Metric.WAGE,
+	Metric.CONSUMPTION,
+	Metric.PRODUCTION,
 	Metric.EMPLOYMENT,
-	Metric.TRADE
+	Metric.INVESTMENT
 ];
 
 const METRIC_LABELS: Record<Metric, string> = {
-	[Metric.TAX]: '税課',
-	[Metric.PRICE]: '物價',
-	[Metric.WAGE]: '工錢',
-	[Metric.EMPLOYMENT]: '用工',
-	[Metric.TRADE]: '商貿'
+	[Metric.TAX]: '稅課',
+	[Metric.CONSUMPTION]: '消費',
+	[Metric.PRODUCTION]: '生產',
+	[Metric.EMPLOYMENT]: '就業',
+	[Metric.INVESTMENT]: '投資'
 };
 
 const RACE_LABELS: Record<NewspaperRace, string> = {
