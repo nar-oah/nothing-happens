@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://dajy5425i5dpq" path="res://definitions/constitution_article_definition.gd" id="1_article_script"]
 [ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_pgq5k"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
-[ext_resource type="Resource" uid="uid://c2eco18e42n34" path="res://data/races/yano.tres" id="3_race_yano"]
+[ext_resource type="Resource" uid="uid://c2eco18e42n34" path="res://data/races/偃偶.tres" id="3_race_yano"]
 [ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="3_tbrb2"]
 [ext_resource type="Resource" uid="uid://crp5hwj3gy3re" path="res://data/policies/机件配给.tres" id="4_policy_1"]
 [ext_resource type="Resource" uid="uid://c75roafw522lh" path="res://data/policies/租身周转.tres" id="5_policy_2"]

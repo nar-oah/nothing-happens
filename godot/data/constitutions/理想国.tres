@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="1_atj7j"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
 [ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_rw0l6"]
-[ext_resource type="Resource" uid="uid://bto7mkhf8cqca" path="res://data/races/nanke.tres" id="3_race_nanke"]
+[ext_resource type="Resource" uid="uid://bto7mkhf8cqca" path="res://data/races/南柯.tres" id="3_race_nanke"]
 [ext_resource type="Resource" uid="uid://dgtt2bc8wps1" path="res://data/constitutions/合作社.tres" id="4_prereq"]
 [ext_resource type="Resource" path="res://data/interest_groups/槐安公所.tres" id="5_group_1"]
 [ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="6_seat_condition_script"]

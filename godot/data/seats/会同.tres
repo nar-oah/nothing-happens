@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="SeatDefinition" format=3 uid="uid://chkf8x0v0inlx"]
 
 [ext_resource type="Script" uid="uid://of78ek0nhty6" path="res://definitions/seat_definition.gd" id="1_qxpgu"]
-[ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/human.tres" id="1_wmdli"]
+[ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/人类.tres" id="1_wmdli"]
 
 [resource]
 script = ExtResource("1_qxpgu")

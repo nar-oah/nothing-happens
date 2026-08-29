@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="SeatDefinition" format=3 uid="uid://becl4oht0txi3"]
 
-[ext_resource type="Resource" uid="uid://dknll48i00v4u" path="res://data/races/zhushui.tres" id="1_l0n4x"]
+[ext_resource type="Resource" uid="uid://dknll48i00v4u" path="res://data/races/驻岁.tres" id="1_l0n4x"]
 [ext_resource type="Script" uid="uid://of78ek0nhty6" path="res://definitions/seat_definition.gd" id="1_qxpgu"]
 
 [resource]

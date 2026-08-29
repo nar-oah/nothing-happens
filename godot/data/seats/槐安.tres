@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="SeatDefinition" format=3 uid="uid://dm1sgsnxlmniy"]
 
-[ext_resource type="Resource" uid="uid://bto7mkhf8cqca" path="res://data/races/nanke.tres" id="1_6u7af"]
+[ext_resource type="Resource" uid="uid://bto7mkhf8cqca" path="res://data/races/南柯.tres" id="1_6u7af"]
 [ext_resource type="Script" uid="uid://of78ek0nhty6" path="res://definitions/seat_definition.gd" id="1_qxpgu"]
 
 [resource]

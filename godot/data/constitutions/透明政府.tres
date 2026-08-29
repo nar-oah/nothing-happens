@@ -1,12 +1,12 @@
 [gd_resource type="Resource" script_class="RegulationConstitutionArticleDefinition" format=3]
 
-[ext_resource type="Script" path="res://definitions/regulation_constitution_article_definition.gd" id="1_article_script"]
-[ext_resource type="Script" path="res://definitions/policy_definition.gd" id="2_policy_script"]
-[ext_resource type="Resource" path="res://data/races/zhushui.tres" id="3_race_zhushui"]
+[ext_resource type="Script" uid="uid://bqftg57rtalf1" path="res://definitions/regulation_constitution_article_definition.gd" id="1_article_script"]
+[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
+[ext_resource type="Resource" uid="uid://dknll48i00v4u" path="res://data/races/驻岁.tres" id="3_race_zhushui"]
 [ext_resource type="Resource" path="res://data/constitution_rows/监管.tres" id="row"]
-[ext_resource type="Resource" path="res://data/policies/公开预算.tres" id="4_policy_1"]
-[ext_resource type="Resource" path="res://data/policies/逐项拨款.tres" id="5_policy_2"]
-[ext_resource type="Resource" path="res://data/policies/实时账簿.tres" id="6_policy_3"]
+[ext_resource type="Resource" uid="uid://cry42v402fitv" path="res://data/policies/公开预算.tres" id="4_policy_1"]
+[ext_resource type="Resource" uid="uid://b8k7e3cppeh88" path="res://data/policies/逐项拨款.tres" id="5_policy_2"]
+[ext_resource type="Resource" uid="uid://ca8c58gipfmb0" path="res://data/policies/实时账簿.tres" id="6_policy_3"]
 
 [resource]
 script = ExtResource("1_article_script")

@@ -1,13 +1,13 @@
 [gd_resource type="Resource" script_class="NankeConstitutionArticleDefinition" format=3]
 
-[ext_resource type="Script" path="res://definitions/nanke_constitution_article_definition.gd" id="1_article_script"]
-[ext_resource type="Script" path="res://definitions/policy_definition.gd" id="2_policy_script"]
-[ext_resource type="Resource" path="res://data/races/nanke.tres" id="3_race_nanke"]
+[ext_resource type="Script" uid="uid://jgr73t04ui0t" path="res://definitions/nanke_constitution_article_definition.gd" id="1_article_script"]
+[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
+[ext_resource type="Resource" uid="uid://bto7mkhf8cqca" path="res://data/races/南柯.tres" id="3_race_nanke"]
 [ext_resource type="Resource" path="res://data/constitution_rows/团体.tres" id="row"]
-[ext_resource type="Resource" path="res://data/constitutions/工会.tres" id="4_prereq"]
-[ext_resource type="Resource" path="res://data/policies/换班互济.tres" id="5_policy_1"]
-[ext_resource type="Resource" path="res://data/policies/弦塔赊能.tres" id="6_policy_2"]
-[ext_resource type="Resource" path="res://data/policies/会账相助.tres" id="7_policy_3"]
+[ext_resource type="Resource" uid="uid://clin7vlpgfkgw" path="res://data/constitutions/工会.tres" id="4_prereq"]
+[ext_resource type="Resource" uid="uid://b8m2jao836rm" path="res://data/policies/换班互济.tres" id="5_policy_1"]
+[ext_resource type="Resource" uid="uid://dbj7pruw111a2" path="res://data/policies/弦塔赊能.tres" id="6_policy_2"]
+[ext_resource type="Resource" uid="uid://ckm6a1ywjx4xh" path="res://data/policies/会账相助.tres" id="7_policy_3"]
 
 [resource]
 script = ExtResource("1_article_script")

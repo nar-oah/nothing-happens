@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="1_w8iph"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
 [ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_siktm"]
-[ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/human.tres" id="3_race_human"]
+[ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/人类.tres" id="3_race_human"]
 [ext_resource type="Resource" path="res://data/constitutions/朝贡.tres" id="4_prereq"]
 [ext_resource type="Resource" path="res://data/interest_groups/永乐轮运局.tres" id="5_group_1"]
 [ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="6_influence_rule_script"]
