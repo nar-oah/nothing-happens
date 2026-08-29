@@ -20,7 +20,6 @@
 		comment: NewspaperCommentData;
 		busy?: boolean;
 		leaving?: boolean;
-		onCommentClick?: () => void;
 		onAdvance?: () => void;
 		onCovered?: () => void;
 		onRequestClose?: () => void;
@@ -39,7 +38,6 @@
 		comment,
 		busy = false,
 		leaving = false,
-		onCommentClick,
 		onAdvance,
 		onCovered,
 		onRequestClose,
@@ -152,7 +150,6 @@
 									{metrics}
 									{events}
 									{comment}
-									{onCommentClick}
 									{onAdvance}
 									disabled={interactionDisabled}
 								/>
