@@ -42,7 +42,9 @@
 		secondary: { text: '执政月数', value: governingMonths % 12, limit: 12, isRow: false }
 	});
 	let unlockableSections = $derived(
-		columns.filter((column) => !column.unlocked && column.can_unlock).map((column) => column.display_name)
+		columns
+			.filter((column) => !column.unlocked && column.can_unlock)
+			.map((column) => column.display_name)
 	);
 
 	function submitRevision(isConfirm: boolean) {
