@@ -18,7 +18,6 @@ export type ConstitutionArticleDto = ConstitutionArticle & {
 
 export type ConstitutionColumnDto = {
 	column_index: number;
-	id: string;
 	display_name: string;
 	unlock_cost_months: number;
 	unlocked: boolean;
@@ -27,7 +26,6 @@ export type ConstitutionColumnDto = {
 
 export type ConstitutionRowDto = {
 	row_index: number;
-	id: string;
 	display_name: string;
 	race_display_name: string;
 	free_navigation: boolean;
