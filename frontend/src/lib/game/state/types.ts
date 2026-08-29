@@ -67,6 +67,7 @@ export type RaceExpectationDto = {
 export type RaceSummaryDto = {
 	race_index: number;
 	display_name: string;
+	description: string;
 	seat_count: number;
 	expectations: RaceExpectationDto[];
 	resolved_events_this_year: number;

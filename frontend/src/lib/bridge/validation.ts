@@ -223,6 +223,7 @@ function isInterestGroup(value: unknown): value is InterestGroupDefinition {
 	return (
 		isRecord(value) &&
 		typeof value.display_name === 'string' &&
+		typeof value.description === 'string' &&
 		isNumber(value.base_column_weight) &&
 		typeof value.decrease_tax === 'boolean' &&
 		typeof value.decrease_price === 'boolean' &&
@@ -346,6 +347,7 @@ function isRaceSummary(value: unknown): value is RaceSummaryDto {
 		isRecord(value) &&
 		isNonnegativeInteger(value.race_index) &&
 		typeof value.display_name === 'string' &&
+		typeof value.description === 'string' &&
 		isNonnegativeInteger(value.seat_count) &&
 		isArrayOf(
 			value.expectations,

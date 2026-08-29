@@ -31,6 +31,7 @@ func interest_group(definition: InterestGroupDefinition) -> Variant:
 		return null
 	return {
 		"display_name": definition.display_name,
+		"description": definition.description,
 		"base_column_weight": definition.base_column_weight,
 		"decrease_tax": definition.decrease_tax,
 		"decrease_price": definition.decrease_price,
@@ -352,6 +353,7 @@ func races(session: RunSession) -> Array:
 			{
 				"race_index": index,
 				"display_name": current.definition.display_name,
+				"description": current.definition.description,
 				"seat_count": seat_count,
 				"expectations": expectations,
 				"resolved_events_this_year": current.resolved_events_this_year,
@@ -442,7 +444,7 @@ func _article(definition: ConstitutionArticleDefinition, article_index: int) -> 
 	return {
 		"article_index": article_index,
 		"display_name": definition.display_name,
-		"content": "",
+		"content": definition.description,
 		"policies": _policies(definition.policies),
 	}
 

@@ -37,6 +37,7 @@ export type MetricVector = MetricValues;
 
 export type InterestGroupDefinition = {
 	display_name: string;
+	description: string;
 	base_column_weight: number;
 	decrease_tax: boolean;
 	decrease_price: boolean;
