@@ -10,7 +10,7 @@ enum Operator {
 
 @export var left_metric: Metric.Id = Metric.Id.TAX
 @export var operator: Operator = Operator.LESS_THAN
-@export var right_metric: Metric.Id = Metric.Id.TRADE
+@export var right_metric: Metric.Id = Metric.Id.INVESTMENT
 @export var right_multiplier: float = 1.0
 
 
