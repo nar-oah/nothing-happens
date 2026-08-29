@@ -116,3 +116,4 @@ func _track_current_hand_order() -> void:
 	for proposal in proposal_hand:
 		if proposal not in proposal_acquisition_order:
 			proposal_acquisition_order.append(proposal)
+
