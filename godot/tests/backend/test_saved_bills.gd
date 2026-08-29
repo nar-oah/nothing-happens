@@ -192,7 +192,7 @@ func _test_saved_policy_reconciles_with_constitution(t: BackendTestContext) -> v
 		[race], [group], t.make_seats(1, "policy revision"), [initial, revised]
 	)
 	var proposal := t.make_proposal(group)
-	proposal.base_effect.trade = -5
+	proposal.base_effect.investment = -5
 	session.state.draft_bill.title = "old constitution bill"
 	session.state.draft_bill.proposals.append(proposal)
 	session.state.draft_bill.policies.append(old_policy)
