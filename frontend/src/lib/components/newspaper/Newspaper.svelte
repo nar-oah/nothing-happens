@@ -25,20 +25,10 @@
 		events: NewspaperEventData[];
 		comment: NewspaperCommentData;
 		disabled?: boolean;
-		onCommentClick?: () => void;
 		onAdvance?: () => void;
 	};
 
-	let {
-		year,
-		month,
-		metrics,
-		events,
-		comment,
-		disabled = false,
-		onCommentClick,
-		onAdvance
-	}: Props = $props();
+	let { year, month, metrics, events, comment, disabled = false, onAdvance }: Props = $props();
 	const sortedEvents = $derived([...events].sort((a, b) => a.countdown - b.countdown));
 	const pages = $derived.by((): NewspaperPage[] => {
 		const result: NewspaperPage[] = [{ kind: 'top' }, { kind: 'metrics' }];
@@ -96,13 +86,6 @@
 				<Event {...page.event} />
 			{:else if page.kind === 'calendar'}
 				<Calendar {month} />
-			{:else if onCommentClick}
-				<button
-					class="h-full w-full border-0 bg-transparent p-0 text-left"
-					type="button"
-					onclick={onCommentClick}
-					aria-label="切换报纸评论"><Comment {...comment} /></button
-				>
 			{:else}
 				<Comment {...comment} />
 			{/if}

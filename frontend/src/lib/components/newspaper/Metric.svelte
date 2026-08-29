@@ -2,10 +2,10 @@
 	import type { Metric } from '$lib/game/types';
 	import MorphText from '../text/MorphText.svelte';
 	import { getNewspaperMetricLabel } from './types';
-	type Props = { metric: Metric; value: number; change: number };
-	let { metric, value, change }: Props = $props();
+	type Props = { metric: Metric; value: number; change: number; changeMagnitude?: number };
+	let { metric, value, change, changeMagnitude }: Props = $props();
 	const direction = $derived(change > 0 ? '↑' : change < 0 ? '↓' : '—');
-	const magnitude = $derived(Math.abs(change));
+	const magnitude = $derived(changeMagnitude ?? Math.abs(change));
 </script>
 
 <div class="flex h-[78px] w-[64px] flex-col items-start overflow-hidden px-5">

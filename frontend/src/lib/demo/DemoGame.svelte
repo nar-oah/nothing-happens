@@ -65,8 +65,8 @@
 			}
 		],
 		comment: {
-			title: '危机，还是事件？',
-			comment: '我们是在解决问题，\n还是在证明危机存在？'
+			title: ['危机，还是事件？', '增长，还是幻觉？'],
+			comment: ['我们是在解决问题，\n还是在证明危机存在？', '数字已经变好，\n生活是否也随之改变？']
 		}
 	};
 	const MOCK_NEWSPAPER_CLOSE_TARGET: Exclude<ViewName, 'Newspaper'> = 'Constitution';

@@ -20,7 +20,6 @@
 		comment: NewspaperCommentData;
 		busy?: boolean;
 		leaving?: boolean;
-		onCommentClick?: () => void;
 		onAdvance?: () => void;
 		onCovered?: () => void;
 		onRequestClose?: () => void;
@@ -39,7 +38,6 @@
 		comment,
 		busy = false,
 		leaving = false,
-		onCommentClick,
 		onAdvance,
 		onCovered,
 		onRequestClose,
@@ -152,7 +150,6 @@
 									{metrics}
 									{events}
 									{comment}
-									{onCommentClick}
 									{onAdvance}
 									disabled={interactionDisabled}
 								/>
@@ -163,11 +160,13 @@
 			</div>
 		</div>
 	</div>
-	<div class="top-controls">
-		<div class="top-items" aria-hidden="true"></div>
-		<ChoreSwitch left="保存" right="读取" />
-	</div>
-	<div class="state-slot"><GameStateDisplay {primary} {secondary} /></div>
+	{#if backgroundCovered}
+		<div class="top-controls">
+			<div class="top-items" aria-hidden="true"></div>
+			<ChoreSwitch left="保存" right="读取" />
+		</div>
+		<div class="state-slot"><GameStateDisplay {primary} {secondary} /></div>
+	{/if}
 </main>
 
 <style>

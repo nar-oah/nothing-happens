@@ -52,25 +52,25 @@
 		const current = state.month_report?.current_metrics ?? state.metrics;
 		const previous = state.month_report?.previous_metrics ?? current;
 		return [
-			{ metric: Metric.TAX, value: current.tax, change: current.tax - previous.tax },
+			{ metric: Metric.TAX, value: previous.tax, change: current.tax - previous.tax },
 			{
 				metric: Metric.CONSUMPTION,
-				value: current.consumption,
+				value: previous.consumption,
 				change: current.consumption - previous.consumption
 			},
 			{
 				metric: Metric.PRODUCTION,
-				value: current.production,
+				value: previous.production,
 				change: current.production - previous.production
 			},
 			{
 				metric: Metric.EMPLOYMENT,
-				value: current.employment,
+				value: previous.employment,
 				change: current.employment - previous.employment
 			},
 			{
 				metric: Metric.INVESTMENT,
-				value: current.investment,
+				value: previous.investment,
 				change: current.investment - previous.investment
 			}
 		];
@@ -344,7 +344,7 @@
 			month={snapshot.month}
 			metrics={newspaperMetrics}
 			events={newspaperEvents}
-			comment={{ title: '', comment: '' }}
+			comment={{ title: [''], comment: [''] }}
 			busy={newspaperBusy}
 			leaving={newspaperLeaving}
 			onCovered={handleNewspaperCovered}
