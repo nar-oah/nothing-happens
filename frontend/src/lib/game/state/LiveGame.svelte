@@ -261,18 +261,17 @@
 		if (newspaperBusy || newspaperLeaving) return;
 		newspaperBusy = true;
 		const foldComplete = beginNewspaperFold();
+		await foldComplete;
 		const requestClient = client;
 		if (!requestClient) {
-			await foldComplete;
 			newspaperLeaving = true;
 			return;
 		}
 		try {
-			await Promise.all([foldComplete, requestClient.request('ui.newspaper.close', {})]);
+			await requestClient.request('ui.newspaper.close', {});
 			await tick();
 			newspaperLeaving = true;
 		} catch (error: unknown) {
-			await foldComplete;
 			console.error('Newspaper close sync failed', error);
 			newspaperFolded = false;
 			newspaperBusy = false;
