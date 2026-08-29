@@ -63,6 +63,9 @@ required_rate = 0.9
 script = ExtResource("1_article_script")
 yin_yang_adjustment_rate = 0.1
 display_name = "法团"
+description = "既然国家需要统一调配，产业需要统一组织，议会又总被无数私利拖慢，那么为什么还要保留那么多彼此争吵的集团？
+法团给出的答案是：不需要。国家、产业与政治被压进同一个庞大的组织里，支持它的人替国家说话，不属于它的人则天然站在国家的对面。
+比翼终于重新取得定义蓬莱秩序的权力——只是如今，他们保存的已经不再是旧日典籍，而是一整套国家机器。"
 row = ExtResource("row")
 is_terminal = true
 race = ExtResource("3_race_biyi")

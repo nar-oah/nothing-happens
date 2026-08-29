@@ -15,6 +15,8 @@
 script = ExtResource("1_article_script")
 donation_detection_probability = 0.0
 display_name = "哲人王"
+description = "蓬莱把政权交给驻岁，本来就是因为相信活得足够久的人能够看得比普通人更远。
+既然执政者已经见过几代人的兴衰，又何必让那些只能看到眼前几十年的人监督他们？哲人王制度建立在一份简单而危险的信任上：长寿本身足以保证审慎。"
 row = ExtResource("row")
 race = ExtResource("3_race_zhushui")
 participates_in_variable_seat_allocation = false

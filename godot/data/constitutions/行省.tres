@@ -23,6 +23,8 @@ required_rate = 0.9
 script = ExtResource("1_article_script")
 petition_limit = 5
 display_name = "行省"
+description = "争论结束了：蓬莱是大明的一省。
+原来的议员仍然坐在那里，各族的产业、恩怨和生活也没有凭空消失，只是他们从此不再以本族的名义决定国家应该成为什么样子。旧议会没有被摧毁，它只是换了匾额，然后继续办公。"
 row = ExtResource("row")
 is_terminal = true
 race = ExtResource("3_race_human")

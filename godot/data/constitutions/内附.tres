@@ -23,6 +23,8 @@ required_rate = 0.5
 script = ExtResource("1_article_script")
 petition_limit = 5
 display_name = "内附"
+description = "与其每遇大事都争论朝廷究竟能管多少，不如把这个问题一次写死。
+内附承认大明在岛上的最高统治权，让联合政府逐渐从各族共同议事的机关，变成一座允许异族参与的地方官署。朝廷因此更容易替蓬莱处理麻烦；代价是，哪些麻烦还算“蓬莱自己的事”，会越来越难说清。"
 row = ExtResource("row")
 race = ExtResource("3_race_human")
 prerequisite = ExtResource("4_prereq")

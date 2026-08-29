@@ -34,6 +34,9 @@ strike_enabled = true
 strike_group = ExtResource("5_group_1")
 strike_extends_to_group = true
 display_name = "理想国"
+description = "南柯睡着时曾无数次生活在另一个世界。那里有更先进的工具、更好的劳动制度，也有一种不必把疲惫当成发展代价的生活。
+他们并不知道现实一定会走到那里，所以决定亲手把它建出来。
+理想国不是预言实现，而是南柯终于拒绝在醒来后接受“现实只能如此”。从此，梦中的标准不再是慰藉，而成为现实制度必须达到的最低线。"
 row = ExtResource("row")
 is_terminal = true
 race = ExtResource("3_race_nanke")

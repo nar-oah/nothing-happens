@@ -23,6 +23,8 @@ comparison = 1
 [resource]
 script = ExtResource("1_article_script")
 display_name = "否决"
+description = "蓬莱已经给了偃偶姓名、财产和议席，再继续承认下去，究竟还剩多少东西不能被叫作“人”？
+否决派选择把界线停在这里。一身两籍的矛盾继续存在，但至少制度不再试图把它推到更远的地方。"
 row = ExtResource("row")
 race = ExtResource("3_race_yano")
 prerequisite = ExtResource("4_prereq")

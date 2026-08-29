@@ -15,6 +15,9 @@
 [resource]
 script = ExtResource("1_article_script")
 display_name = "开放"
+description = "道路既然已经修到桃源门口，再不断封闭它们，只会让土地、货物与人困在越来越小的范围里。
+开放派选择接受桃源已经属于整个蓬莱的事实。道路、土地产品和贸易重新进入全岛网络，祖地不再以隔绝来换取安宁。
+他们相信桃源可以生活在世界之中，而不是永远藏在世界之外。"
 row = ExtResource("row")
 race = ExtResource("3_race_peach")
 prerequisite = ExtResource("4_prereq")

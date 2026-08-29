@@ -15,6 +15,8 @@
 [resource]
 script = ExtResource("1_article_script")
 display_name = "汉化"
+description = "既然大家已经在同一个政府、同一个市场和同一份报纸里生活，为什么还要维持一套只有少数人掌握的文字与历法？
+汉化把这种疑问变成制度答案：公共生活只保留汉语，比翼旧有的知识体系退出官署与教育。它让交流变得简单，也告诉比翼，他们最珍视的那些东西今后只能算私人的旧习。"
 row = ExtResource("row")
 race = ExtResource("3_race_biyi")
 prerequisite = ExtResource("4_prereq")

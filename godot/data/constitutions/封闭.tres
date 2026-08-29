@@ -22,6 +22,8 @@ required_rate = 0.5
 [resource]
 script = ExtResource("1_article_script")
 display_name = "封闭"
+description = "桃花妖看见的答案比其他人简单得多：麻烦之所以越来越多，是因为路开得太多。
+于是每个地方重新只为自己负责，每名议员先回答故土的需要，再谈全岛的宏大方案。蓬莱仍有议会，但桃源不再愿意让一个跨岛组织替所有村镇同时作答。"
 row = ExtResource("row")
 race = ExtResource("3_race_peach")
 prerequisite = ExtResource("4_prereq")

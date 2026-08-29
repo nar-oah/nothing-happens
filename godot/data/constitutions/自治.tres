@@ -14,6 +14,8 @@
 [resource]
 script = ExtResource("1_article_script")
 display_name = "自治"
+description = "桃源各地仍由自己的家系、长辈与合枝议处理生活，只有那些实在绕不开的事情才拿到联合政府里讨论。
+他们参加蓬莱，却从来不觉得蓬莱有必要进入生活的每一个角落。道路可以相通，议会可以存在，只要外面的变化不要来得太深、太快。"
 row = ExtResource("row")
 race = ExtResource("3_race_peach")
 policies = Array[ExtResource("2_policy_script")]([ExtResource("4_policy_1"), ExtResource("5_policy_2"), ExtResource("6_policy_3")])

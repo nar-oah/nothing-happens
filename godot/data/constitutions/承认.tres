@@ -23,6 +23,9 @@ required_rate = 0.5
 [resource]
 script = ExtResource("1_article_script")
 display_name = "承认"
+description = "既然偃偶能够思考、签约、投票和承担责任，那么它的身体理应首先属于它自己。
+承认把每具行身视为完整公民，却没有因此废除身契。相反，只有拥有完整身体所有权的人，才能最彻底地决定如何出售、出租和抵押自己。
+偃偶争取到了不再被别人卖掉的自由，也争取到了把自己卖得更自由的权利。"
 row = ExtResource("row")
 race = ExtResource("3_race_yano")
 prerequisite = ExtResource("4_prereq")

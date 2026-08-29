@@ -15,6 +15,9 @@
 [resource]
 script = ExtResource("1_article_script")
 display_name = "互助"
+description = "并不是所有共同劳动都需要一座正式组织，也不是所有争端都要变成谈判与罢工。
+互助让南柯重新依靠旧有的换班、照护、借贷和彼此顶工。它保留劳动者之间的联系，却放弃用一个统一组织去约束产业和议会。
+世界仍然很累，只是大家再次把如何撑下去当成彼此之间的私事。"
 row = ExtResource("row")
 race = ExtResource("3_race_nanke")
 prerequisite = ExtResource("4_prereq")

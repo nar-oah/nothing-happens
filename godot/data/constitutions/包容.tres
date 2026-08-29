@@ -15,6 +15,8 @@
 script = ExtResource("1_article_script")
 yin_yang_adjustment_rate = 0.1
 display_name = "包容"
+description = "官署说汉语，比翼仍保存自己的文字、历法和学问；不同族群在公共事务里使用同一套语言，又各自带着自己的旧传统生活。
+这套制度没有解决比翼对失去知识地位的不满，只是默认一种朴素的妥协：公共世界可以改变，但至少族内还有些东西不必跟着改变。"
 row = ExtResource("row")
 race = ExtResource("3_race_biyi")
 policies = Array[ExtResource("2_policy_script")]([ExtResource("4_policy_1"), ExtResource("5_policy_2"), ExtResource("6_policy_3")])

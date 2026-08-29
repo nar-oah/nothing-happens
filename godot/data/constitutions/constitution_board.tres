@@ -1,9 +1,10 @@
-[gd_resource type="Resource" script_class="ConstitutionBoardDefinition" format=3]
+[gd_resource type="Resource" script_class="ConstitutionBoardDefinition" format=3 uid="uid://yqp37ensgbee"]
 
-[ext_resource type="Script" path="res://definitions/constitution_board_definition.gd" id="1"]
-[ext_resource type="Resource" path="res://data/constitution_columns/异制.tres" id="2"]
+[ext_resource type="Script" uid="uid://d0qvejnhwnxiv" path="res://definitions/constitution_board_definition.gd" id="1"]
+[ext_resource type="Script" uid="uid://capasgkks1t4a" path="res://definitions/constitution_column_definition.gd" id="1_1cf1q"]
+[ext_resource type="Resource" uid="uid://dqy0xjed56mdo" path="res://data/constitution_columns/异制.tres" id="2"]
 [ext_resource type="Resource" path="res://data/constitution_columns/变制.tres" id="3"]
-[ext_resource type="Resource" path="res://data/constitution_columns/偏制.tres" id="4"]
+[ext_resource type="Resource" uid="uid://i5575fpmtnvt" path="res://data/constitution_columns/偏制.tres" id="4"]
 [ext_resource type="Resource" path="res://data/constitution_columns/常制.tres" id="5"]
 [ext_resource type="Resource" path="res://data/constitution_columns/新制.tres" id="6"]
 [ext_resource type="Resource" path="res://data/constitution_columns/强制.tres" id="7"]
@@ -11,4 +12,4 @@
 
 [resource]
 script = ExtResource("1")
-columns = Array[ConstitutionColumnDefinition]([ExtResource("2"), ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("6"), ExtResource("7"), ExtResource("8")])
+columns = Array[ExtResource("1_1cf1q")]([ExtResource("2"), ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("6"), ExtResource("7"), ExtResource("8")])

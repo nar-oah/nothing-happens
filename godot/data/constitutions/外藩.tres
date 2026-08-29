@@ -15,6 +15,8 @@
 script = ExtResource("1_article_script")
 petition_limit = 5
 display_name = "外藩"
+description = "大明守着永乐港与远洋航路，蓬莱诸族守着自己的土地、习惯和议会。谁都没有真正制服谁，于是双方把这份妥协写成了制度：蓬莱自行治理岛内事务，却仍向朝廷称臣纳贡，也容许朝廷在最要紧的时候伸手进来。
+这不是独立，也不是统治，而是一份维持了太久、以至于所有人都习惯把它当成自然秩序的停战书。"
 row = ExtResource("row")
 race = ExtResource("3_race_human")
 race_min_seat_rate = 0.2

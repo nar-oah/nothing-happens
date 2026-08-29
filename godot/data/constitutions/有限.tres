@@ -23,6 +23,8 @@ required_rate = 0.2
 [resource]
 script = ExtResource("1_article_script")
 display_name = "有限"
+description = "偃偶可以拥有姓名、财产、合同和议席，也可以像货物一样被登记、出租、抵押和转卖。
+蓬莱没有解决这个矛盾，只是学会了同时承认两边都是真的。一具行身既是公民，也是商品；只要日子还能继续，这份“一身两籍”就被视作足够合理。"
 row = ExtResource("row")
 race = ExtResource("3_race_yano")
 seat_condition = SubResource("Resource_condition")

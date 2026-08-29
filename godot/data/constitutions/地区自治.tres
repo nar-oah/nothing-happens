@@ -22,6 +22,9 @@ required_rate = 0.9
 [resource]
 script = ExtResource("1_article_script")
 display_name = "地区自治"
+description = "如果每个地方都有自己的土地、祖先、生活和麻烦，那么“整个蓬莱共同的利益”究竟是谁的利益？
+地区自治把这个怀疑贯彻到底。跨地区集团退出议会，每一席只代表一个具体地方；任何想改变全岛的方案，都必须重新面对那些地图上彼此分开的生活。
+议会最终变成了蓬莱本身：许多地方彼此相邻，却再没有谁能轻易替所有地方说话。"
 row = ExtResource("row")
 is_terminal = true
 race = ExtResource("3_race_peach")

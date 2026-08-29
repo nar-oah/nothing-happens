@@ -23,6 +23,8 @@ required_rate = 0.5
 script = ExtResource("1_article_script")
 yin_yang_adjustment_rate = 0.1
 display_name = "比翼化"
+description = "如果蓬莱必须拥有一种共同文化，比翼相信最合适的当然是自己保存了数百年的那一种。
+他们曾经替全岛记事、定历、传授知识；如今，他们要求国家重新承认这份古老资格。比翼化不是单纯恢复旧文字，而是把比翼理解世界的方式重新变成所有人的公共规则。"
 row = ExtResource("row")
 race = ExtResource("3_race_biyi")
 prerequisite = ExtResource("4_prereq")

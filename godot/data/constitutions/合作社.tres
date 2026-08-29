@@ -34,6 +34,8 @@ strike_enabled = true
 strike_group = ExtResource("5_group_1")
 strike_extends_to_group = true
 display_name = "合作社"
+description = "如果共同劳动创造的东西最终仍由别人决定如何生产、分配和出售，那么工会争来的底线始终只是谈判条件。
+合作社试图更进一步：劳动者不只在坏条件出现时拒绝工作，也开始共同掌握生产本身。原本属于南柯的劳动问题因此越过族群边界，成为所有加入组织的人共同承担的事情。"
 row = ExtResource("row")
 race = ExtResource("3_race_nanke")
 prerequisite = ExtResource("4_prereq")

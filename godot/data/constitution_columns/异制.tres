@@ -1,13 +1,14 @@
-[gd_resource type="Resource" script_class="ConstitutionColumnDefinition" format=3]
+[gd_resource type="Resource" script_class="ConstitutionColumnDefinition" format=3 uid="uid://dqy0xjed56mdo"]
 
-[ext_resource type="Script" path="res://definitions/constitution_column_definition.gd" id="1"]
-[ext_resource type="Resource" path="res://data/constitutions/托拉斯.tres" id="2"]
-[ext_resource type="Resource" path="res://data/constitutions/地区自治.tres" id="3"]
-[ext_resource type="Resource" path="res://data/constitutions/透明政府.tres" id="4"]
+[ext_resource type="Script" uid="uid://capasgkks1t4a" path="res://definitions/constitution_column_definition.gd" id="1"]
+[ext_resource type="Script" uid="uid://dajy5425i5dpq" path="res://definitions/constitution_article_definition.gd" id="1_hhf82"]
+[ext_resource type="Resource" uid="uid://cearrchs215h0" path="res://data/constitutions/托拉斯.tres" id="2"]
+[ext_resource type="Resource" uid="uid://dce70h370cmcp" path="res://data/constitutions/地区自治.tres" id="3"]
+[ext_resource type="Resource" uid="uid://c3evhwfnxiem0" path="res://data/constitutions/透明政府.tres" id="4"]
 
 [resource]
 script = ExtResource("1")
 id = &"exceptional"
 display_name = "异制"
 unlock_cost_months = 36
-articles = Array[ConstitutionArticleDefinition]([ExtResource("2"), ExtResource("3"), ExtResource("4")])
+articles = Array[ExtResource("1_hhf82")]([ExtResource("2"), ExtResource("3"), ExtResource("4")])

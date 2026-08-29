@@ -15,6 +15,8 @@
 script = ExtResource("1_article_script")
 donation_detection_probability = 0.2
 display_name = "有限监管"
+description = "即便驻岁值得信任，偶尔有人看看账本，也不算冒犯。
+有限监管承认执政者可能犯错，却仍把监督视作例外而非常态。政府允许部分事情被看见，但保留足够多的阴影，好让政治继续以原来的方式运转。"
 row = ExtResource("row")
 race = ExtResource("3_race_zhushui")
 participates_in_variable_seat_allocation = false

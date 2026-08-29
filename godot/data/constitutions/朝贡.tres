@@ -16,6 +16,8 @@
 script = ExtResource("1_article_script")
 petition_limit = 5
 display_name = "朝贡"
+description = "既然只是奉表称臣、按期入贡，又何必让朝廷继续过问岛内每一件事？
+朝贡派愿意保留天朝名分，却要求把名分重新缩回礼仪与贡路之中。蓬莱仍向大明低头，但这一低头应当止于海岸，不该一路伸进议会。"
 row = ExtResource("row")
 race = ExtResource("3_race_human")
 prerequisite = ExtResource("4_prereq")

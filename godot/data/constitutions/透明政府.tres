@@ -15,6 +15,8 @@
 script = ExtResource("1_article_script")
 donation_detection_probability = 1.0
 display_name = "透明政府"
+description = "既然权力属于联合政府，那么联合政府做过的交易就没有理由藏起来。
+透明政府把监督推到最彻底的程度：不再赌事情会不会被发现，而是假定一切迟早都会公开。秘密政治并没有因此消失，只是每一次秘密都必须按“终将成为新闻”的方式计算代价。"
 row = ExtResource("row")
 race = ExtResource("3_race_zhushui")
 participates_in_variable_seat_allocation = false

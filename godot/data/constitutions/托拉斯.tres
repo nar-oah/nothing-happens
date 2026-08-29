@@ -23,6 +23,9 @@ required_rate = 0.9
 [resource]
 script = ExtResource("1_article_script")
 display_name = "托拉斯"
+description = "当所有身体都可以自由交易，所有产业都可以自由兼并，最后留下的最自由状态，也许就是所有人面对同一个买家。
+托拉斯把产业集团、合同标准、行身市场乃至议会影响收进一个组织。偃偶终于成为完整的市场主体，也因此迎来了一个可以把完整的“自己”全部交给市场的世界。
+他们没有摆脱商品身份，只是让商品与公民之间最后那条界线失去了意义。"
 row = ExtResource("row")
 is_terminal = true
 race = ExtResource("3_race_yano")

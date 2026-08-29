@@ -22,6 +22,8 @@ rate = 1.0
 [resource]
 script = ExtResource("1_article_script")
 display_name = "自由贸易"
+description = "大明的旗号可以留在港口，但货物不该因为挂着谁的旗就先过栈桥。
+自由贸易取消朝廷在航路、关税和货物上的优先权，把永乐港变成所有商人都按同一套规矩竞争的港口。可当旧有特权真正消失，原本只想做生意的轮运局，也会突然发现自己肩上还有“官督”二字。"
 row = ExtResource("row")
 race = ExtResource("3_race_human")
 prerequisite = ExtResource("4_prereq")
