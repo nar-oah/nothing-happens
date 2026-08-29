@@ -8,6 +8,7 @@
 	import type {
 		NewspaperCommentData,
 		NewspaperEventData,
+		NewspaperFrontData,
 		NewspaperMetricData
 	} from '$lib/components/newspaper/types';
 
@@ -16,13 +17,16 @@
 		year: number;
 		month: number;
 		metrics: NewspaperMetricData[];
+		front?: NewspaperFrontData;
 		events: NewspaperEventData[];
 		comment: NewspaperCommentData;
 		busy?: boolean;
+		folded?: boolean;
 		leaving?: boolean;
 		onAdvance?: () => void;
 		onCovered?: () => void;
 		onRequestClose?: () => void;
+		onFolded?: () => void;
 		onClosed?: () => void;
 	};
 	const ROTATION_DEGREES = -20;
@@ -34,13 +38,16 @@
 		year,
 		month,
 		metrics,
+		front,
 		events,
 		comment,
 		busy = false,
+		folded = false,
 		leaving = false,
 		onAdvance,
 		onCovered,
 		onRequestClose,
+		onFolded,
 		onClosed
 	}: Props = $props();
 	let viewportWidth = $state(1512);
@@ -49,7 +56,7 @@
 	let motionPhase = $state<NewspaperMotionPhase>('entering');
 	let backgroundCovered = $state(false);
 	let scrollElement: HTMLDivElement;
-	const pageCount = $derived(4 + events.length);
+	const pageCount = $derived(4 + events.length + (front ? 1 : 0));
 	const baseHeight = $derived(pageCount * VERTICAL_FOLD_WIDTH);
 	const scale = $derived(viewportWidth / VERTICAL_FOLD_HEIGHT);
 	const scaledHeight = $derived(baseHeight * scale);
@@ -148,9 +155,12 @@
 									{year}
 									{month}
 									{metrics}
+									{front}
 									{events}
 									{comment}
 									{onAdvance}
+									onFolded={onFolded}
+									open={!folded}
 									disabled={interactionDisabled}
 								/>
 							</div>
