@@ -1,10 +1,11 @@
 [gd_resource type="Resource" script_class="SeatDefinition" format=3 uid="uid://6xf677natns0"]
 
-[ext_resource type="Resource" uid="uid://bw162ei21njtt" path="res://data/races/biyi.tres" id="1_40216"]
+[ext_resource type="Resource" uid="uid://bw162ei21njtt" path="res://data/races/比翼.tres" id="1_40216"]
 [ext_resource type="Script" uid="uid://of78ek0nhty6" path="res://definitions/seat_definition.gd" id="1_qxpgu"]
 
 [resource]
 script = ExtResource("1_qxpgu")
 display_name = "连理"
-anchor_race = ExtResource("1_40216")
+description = "比翼保存文字、历法与谱系传统最深的旧城，城中至今遍布校书馆、旧历院与私人藏书楼。当地人习惯认为许多后来被称作“蓬莱共同传统”的东西，不过是外人重新命名过的连理旧学。"
+fixed_race = ExtResource("1_40216")
 metadata/_custom_type_script = "uid://of78ek0nhty6"

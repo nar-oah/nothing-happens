@@ -1,9 +1,0 @@
-[gd_resource type="Resource" script_class="NankeRaceDefinition" format=3 uid="uid://bto7mkhf8cqca"]
-
-[ext_resource type="Script" uid="uid://c1ym6g0ye21fa" path="res://definitions/nanke_race_definition.gd" id="2_de8f7"]
-
-[resource]
-script = ExtResource("2_de8f7")
-display_name = "南柯"
-increase_wage = true
-decrease_price = true

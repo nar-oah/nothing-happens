@@ -1,20 +1,26 @@
-[gd_resource type="Resource" script_class="RegulationConstitutionArticleDefinition" format=3]
+[gd_resource type="Resource" script_class="RegulationConstitutionArticleDefinition" format=3 uid="uid://c7lo08fbvf5op"]
 
-[ext_resource type="Script" path="res://definitions/regulation_constitution_article_definition.gd" id="1_article_script"]
-[ext_resource type="Script" path="res://definitions/policy_definition.gd" id="2_policy_script"]
-[ext_resource type="Resource" path="res://data/races/zhushui.tres" id="3_race_zhushui"]
-[ext_resource type="Resource" path="res://data/constitution_rows/监管.tres" id="row"]
-[ext_resource type="Resource" path="res://data/policies/密查囤积.tres" id="4_policy_1"]
-[ext_resource type="Resource" path="res://data/policies/缉查逃课.tres" id="5_policy_2"]
-[ext_resource type="Resource" path="res://data/policies/夜禁工场.tres" id="6_policy_3"]
+[ext_resource type="Script" uid="uid://bqftg57rtalf1" path="res://definitions/regulation_constitution_article_definition.gd" id="1_article_script"]
+[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="1_k1rnc"]
+[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_62lxq"]
+[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
+[ext_resource type="Resource" uid="uid://dknll48i00v4u" path="res://data/races/驻岁.tres" id="3_race_zhushui"]
+[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="3_ueoym"]
+[ext_resource type="Resource" uid="uid://b54ghm84jsihb" path="res://data/policies/密查囤积.tres" id="4_policy_1"]
+[ext_resource type="Resource" uid="uid://cy6k5b5spfvlo" path="res://data/policies/缉查逃课.tres" id="5_policy_2"]
+[ext_resource type="Resource" uid="uid://b7avljwhril65" path="res://data/policies/夜禁工场.tres" id="6_policy_3"]
+[ext_resource type="Resource" uid="uid://cl8wvh82je431" path="res://data/constitution_rows/监管.tres" id="row"]
 
 [resource]
 script = ExtResource("1_article_script")
+donation_detection_probability = 0.0
+event_early_reveal_bonus_probability = 0.25
 display_name = "锦衣卫"
+description = "若问题在于政府知道得太晚，那么最直接的答案，就是派更多人去更早地知道一切。
+锦衣卫绕过公开监督，把耳目伸进尚未成为新闻的地方。它确实能更早发现正在形成的问题，可当整个社会知道有人正在寻找危机时，每一个风声也会显得更像危机。
+蓬莱获得了一双更敏锐的眼睛，也顺便学会了更加紧张地看待自己。"
 row = ExtResource("row")
 race = ExtResource("3_race_zhushui")
 participates_in_variable_seat_allocation = false
 expectation_growth_rate = -1.0
-donation_detection_probability = 0.0
-event_early_reveal_bonus_probability = 0.25
 policies = Array[ExtResource("2_policy_script")]([ExtResource("4_policy_1"), ExtResource("5_policy_2"), ExtResource("6_policy_3")])

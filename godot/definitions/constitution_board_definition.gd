@@ -72,13 +72,13 @@ func validate() -> bool:
 	if columns.is_empty() or get_center_column_index() < 0:
 		push_error("Constitution board requires exactly one zero-cost center column.")
 		return false
-	var seen_columns: Dictionary[StringName, bool] = {}
+	var seen_columns: Dictionary[ConstitutionColumnDefinition, bool] = {}
 	var seen_articles: Dictionary[ConstitutionArticleDefinition, bool] = {}
 	for column in columns:
-		if column == null or column.id == &"" or seen_columns.has(column.id):
-			push_error("Constitution columns require unique non-empty ids.")
+		if column == null or seen_columns.has(column):
+			push_error("Constitution columns require unique non-null Resources.")
 			return false
-		seen_columns[column.id] = true
+		seen_columns[column] = true
 		var seen_rows: Dictionary[ConstitutionRowDefinition, bool] = {}
 		for article in column.articles:
 			if article == null or article.row == null or seen_articles.has(article):

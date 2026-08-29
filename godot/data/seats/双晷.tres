@@ -5,4 +5,5 @@
 [resource]
 script = ExtResource("1_qxpgu")
 display_name = "双晷"
+description = "以历法、测时和昼夜记录闻名的比翼旧城，公共建筑上仍保存着大量不同年代的晷仪。工业时钟普及后，这里失去了曾经不可替代的地位，因此当地关于“新技术究竟是在提高效率，还是在毁掉正确秩序”的争论从未停止。"
 metadata/_custom_type_script = "uid://of78ek0nhty6"

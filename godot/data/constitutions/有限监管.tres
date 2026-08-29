@@ -1,20 +1,24 @@
-[gd_resource type="Resource" script_class="RegulationConstitutionArticleDefinition" format=3]
+[gd_resource type="Resource" script_class="RegulationConstitutionArticleDefinition" format=3 uid="uid://bhsfamsaabdtl"]
 
-[ext_resource type="Script" path="res://definitions/regulation_constitution_article_definition.gd" id="1_article_script"]
-[ext_resource type="Script" path="res://definitions/policy_definition.gd" id="2_policy_script"]
-[ext_resource type="Resource" path="res://data/races/zhushui.tres" id="3_race_zhushui"]
-[ext_resource type="Resource" path="res://data/constitution_rows/监管.tres" id="row"]
-[ext_resource type="Resource" path="res://data/policies/稽核拨款.tres" id="4_policy_1"]
-[ext_resource type="Resource" path="res://data/policies/核价公示.tres" id="5_policy_2"]
-[ext_resource type="Resource" path="res://data/policies/案卷核薪.tres" id="6_policy_3"]
+[ext_resource type="Script" uid="uid://bqftg57rtalf1" path="res://definitions/regulation_constitution_article_definition.gd" id="1_article_script"]
+[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="1_kgypd"]
+[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_01vmh"]
+[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
+[ext_resource type="Resource" uid="uid://dknll48i00v4u" path="res://data/races/驻岁.tres" id="3_race_zhushui"]
+[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="3_wkk50"]
+[ext_resource type="Resource" uid="uid://cl6j0y3dlu8km" path="res://data/policies/稽核拨款.tres" id="4_policy_1"]
+[ext_resource type="Resource" uid="uid://cnv5d7rxf6uva" path="res://data/policies/核价公示.tres" id="5_policy_2"]
+[ext_resource type="Resource" uid="uid://dup7h03f8ujv5" path="res://data/policies/案卷核薪.tres" id="6_policy_3"]
+[ext_resource type="Resource" uid="uid://cl8wvh82je431" path="res://data/constitution_rows/监管.tres" id="row"]
 
 [resource]
 script = ExtResource("1_article_script")
+donation_detection_probability = 0.2
 display_name = "有限监管"
+description = "即便驻岁值得信任，偶尔有人看看账本，也不算冒犯。
+有限监管承认执政者可能犯错，却仍把监督视作例外而非常态。政府允许部分事情被看见，但保留足够多的阴影，好让政治继续以原来的方式运转。"
 row = ExtResource("row")
 race = ExtResource("3_race_zhushui")
 participates_in_variable_seat_allocation = false
 expectation_growth_rate = -1.0
-donation_detection_probability = 0.2
-event_early_reveal_bonus_probability = 0.0
 policies = Array[ExtResource("2_policy_script")]([ExtResource("4_policy_1"), ExtResource("5_policy_2"), ExtResource("6_policy_3")])

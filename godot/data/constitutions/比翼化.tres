@@ -5,14 +5,14 @@
 [ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="1_pi8wa"]
 [ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_fxjlp"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
-[ext_resource type="Resource" uid="uid://bw162ei21njtt" path="res://data/races/biyi.tres" id="3_race_biyi"]
-[ext_resource type="Resource" path="res://data/constitutions/包容.tres" id="4_prereq"]
+[ext_resource type="Resource" uid="uid://bw162ei21njtt" path="res://data/races/比翼.tres" id="3_race_biyi"]
+[ext_resource type="Resource" uid="uid://cbaegioaf86au" path="res://data/constitutions/包容.tres" id="4_prereq"]
 [ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="5_seat_condition_script"]
 [ext_resource type="Resource" uid="uid://cevrii67ltmsg" path="res://data/policies/阴历平准.tres" id="6_policy_1"]
 [ext_resource type="Resource" uid="uid://bpj8sxytmtoyp" path="res://data/policies/阳历分利.tres" id="7_policy_2"]
 [ext_resource type="Resource" uid="uid://dl3mgnbq5hgfp" path="res://data/policies/阴阳转录.tres" id="8_policy_3"]
 [ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="12_353y4"]
-[ext_resource type="Resource" path="res://data/constitution_rows/文化.tres" id="row"]
+[ext_resource type="Resource" uid="uid://b5clravmnjms4" path="res://data/constitution_rows/文化.tres" id="row"]
 
 [sub_resource type="Resource" id="Resource_seat_condition"]
 script = ExtResource("5_seat_condition_script")
@@ -23,6 +23,8 @@ required_rate = 0.5
 script = ExtResource("1_article_script")
 yin_yang_adjustment_rate = 0.1
 display_name = "比翼化"
+description = "如果蓬莱必须拥有一种共同文化，比翼相信最合适的当然是自己保存了数百年的那一种。
+他们曾经替全岛记事、定历、传授知识；如今，他们要求国家重新承认这份古老资格。比翼化不是单纯恢复旧文字，而是把比翼理解世界的方式重新变成所有人的公共规则。"
 row = ExtResource("row")
 race = ExtResource("3_race_biyi")
 prerequisite = ExtResource("4_prereq")

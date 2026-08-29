@@ -17,6 +17,7 @@ import {
 
 const sourceGroup: InterestGroupDefinition = {
 	display_name: 'source',
+	description: 'source description',
 	base_column_weight: 1,
 	decrease_tax: true,
 	decrease_price: false,

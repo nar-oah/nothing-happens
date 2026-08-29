@@ -5,4 +5,5 @@
 [resource]
 script = ExtResource("1_qxpgu")
 display_name = "问津"
+description = "桃源外围最重要的道路节点，也是桃花妖与外界长期接触最频繁的地方。每一次开放道路、征收货物或重新封闭入口，最先受影响的总是问津，因此当地政治很少真正相信“只开这一条路不会改变什么”。"
 metadata/_custom_type_script = "uid://of78ek0nhty6"

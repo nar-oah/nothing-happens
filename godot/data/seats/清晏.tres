@@ -5,4 +5,5 @@
 [resource]
 script = ExtResource("1_qxpgu")
 display_name = "清晏"
+description = "过去常作为跨族会盟、交换和争端调停地点，驻岁曾长期在此主持共同仪式。如今这里已经是一座普通城市，但许多居民仍以“事情最后总能谈下来”自豪——哪怕最近几十年，每一次谈判都比上一次更急。"
 metadata/_custom_type_script = "uid://of78ek0nhty6"

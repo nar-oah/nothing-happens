@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="InterestGroupDefinition" format=3 uid="uid://cm1s3iuqjrcx7"]
+
+[ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+display_name = "岁契基金"
+description = "在人类带来白银与铜钱以前，各族便已经以未然互相借贷；那些跨越漫长年月仍能兑现的契约，大多需要驻岁出面作保。围绕这种信用逐渐形成的岁契基金延续至今，成为蓬莱几乎唯一真正意义上的银行，经营存贷、收债以及由此衍生的金融业务。岛上无数本土商号、工场与小业主都是它的债务人，因此岁契基金代表的从来不只是一家银行，而是整个依靠借来的钱维持运转的本土商业社会。"
+base_column_weight = 2
+decrease_wage = true
+decrease_trade = true

@@ -1,19 +1,24 @@
-[gd_resource type="Resource" script_class="HumanConstitutionArticleDefinition" format=3]
+[gd_resource type="Resource" script_class="HumanConstitutionArticleDefinition" format=3 uid="uid://biywjnnwikuif"]
 
-[ext_resource type="Script" path="res://definitions/human_constitution_article_definition.gd" id="1_article_script"]
-[ext_resource type="Script" path="res://definitions/policy_definition.gd" id="2_policy_script"]
-[ext_resource type="Resource" path="res://data/races/human.tres" id="3_race_human"]
-[ext_resource type="Resource" path="res://data/constitution_rows/外交.tres" id="row"]
-[ext_resource type="Resource" path="res://data/constitutions/外藩.tres" id="4_prereq"]
-[ext_resource type="Resource" path="res://data/policies/折贡为货.tres" id="5_policy_1"]
-[ext_resource type="Resource" path="res://data/policies/贡期缓征.tres" id="6_policy_2"]
-[ext_resource type="Resource" path="res://data/policies/海舶限贡.tres" id="7_policy_3"]
+[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="1_48lrw"]
+[ext_resource type="Script" uid="uid://tmkjsuwecnwg" path="res://definitions/human_constitution_article_definition.gd" id="1_article_script"]
+[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_16jii"]
+[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
+[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="3_c4rnr"]
+[ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/人类.tres" id="3_race_human"]
+[ext_resource type="Resource" uid="uid://capcotm76joas" path="res://data/constitutions/外藩.tres" id="4_prereq"]
+[ext_resource type="Resource" uid="uid://d1tjiryxrc6fw" path="res://data/policies/折贡为货.tres" id="5_policy_1"]
+[ext_resource type="Resource" uid="uid://ifeh7dncll23" path="res://data/policies/贡期缓征.tres" id="6_policy_2"]
+[ext_resource type="Resource" uid="uid://vwtxr08mshcr" path="res://data/policies/海舶限贡.tres" id="7_policy_3"]
+[ext_resource type="Resource" uid="uid://bjubbxjboutnj" path="res://data/constitution_rows/外交.tres" id="row"]
 
 [resource]
 script = ExtResource("1_article_script")
+petition_limit = 5
 display_name = "朝贡"
+description = "既然只是奉表称臣、按期入贡，又何必让朝廷继续过问岛内每一件事？
+朝贡派愿意保留天朝名分，却要求把名分重新缩回礼仪与贡路之中。蓬莱仍向大明低头，但这一低头应当止于海岸，不该一路伸进议会。"
 row = ExtResource("row")
 race = ExtResource("3_race_human")
 prerequisite = ExtResource("4_prereq")
-petition_limit = 5
 policies = Array[ExtResource("2_policy_script")]([ExtResource("5_policy_1"), ExtResource("6_policy_2"), ExtResource("7_policy_3")])

@@ -5,4 +5,5 @@
 [resource]
 script = ExtResource("1_qxpgu")
 display_name = "析文"
+description = "由校书、释义、印本订正与公共教育发展起来的学术城市。当地人对一个词该如何定义往往比对一项政策该不该实行更容易争论起来，也因此成为蓬莱最擅长把政治争执写成几十页注释的地方。"
 metadata/_custom_type_script = "uid://of78ek0nhty6"

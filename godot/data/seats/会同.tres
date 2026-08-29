@@ -1,10 +1,11 @@
 [gd_resource type="Resource" script_class="SeatDefinition" format=3 uid="uid://chkf8x0v0inlx"]
 
 [ext_resource type="Script" uid="uid://of78ek0nhty6" path="res://definitions/seat_definition.gd" id="1_qxpgu"]
-[ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/human.tres" id="1_wmdli"]
+[ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/人类.tres" id="1_wmdli"]
 
 [resource]
 script = ExtResource("1_qxpgu")
 display_name = "会同"
-anchor_race = ExtResource("1_wmdli")
+description = "郑和船队最初登陆之地，也是永乐港、联合议会与联合政府所在的蓬莱首都。朝使、商人、报馆和各族官员都聚集于此，岛上发生的每一场争论，最后似乎都会变成会同桌面上的一份文书。"
+fixed_race = ExtResource("1_wmdli")
 metadata/_custom_type_script = "uid://of78ek0nhty6"

@@ -25,6 +25,7 @@ func _apply_local_groups(context) -> void:
 			continue
 		var group := InterestGroupDefinition.new()
 		group.display_name = seat_definition.display_name
+		group.description = seat_definition.description
 		group.base_column_weight = local_group_base_column_weight
 		group.decrease_tax = true
 		context.state.constitution.local_interest_groups[seat_definition] = group

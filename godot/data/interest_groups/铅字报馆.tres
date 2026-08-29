@@ -1,9 +1,10 @@
-[gd_resource type="Resource" script_class="InterestGroupDefinition" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="InterestGroupDefinition" format=3 uid="uid://pd7b0qkrdw6u"]
 
 [ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="1_script"]
 
 [resource]
 script = ExtResource("1_script")
 display_name = "铅字报馆"
+description = "蓬莱的报纸、告示、统计与公共消息几乎都从这里排印出去。它不仅经营新闻，也决定什么值得成为新闻、哪些数字应当登上头版，以及全岛在同一个早晨讨论什么。《听弦》正是其发行的严肃政治经济报纸；许多蓬莱人以为自己只是从报纸上了解世界，却很少意识到，他们了解世界的方式本身也掌握在报馆手中。"
 base_column_weight = 2
 decrease_wage = true

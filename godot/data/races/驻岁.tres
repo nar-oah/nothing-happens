@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ZhushuiRaceDefinition" format=3 uid="uid://dknll48i00v4u"]
+
+[ext_resource type="Script" uid="uid://5vl3510p0xx5" path="res://definitions/zhushui_race_definition.gd" id="1_yslc4"]
+
+[resource]
+script = ExtResource("1_yslc4")
+display_name = "驻岁"
+description = "驻岁曾替各族见证旧约、调停争端，因为寿命漫长，人们相信他们比谁都懂得等待。但这个几乎无法繁衍的种族，也曾因害怕落后而追逐更快的生产、更早的收益和更激烈的竞争，最终只剩下玩家与助手。如今他们对“危机将至”格外迟疑，并非天生超然，而是因为整个种族已经为这种恐惧付过一次代价。"
+increase_tax = true
+increase_price = true
+increase_wage = true
+increase_employment = true
+increase_trade = true

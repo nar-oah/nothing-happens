@@ -179,6 +179,8 @@ func _test_local_autonomy_runtime_resources(t: BackendTestContext) -> void:
 	var other_initial := t.make_article(other_race)
 	var other_next := t.make_article(other_race, false)
 	var definitions := t.make_seats(4, "location")
+	for definition in definitions:
+		definition.description = "%s description" % definition.display_name
 	var session := t.make_session(
 		[race, other_race], [base_group, rule_group], definitions,
 		[article, replacement, other_initial, other_next]
@@ -191,6 +193,9 @@ func _test_local_autonomy_runtime_resources(t: BackendTestContext) -> void:
 		var group: InterestGroupDefinition = locals[definition]
 		unique[group] = true
 		t.check_equal(group.display_name, definition.display_name, "local name comes from location")
+		t.check_equal(
+			group.description, definition.description, "local description comes from location"
+		)
 		t.check(group.decrease_tax, "local group only cares about lower tax")
 		t.check(
 			not group.decrease_price

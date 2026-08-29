@@ -5,4 +5,5 @@
 [resource]
 script = ExtResource("1_qxpgu")
 display_name = "永宁"
+description = "会同外最早形成的大型常住城镇，住着大量港务人员、官署雇员、船员家属与迁居岛上的普通人类。这里不像首都那样天天讨论名分与天下，但会同每一次扩大港运、税课或征用，往往最先落到永宁人的生活里。"
 metadata/_custom_type_script = "uid://of78ek0nhty6"

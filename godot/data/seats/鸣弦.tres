@@ -5,4 +5,5 @@
 [resource]
 script = ExtResource("1_qxpgu")
 display_name = "鸣弦"
+description = "围绕一座格外庞大的古听弦塔形成的跨族城市，塔鸣频率甚至被当地报馆当作日常新闻的一部分。没有人知道这座塔为什么比别处更容易积蓄未然，但所有人都很擅长解释它最近为什么又响得更频繁。"
 metadata/_custom_type_script = "uid://of78ek0nhty6"

@@ -223,6 +223,7 @@ function isInterestGroup(value: unknown): value is InterestGroupDefinition {
 	return (
 		isRecord(value) &&
 		typeof value.display_name === 'string' &&
+		typeof value.description === 'string' &&
 		isNumber(value.base_column_weight) &&
 		typeof value.decrease_tax === 'boolean' &&
 		typeof value.decrease_price === 'boolean' &&
@@ -290,7 +291,6 @@ function isConstitutionColumn(value: unknown): value is ConstitutionColumnDto {
 	return (
 		isRecord(value) &&
 		isNonnegativeInteger(value.column_index) &&
-		typeof value.id === 'string' &&
 		typeof value.display_name === 'string' &&
 		isNonnegativeInteger(value.unlock_cost_months) &&
 		typeof value.unlocked === 'boolean' &&
@@ -302,7 +302,6 @@ function isConstitutionRow(value: unknown): value is ConstitutionRowDto {
 	return (
 		isRecord(value) &&
 		isNonnegativeInteger(value.row_index) &&
-		typeof value.id === 'string' &&
 		typeof value.display_name === 'string' &&
 		typeof value.race_display_name === 'string' &&
 		typeof value.free_navigation === 'boolean' &&
@@ -348,6 +347,7 @@ function isRaceSummary(value: unknown): value is RaceSummaryDto {
 		isRecord(value) &&
 		isNonnegativeInteger(value.race_index) &&
 		typeof value.display_name === 'string' &&
+		typeof value.description === 'string' &&
 		isNonnegativeInteger(value.seat_count) &&
 		isArrayOf(
 			value.expectations,
@@ -422,7 +422,10 @@ function isVoteResult(value: unknown): value is VoteResultDto {
 				typeof vote.seat_display_name === 'string' &&
 				typeof vote.race_display_name === 'string' &&
 				typeof vote.interest_group_display_name === 'string' &&
-				(vote.position === 0 || vote.position === 1 || vote.position === 2 || vote.position === 3) &&
+				(vote.position === 0 ||
+					vote.position === 1 ||
+					vote.position === 2 ||
+					vote.position === 3) &&
 				isNumber(vote.score) &&
 				isNumberRecord(vote.breakdown)
 		)
@@ -501,7 +504,9 @@ function isEffectFormula(value: unknown): boolean {
 }
 
 function isUiMode(value: unknown): boolean {
-	return value === 'office' || value === 'dialogue' || value === 'parliament' || value === 'constitution';
+	return (
+		value === 'office' || value === 'dialogue' || value === 'parliament' || value === 'constitution'
+	);
 }
 
 function isWorldScene(value: unknown): boolean {

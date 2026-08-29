@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="InterestGroupDefinition" format=3 uid="uid://by7u482sgaihw"]
+
+[ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="1_5u5km"]
+
+[resource]
+script = ExtResource("1_5u5km")
+display_name = "听弦塔"
+description = "以遍布全岛的古老听弦塔为名，掌握未然取能、未然胆制造、能源配给与相关技术开发的组织。没有人知道那些古塔从何而来，但今日蓬莱的工场、偃偶、航船和远距通信都离不开从塔中取出的未然。于是，谁掌握听弦塔，谁便握住了这个工业时代最接近血液的东西。"
+base_column_weight = 5
+decrease_wage = true
+decrease_employment = true

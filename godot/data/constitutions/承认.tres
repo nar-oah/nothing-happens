@@ -1,15 +1,19 @@
 [gd_resource type="Resource" script_class="ConstitutionArticleDefinition" format=3 uid="uid://cwg5ec0qduwd"]
 
 [ext_resource type="Script" uid="uid://dajy5425i5dpq" path="res://definitions/constitution_article_definition.gd" id="1_article_script"]
+[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="1_ikkwc"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
-[ext_resource type="Resource" uid="uid://c2eco18e42n34" path="res://data/races/yano.tres" id="3_race_yano"]
-[ext_resource type="Resource" path="res://data/constitutions/有限.tres" id="4_prereq"]
-[ext_resource type="Resource" path="res://data/interest_groups/造身公所.tres" id="5_group_1"]
+[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_u3qtl"]
+[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="3_8onv3"]
+[ext_resource type="Resource" uid="uid://c2eco18e42n34" path="res://data/races/偃偶.tres" id="3_race_yano"]
+[ext_resource type="Resource" uid="uid://bp366yyqyg6le" path="res://data/constitutions/有限.tres" id="4_prereq"]
+[ext_resource type="Resource" uid="uid://b7vlc4eb8m4io" path="res://data/interest_groups/造身公所.tres" id="5_group_1"]
 [ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="6_seat_condition_script"]
 [ext_resource type="Resource" uid="uid://boq6isoei3e55" path="res://data/policies/自主身契.tres" id="8_policy_1"]
 [ext_resource type="Resource" uid="uid://cxnr2v5cpw160" path="res://data/policies/行身信贷.tres" id="9_policy_2"]
 [ext_resource type="Resource" uid="uid://dhsgt5yf783d8" path="res://data/policies/自营维修.tres" id="10_policy_3"]
-[ext_resource type="Resource" path="res://data/constitution_rows/偃偶.tres" id="row"]
+[ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="13_n4y35"]
+[ext_resource type="Resource" uid="uid://cqpejxjyt0cyq" path="res://data/constitution_rows/偃偶.tres" id="row"]
 
 [sub_resource type="Resource" id="Resource_seat_condition"]
 script = ExtResource("6_seat_condition_script")
@@ -19,6 +23,9 @@ required_rate = 0.5
 [resource]
 script = ExtResource("1_article_script")
 display_name = "承认"
+description = "既然偃偶能够思考、签约、投票和承担责任，那么它的身体理应首先属于它自己。
+承认把每具行身视为完整公民，却没有因此废除身契。相反，只有拥有完整身体所有权的人，才能最彻底地决定如何出售、出租和抵押自己。
+偃偶争取到了不再被别人卖掉的自由，也争取到了把自己卖得更自由的权利。"
 row = ExtResource("row")
 race = ExtResource("3_race_yano")
 prerequisite = ExtResource("4_prereq")

@@ -2,6 +2,7 @@ extends Resource
 class_name ConstitutionArticleDefinition
 
 @export var display_name: String
+@export_multiline var description: String
 @export var row: ConstitutionRowDefinition
 @export var is_terminal: bool = false
 

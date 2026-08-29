@@ -29,10 +29,16 @@ test('live race/group summaries derive Top without mock lore', () => {
 	const top = deriveTopItems(makeLiveState());
 	assert.equal(top.raceItems[0].item.text, '人类');
 	assert.equal(top.raceItems[0].item.value, 1);
+	assert.equal(top.raceItems[0].detail.leftLabel, '年度期望');
 	assert.match(top.raceItems[0].detail.leftBody, /商貿↑110/);
+	assert.equal(top.raceItems[0].detail.rightLabel, '种族简介');
+	assert.equal(top.raceItems[0].detail.rightBody, '人类简介');
 	assert.equal(top.interestGroupItems[0].item.text, '造身公所');
 	assert.equal(top.interestGroupItems[0].item.value, 1);
+	assert.equal(top.interestGroupItems[0].detail.leftLabel, '固定指标立场');
 	assert.match(top.interestGroupItems[0].detail.leftBody, /物價↓/);
+	assert.equal(top.interestGroupItems[0].detail.rightLabel, '利益集团简介');
+	assert.equal(top.interestGroupItems[0].detail.rightBody, '造身公所简介');
 });
 
 test('live status derives political donation and collapse values', () => {
@@ -59,7 +65,6 @@ test('constitution presentation keeps one aligned row grid and turns locked colu
 	const state = makeLiveState();
 	state.constitution.columns.push({
 		column_index: 1,
-		id: 'new',
 		display_name: '新制',
 		unlock_cost_months: 12,
 		unlocked: false,
@@ -67,7 +72,6 @@ test('constitution presentation keeps one aligned row grid and turns locked colu
 	});
 	state.constitution.rows.push({
 		row_index: 1,
-		id: 'culture',
 		display_name: '文化',
 		race_display_name: '比翼',
 		free_navigation: false,

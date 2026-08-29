@@ -1,7 +1,7 @@
-[gd_resource type="Resource" script_class="ConstitutionRowDefinition" format=3]
+[gd_resource type="Resource" script_class="ConstitutionRowDefinition" format=3 uid="uid://cl8wvh82je431"]
 
-[ext_resource type="Script" path="res://definitions/constitution_row_definition.gd" id="1_script"]
-[ext_resource type="Resource" path="res://data/races/zhushui.tres" id="2_race"]
+[ext_resource type="Script" uid="uid://ckrs2sqbfq880" path="res://definitions/constitution_row_definition.gd" id="1_script"]
+[ext_resource type="Resource" uid="uid://dknll48i00v4u" path="res://data/races/驻岁.tres" id="2_race"]
 
 [resource]
 script = ExtResource("1_script")

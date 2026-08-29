@@ -5,4 +5,5 @@
 [resource]
 script = ExtResource("1_qxpgu")
 display_name = "守白"
+description = "远离主要商路的传统学术聚落，以保存古本、手抄文献和旧式讲学闻名。这里并不真正拒绝新事物，只是坚持任何新事物都必须先证明自己比已经保存了几百年的旧办法更可靠。"
 metadata/_custom_type_script = "uid://of78ek0nhty6"

@@ -1,17 +1,23 @@
-[gd_resource type="Resource" script_class="ConstitutionArticleDefinition" format=3]
+[gd_resource type="Resource" script_class="ConstitutionArticleDefinition" format=3 uid="uid://b3ojycq8ux16s"]
 
-[ext_resource type="Script" path="res://definitions/constitution_article_definition.gd" id="1_article_script"]
-[ext_resource type="Script" path="res://definitions/policy_definition.gd" id="2_policy_script"]
-[ext_resource type="Resource" path="res://data/races/peach_blossom.tres" id="3_race_peach"]
-[ext_resource type="Resource" path="res://data/constitution_rows/桃源.tres" id="row"]
-[ext_resource type="Resource" path="res://data/constitutions/自治.tres" id="4_prereq"]
-[ext_resource type="Resource" path="res://data/policies/开山通路.tres" id="5_policy_1"]
-[ext_resource type="Resource" path="res://data/policies/外货竞价.tres" id="6_policy_2"]
-[ext_resource type="Resource" path="res://data/policies/土产外销.tres" id="7_policy_3"]
+[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="1_50bt5"]
+[ext_resource type="Script" uid="uid://dajy5425i5dpq" path="res://definitions/constitution_article_definition.gd" id="1_article_script"]
+[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_k01yh"]
+[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
+[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="3_bmny0"]
+[ext_resource type="Resource" uid="uid://b4e7rdu770lrv" path="res://data/races/桃花妖.tres" id="3_race_peach"]
+[ext_resource type="Resource" uid="uid://brf58w2wswch1" path="res://data/constitutions/自治.tres" id="4_prereq"]
+[ext_resource type="Resource" uid="uid://bwqcl5ttb6eat" path="res://data/policies/开山通路.tres" id="5_policy_1"]
+[ext_resource type="Resource" uid="uid://cdrcnokne8wah" path="res://data/policies/外货竞价.tres" id="6_policy_2"]
+[ext_resource type="Resource" uid="uid://sw8vf06gj1o2" path="res://data/policies/土产外销.tres" id="7_policy_3"]
+[ext_resource type="Resource" uid="uid://cq8xj0frv0cdf" path="res://data/constitution_rows/桃源.tres" id="row"]
 
 [resource]
 script = ExtResource("1_article_script")
 display_name = "开放"
+description = "道路既然已经修到桃源门口，再不断封闭它们，只会让土地、货物与人困在越来越小的范围里。
+开放派选择接受桃源已经属于整个蓬莱的事实。道路、土地产品和贸易重新进入全岛网络，祖地不再以隔绝来换取安宁。
+他们相信桃源可以生活在世界之中，而不是永远藏在世界之外。"
 row = ExtResource("row")
 race = ExtResource("3_race_peach")
 prerequisite = ExtResource("4_prereq")

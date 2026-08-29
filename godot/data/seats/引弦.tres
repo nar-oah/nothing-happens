@@ -5,4 +5,5 @@
 [resource]
 script = ExtResource("1_qxpgu")
 display_name = "引弦"
+description = "因未然胆、引弦管路与大型工业设施而迅速扩张的新城。这里没有槐安那么多古老制度，却有更多工场、试验设备和跨族技术人员，是蓬莱最像“未来已经提前落地”的地方之一。"
 metadata/_custom_type_script = "uid://of78ek0nhty6"

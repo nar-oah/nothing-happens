@@ -5,14 +5,14 @@
 [ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="1_hrbgp"]
 [ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_cvp6l"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
-[ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/human.tres" id="3_race_human"]
+[ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/人类.tres" id="3_race_human"]
 [ext_resource type="Resource" uid="uid://d2060urv5hhfb" path="res://data/constitutions/内附.tres" id="4_prereq"]
 [ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="5_seat_condition_script"]
 [ext_resource type="Resource" uid="uid://ctdshm7piam16" path="res://data/policies/平准官仓.tres" id="6_policy_1"]
 [ext_resource type="Resource" uid="uid://dsbfw6wkdld46" path="res://data/policies/驿运统筹.tres" id="7_policy_2"]
 [ext_resource type="Resource" uid="uid://cjq1ijklbkgf0" path="res://data/policies/徭役统筹.tres" id="8_policy_3"]
 [ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="12_2c8gl"]
-[ext_resource type="Resource" path="res://data/constitution_rows/外交.tres" id="row"]
+[ext_resource type="Resource" uid="uid://bjubbxjboutnj" path="res://data/constitution_rows/外交.tres" id="row"]
 
 [sub_resource type="Resource" id="Resource_seat_condition"]
 script = ExtResource("5_seat_condition_script")
@@ -23,6 +23,8 @@ required_rate = 0.9
 script = ExtResource("1_article_script")
 petition_limit = 5
 display_name = "行省"
+description = "争论结束了：蓬莱是大明的一省。
+原来的议员仍然坐在那里，各族的产业、恩怨和生活也没有凭空消失，只是他们从此不再以本族的名义决定国家应该成为什么样子。旧议会没有被摧毁，它只是换了匾额，然后继续办公。"
 row = ExtResource("row")
 is_terminal = true
 race = ExtResource("3_race_human")

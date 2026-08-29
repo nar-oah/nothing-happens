@@ -5,4 +5,5 @@
 [resource]
 script = ExtResource("1_qxpgu")
 display_name = "深坞"
+description = "藏在山岭和密林后的封闭聚落，许多道路至今仍由桃林和地方合枝议共同控制。这里的人并不觉得自己与世隔绝，只认为外界把“每天都必须和所有地方发生关系”误当成了正常生活。"
 metadata/_custom_type_script = "uid://of78ek0nhty6"

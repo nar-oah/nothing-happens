@@ -80,9 +80,9 @@ export function deriveRaceTopItems(races: RaceSummaryDto[]): TopItemData[] {
 		item: { text: race.display_name, value: race.seat_count },
 		detail: {
 			leftLabel: '年度期望',
-			rightLabel: '当前席位',
+			rightLabel: '种族简介',
 			leftBody: race.expectations.map(formatRaceExpectation).join('\n'),
-			rightBody: String(race.seat_count)
+			rightBody: race.description
 		},
 		payload: race
 	}));
@@ -94,9 +94,9 @@ export function deriveInterestGroupTopItems(groups: InterestGroupSummaryDto[]): 
 		item: { text: group.display_name, value: group.influence_count },
 		detail: {
 			leftLabel: '固定指标立场',
-			rightLabel: '当前影响',
+			rightLabel: '利益集团简介',
 			leftBody: formatInterestGroupStance(group),
-			rightBody: `${group.influence_count}\n${formatPercent(group.influence_rate)}`
+			rightBody: group.description
 		},
 		payload: group
 	}));
@@ -240,10 +240,6 @@ function formatInterestGroupStance(group: InterestGroupDefinition): string {
 		.filter(([, enabled]) => enabled)
 		.map(([metric]) => `${METRIC_DISPLAY_NAMES[metric]}↓`)
 		.join('\n');
-}
-
-function formatPercent(value: number): string {
-	return `${formatNumber(value * 100)}%`;
 }
 
 function formatNumber(value: number): string {

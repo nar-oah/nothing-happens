@@ -1,15 +1,19 @@
-[gd_resource type="Resource" script_class="ConstitutionArticleDefinition" format=3]
+[gd_resource type="Resource" script_class="ConstitutionArticleDefinition" format=3 uid="uid://cearrchs215h0"]
 
-[ext_resource type="Script" path="res://definitions/constitution_article_definition.gd" id="1_article_script"]
-[ext_resource type="Script" path="res://definitions/policy_definition.gd" id="2_policy_script"]
-[ext_resource type="Resource" path="res://data/races/yano.tres" id="3_race_yano"]
-[ext_resource type="Resource" path="res://data/constitution_rows/偃偶.tres" id="row"]
-[ext_resource type="Resource" path="res://data/constitutions/承认.tres" id="4_prereq"]
-[ext_resource type="Script" path="res://definitions/constitution_seat_condition.gd" id="condition_script"]
-[ext_resource type="Resource" path="res://data/interest_groups/造身公所.tres" id="group"]
-[ext_resource type="Resource" path="res://data/policies/全业并购.tres" id="5_policy_1"]
-[ext_resource type="Resource" path="res://data/policies/统一定价.tres" id="6_policy_2"]
-[ext_resource type="Resource" path="res://data/policies/自动替工.tres" id="7_policy_3"]
+[ext_resource type="Script" uid="uid://dajy5425i5dpq" path="res://definitions/constitution_article_definition.gd" id="1_article_script"]
+[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="1_oxs0a"]
+[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_g5wit"]
+[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
+[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="3_kafho"]
+[ext_resource type="Resource" uid="uid://c2eco18e42n34" path="res://data/races/偃偶.tres" id="3_race_yano"]
+[ext_resource type="Resource" uid="uid://cwg5ec0qduwd" path="res://data/constitutions/承认.tres" id="4_prereq"]
+[ext_resource type="Resource" uid="uid://bi88cp6wyendn" path="res://data/policies/全业并购.tres" id="5_policy_1"]
+[ext_resource type="Resource" uid="uid://c256dkijh3g8y" path="res://data/policies/统一定价.tres" id="6_policy_2"]
+[ext_resource type="Resource" uid="uid://5i0u8uobs8sd" path="res://data/policies/自动替工.tres" id="7_policy_3"]
+[ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="13_2mc4c"]
+[ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="condition_script"]
+[ext_resource type="Resource" uid="uid://b7vlc4eb8m4io" path="res://data/interest_groups/造身公所.tres" id="group"]
+[ext_resource type="Resource" uid="uid://cqpejxjyt0cyq" path="res://data/constitution_rows/偃偶.tres" id="row"]
 
 [sub_resource type="Resource" id="Resource_condition"]
 script = ExtResource("condition_script")
@@ -19,6 +23,9 @@ required_rate = 0.9
 [resource]
 script = ExtResource("1_article_script")
 display_name = "托拉斯"
+description = "当所有身体都可以自由交易，所有产业都可以自由兼并，最后留下的最自由状态，也许就是所有人面对同一个买家。
+托拉斯把产业集团、合同标准、行身市场乃至议会影响收进一个组织。偃偶终于成为完整的市场主体，也因此迎来了一个可以把完整的“自己”全部交给市场的世界。
+他们没有摆脱商品身份，只是让商品与公民之间最后那条界线失去了意义。"
 row = ExtResource("row")
 is_terminal = true
 race = ExtResource("3_race_yano")

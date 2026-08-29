@@ -52,7 +52,6 @@ func _initialize_legacy(context: RunContext) -> bool:
 		var row := initial.row
 		if row == null:
 			row = ConstitutionRowDefinition.new()
-			row.id = StringName("legacy_%s" % race.display_name)
 			row.display_name = race.display_name
 			row.race = race
 		context.state.constitution.active_articles[row] = initial

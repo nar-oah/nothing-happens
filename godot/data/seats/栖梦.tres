@@ -5,4 +5,5 @@
 [resource]
 script = ExtResource("1_qxpgu")
 display_name = "栖梦"
+description = "南柯传统生活保存较完整的聚落，许多家庭仍按照现实生活与理想国中的长期经历安排作息和职业。外地人常把这里描绘得安逸散漫，当地人则认为一个只能清醒工作、不能认真睡觉的社会才更加古怪。"
 metadata/_custom_type_script = "uid://of78ek0nhty6"

@@ -52,6 +52,7 @@ func _test_core_dto_serialization(t: BackendTestContext) -> void:
 		"MetricValues serializes every named metric"
 	)
 	var group := t.make_group("serializer group", 4)
+	group.description = "serializer group description"
 	group.decrease_tax = true
 	var proposal := t.make_proposal(group)
 	proposal.base_effect.tax = 8
@@ -62,6 +63,11 @@ func _test_core_dto_serialization(t: BackendTestContext) -> void:
 	proposal.positive_trait_accepted = false
 	var proposal_dto: Dictionary = serializer.proposal(proposal)
 	t.check_equal(proposal_dto["source_group"]["display_name"], "serializer group", "proposal source serializes")
+	t.check_equal(
+		proposal_dto["source_group"]["description"],
+		"serializer group description",
+		"proposal source description serializes"
+	)
 	t.check_equal(proposal_dto["base_effect"]["tax"], 8, "proposal base effect serializes")
 	t.check_equal(proposal_dto["positive_effect"]["trade"], 5, "proposal trait serializes")
 	t.check_equal(proposal_dto["lag_months"], 6, "proposal lag serializes")
@@ -82,8 +88,11 @@ func _test_core_dto_serialization(t: BackendTestContext) -> void:
 
 func _test_full_state_and_saved_bill_indices(t: BackendTestContext) -> void:
 	var race := t.make_race("full race")
+	race.description = "full race description"
 	var group := t.make_group("full group")
+	group.description = "full group description"
 	var session := t.make_session([race], [group], t.make_seats(2, "full"))
+	session.constitution_articles[0].description = "full article description"
 	var saved := SavedBillState.new()
 	saved.title = "saved zero"
 	session.state.saved_bills.append(saved)
@@ -96,7 +105,19 @@ func _test_full_state_and_saved_bill_indices(t: BackendTestContext) -> void:
 	t.check_equal(full["saved_bills"][0]["title"], "saved zero", "saved bill array preserves index")
 	t.check_equal(full["editing_saved_bill_index"], null, "new bill index serializes as null")
 	t.check_equal(full["constitution"]["title"], "蓬莱约法", "constitution uses its fixed title")
-	t.check_equal(full["constitution"]["articles"][0]["content"], "", "article content remains empty")
+	t.check_equal(
+		full["constitution"]["articles"][0]["content"],
+		"full article description",
+		"article content uses its description"
+	)
+	t.check_equal(
+		full["races"][0]["description"], "full race description", "race description serializes"
+	)
+	t.check_equal(
+		full["interest_groups"][0]["description"],
+		"full group description",
+		"interest group description serializes"
+	)
 	t.check_equal(full["races"][0]["seat_count"], 2, "race summary uses actual seats")
 	t.check_equal(full["parliament"]["total_seats"], 2, "parliament summary uses actual pool")
 	t.check_equal(full["max_collapse"], session.balance.max_collapse, "status uses balance collapse limit")

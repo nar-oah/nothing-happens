@@ -31,6 +31,7 @@ func interest_group(definition: InterestGroupDefinition) -> Variant:
 		return null
 	return {
 		"display_name": definition.display_name,
+		"description": definition.description,
 		"base_column_weight": definition.base_column_weight,
 		"decrease_tax": definition.decrease_tax,
 		"decrease_price": definition.decrease_price,
@@ -268,7 +269,6 @@ func constitution(session: RunSession) -> Dictionary:
 			columns.append(
 				{
 					"column_index": column_index,
-					"id": "" if column == null else str(column.id),
 					"display_name": "" if column == null else column.display_name,
 					"unlock_cost_months": 0 if column == null else column.unlock_cost_months,
 					"unlocked": column != null and session.meta_progression.is_column_unlocked(column),
@@ -282,7 +282,6 @@ func constitution(session: RunSession) -> Dictionary:
 			rows.append(
 				{
 					"row_index": row_index,
-					"id": str(row.id),
 					"display_name": row.display_name,
 					"race_display_name": _race_name(row.race),
 					"free_navigation": row.free_navigation,
@@ -354,6 +353,7 @@ func races(session: RunSession) -> Array:
 			{
 				"race_index": index,
 				"display_name": current.definition.display_name,
+				"description": current.definition.description,
 				"seat_count": seat_count,
 				"expectations": expectations,
 				"resolved_events_this_year": current.resolved_events_this_year,
@@ -444,7 +444,7 @@ func _article(definition: ConstitutionArticleDefinition, article_index: int) -> 
 	return {
 		"article_index": article_index,
 		"display_name": definition.display_name,
-		"content": "",
+		"content": definition.description,
 		"policies": _policies(definition.policies),
 	}
 

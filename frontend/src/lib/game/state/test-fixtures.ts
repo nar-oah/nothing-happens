@@ -19,6 +19,7 @@ export const zeroMetrics = (): MetricValues => ({
 
 export const testGroup: InterestGroupDefinition = {
 	display_name: '造身公所',
+	description: '造身公所简介',
 	base_column_weight: 5,
 	decrease_tax: false,
 	decrease_price: true,
@@ -104,7 +105,6 @@ export function makeLiveState(stateVersion = 1): LiveGameState {
 			columns: [
 				{
 					column_index: 0,
-					id: 'normal',
 					display_name: '常制',
 					unlock_cost_months: 0,
 					unlocked: true,
@@ -114,7 +114,6 @@ export function makeLiveState(stateVersion = 1): LiveGameState {
 			rows: [
 				{
 					row_index: 0,
-					id: 'diplomacy',
 					display_name: '外交',
 					race_display_name: '人类',
 					free_navigation: false,
@@ -147,6 +146,7 @@ export function makeLiveState(stateVersion = 1): LiveGameState {
 			{
 				race_index: 0,
 				display_name: '人类',
+				description: '人类简介',
 				seat_count: 1,
 				expectations: [{ metric: Metric.TRADE, target: 110, direction: 1 }],
 				resolved_events_this_year: 2,

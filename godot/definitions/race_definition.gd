@@ -2,6 +2,7 @@ extends Resource
 class_name RaceDefinition
 
 @export var display_name: String
+@export_multiline var description: String
 @export var fixed_interest_group: InterestGroupDefinition
 
 @export_group("希望提高")
@@ -54,17 +55,17 @@ func is_vote_metric_active(_metric: Metric.Id, _context) -> bool:
 	return true
 
 
-func get_effective_expectation(
-	base_target: int, _metric: Metric.Id, _context, _race_state
-) -> int:
+func get_effective_expectation(base_target: int, _metric: Metric.Id, _context, _race_state) -> int:
 	return base_target
 
 
 func _resolve_stance(increase: bool, decrease: bool, metric: Metric.Id) -> Metric.Direction:
 	if increase and decrease:
 		push_error(
-			"Race %s cannot both increase and decrease %s."
-			% [_debug_name(), Metric.display_name(metric)]
+			(
+				"Race %s cannot both increase and decrease %s."
+				% [_debug_name(), Metric.display_name(metric)]
+			)
 		)
 		return Metric.Direction.NONE
 	if increase:

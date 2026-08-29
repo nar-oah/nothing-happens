@@ -32,7 +32,7 @@ export function proposalToMemorialContent(proposal: Proposal): MemorialProposalC
 
 export function proposalToHorizontalContents(proposal: Proposal): MemorialHorizontalContentData[] {
 	return [
-		{ title: proposal.source_group.display_name, body: '' },
+		{ title: proposal.source_group.display_name, body: proposal.source_group.description },
 		{ title: '指标', body: formatVector(getProposalTotalEffect(proposal)) },
 		{
 			body: `如果你把该提案加入到法案中，${proposal.source_group.display_name}会很高兴。`,

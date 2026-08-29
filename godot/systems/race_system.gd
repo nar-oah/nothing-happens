@@ -45,13 +45,7 @@ func rebuild_annual_expectations(context: RunContext) -> void:
 func allocate_opening_seats(context: RunContext) -> bool:
 	if context == null or context.state == null or context.state.seats.is_empty():
 		return false
-	# Opening anchors are physical starting assignments, not permanent constraints. Only
-	# unanchored variable seats participate in the random opening draw; anchored variable
-	# seats remain available to later annual reallocation.
-	var random_seats: Array[SeatState] = []
-	for seat in context.parliament_system.get_variable_seats(context.state):
-		if seat.definition == null or seat.definition.anchor_race == null:
-			random_seats.append(seat)
+	var random_seats: Array[SeatState] = context.parliament_system.get_variable_seats(context.state)
 	var random_pool := random_seats.size()
 	var eligible: Array[RaceDefinition] = []
 	for race in context.race_definitions:
@@ -60,8 +54,6 @@ func allocate_opening_seats(context: RunContext) -> bool:
 	if random_pool > 0 and eligible.is_empty():
 		push_error("Opening parliament has random seats but no eligible race.")
 		return false
-	# The opening cap applies only to the twenty random seats. Race anchors guarantee the
-	# formal opening representation independently of the random distribution.
 	var random_cap := floori(float(random_pool) * context.balance.opening_max_race_seat_rate)
 	var caps: Dictionary[RaceDefinition, int] = {}
 	for race in eligible:
