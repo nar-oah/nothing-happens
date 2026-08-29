@@ -162,6 +162,7 @@ export type MonthReportEventPhase = 0 | 1 | 2;
 
 export type MonthReportEventDto = {
 	race_display_name: string;
+	event_description: string;
 	metric: Metric;
 	value: number;
 	countdown: number;
