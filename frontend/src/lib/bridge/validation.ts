@@ -89,7 +89,7 @@ export function decodeInboundMessage(raw: string): DecodeResult<InboundMessage> 
 }
 
 export function isOutboundType(value: unknown): value is OutboundType {
-	return typeof value === 'string' && outboundTypes.has(value as OutboundType);
+	return typeof value === 'string' && outboundTypes.has(value as InboundType);
 }
 
 export function isLiveGameState(value: unknown): value is LiveGameState {
@@ -290,7 +290,6 @@ function isConstitutionColumn(value: unknown): value is ConstitutionColumnDto {
 	return (
 		isRecord(value) &&
 		isNonnegativeInteger(value.column_index) &&
-		typeof value.id === 'string' &&
 		typeof value.display_name === 'string' &&
 		isNonnegativeInteger(value.unlock_cost_months) &&
 		typeof value.unlocked === 'boolean' &&
@@ -302,7 +301,6 @@ function isConstitutionRow(value: unknown): value is ConstitutionRowDto {
 	return (
 		isRecord(value) &&
 		isNonnegativeInteger(value.row_index) &&
-		typeof value.id === 'string' &&
 		typeof value.display_name === 'string' &&
 		typeof value.race_display_name === 'string' &&
 		typeof value.free_navigation === 'boolean' &&
