@@ -4,6 +4,7 @@
 	import MemorialMetric from '../shared/MemorialMetric.svelte';
 	import MemorialTitle from '../shared/MemorialTitle.svelte';
 	import type { MemorialMetricData } from '../types';
+	import { toTraditional } from 'chinese-simple2traditional';
 
 	type Props = {
 		title: string;
@@ -24,7 +25,7 @@
 			{/each}
 		</div>
 		<div class="mr-8 flex shrink-0 flex-col items-end gap-8 pt-8">
-			<MemorialTitle text={title} />
+			<MemorialTitle text={toTraditional(title)} />
 			<MemorialLag time={lag} />
 		</div>
 	</div>
