@@ -1,7 +1,6 @@
 <script lang="ts">
 	import {
 		formatNewspaperNumber,
-		getNewspaperEventDescription,
 		getNewspaperEventStateLabel,
 		getNewspaperMetricLabel,
 		getNewspaperRaceLabel,
@@ -38,9 +37,7 @@
 						>
 					</div>
 				</div>
-				<p class="typo-newspaper-body min-w-full w-min">
-					{getNewspaperEventDescription(props.race)}
-				</p>
+				<p class="typo-newspaper-body min-w-full w-min">{props.description}</p>
 			</div>
 			<div
 				class="flex h-full min-w-0 flex-1 flex-col items-center gap-px overflow-hidden pl-[6px] whitespace-nowrap"
