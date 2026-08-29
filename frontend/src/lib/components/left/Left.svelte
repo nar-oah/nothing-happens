@@ -72,7 +72,7 @@
 					利益集团: { options: [], selected: [], multiple: false },
 					指标: {
 						options: Object.values(LEFT_METRIC_LABELS),
-						selected: ['商贸'],
+						selected: ['投资'],
 						multiple: true
 					},
 					时间: false,
