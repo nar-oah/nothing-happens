@@ -10,7 +10,7 @@
 [ext_resource type="Resource" uid="uid://b4e7rdu770lrv" path="res://data/races/桃花妖.tres" id="6_race_peach"]
 [ext_resource type="Resource" uid="uid://c2eco18e42n34" path="res://data/races/偃偶.tres" id="7_race_yano"]
 [ext_resource type="Resource" uid="uid://pdec6waifvom" path="res://data/constitutions/比翼化.tres" id="8_prereq"]
-[ext_resource type="Resource" path="res://data/interest_groups/蓬莱公所.tres" id="9_group_1"]
+[ext_resource type="Resource" uid="uid://nuiau2qkch4e" path="res://data/interest_groups/蓬莱公所.tres" id="9_group_1"]
 [ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="10_influence_rule_script"]
 [ext_resource type="Resource" uid="uid://d0tsptffgoh8s" path="res://data/policies/官营平价.tres" id="11_policy_1"]
 [ext_resource type="Resource" uid="uid://bs7ofkv8hds3c" path="res://data/policies/官业扩工.tres" id="12_policy_2"]
