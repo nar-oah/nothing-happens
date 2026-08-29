@@ -53,14 +53,26 @@
 		const previous = state.month_report?.previous_metrics ?? current;
 		return [
 			{ metric: Metric.TAX, value: current.tax, change: current.tax - previous.tax },
-			{ metric: Metric.PRICE, value: current.price, change: current.price - previous.price },
-			{ metric: Metric.WAGE, value: current.wage, change: current.wage - previous.wage },
+			{
+				metric: Metric.CONSUMPTION,
+				value: current.consumption,
+				change: current.consumption - previous.consumption
+			},
+			{
+				metric: Metric.PRODUCTION,
+				value: current.production,
+				change: current.production - previous.production
+			},
 			{
 				metric: Metric.EMPLOYMENT,
 				value: current.employment,
 				change: current.employment - previous.employment
 			},
-			{ metric: Metric.TRADE, value: current.trade, change: current.trade - previous.trade }
+			{
+				metric: Metric.INVESTMENT,
+				value: current.investment,
+				change: current.investment - previous.investment
+			}
 		];
 	}
 
