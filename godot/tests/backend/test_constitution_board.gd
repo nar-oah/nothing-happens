@@ -16,14 +16,14 @@ func _test_board_navigation_unlocks_and_terminal_mutex(t: BackendTestContext) ->
 	var race_a := t.make_race("axis a")
 	var race_b := t.make_race("axis b")
 	var group := t.make_group("board group")
-	var row_a := _make_row(&"a", "甲轴", race_a, 0)
-	var row_b := _make_row(&"b", "乙轴", race_b, 1)
-	var regulator := _make_row(&"regulator", "监管", zhushui, 2, true, true)
-	var far_left := _make_column(&"far_left", "异制", 24)
-	var left := _make_column(&"left", "偏制", 12)
-	var center := _make_column(&"center", "常制", 0)
-	var right := _make_column(&"right", "新制", 12)
-	var far_right := _make_column(&"far_right", "极制", 24)
+	var row_a := _make_row("甲轴", race_a, 0)
+	var row_b := _make_row("乙轴", race_b, 1)
+	var regulator := _make_row("监管", zhushui, 2, true, true)
+	var far_left := _make_column("异制", 24)
+	var left := _make_column("偏制", 12)
+	var center := _make_column("常制", 0)
+	var right := _make_column("新制", 12)
+	var far_right := _make_column("极制", 24)
 	var a_terminal := _add_article(far_left, row_a, "甲终局", true)
 	var regulator_left := _add_article(far_left, regulator, "透明政府")
 	var a_left := _add_article(left, row_a, "甲偏制")
@@ -123,11 +123,11 @@ func _test_column_unlock_ipc_stays_in_month_zero(t: BackendTestContext) -> void:
 	var race := t.make_race("ipc axis")
 	var race_b := t.make_race("ipc companion")
 	var group := t.make_group("ipc group")
-	var row := _make_row(&"ipc_axis", "IPC轴", race, 0)
-	var row_b := _make_row(&"ipc_companion", "陪测轴", race_b, 1)
-	var regulator := _make_row(&"ipc_regulator", "监管", zhushui, 2, true, true)
-	var center := _make_column(&"center", "常制", 0)
-	var right := _make_column(&"right", "新制", 12)
+	var row := _make_row("IPC轴", race, 0)
+	var row_b := _make_row("陪测轴", race_b, 1)
+	var regulator := _make_row("监管", zhushui, 2, true, true)
+	var center := _make_column("常制", 0)
+	var right := _make_column("新制", 12)
 	_add_article(center, row, "常制")
 	_add_article(center, row_b, "陪测常制")
 	_add_article(center, regulator, "哲人王")
@@ -163,10 +163,10 @@ func _test_variable_seat_denominators(t: BackendTestContext) -> void:
 	var race_b := t.make_race("ratio b")
 	var group_a := t.make_group("ratio group a")
 	var group_b := t.make_group("ratio group b")
-	var row_z := _make_row(&"ratio_z", "监管", zhushui, 0, true, true)
-	var row_a := _make_row(&"ratio_a", "甲轴", race_a, 1)
-	var row_b := _make_row(&"ratio_b", "乙轴", race_b, 2)
-	var center := _make_column(&"center", "常制", 0)
+	var row_z := _make_row("监管", zhushui, 0, true, true)
+	var row_a := _make_row("甲轴", race_a, 1)
+	var row_b := _make_row("乙轴", race_b, 2)
+	var center := _make_column("常制", 0)
 	_add_article(center, row_z, "哲人王")
 	var article_a := _add_article(center, row_a, "甲常制")
 	article_a.race_min_seat_rate = 0.5
@@ -210,10 +210,10 @@ func _test_group_coloring_bias_and_hard_rule_layers(t: BackendTestContext) -> vo
 	var source := t.make_group("annual source")
 	var biased := t.make_group("constitution bias")
 	var hard := t.make_group("hard override")
-	var row_z := _make_row(&"layer_z", "监管", zhushui, 0, true, true)
-	var row_a := _make_row(&"layer_a", "甲轴", race_a, 1)
-	var row_b := _make_row(&"layer_b", "乙轴", race_b, 2)
-	var center := _make_column(&"center", "常制", 0)
+	var row_z := _make_row("监管", zhushui, 0, true, true)
+	var row_a := _make_row("甲轴", race_a, 1)
+	var row_b := _make_row("乙轴", race_b, 2)
+	var center := _make_column("常制", 0)
 	_add_article(center, row_z, "哲人王")
 	var article_a := _add_article(center, row_a, "甲常制")
 	_add_article(center, row_b, "乙常制")
@@ -278,7 +278,6 @@ func _make_board_session(
 
 
 func _make_row(
-	id: StringName,
 	display_name: String,
 	race: RaceDefinition,
 	display_order: int,
@@ -286,7 +285,6 @@ func _make_row(
 	ignores_column_unlocks: bool = false
 ) -> ConstitutionRowDefinition:
 	var row := ConstitutionRowDefinition.new()
-	row.id = id
 	row.display_name = display_name
 	row.race = race
 	row.display_order = display_order
@@ -295,11 +293,8 @@ func _make_row(
 	return row
 
 
-func _make_column(
-	id: StringName, display_name: String, unlock_cost_months: int
-) -> ConstitutionColumnDefinition:
+func _make_column(display_name: String, unlock_cost_months: int) -> ConstitutionColumnDefinition:
 	var column := ConstitutionColumnDefinition.new()
-	column.id = id
 	column.display_name = display_name
 	column.unlock_cost_months = unlock_cost_months
 	return column
