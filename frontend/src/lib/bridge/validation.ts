@@ -89,7 +89,7 @@ export function decodeInboundMessage(raw: string): DecodeResult<InboundMessage> 
 }
 
 export function isOutboundType(value: unknown): value is OutboundType {
-	return typeof value === 'string' && outboundTypes.has(value as InboundType);
+	return typeof value === 'string' && outboundTypes.has(value as OutboundType);
 }
 
 export function isLiveGameState(value: unknown): value is LiveGameState {
