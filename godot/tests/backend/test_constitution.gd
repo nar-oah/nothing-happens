@@ -198,10 +198,10 @@ func _test_local_autonomy_runtime_resources(t: BackendTestContext) -> void:
 		)
 		t.check(group.decrease_tax, "local group only cares about lower tax")
 		t.check(
-			not group.decrease_price
-			and not group.decrease_wage
+			not group.decrease_consumption
+			and not group.decrease_production
 			and not group.decrease_employment
-			and not group.decrease_trade,
+			and not group.decrease_investment,
 			"other local stances remain false"
 		)
 	t.check_equal(unique.size(), definitions.size(), "each location owns a unique Resource")
