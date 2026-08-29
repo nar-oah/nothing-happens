@@ -268,7 +268,6 @@ func constitution(session: RunSession) -> Dictionary:
 			columns.append(
 				{
 					"column_index": column_index,
-					"id": "" if column == null else str(column.id),
 					"display_name": "" if column == null else column.display_name,
 					"unlock_cost_months": 0 if column == null else column.unlock_cost_months,
 					"unlocked": column != null and session.meta_progression.is_column_unlocked(column),
@@ -282,7 +281,6 @@ func constitution(session: RunSession) -> Dictionary:
 			rows.append(
 				{
 					"row_index": row_index,
-					"id": str(row.id),
 					"display_name": row.display_name,
 					"race_display_name": _race_name(row.race),
 					"free_navigation": row.free_navigation,
