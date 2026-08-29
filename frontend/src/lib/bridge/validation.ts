@@ -422,7 +422,10 @@ function isVoteResult(value: unknown): value is VoteResultDto {
 				typeof vote.seat_display_name === 'string' &&
 				typeof vote.race_display_name === 'string' &&
 				typeof vote.interest_group_display_name === 'string' &&
-				(vote.position === 0 || vote.position === 1 || vote.position === 2 || vote.position === 3) &&
+				(vote.position === 0 ||
+					vote.position === 1 ||
+					vote.position === 2 ||
+					vote.position === 3) &&
 				isNumber(vote.score) &&
 				isNumberRecord(vote.breakdown)
 		)
@@ -501,7 +504,9 @@ function isEffectFormula(value: unknown): boolean {
 }
 
 function isUiMode(value: unknown): boolean {
-	return value === 'office' || value === 'dialogue' || value === 'parliament' || value === 'constitution';
+	return (
+		value === 'office' || value === 'dialogue' || value === 'parliament' || value === 'constitution'
+	);
 }
 
 function isWorldScene(value: unknown): boolean {
