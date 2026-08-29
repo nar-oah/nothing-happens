@@ -3,7 +3,7 @@ class_name MetaProgressionState
 
 var available_governing_months: int = 0
 var lifetime_governing_months: int = 0
-var unlocked_constitution_columns: Dictionary[StringName, bool] = {}
+var unlocked_constitution_columns: Dictionary[ConstitutionColumnDefinition, bool] = {}
 
 
 func add_governing_months(months: int) -> void:
@@ -15,7 +15,7 @@ func add_governing_months(months: int) -> void:
 func is_column_unlocked(column: ConstitutionColumnDefinition) -> bool:
 	if column == null:
 		return false
-	return column.unlock_cost_months == 0 or unlocked_constitution_columns.has(column.id)
+	return column.unlock_cost_months == 0 or unlocked_constitution_columns.has(column)
 
 
 func can_unlock_column(
@@ -39,5 +39,5 @@ func unlock_column(
 	if not can_unlock_column(board, column):
 		return false
 	available_governing_months -= column.unlock_cost_months
-	unlocked_constitution_columns[column.id] = true
+	unlocked_constitution_columns[column] = true
 	return true
