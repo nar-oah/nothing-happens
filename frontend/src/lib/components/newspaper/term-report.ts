@@ -1,4 +1,4 @@
-import type { TermReportDto } from '$lib/game/state/types.ts';
+import type { TermReportDto } from '$lib/game/state/types';
 import type { NewspaperFrontData, NewspaperMetricData } from './types.ts';
 
 const TERM_REPORT_FRONTS: Record<TermReportDto['outcome'], NewspaperFrontData> = {
