@@ -5,7 +5,16 @@ const isEnglishLetter = (character: string) => /^[A-Za-z]$/.test(character);
 const isPunctuation = (character: string) => /^\p{P}$/u.test(character);
 const getCharacterWidth = (character: string) => (isEnglishLetter(character) ? 0.5 : 1);
 
-export function splitMemorialBodyIntoLines(body: string): string[] {
+type PaginationOptions = {
+	lineWidth?: number;
+	titledPageBodyLines?: number;
+	untitledPageBodyLines?: number;
+};
+
+export function splitMemorialBodyIntoLines(
+	body: string,
+	lineWidth = MEMORIAL_LINE_WIDTH
+): string[] {
 	const characters = Array.from(body);
 	const lines: string[] = [];
 	let start = 0;
@@ -22,7 +31,7 @@ export function splitMemorialBodyIntoLines(body: string): string[] {
 			}
 
 			const nextWidth = getCharacterWidth(characters[end]);
-			if (width + nextWidth > MEMORIAL_LINE_WIDTH) break;
+			if (width + nextWidth > lineWidth) break;
 			width += nextWidth;
 			end += 1;
 		}
@@ -38,19 +47,24 @@ export function splitMemorialBodyIntoLines(body: string): string[] {
 }
 
 export function paginateMemorialContents(
-	contents: MemorialHorizontalContentData[]
+	contents: MemorialHorizontalContentData[],
+	{
+		lineWidth = MEMORIAL_LINE_WIDTH,
+		titledPageBodyLines = TITLED_PAGE_BODY_LINES,
+		untitledPageBodyLines = UNTITLED_PAGE_BODY_LINES
+	}: PaginationOptions = {}
 ): MemorialHorizontalContentData[] {
 	return contents.flatMap((content) => {
-		const lines = splitMemorialBodyIntoLines(content.body);
-		const firstPageLineCount = content.title ? TITLED_PAGE_BODY_LINES : UNTITLED_PAGE_BODY_LINES;
+		const lines = splitMemorialBodyIntoLines(content.body, lineWidth);
+		const firstPageLineCount = content.title ? titledPageBodyLines : untitledPageBodyLines;
 		if (lines.length === 0) return [{ ...content }];
 
 		const pages: MemorialHorizontalContentData[] = [
 			{ ...content, body: lines.slice(0, firstPageLineCount).join('\n') }
 		];
-		for (let index = firstPageLineCount; index < lines.length; index += UNTITLED_PAGE_BODY_LINES) {
+		for (let index = firstPageLineCount; index < lines.length; index += untitledPageBodyLines) {
 			pages.push({
-				body: lines.slice(index, index + UNTITLED_PAGE_BODY_LINES).join('\n'),
+				body: lines.slice(index, index + untitledPageBodyLines).join('\n'),
 				redacted: content.redacted
 			});
 		}

@@ -4,6 +4,7 @@
 	import MemorialConstitutionRow from '../content/MemorialConstitutionRow.svelte';
 	import MemorialHorizontalContent from '../content/MemorialHorizontalContent.svelte';
 	import MemorialPolicyContent from '../content/MemorialPolicyContent.svelte';
+	import { paginateMemorialContents } from '../pagination';
 	import MemorialTitleStrip from '../shared/MemorialTitleStrip.svelte';
 	import MemorialVertical from './MemorialVertical.svelte';
 	import MemorialVerticalCover from './MemorialVerticalCover.svelte';
@@ -21,6 +22,9 @@
 		onArticleSelectionChange?: (articleRef: number, selected: boolean) => void;
 		onSectionUnlock?: (sectionTitle: string) => void;
 	};
+	const DETAIL_LINE_WIDTH = 7;
+	const TITLED_DETAIL_BODY_LINES = 12;
+	const UNTITLED_DETAIL_BODY_LINES = 13;
 
 	type ConstitutionPage =
 		| {
@@ -46,26 +50,38 @@
 	let expandedRow = $state<{ sectionTitle: string; rowIndex: number }>();
 	let pendingSelection = $state<PendingArticleSelection>();
 	let appliedConstitution = untrack(() => constitution);
-	let pages: ConstitutionPage[] = $derived.by(() =>
-		Object.entries(constitution).flatMap(([sectionTitle, content]) => {
-			const sectionPage: ConstitutionPage = { type: 'section', title: sectionTitle, content };
-			if (
-				typeof content === 'number' ||
-				expandedRow?.sectionTitle !== sectionTitle ||
-				!content[expandedRow.rowIndex] ||
-				content[expandedRow.rowIndex].articleRef === undefined
-			) {
-				return [sectionPage];
-			}
+	let pages: ConstitutionPage[] = $derived.by(() => {
+		const sectionPages = Object.entries(constitution).map(
+			([sectionTitle, content]): ConstitutionPage => ({
+				type: 'section',
+				title: sectionTitle,
+				content
+			})
+		);
+		if (!expandedRow) return sectionPages;
 
-			const row = content[expandedRow.rowIndex];
-			return [
-				sectionPage,
-				{ type: 'detail', title: row.text, contents: row.contents },
-				...row.policies.map((policy): ConstitutionPage => ({ type: 'policy', content: policy }))
-			];
-		})
-	);
+		const content = constitution[expandedRow.sectionTitle];
+		if (typeof content === 'number') return sectionPages;
+		const row = content?.[expandedRow.rowIndex];
+		if (!row || row.articleRef === undefined) return sectionPages;
+
+		const detailPages = paginateMemorialContents(row.contents, {
+			lineWidth: DETAIL_LINE_WIDTH,
+			titledPageBodyLines: TITLED_DETAIL_BODY_LINES,
+			untitledPageBodyLines: UNTITLED_DETAIL_BODY_LINES
+		});
+		return [
+			...sectionPages,
+			...detailPages.map(
+				(content, index): ConstitutionPage => ({
+					type: 'detail',
+					title: index === 0 ? row.text : '',
+					contents: [content]
+				})
+			),
+			...row.policies.map((policy): ConstitutionPage => ({ type: 'policy', content: policy }))
+		];
+	});
 
 	$effect(() => {
 		if (constitution === appliedConstitution) return;
