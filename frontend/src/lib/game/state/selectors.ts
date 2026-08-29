@@ -35,8 +35,6 @@ export type LiveConstitutionMemorialData = MemorialConstitutionData;
 
 export type DialoguePresentation = {
 	hand_index: number;
-	visitor_text: string;
-	body: string;
 	trait_label: string;
 	donation_label: string;
 };
@@ -182,7 +180,6 @@ export function deriveDialoguePresentation(
 	pending: PendingDialogueDto | null
 ): DialoguePresentation | null {
 	if (!pending) return null;
-	const groupName = pending.proposal.source_group.display_name;
 	const traitParts = METRICS.flatMap((metric) => {
 		const value = getMetricValue(pending.proposal.positive_effect, metric);
 		return value === 0
@@ -191,8 +188,6 @@ export function deriveDialoguePresentation(
 	});
 	return {
 		hand_index: pending.hand_index,
-		visitor_text: `${groupName}代表来访。`,
-		body: `${groupName}愿意给出一个优惠的提案，\n您可以选择给我手上的这张提案添加一个优惠条款，或收下我们的一点心意`,
 		trait_label: traitParts.join('、') || '正面词条',
 		donation_label: `政治献金+${formatNumber(pending.proposal.donation_offer)}`
 	};
