@@ -37,12 +37,11 @@ func spawn_event(
 	var race_state := context.state.get_race(race)
 	if race_state == null:
 		return null
-	var direction := race.get_stance(metric)
-	if direction == Metric.Direction.NONE:
+	if race.get_stance(metric) == Metric.Direction.NONE:
 		return null
 	var target := context.race_system.get_effective_expectation(race_state, metric, context)
 	var baseline := context.state.metrics.get_value(metric)
-	if not _has_gap(direction, baseline, target):
+	if baseline >= target:
 		return null
 	var event := EventState.new(race, metric, baseline, target)
 	context.state.events.append(event)
@@ -136,20 +135,11 @@ func _get_eligible_metrics(
 	for metric in race.get_stance_metrics():
 		if has_active_event(context.state, race, metric):
 			continue
-		var direction := race.get_stance(metric)
 		var target := context.race_system.get_effective_expectation(race_state, metric, context)
 		var current := context.state.metrics.get_value(metric)
-		if _has_gap(direction, current, target):
+		if current < target:
 			result.append(metric)
 	return result
-
-
-func _has_gap(direction: Metric.Direction, current: int, target: int) -> bool:
-	if direction == Metric.Direction.HIGHER:
-		return current < target
-	if direction == Metric.Direction.LOWER:
-		return current > target
-	return false
 
 
 func _get_race_seat_count(state: RunState, race: RaceDefinition) -> int:
@@ -212,14 +202,13 @@ func _update_known_event(event: EventState, context: RunContext) -> void:
 
 func _calculate_satisfaction(event: EventState, state: RunState) -> float:
 	var requirement := get_current_requirement(event)
-	var required_change := absf(float(requirement - event.baseline_value))
+	var required_change := float(requirement - event.baseline_value)
 	if is_zero_approx(required_change):
-		required_change = absf(float(event.full_target - event.baseline_value))
+		required_change = float(event.full_target - event.baseline_value)
 	if is_zero_approx(required_change):
 		return 0.0
 	var current := state.metrics.get_value(event.metric)
-	var direction := 1.0 if event.full_target > event.baseline_value else -1.0
-	var achieved_change := maxf(float(current - event.baseline_value) * direction, 0.0)
+	var achieved_change := maxf(float(current - event.baseline_value), 0.0)
 	return achieved_change / required_change
 
 

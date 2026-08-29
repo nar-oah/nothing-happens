@@ -12,33 +12,15 @@ class_name RaceDefinition
 @export var increase_employment: bool = false
 @export var increase_investment: bool = false
 
-@export_group("希望降低")
-@export var decrease_tax: bool = false
-@export var decrease_consumption: bool = false
-@export var decrease_production: bool = false
-@export var decrease_employment: bool = false
-@export var decrease_investment: bool = false
-
 
 func get_stance(metric: Metric.Id) -> Metric.Direction:
-	match metric:
-		Metric.Id.TAX:
-			return _resolve_stance(increase_tax, decrease_tax, metric)
-		Metric.Id.CONSUMPTION:
-			return _resolve_stance(increase_consumption, decrease_consumption, metric)
-		Metric.Id.PRODUCTION:
-			return _resolve_stance(increase_production, decrease_production, metric)
-		Metric.Id.EMPLOYMENT:
-			return _resolve_stance(increase_employment, decrease_employment, metric)
-		Metric.Id.INVESTMENT:
-			return _resolve_stance(increase_investment, decrease_investment, metric)
-	return Metric.Direction.NONE
+	return Metric.Direction.HIGHER if _increases_metric(metric) else Metric.Direction.NONE
 
 
 func get_stance_metrics() -> Array[Metric.Id]:
 	var result: Array[Metric.Id] = []
 	for metric in Metric.all_ids():
-		if get_stance(metric) != Metric.Direction.NONE:
+		if _increases_metric(metric):
 			result.append(metric)
 	return result
 
@@ -59,20 +41,19 @@ func get_effective_expectation(base_target: int, _metric: Metric.Id, _context, _
 	return base_target
 
 
-func _resolve_stance(increase: bool, decrease: bool, metric: Metric.Id) -> Metric.Direction:
-	if increase and decrease:
-		push_error(
-			(
-				"Race %s cannot both increase and decrease %s."
-				% [_debug_name(), Metric.display_name(metric)]
-			)
-		)
-		return Metric.Direction.NONE
-	if increase:
-		return Metric.Direction.HIGHER
-	if decrease:
-		return Metric.Direction.LOWER
-	return Metric.Direction.NONE
+func _increases_metric(metric: Metric.Id) -> bool:
+	match metric:
+		Metric.Id.TAX:
+			return increase_tax
+		Metric.Id.CONSUMPTION:
+			return increase_consumption
+		Metric.Id.PRODUCTION:
+			return increase_production
+		Metric.Id.EMPLOYMENT:
+			return increase_employment
+		Metric.Id.INVESTMENT:
+			return increase_investment
+	return false
 
 
 func _set(property: StringName, value: Variant) -> bool:
@@ -86,21 +67,6 @@ func _set(property: StringName, value: Variant) -> bool:
 		&"increase_trade":
 			increase_investment = bool(value)
 			return true
-		&"decrease_price":
-			decrease_consumption = bool(value)
-			return true
-		&"decrease_wage":
-			decrease_production = bool(value)
-			return true
-		&"decrease_trade":
-			decrease_investment = bool(value)
+		&"decrease_tax", &"decrease_consumption", &"decrease_production", &"decrease_employment", &"decrease_investment", &"decrease_price", &"decrease_wage", &"decrease_trade":
 			return true
 	return false
-
-
-func _debug_name() -> String:
-	if not display_name.is_empty():
-		return display_name
-	if not resource_path.is_empty():
-		return resource_path
-	return "<unnamed>"
