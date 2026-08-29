@@ -158,7 +158,7 @@ func _test_month_report_serializes_events(t: BackendTestContext) -> void:
 
 func _test_constitution_expectation_growth_uses_month_zero_economy(t: BackendTestContext) -> void:
 	var race := t.make_race("constitution growth race")
-	race.increase_wage = true
+	race.increase_production = true
 	var group := t.make_group("constitution growth group")
 	var article := t.make_article(race, true, 0.10)
 	var session := t.make_session(
@@ -166,11 +166,11 @@ func _test_constitution_expectation_growth_uses_month_zero_economy(t: BackendTes
 	)
 	var race_state := session.state.get_race(race)
 	t.check_approx(race_state.expectation_growth_rate, 0.10, "active article supplies race-local growth")
-	t.check_equal(race_state.get_expectation(Metric.Id.WAGE), 110, "opening target uses the month-zero economy")
-	session.state.metrics.wage = 200
+	t.check_equal(race_state.get_expectation(Metric.Id.PRODUCTION), 110, "opening target uses the month-zero economy")
+	session.state.metrics.production = 200
 	session.annual_settlement_system.settle_year(session.context)
 	t.check_equal(
-		race_state.get_expectation(Metric.Id.WAGE),
+		race_state.get_expectation(Metric.Id.PRODUCTION),
 		220,
 		"annual settlement rebuilds expectation from the new month-zero economy"
 	)

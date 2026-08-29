@@ -231,10 +231,10 @@ function formatRaceExpectation(expectation: RaceSummaryDto['expectations'][numbe
 function formatInterestGroupStance(group: InterestGroupDefinition): string {
 	const decreases: Array<[Metric, boolean]> = [
 		[Metric.TAX, group.decrease_tax],
-		[Metric.PRICE, group.decrease_price],
-		[Metric.WAGE, group.decrease_wage],
+		[Metric.CONSUMPTION, group.decrease_consumption],
+		[Metric.PRODUCTION, group.decrease_production],
 		[Metric.EMPLOYMENT, group.decrease_employment],
-		[Metric.TRADE, group.decrease_trade]
+		[Metric.INVESTMENT, group.decrease_investment]
 	];
 	return decreases
 		.filter(([, enabled]) => enabled)

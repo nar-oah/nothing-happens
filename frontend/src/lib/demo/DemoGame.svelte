@@ -41,15 +41,15 @@
 		month: 7,
 		metrics: [
 			{ metric: Metric.TAX, value: 62, change: 2 },
-			{ metric: Metric.PRICE, value: 71, change: -1 },
-			{ metric: Metric.WAGE, value: 48, change: 3 },
+			{ metric: Metric.CONSUMPTION, value: 71, change: -1 },
+			{ metric: Metric.PRODUCTION, value: 48, change: 3 },
 			{ metric: Metric.EMPLOYMENT, value: 55, change: 0 },
-			{ metric: Metric.TRADE, value: 83, change: -4 }
+			{ metric: Metric.INVESTMENT, value: 83, change: -4 }
 		],
 		events: [
 			{
 				race: NewspaperRace.NANKE,
-				metric: Metric.WAGE,
+				metric: Metric.PRODUCTION,
 				value: 52,
 				countdown: 3,
 				strength: 100,
@@ -57,7 +57,7 @@
 			},
 			{
 				race: NewspaperRace.BIYI,
-				metric: Metric.PRICE,
+				metric: Metric.CONSUMPTION,
 				value: 60,
 				countdown: 7,
 				strength: 72,
@@ -183,7 +183,7 @@
 			dialogue={{
 				handIndex: 0,
 				groupName: '造身公所',
-				positiveEffect: '商貿+8',
+				positiveEffect: '投資+8',
 				donationOffer: '政治献金+5'
 			}}
 			onResolveBonus={(_, acceptTrait) =>

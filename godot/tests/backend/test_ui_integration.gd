@@ -42,13 +42,13 @@ func _test_core_dto_serialization(t: BackendTestContext) -> void:
 	var serializer := UiSerializer.new()
 	var values := MetricValues.new()
 	values.tax = 1
-	values.price = 2
-	values.wage = 3
+	values.consumption = 2
+	values.production = 3
 	values.employment = 4
-	values.trade = 5
+	values.investment = 5
 	t.check_equal(
 		serializer.metric_values(values),
-		{"tax": 1, "price": 2, "wage": 3, "employment": 4, "trade": 5},
+		{"tax": 1, "consumption": 2, "production": 3, "employment": 4, "investment": 5},
 		"MetricValues serializes every named metric"
 	)
 	var group := t.make_group("serializer group", 4)
@@ -56,7 +56,7 @@ func _test_core_dto_serialization(t: BackendTestContext) -> void:
 	group.decrease_tax = true
 	var proposal := t.make_proposal(group)
 	proposal.base_effect.tax = 8
-	proposal.positive_effect.trade = 5
+	proposal.positive_effect.investment = 5
 	proposal.lag_months = 6
 	proposal.donation_offer = 5.0
 	proposal.bonus_choice_resolved = false
@@ -69,7 +69,7 @@ func _test_core_dto_serialization(t: BackendTestContext) -> void:
 		"proposal source description serializes"
 	)
 	t.check_equal(proposal_dto["base_effect"]["tax"], 8, "proposal base effect serializes")
-	t.check_equal(proposal_dto["positive_effect"]["trade"], 5, "proposal trait serializes")
+	t.check_equal(proposal_dto["positive_effect"]["investment"], 5, "proposal trait serializes")
 	t.check_equal(proposal_dto["lag_months"], 6, "proposal lag serializes")
 	t.check(not proposal_dto["bonus_choice_resolved"], "proposal pending state serializes")
 	var policy := _make_policy("serializer policy")
@@ -244,7 +244,7 @@ func _test_merge_refs(t: BackendTestContext) -> void:
 	var base := t.make_proposal(group)
 	base.base_effect.tax = 7
 	var positive := t.make_proposal(group)
-	positive.positive_effect.wage = 6
+	positive.positive_effect.production = 6
 	var third := t.make_proposal(group)
 	for current in [base, positive, third]:
 		session.proposal_system.add_to_hand(session.state, current)
@@ -284,9 +284,9 @@ func _test_draft_preview(t: BackendTestContext) -> void:
 	var preview := UiSerializer.new().draft_preview(session)
 	t.check_equal(preview["current_metrics"]["tax"], 100, "preview includes current metrics")
 	t.check_equal(preview["pure_proposal_target"]["tax"], 107, "preview uses pure proposal target")
-	t.check_equal(preview["immediate_policy_result"]["trade"], 110, "preview uses policy chain")
+	t.check_equal(preview["immediate_policy_result"]["investment"], 110, "preview uses policy chain")
 	t.check_equal(preview["projected_metrics"]["tax"], 107, "projected metrics include proposal")
-	t.check_equal(preview["projected_metrics"]["trade"], 110, "projected metrics include policy")
+	t.check_equal(preview["projected_metrics"]["investment"], 110, "projected metrics include policy")
 	t.check_equal(preview["vote"]["seat_votes"].size(), 1, "preview uses authoritative seat vote")
 	session.free()
 
@@ -296,7 +296,7 @@ func _test_bonus_choice_sync(t: BackendTestContext) -> void:
 	var group := t.make_group("dialogue group")
 	var session := t.make_session([race], [group], t.make_seats(1, "dialogue"))
 	var proposal := t.make_proposal(group)
-	proposal.positive_effect.trade = 8
+	proposal.positive_effect.investment = 8
 	proposal.donation_offer = 8.0
 	proposal.bonus_choice_resolved = false
 	proposal.positive_trait_accepted = false
@@ -348,9 +348,9 @@ func _make_policy(display_name: String) -> PolicyDefinition:
 	var condition := MetricCondition.new()
 	condition.left_metric = Metric.Id.TAX
 	condition.operator = MetricCondition.Operator.GREATER_THAN_OR_EQUAL
-	condition.right_metric = Metric.Id.TRADE
+	condition.right_metric = Metric.Id.INVESTMENT
 	var effect := PolicyEffect.new()
-	effect.target_metric = Metric.Id.TRADE
+	effect.target_metric = Metric.Id.INVESTMENT
 	effect.formula = PolicyEffect.Formula.METRIC_VALUE
 	effect.source_a = Metric.Id.TAX
 	effect.multiplier = 0.1

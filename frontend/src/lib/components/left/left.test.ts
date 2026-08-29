@@ -31,27 +31,27 @@ const group = (display_name: string): InterestGroupDefinition => ({
 	description: `${display_name}简介`,
 	base_column_weight: 1,
 	decrease_tax: false,
-	decrease_price: false,
-	decrease_wage: false,
+	decrease_consumption: false,
+	decrease_production: false,
 	decrease_employment: false,
-	decrease_trade: false
+	decrease_investment: false
 });
 
 const proposal = (
 	name: string,
 	tax: number,
-	trade = 0,
+	investment = 0,
 	positiveTax = 0,
-	positiveTrade = 0
+	positiveInvestment = 0
 ): Proposal => ({
 	source_group: group(name),
-	base_effect: { tax, price: 0, wage: 0, employment: 0, trade },
+	base_effect: { tax, consumption: 0, production: 0, employment: 0, investment },
 	positive_effect: {
 		tax: positiveTax,
-		price: 0,
-		wage: 0,
+		consumption: 0,
+		production: 0,
 		employment: 0,
-		trade: positiveTrade
+		investment: positiveInvestment
 	},
 	lag_months: 2,
 	donation_offer: 0,
@@ -68,26 +68,26 @@ const proposalItem = (index: number, value: Proposal): ProposalLeftItem => ({
 const policy: PolicyDefinition = {
 	display_name: '工贸调节',
 	condition: {
-		left_metric: Metric.WAGE,
+		left_metric: Metric.PRODUCTION,
 		operator: MetricConditionOperator.LESS_THAN,
-		right_metric: Metric.TRADE,
+		right_metric: Metric.INVESTMENT,
 		right_multiplier: 1
 	},
 	effects: [
 		{
 			target_metric: Metric.EMPLOYMENT,
 			formula: PolicyEffectFormula.METRIC_VALUE,
-			source_a: Metric.TRADE,
-			source_b: Metric.TRADE,
+			source_a: Metric.INVESTMENT,
+			source_b: Metric.INVESTMENT,
 			multiplier: 0.1
 		}
 	]
 };
 
 const secondArticlePolicy: PolicyDefinition = {
-	display_name: '物价政策',
+	display_name: '消费政策',
 	condition: {
-		left_metric: Metric.PRICE,
+		left_metric: Metric.CONSUMPTION,
 		operator: MetricConditionOperator.GREATER_THAN,
 		right_metric: Metric.TAX,
 		right_multiplier: 1
@@ -96,9 +96,9 @@ const secondArticlePolicy: PolicyDefinition = {
 };
 
 const proposals = [
-	proposalItem(4, proposal('商会', -4, 1)),
-	proposalItem(9, proposal('工所', -9, 3)),
-	proposalItem(2, proposal('商会', -2, 2))
+	proposalItem(4, proposal('商会', -4, -1)),
+	proposalItem(9, proposal('工所', -9, -3)),
+	proposalItem(2, proposal('商会', -2, -2))
 ];
 
 const items: LeftItem[] = [
@@ -132,7 +132,7 @@ test('proposal details show the source interest group description', () => {
 test('Left filters by discriminated kind without mutating input', () => {
 	const filtered = filterArchiveItems(items, {
 		kinds: ['bill', 'policy'],
-		metrics: [Metric.TAX, Metric.WAGE],
+		metrics: [Metric.TAX, Metric.PRODUCTION],
 		timeAscending: false,
 		valueAscending: false
 	});
@@ -146,7 +146,7 @@ test('Left filters by discriminated kind without mutating input', () => {
 test('Left metric filter matches any involved metric', () => {
 	const filtered = filterArchiveItems(items, {
 		kinds: ['constitution', 'proposal'],
-		metrics: [Metric.PRICE],
+		metrics: [Metric.CONSUMPTION],
 		timeAscending: false,
 		valueAscending: false
 	});
@@ -209,11 +209,11 @@ test('proposal selection is capped at three and selected refs move first unchang
 test('three proposal preview shows min~max ranges', () => {
 	const preview = createProposalSynthesisPreview(proposals);
 	assert.equal(preview.metrics.find((metric) => metric.text === '税課')?.value, '-9~-2');
-	assert.equal(preview.metrics.find((metric) => metric.text === '商貿')?.value, '1~3');
+	assert.equal(preview.metrics.find((metric) => metric.text === '投資')?.value, '-3~-1');
 });
 
 test('preview keeps only the largest reverse metric with stable ties', () => {
-	const first = proposalItem(0, proposal('商会', -1, 0, -8));
+	const first = proposalItem(0, proposal('商会', -1, 0, 8));
 	const second = proposalItem(1, proposal('工所', -1, 0, 0, 8));
 	const third = proposalItem(2, proposal('农会', -1, 0, 0, 5));
 	const preview = createProposalSynthesisPreview([first, second, third]);
@@ -280,12 +280,12 @@ test('the Left mock contains one Constitution with active articles', () => {
 
 test('Proposal mocks preserve each InterestGroup fixed base effect template', () => {
 	const expected: Record<string, Partial<Record<keyof Proposal['base_effect'], number>>> = {
-		造身公所: { price: 1, employment: -1 },
-		槐安公所: { wage: -1, price: 1 },
-		永乐轮运局: { price: 1, trade: -1 },
-		官药局: { tax: 1, price: 1 },
-		铅字报馆: { tax: 1, wage: -1 },
-		会同成衣会: { price: 1, wage: -1 }
+		造身公所: { consumption: -1, employment: -1 },
+		槐安公所: { production: -1, consumption: -1 },
+		永乐轮运局: { consumption: -1, investment: -1 },
+		官药局: { tax: -1, consumption: -1 },
+		铅字报馆: { tax: -1, production: -1 },
+		会同成衣会: { consumption: -1, production: -1 }
 	};
 	for (const item of mockProposalItems) {
 		const template = expected[item.proposal.source_group.display_name];

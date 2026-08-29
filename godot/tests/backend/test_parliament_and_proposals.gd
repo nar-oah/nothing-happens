@@ -40,10 +40,10 @@ func _test_resource_identity(t: BackendTestContext) -> void:
 func _test_group_stance_and_generated_proposal(t: BackendTestContext) -> void:
 	var group := t.make_group("guild")
 	group.decrease_tax = true
-	group.decrease_wage = true
+	group.decrease_production = true
 	t.check_equal(group.get_stance(Metric.Id.TAX), Metric.Direction.LOWER, "tax stance is lower")
-	t.check_equal(group.get_stance(Metric.Id.WAGE), Metric.Direction.LOWER, "wage stance is lower")
-	t.check_equal(group.get_stance(Metric.Id.TRADE), Metric.Direction.NONE, "unset stance is none")
+	t.check_equal(group.get_stance(Metric.Id.PRODUCTION), Metric.Direction.LOWER, "production stance is lower")
+	t.check_equal(group.get_stance(Metric.Id.INVESTMENT), Metric.Direction.NONE, "unset stance is none")
 	t.check_equal(group.get_stance_metrics().size(), 2, "bool stances enumerate both metrics")
 
 	var balance := GameBalanceDefinition.new()
@@ -62,9 +62,9 @@ func _test_group_stance_and_generated_proposal(t: BackendTestContext) -> void:
 
 	t.check(proposal != null, "group stance directly generates a proposal")
 	t.check(proposal.source_group == group, "proposal stores its source Resource")
-	t.check_equal(proposal.base_effect.tax, 11, "tax downside uses compounded magnitude")
-	t.check_equal(proposal.base_effect.wage, -11, "wage downside uses compounded magnitude")
-	t.check_equal(proposal.base_effect.trade, 0, "unconcerned metrics stay empty")
+	t.check_equal(proposal.base_effect.tax, -11, "tax downside uses compounded magnitude")
+	t.check_equal(proposal.base_effect.production, -11, "production downside uses compounded magnitude")
+	t.check_equal(proposal.base_effect.investment, 0, "unconcerned metrics stay empty")
 	t.check_equal(proposal.lag_months, 4, "lag month range is balance-driven")
 
 
@@ -72,7 +72,7 @@ func _test_proposal_gameplay_equivalence(t: BackendTestContext) -> void:
 	var group := t.make_group("equivalent source")
 	var proposal := t.make_proposal(group)
 	proposal.base_effect.tax = 8
-	proposal.positive_effect.wage = 5
+	proposal.positive_effect.production = 5
 	proposal.lag_months = 4
 	proposal.donation_offer = 5.0
 	proposal.bonus_choice_resolved = true
@@ -118,7 +118,7 @@ func _test_proposal_gameplay_equivalence(t: BackendTestContext) -> void:
 		"a choice flag without a positive trait has no future gameplay effect"
 	)
 	var pending := ordinary.copy()
-	pending.positive_effect.wage = 5
+	pending.positive_effect.production = 5
 	pending.bonus_choice_resolved = false
 	pending.positive_trait_accepted = false
 	pending.donation_offer = 10.0
@@ -141,7 +141,7 @@ func _test_proposal_gameplay_equivalence(t: BackendTestContext) -> void:
 
 func _test_duplicate_equivalent_matching(t: BackendTestContext) -> void:
 	var proposal := t.make_proposal(t.make_group("duplicate source"))
-	proposal.base_effect.trade = -7
+	proposal.base_effect.investment = -7
 	proposal.lag_months = 3
 	var replacement := proposal.copy()
 	var matches := ProposalSystem.new().match_equivalent_proposals(
@@ -167,8 +167,8 @@ func _test_positive_trait_and_donation_choice(t: BackendTestContext) -> void:
 	system.add_positive_trait(accepted, 2, inflation, balance, random)
 	var accepted_metric := accepted.get_positive_metric() as Metric.Id
 	t.check_equal(
-		absi(accepted.positive_effect.get_value(accepted_metric)), 11,
-		"positive trait compounds by proposal era growth"
+		accepted.positive_effect.get_value(accepted_metric), 11,
+		"positive trait compounds by proposal era growth and is always positive"
 	)
 	t.check_approx(accepted.donation_offer, 22.0, "offer derives from positive magnitude")
 	var accepted_state := RunState.new()
@@ -199,9 +199,9 @@ func _test_merge_uses_group_resource_identity(t: BackendTestContext) -> void:
 	var base := t.make_proposal(group)
 	base.base_effect.tax = 7
 	var positive_a := t.make_proposal(group)
-	positive_a.positive_effect.wage = 10
+	positive_a.positive_effect.production = 10
 	var positive_b := t.make_proposal(group)
-	positive_b.positive_effect.trade = 8
+	positive_b.positive_effect.investment = 8
 	var state := RunState.new()
 	state.proposal_hand = [base, positive_a, positive_b]
 	var balance := GameBalanceDefinition.new()
@@ -215,11 +215,11 @@ func _test_merge_uses_group_resource_identity(t: BackendTestContext) -> void:
 	t.check_equal(state.proposal_hand.size(), 1, "merge consumes its three mothers")
 	t.check(merged.source_group == group, "merged proposal keeps source Resource")
 	t.check_equal(merged.base_effect.tax, 7, "merge keeps selected negative base")
-	t.check_equal(merged.positive_effect.wage, 14, "discarded trait converts by balance ratio")
+	t.check_equal(merged.positive_effect.production, 14, "discarded trait converts by balance ratio")
 	t.check(state.saved_bills.is_empty(), "proposal synthesis does not save a bill")
 
 	var pending := t.make_proposal(group)
-	pending.positive_effect.wage = 5
+	pending.positive_effect.production = 5
 	pending.bonus_choice_resolved = false
 	pending.positive_trait_accepted = false
 	var plain_a := t.make_proposal(group)
@@ -240,7 +240,7 @@ func _test_pending_choice_blocks_submission(t: BackendTestContext) -> void:
 	var group := t.make_group("pending source")
 	var session := t.make_session([race], [group], t.make_seats(1, "pending"))
 	var proposal := t.make_proposal(group)
-	proposal.positive_effect.tax = -5
+	proposal.positive_effect.tax = 5
 	proposal.donation_offer = 5.0
 	proposal.bonus_choice_resolved = false
 	proposal.positive_trait_accepted = false
@@ -302,7 +302,7 @@ func _test_failed_draft_does_not_record_sources(t: BackendTestContext) -> void:
 func _test_visit_probability_comes_from_race_state(t: BackendTestContext) -> void:
 	var race := t.make_race("visitor")
 	var group := t.make_group("visiting group")
-	group.decrease_price = true
+	group.decrease_consumption = true
 	var article := t.make_article(race, true, 0.0, 1.0)
 	var balance := GameBalanceDefinition.new()
 	balance.automatic_draw_count = 0

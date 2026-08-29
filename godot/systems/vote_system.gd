@@ -93,9 +93,6 @@ func _calculate_seat_vote(
 		&"race_expectation", _race_expectation_score(race, projected, context)
 	)
 	vote.add_reason(
-		&"group_stance", _group_stance_score(seat.actual_group, draft, context)
-	)
-	vote.add_reason(
 		&"proposal_source", _proposal_source_score(seat.actual_group, draft, context.balance)
 	)
 	vote.add_reason(&"personal_relation", seat.personal_relation)
@@ -124,31 +121,12 @@ func _race_expectation_score(
 		if not race.definition.is_vote_metric_active(metric, context):
 			continue
 		var target := context.race_system.get_effective_expectation(race, metric, context)
-		var before_distance := absf(float(context.state.metrics.get_value(metric) - target))
-		var after_distance := absf(float(projected.get_value(metric) - target))
-		if after_distance < before_distance:
+		var before_gap := maxf(float(target - context.state.metrics.get_value(metric)), 0.0)
+		var after_gap := maxf(float(target - projected.get_value(metric)), 0.0)
+		if after_gap < before_gap:
 			score += context.balance.race_expectation_score
-		elif after_distance > before_distance:
+		elif after_gap > before_gap:
 			score -= context.balance.race_expectation_score
-	return score
-
-
-func _group_stance_score(
-	group: InterestGroupDefinition, draft: DraftBillState, context: RunContext
-) -> float:
-	if group == null:
-		return 0.0
-	var effect := context.proposal_system.calculate_total_effect(draft.proposals)
-	var score := 0.0
-	for metric in effect.non_zero_metrics():
-		var stance := group.get_stance(metric)
-		if stance == Metric.Direction.NONE:
-			continue
-		score += (
-			context.balance.group_stance_score
-			if effect.get_value(metric) * int(stance) > 0
-			else -context.balance.group_stance_score
-		)
 	return score
 
 

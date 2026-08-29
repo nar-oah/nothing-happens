@@ -1,9 +1,9 @@
 export const Metric = {
 	TAX: 0,
-	PRICE: 1,
-	WAGE: 2,
+	CONSUMPTION: 1,
+	PRODUCTION: 2,
 	EMPLOYMENT: 3,
-	TRADE: 4
+	INVESTMENT: 4
 } as const;
 
 export type Metric = (typeof Metric)[keyof typeof Metric];
@@ -27,10 +27,10 @@ export type PolicyEffectFormula = (typeof PolicyEffectFormula)[keyof typeof Poli
 
 export type MetricValues = {
 	tax: number;
-	price: number;
-	wage: number;
+	consumption: number;
+	production: number;
 	employment: number;
-	trade: number;
+	investment: number;
 };
 
 export type MetricVector = MetricValues;
@@ -40,10 +40,10 @@ export type InterestGroupDefinition = {
 	description: string;
 	base_column_weight: number;
 	decrease_tax: boolean;
-	decrease_price: boolean;
-	decrease_wage: boolean;
+	decrease_consumption: boolean;
+	decrease_production: boolean;
 	decrease_employment: boolean;
-	decrease_trade: boolean;
+	decrease_investment: boolean;
 };
 
 export type MetricCondition = {

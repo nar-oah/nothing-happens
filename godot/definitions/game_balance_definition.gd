@@ -25,7 +25,6 @@ class_name GameBalanceDefinition
 
 @export_group("投票与政治献金")
 @export_range(0.0, 100.0, 0.5) var race_expectation_score: float = 6.0
-@export_range(0.0, 100.0, 0.5) var group_stance_score: float = 4.0
 @export_range(0.0, 100.0, 0.5) var support_threshold: float = 1.0
 @export_range(0.0, 1.0, 0.01) var donation_detection_probability: float = 0.25
 

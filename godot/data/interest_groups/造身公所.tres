@@ -7,5 +7,5 @@ script = ExtResource("1_script")
 display_name = "造身公所"
 description = "掌管行身制造、机谱、机件规格、身契登记与维修网络的庞大公所。每一具新偃偶的诞生、每一次大修乃至身体如何被买卖，都绕不开它制定的标准。它既把自己称作偃偶一族得以延续的保障，也让偃偶从出生起便活在它的账册、工场与契约之中。"
 base_column_weight = 5
-decrease_price = true
+decrease_tax = true
 decrease_employment = true

@@ -126,9 +126,9 @@ func _test_nanke_absence_is_submit_only(t: BackendTestContext) -> void:
 func _test_nanke_constitution_strike_hook(t: BackendTestContext) -> void:
 	var race := NankeRaceDefinition.new()
 	race.display_name = "nanke workers"
-	race.increase_wage = true
+	race.increase_production = true
 	var union := t.make_group("union")
-	union.decrease_wage = true
+	union.decrease_production = true
 	var article := NankeConstitutionArticleDefinition.new()
 	article.display_name = "strike constitution"
 	article.race = race
@@ -140,7 +140,7 @@ func _test_nanke_constitution_strike_hook(t: BackendTestContext) -> void:
 		[race], [union], t.make_seats(1, "strike"), [article]
 	)
 	var proposal := t.make_proposal(union)
-	proposal.base_effect.wage = -10
+	proposal.base_effect.production = -10
 	var draft := DraftBillState.new()
 	draft.proposals.append(proposal)
 	var result := session.vote_system.preview_vote(draft, session.context)

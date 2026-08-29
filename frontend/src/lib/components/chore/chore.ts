@@ -1,6 +1,6 @@
 export type ChoreFilterMode = 'default' | 'archives' | 'metric';
 export type ChoreArchiveKey = 'constitution' | 'bill' | 'proposal' | 'policy';
-export type ChoreMetricKey = 'tax' | 'price' | 'wage' | 'employment' | 'trade';
+export type ChoreMetricKey = 'tax' | 'consumption' | 'production' | 'employment' | 'investment';
 
 export type ChoreArchiveState = Record<ChoreArchiveKey, boolean>;
 export type ChoreMetricState = Record<ChoreMetricKey, boolean>;
@@ -23,10 +23,10 @@ export const CHORE_ARCHIVE_OPTIONS = [
 
 export const CHORE_METRIC_OPTIONS = [
 	{ key: 'tax', text: '税课' },
-	{ key: 'price', text: '物价' },
-	{ key: 'wage', text: '工钱' },
-	{ key: 'employment', text: '用工' },
-	{ key: 'trade', text: '商贸' }
+	{ key: 'consumption', text: '消费' },
+	{ key: 'production', text: '生产' },
+	{ key: 'employment', text: '就业' },
+	{ key: 'investment', text: '投资' }
 ] as const;
 
 export function createChoreArchiveState(): ChoreArchiveState {
@@ -34,5 +34,5 @@ export function createChoreArchiveState(): ChoreArchiveState {
 }
 
 export function createChoreMetricState(): ChoreMetricState {
-	return { tax: true, price: false, wage: true, employment: false, trade: false };
+	return { tax: true, consumption: false, production: true, employment: false, investment: false };
 }

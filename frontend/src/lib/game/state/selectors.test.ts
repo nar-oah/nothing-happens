@@ -30,13 +30,13 @@ test('live race/group summaries derive Top without mock lore', () => {
 	assert.equal(top.raceItems[0].item.text, '人类');
 	assert.equal(top.raceItems[0].item.value, 1);
 	assert.equal(top.raceItems[0].detail.leftLabel, '年度期望');
-	assert.match(top.raceItems[0].detail.leftBody, /商貿↑110/);
+	assert.match(top.raceItems[0].detail.leftBody, /投資↑110/);
 	assert.equal(top.raceItems[0].detail.rightLabel, '种族简介');
 	assert.equal(top.raceItems[0].detail.rightBody, '人类简介');
 	assert.equal(top.interestGroupItems[0].item.text, '造身公所');
 	assert.equal(top.interestGroupItems[0].item.value, 1);
 	assert.equal(top.interestGroupItems[0].detail.leftLabel, '固定指标立场');
-	assert.match(top.interestGroupItems[0].detail.leftBody, /物價↓/);
+	assert.match(top.interestGroupItems[0].detail.leftBody, /消費↓/);
 	assert.equal(top.interestGroupItems[0].detail.rightLabel, '利益集团简介');
 	assert.equal(top.interestGroupItems[0].detail.rightBody, '造身公所简介');
 });
@@ -55,8 +55,8 @@ test('authoritative draft preview becomes existing Memorial metric props', () =>
 		preview.map(({ text, symbol, value }) => [text, symbol, value]),
 		[
 			['税課', undefined, 0],
-			['物價', '+', 16],
-			['商貿', '-', 4]
+			['消費', '-', 8],
+			['投資', undefined, 0]
 		]
 	);
 });
@@ -100,7 +100,7 @@ test('dialogue presentation retains authoritative values', () => {
 	const state = makeLiveState();
 	const dialogue = deriveDialoguePresentation(state.pending_dialogue);
 	assert.equal(dialogue?.visitor_text, '造身公所代表来访。');
-	assert.equal(dialogue?.trait_label, '商貿+8');
+	assert.equal(dialogue?.trait_label, '投資+8');
 	assert.equal(dialogue?.donation_label, '政治献金+5');
 });
 

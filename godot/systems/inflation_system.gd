@@ -25,8 +25,7 @@ func generate_negative_effect(
 			balance.proposal_negative_magnitude_max
 		)
 		var magnitude := roundi(float(base_magnitude) * multiplier)
-		var signed_value := magnitude * Metric.proposal_negative_sign(metric)
-		result.set_value(metric, signed_value)
+		result.set_value(metric, -magnitude)
 	return result
 
 

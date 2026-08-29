@@ -20,17 +20,17 @@ const sourceGroup: InterestGroupDefinition = {
 	description: 'source description',
 	base_column_weight: 1,
 	decrease_tax: true,
-	decrease_price: false,
-	decrease_wage: false,
+	decrease_consumption: false,
+	decrease_production: false,
 	decrease_employment: false,
-	decrease_trade: false
+	decrease_investment: false
 };
 
 function makeProposal(): Proposal {
 	return {
 		source_group: sourceGroup,
-		base_effect: { tax: 8, price: 0, wage: 0, employment: 0, trade: 0 },
-		positive_effect: { tax: 0, price: 0, wage: 0, employment: 0, trade: 0 },
+		base_effect: { tax: 8, consumption: 0, production: 0, employment: 0, investment: 0 },
+		positive_effect: { tax: 0, consumption: 0, production: 0, employment: 0, investment: 0 },
 		lag_months: 4,
 		donation_offer: 0,
 		bonus_choice_resolved: true,
@@ -52,7 +52,7 @@ test('settled historical bonus fields do not affect future gameplay equivalence'
 
 test('actionable bonus state remains part of gameplay equivalence', () => {
 	const pending = makeProposal();
-	pending.positive_effect.wage = 5;
+	pending.positive_effect.production = 5;
 	pending.bonus_choice_resolved = false;
 	pending.positive_trait_accepted = false;
 	pending.donation_offer = 10;
@@ -100,12 +100,12 @@ test('saved bill reconciliation removes missing proposals and unavailable polici
 		condition: {
 			left_metric: Metric.TAX,
 			operator: MetricConditionOperator.LESS_THAN,
-			right_metric: Metric.TRADE,
+			right_metric: Metric.INVESTMENT,
 			right_multiplier: 1
 		},
 		effects: [
 			{
-				target_metric: Metric.TRADE,
+				target_metric: Metric.INVESTMENT,
 				formula: PolicyEffectFormula.METRIC_VALUE,
 				source_a: Metric.TAX,
 				source_b: Metric.TAX,
@@ -133,7 +133,7 @@ test('policy identity uses display_name only', () => {
 		condition: {
 			left_metric: Metric.TAX,
 			operator: MetricConditionOperator.LESS_THAN,
-			right_metric: Metric.TRADE,
+			right_metric: Metric.INVESTMENT,
 			right_multiplier: 1
 		},
 		effects: []
@@ -141,16 +141,16 @@ test('policy identity uses display_name only', () => {
 	const second: PolicyDefinition = {
 		display_name: '同名政策',
 		condition: {
-			left_metric: Metric.WAGE,
+			left_metric: Metric.PRODUCTION,
 			operator: MetricConditionOperator.GREATER_THAN,
-			right_metric: Metric.PRICE,
+			right_metric: Metric.CONSUMPTION,
 			right_multiplier: 2
 		},
 		effects: [
 			{
 				target_metric: Metric.EMPLOYMENT,
 				formula: PolicyEffectFormula.METRIC_VALUE,
-				source_a: Metric.TRADE,
+				source_a: Metric.INVESTMENT,
 				source_b: Metric.TAX,
 				multiplier: 0.5
 			}

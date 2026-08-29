@@ -3,17 +3,17 @@ class_name BiyiRaceDefinition
 
 @export_group("阴项")
 @export var yin_tax: bool = false
-@export var yin_price: bool = false
-@export var yin_wage: bool = false
+@export var yin_consumption: bool = false
+@export var yin_production: bool = false
 @export var yin_employment: bool = false
-@export var yin_trade: bool = false
+@export var yin_investment: bool = false
 
 @export_group("阳项")
 @export var yang_tax: bool = false
-@export var yang_price: bool = false
-@export var yang_wage: bool = false
+@export var yang_consumption: bool = false
+@export var yang_production: bool = false
 @export var yang_employment: bool = false
-@export var yang_trade: bool = false
+@export var yang_investment: bool = false
 
 
 func on_month_start(context, race_state) -> void:
@@ -42,12 +42,9 @@ func get_effective_expectation(
 	if race_state == null:
 		return base_target
 	var month_sign := get_yin_yang_month_sign(metric, context.state.month)
-	var direction := get_stance(metric)
-	if month_sign == 0 or direction == Metric.Direction.NONE:
+	if month_sign == 0 or get_stance(metric) == Metric.Direction.NONE:
 		return base_target
-	var adjustment: float = (
-		float(direction) * float(month_sign) * float(race_state.yin_yang_adjustment_rate)
-	)
+	var adjustment := float(month_sign) * float(race_state.yin_yang_adjustment_rate)
 	return roundi(float(base_target) * (1.0 + adjustment))
 
 
@@ -55,14 +52,14 @@ func is_yin_metric(metric: Metric.Id) -> bool:
 	match metric:
 		Metric.Id.TAX:
 			return yin_tax
-		Metric.Id.PRICE:
-			return yin_price
-		Metric.Id.WAGE:
-			return yin_wage
+		Metric.Id.CONSUMPTION:
+			return yin_consumption
+		Metric.Id.PRODUCTION:
+			return yin_production
 		Metric.Id.EMPLOYMENT:
 			return yin_employment
-		Metric.Id.TRADE:
-			return yin_trade
+		Metric.Id.INVESTMENT:
+			return yin_investment
 	return false
 
 
@@ -70,14 +67,14 @@ func is_yang_metric(metric: Metric.Id) -> bool:
 	match metric:
 		Metric.Id.TAX:
 			return yang_tax
-		Metric.Id.PRICE:
-			return yang_price
-		Metric.Id.WAGE:
-			return yang_wage
+		Metric.Id.CONSUMPTION:
+			return yang_consumption
+		Metric.Id.PRODUCTION:
+			return yang_production
 		Metric.Id.EMPLOYMENT:
 			return yang_employment
-		Metric.Id.TRADE:
-			return yang_trade
+		Metric.Id.INVESTMENT:
+			return yang_investment
 	return false
 
 
@@ -88,6 +85,29 @@ func get_yin_yang_month_sign(metric: Metric.Id, month: int) -> int:
 		return 0
 	var yin_month := month % 2 == 1
 	return 1 if (yin_month and is_yin) or (not yin_month and is_yang) else -1
+
+
+func _set(property: StringName, value: Variant) -> bool:
+	match property:
+		&"yin_price":
+			yin_consumption = bool(value)
+			return true
+		&"yin_wage":
+			yin_production = bool(value)
+			return true
+		&"yin_trade":
+			yin_investment = bool(value)
+			return true
+		&"yang_price":
+			yang_consumption = bool(value)
+			return true
+		&"yang_wage":
+			yang_production = bool(value)
+			return true
+		&"yang_trade":
+			yang_investment = bool(value)
+			return true
+	return super._set(property, value)
 
 
 func _is_yin_month(context) -> bool:

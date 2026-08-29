@@ -17,7 +17,7 @@
 		时间: false
 	});
 	let rightFilters = $state({
-		指标: { options: ['税课', '物价', '工钱', '用工', '商贸'], selected: ['商贸'], multiple: true },
+		指标: { options: ['税课', '消费', '生产', '就业', '投资'], selected: ['投资'], multiple: true },
 		数值: false
 	});
 	let galleryBill = $state(mockSavedBills[0]);

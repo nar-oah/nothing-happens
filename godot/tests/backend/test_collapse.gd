@@ -177,9 +177,9 @@ func _test_policy_trigger_chain(t: BackendTestContext) -> void:
 	first.condition = MetricCondition.new()
 	first.condition.left_metric = Metric.Id.TAX
 	first.condition.operator = MetricCondition.Operator.GREATER_THAN
-	first.condition.right_metric = Metric.Id.PRICE
+	first.condition.right_metric = Metric.Id.CONSUMPTION
 	var first_effect := PolicyEffect.new()
-	first_effect.target_metric = Metric.Id.WAGE
+	first_effect.target_metric = Metric.Id.PRODUCTION
 	first_effect.formula = PolicyEffect.Formula.METRIC_VALUE
 	first_effect.source_a = Metric.Id.TAX
 	first_effect.multiplier = 1.0
@@ -188,27 +188,27 @@ func _test_policy_trigger_chain(t: BackendTestContext) -> void:
 	var second := PolicyDefinition.new()
 	second.display_name = "second"
 	second.condition = MetricCondition.new()
-	second.condition.left_metric = Metric.Id.WAGE
+	second.condition.left_metric = Metric.Id.PRODUCTION
 	second.condition.operator = MetricCondition.Operator.GREATER_THAN_OR_EQUAL
 	second.condition.right_metric = Metric.Id.TAX
 	var second_effect := PolicyEffect.new()
-	second_effect.target_metric = Metric.Id.TRADE
+	second_effect.target_metric = Metric.Id.INVESTMENT
 	second_effect.formula = PolicyEffect.Formula.METRIC_VALUE
-	second_effect.source_a = Metric.Id.WAGE
+	second_effect.source_a = Metric.Id.PRODUCTION
 	second_effect.multiplier = 2.0
 	second.effects = [second_effect]
 
 	var state := RunState.new()
 	state.metrics.tax = 10
-	state.metrics.price = 5
-	state.metrics.wage = 0
-	state.metrics.trade = 0
+	state.metrics.consumption = 5
+	state.metrics.production = 0
+	state.metrics.investment = 0
 	state.active_bill = ActiveBillState.new()
 	var system := PolicySystem.new()
 	state.active_bill.policies = system.create_states([first, second])
 	system.resolve_policy_chain(state)
-	t.check_equal(state.metrics.wage, 10, "first policy applies from initial condition")
-	t.check_equal(state.metrics.trade, 20, "second policy triggers from first policy result")
+	t.check_equal(state.metrics.production, 10, "first policy applies from initial condition")
+	t.check_equal(state.metrics.investment, 20, "second policy triggers from first policy result")
 	t.check(state.active_bill.policies[0].triggered, "first policy is marked triggered")
 	t.check(state.active_bill.policies[1].triggered, "second policy is marked triggered")
 	t.check_equal(state.collapse_level, 0, "policies do not add collapse")

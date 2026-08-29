@@ -2,24 +2,24 @@ extends RefCounted
 class_name MetricVector
 
 var tax: int = 0
-var price: int = 0
-var wage: int = 0
+var consumption: int = 0
+var production: int = 0
 var employment: int = 0
-var trade: int = 0
+var investment: int = 0
 
 
 func get_value(metric: Metric.Id) -> int:
 	match metric:
 		Metric.Id.TAX:
 			return tax
-		Metric.Id.PRICE:
-			return price
-		Metric.Id.WAGE:
-			return wage
+		Metric.Id.CONSUMPTION:
+			return consumption
+		Metric.Id.PRODUCTION:
+			return production
 		Metric.Id.EMPLOYMENT:
 			return employment
-		Metric.Id.TRADE:
-			return trade
+		Metric.Id.INVESTMENT:
+			return investment
 		_:
 			push_error("Unknown metric: %s" % metric)
 			return 0
@@ -29,34 +29,34 @@ func set_value(metric: Metric.Id, value: int) -> void:
 	match metric:
 		Metric.Id.TAX:
 			tax = value
-		Metric.Id.PRICE:
-			price = value
-		Metric.Id.WAGE:
-			wage = value
+		Metric.Id.CONSUMPTION:
+			consumption = value
+		Metric.Id.PRODUCTION:
+			production = value
 		Metric.Id.EMPLOYMENT:
 			employment = value
-		Metric.Id.TRADE:
-			trade = value
+		Metric.Id.INVESTMENT:
+			investment = value
 		_:
 			push_error("Unknown metric: %s" % metric)
 
 
 func add(other: MetricVector) -> void:
 	tax += other.tax
-	price += other.price
-	wage += other.wage
+	consumption += other.consumption
+	production += other.production
 	employment += other.employment
-	trade += other.trade
+	investment += other.investment
 
 
 func copy() -> MetricVector:
 	var result := MetricVector.new()
 
 	result.tax = tax
-	result.price = price
-	result.wage = wage
+	result.consumption = consumption
+	result.production = production
 	result.employment = employment
-	result.trade = trade
+	result.investment = investment
 
 	return result
 

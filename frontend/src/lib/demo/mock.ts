@@ -30,10 +30,10 @@ import {
 
 const vector = (values: Partial<MetricValues> = {}): MetricValues => ({
 	tax: values.tax ?? 0,
-	price: values.price ?? 0,
-	wage: values.wage ?? 0,
+	consumption: values.consumption ?? 0,
+	production: values.production ?? 0,
 	employment: values.employment ?? 0,
-	trade: values.trade ?? 0
+	investment: values.investment ?? 0
 });
 
 const makeGroup = (
@@ -45,30 +45,30 @@ const makeGroup = (
 	description: `${display_name}简介`,
 	base_column_weight,
 	decrease_tax: decreases[Metric.TAX] ?? false,
-	decrease_price: decreases[Metric.PRICE] ?? false,
-	decrease_wage: decreases[Metric.WAGE] ?? false,
+	decrease_consumption: decreases[Metric.CONSUMPTION] ?? false,
+	decrease_production: decreases[Metric.PRODUCTION] ?? false,
 	decrease_employment: decreases[Metric.EMPLOYMENT] ?? false,
-	decrease_trade: decreases[Metric.TRADE] ?? false
+	decrease_investment: decreases[Metric.INVESTMENT] ?? false
 });
 
 export const mockInterestGroups = {
 	造身公所: makeGroup('造身公所', 5, {
-		[Metric.PRICE]: true,
+		[Metric.CONSUMPTION]: true,
 		[Metric.EMPLOYMENT]: true
 	}),
 	槐安公所: makeGroup('槐安公所', 5, {
-		[Metric.WAGE]: true,
+		[Metric.PRODUCTION]: true,
 		[Metric.EMPLOYMENT]: true
 	}),
 	永乐轮运局: makeGroup('永乐轮运局', 5, {
 		[Metric.EMPLOYMENT]: true,
-		[Metric.TRADE]: true
+		[Metric.INVESTMENT]: true
 	}),
 	官药局: makeGroup('官药局', 2),
-	铅字报馆: makeGroup('铅字报馆', 2, { [Metric.WAGE]: true }),
+	铅字报馆: makeGroup('铅字报馆', 2, { [Metric.PRODUCTION]: true }),
 	会同成衣会: makeGroup('会同成衣会', 2, {
-		[Metric.WAGE]: true,
-		[Metric.TRADE]: true
+		[Metric.PRODUCTION]: true,
+		[Metric.INVESTMENT]: true
 	})
 } satisfies Record<string, InterestGroupDefinition>;
 
@@ -127,36 +127,36 @@ const policy = (
 
 export const mockBaseline: MetricValues = {
 	tax: 100,
-	price: 100,
-	wage: 100,
+	consumption: 100,
+	production: 100,
 	employment: 100,
-	trade: 100
+	investment: 100
 };
 
 export const mockPolicies: PolicyDefinition[] = [
-	policy('勘合互市', condition(Metric.TRADE, Metric.TAX), [
-		effect(Metric.PRICE, Metric.TRADE, Metric.TAX, -0.4),
-		effect(Metric.TRADE, Metric.TRADE, Metric.TAX, -0.3)
+	policy('勘合互市', condition(Metric.INVESTMENT, Metric.TAX), [
+		effect(Metric.CONSUMPTION, Metric.INVESTMENT, Metric.TAX, -0.4),
+		effect(Metric.INVESTMENT, Metric.INVESTMENT, Metric.TAX, -0.3)
 	]),
-	policy('岁贡折征', condition(Metric.TAX, Metric.TRADE), [
-		effect(Metric.TAX, Metric.TAX, Metric.TRADE, -0.25),
-		effect(Metric.TRADE, Metric.TAX, Metric.TRADE, 0.5)
+	policy('岁贡折征', condition(Metric.TAX, Metric.INVESTMENT), [
+		effect(Metric.TAX, Metric.TAX, Metric.INVESTMENT, -0.25),
+		effect(Metric.INVESTMENT, Metric.TAX, Metric.INVESTMENT, 0.5)
 	]),
-	policy('港务调停', condition(Metric.PRICE, Metric.WAGE), [
-		effect(Metric.PRICE, Metric.PRICE, Metric.WAGE, -0.35),
-		effect(Metric.TRADE, Metric.PRICE, Metric.WAGE, -0.2)
+	policy('港务调停', condition(Metric.CONSUMPTION, Metric.PRODUCTION), [
+		effect(Metric.CONSUMPTION, Metric.CONSUMPTION, Metric.PRODUCTION, -0.35),
+		effect(Metric.INVESTMENT, Metric.CONSUMPTION, Metric.PRODUCTION, -0.2)
 	]),
-	policy('集体议价', condition(Metric.TRADE, Metric.WAGE), [
-		effect(Metric.TRADE, Metric.TRADE, Metric.WAGE, -0.3),
-		effect(Metric.WAGE, Metric.TRADE, Metric.WAGE, 0.6)
+	policy('集体议价', condition(Metric.INVESTMENT, Metric.PRODUCTION), [
+		effect(Metric.INVESTMENT, Metric.INVESTMENT, Metric.PRODUCTION, -0.3),
+		effect(Metric.PRODUCTION, Metric.INVESTMENT, Metric.PRODUCTION, 0.6)
 	]),
-	policy('轮班限制', condition(Metric.EMPLOYMENT, Metric.WAGE), [
-		effect(Metric.EMPLOYMENT, Metric.EMPLOYMENT, Metric.WAGE, -0.35),
-		effect(Metric.WAGE, Metric.EMPLOYMENT, Metric.WAGE, 0.5)
+	policy('轮班限制', condition(Metric.EMPLOYMENT, Metric.PRODUCTION), [
+		effect(Metric.EMPLOYMENT, Metric.EMPLOYMENT, Metric.PRODUCTION, -0.35),
+		effect(Metric.PRODUCTION, Metric.EMPLOYMENT, Metric.PRODUCTION, 0.5)
 	]),
-	policy('生活津贴', condition(Metric.PRICE, Metric.WAGE), [
-		effect(Metric.WAGE, Metric.PRICE, Metric.WAGE, 0.4),
-		effect(Metric.TAX, Metric.PRICE, Metric.WAGE, 0.25)
+	policy('生活津贴', condition(Metric.CONSUMPTION, Metric.PRODUCTION), [
+		effect(Metric.PRODUCTION, Metric.CONSUMPTION, Metric.PRODUCTION, 0.4),
+		effect(Metric.TAX, Metric.CONSUMPTION, Metric.PRODUCTION, 0.25)
 	])
 ];
 
@@ -166,16 +166,16 @@ const unavailablePolicy = policy('公开预算', condition(Metric.TAX, Metric.EM
 ]);
 
 export const mockProposalItems: ProposalLeftItem[] = [
-	makeProposal(mockInterestGroups.造身公所, { price: 8, employment: -5 }, 6, { trade: 8 }),
-	makeProposal(mockInterestGroups.造身公所, { price: 5, employment: -9 }, 3),
-	makeProposal(mockInterestGroups.造身公所, { price: 5, employment: -9 }, 3),
-	makeProposal(mockInterestGroups.造身公所, { price: 5, employment: -9 }, 3, { employment: 6 }),
-	makeProposal(mockInterestGroups.槐安公所, { wage: -6, price: 7 }, 4, { employment: 6 }),
-	makeProposal(mockInterestGroups.槐安公所, { wage: -4, price: 10 }, 7),
-	makeProposal(mockInterestGroups.永乐轮运局, { price: 6, trade: -8 }, 5, { tax: -5 }),
-	makeProposal(mockInterestGroups.官药局, { tax: 7, price: 4 }, 2),
-	makeProposal(mockInterestGroups.铅字报馆, { tax: 5, wage: -7 }, 4),
-	makeProposal(mockInterestGroups.会同成衣会, { price: 6, wage: -5 }, 6)
+	makeProposal(mockInterestGroups.造身公所, { consumption: -8, employment: -5 }, 6, { investment: 8 }),
+	makeProposal(mockInterestGroups.造身公所, { consumption: -5, employment: -9 }, 3),
+	makeProposal(mockInterestGroups.造身公所, { consumption: -5, employment: -9 }, 3),
+	makeProposal(mockInterestGroups.造身公所, { consumption: -5, employment: -9 }, 3, { employment: 6 }),
+	makeProposal(mockInterestGroups.槐安公所, { production: -6, consumption: -7 }, 4, { employment: 6 }),
+	makeProposal(mockInterestGroups.槐安公所, { production: -4, consumption: -10 }, 7),
+	makeProposal(mockInterestGroups.永乐轮运局, { consumption: -6, investment: -8 }, 5, { tax: 5 }),
+	makeProposal(mockInterestGroups.官药局, { tax: -7, consumption: -4 }, 2),
+	makeProposal(mockInterestGroups.铅字报馆, { tax: -5, production: -7 }, 4),
+	makeProposal(mockInterestGroups.会同成衣会, { consumption: -6, production: -5 }, 6)
 ].map((proposal, index) => ({
 	kind: 'proposal',
 	ref: { collection: 'proposals', index },
@@ -312,10 +312,10 @@ export function getMockBillPreview(bill: Bill): MemorialMetricData[] {
 		for (const metric of METRICS) {
 			const key = {
 				[Metric.TAX]: 'tax',
-				[Metric.PRICE]: 'price',
-				[Metric.WAGE]: 'wage',
+				[Metric.CONSUMPTION]: 'consumption',
+				[Metric.PRODUCTION]: 'production',
 				[Metric.EMPLOYMENT]: 'employment',
-				[Metric.TRADE]: 'trade'
+				[Metric.INVESTMENT]: 'investment'
 			}[metric] as keyof MetricValues;
 			result[key] += getMetricValue(proposalEffect, metric);
 		}

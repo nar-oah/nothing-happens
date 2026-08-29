@@ -35,11 +35,7 @@ func rebuild_annual_expectations(context: RunContext) -> void:
 		var growth_rate := clampf(race_state.expectation_growth_rate, -1.0, 1.0)
 		for metric in race_state.definition.get_stance_metrics():
 			var base := baseline.get_value(metric)
-			var direction := race_state.definition.get_stance(metric)
-			if direction == Metric.Direction.HIGHER:
-				race_state.expectation_targets[metric] = roundi(float(base) * (1.0 + growth_rate))
-			elif direction == Metric.Direction.LOWER:
-				race_state.expectation_targets[metric] = roundi(float(base) * (1.0 - growth_rate))
+			race_state.expectation_targets[metric] = roundi(float(base) * (1.0 + growth_rate))
 
 
 func allocate_opening_seats(context: RunContext) -> bool:

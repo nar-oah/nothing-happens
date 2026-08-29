@@ -28,10 +28,10 @@ func _event_balance() -> GameBalanceDefinition:
 func _test_generation_count_and_pair_identity(t: BackendTestContext) -> void:
 	var race := t.make_race("many concerns")
 	race.increase_tax = true
-	race.increase_price = true
-	race.increase_wage = true
+	race.increase_consumption = true
+	race.increase_production = true
 	race.increase_employment = true
-	race.increase_trade = true
+	race.increase_investment = true
 	var group := t.make_group("group")
 	var balance := _event_balance()
 	balance.event_spawn_count_min = 3
@@ -70,7 +70,7 @@ func _test_zero_seat_race_is_ineligible(t: BackendTestContext) -> void:
 	var seated := t.make_race("seated")
 	seated.increase_tax = true
 	var absent := t.make_race("zero seat")
-	absent.increase_wage = true
+	absent.increase_production = true
 	var seated_article := t.make_article(seated)
 	var absent_article := t.make_article(absent)
 	absent_article.race_max_seat_rate = 0.0
@@ -85,13 +85,13 @@ func _test_zero_seat_race_is_ineligible(t: BackendTestContext) -> void:
 		balance
 	)
 	session.state.metrics.tax = 0
-	session.state.metrics.wage = 0
+	session.state.metrics.production = 0
 	t.check_equal(t.count_race_seats(session.state, absent), 0, "fixture has zero-seat race")
 	var generated := session.event_system.try_generate_month(session.context)
 	t.check_equal(generated.size(), 1, "only the seated race has a legal pair")
 	t.check(generated[0].race == seated, "zero-seat race is never selected")
 	t.check(
-		session.event_system.spawn_event(session.context, absent, Metric.Id.WAGE) == null,
+		session.event_system.spawn_event(session.context, absent, Metric.Id.PRODUCTION) == null,
 		"direct spawn also enforces the seat requirement"
 	)
 	session.free()
@@ -99,15 +99,15 @@ func _test_zero_seat_race_is_ineligible(t: BackendTestContext) -> void:
 
 func _test_hidden_growth_public_window_and_resolution(t: BackendTestContext) -> void:
 	var race := t.make_race("deadline")
-	race.increase_wage = true
+	race.increase_production = true
 	var balance := _event_balance()
 	var session := t.make_session(
 		[race], [t.make_group("group")], t.make_seats(1, "lifecycle"), [], balance
 	)
-	session.state.metrics.wage = 0
-	var event := session.event_system.spawn_event(session.context, race, Metric.Id.WAGE)
+	session.state.metrics.production = 0
+	var event := session.event_system.spawn_event(session.context, race, Metric.Id.PRODUCTION)
 	t.check(event != null, "expectation gap creates an event")
-	session.state.metrics.wage = 100
+	session.state.metrics.production = 100
 	session.event_system.settle_month(session.context)
 	t.check_equal(event.months_alive, 1, "hidden event still advances its deadline")
 	t.check(event.growth_progress > 0.0, "hidden event still grows")
@@ -133,13 +133,13 @@ func _test_hidden_growth_public_window_and_resolution(t: BackendTestContext) -> 
 
 func _test_pause_relief_and_early_reveal(t: BackendTestContext) -> void:
 	var race := t.make_race("information")
-	race.increase_trade = true
+	race.increase_investment = true
 	var balance := _event_balance()
 	var session := t.make_session(
 		[race], [t.make_group("group")], t.make_seats(2, "intel"), [], balance
 	)
-	session.state.metrics.trade = 0
-	var event := session.event_system.spawn_event(session.context, race, Metric.Id.TRADE)
+	session.state.metrics.investment = 0
+	var event := session.event_system.spawn_event(session.context, race, Metric.Id.INVESTMENT)
 	session.event_system.update_information(session.context)
 	t.check(not event.known, "zero reveal probability keeps event hidden")
 	balance.event_early_reveal_probability_per_seat = 0.5
@@ -153,11 +153,11 @@ func _test_pause_relief_and_early_reveal(t: BackendTestContext) -> void:
 	balance.event_pause_satisfaction_threshold = 0.4
 	balance.event_relief_satisfaction_threshold = 0.8
 	balance.event_relief_progress_per_month = 1.0
-	session.state.metrics.trade = 50
+	session.state.metrics.investment = 50
 	session.event_system.settle_month(session.context)
 	t.check_equal(event.phase, EventState.Phase.PAUSED, "middle satisfaction pauses a known event")
 	t.check_approx(event.growth_progress, 1.0, "pause holds demand growth")
-	session.state.metrics.trade = 100
+	session.state.metrics.investment = 100
 	session.event_system.settle_month(session.context)
 	t.check_equal(event.phase, EventState.Phase.RESOLVED, "relief threshold resolves by progress")
 	session.free()

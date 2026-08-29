@@ -8,7 +8,7 @@ enum Formula {
 
 @export var target_metric: Metric.Id = Metric.Id.TAX
 @export var formula: Formula = Formula.METRIC_GAP
-@export var source_a: Metric.Id = Metric.Id.TRADE
+@export var source_a: Metric.Id = Metric.Id.INVESTMENT
 @export var source_b: Metric.Id = Metric.Id.TAX
 @export var multiplier: float = 1.0
 
