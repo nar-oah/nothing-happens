@@ -58,28 +58,26 @@
 		display: flex;
 		flex-direction: column;
 		gap: 36px;
-		padding: 40px;
-		background: #f5f1e8;
-		color: #1e2e3b;
+		padding: 48px;
+		background: #537087;
 	}
-
 	header {
 		display: flex;
 		align-items: baseline;
 		gap: 24px;
+		color: #1e2e3b;
+		font-family: 'RealTypeWriter';
 	}
-
 	header a {
-		color: inherit;
+		color: #1e2e3b;
 	}
-
 	section {
 		display: flex;
 		align-items: flex-start;
 		gap: 32px;
 	}
-
 	.wide {
-		width: 100%;
+		overflow-x: auto;
+		padding-bottom: 20px;
 	}
 </style>
