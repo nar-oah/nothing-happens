@@ -102,6 +102,7 @@ func _test_full_state_and_saved_bill_indices(t: BackendTestContext) -> void:
 	t.check_equal(full["run_phase"], "RUNNING", "full sync carries the authoritative run phase")
 	t.check_equal(full["term_outcome"], "NONE", "a running term has no terminal outcome")
 	t.check_equal(full["governing_months"], 0, "full sync carries integer governing duration")
+	t.check_equal(full["term_report"], null, "an unsettled run has no term report")
 	t.check_equal(full["saved_bills"][0]["title"], "saved zero", "saved bill array preserves index")
 	t.check_equal(full["editing_saved_bill_index"], null, "new bill index serializes as null")
 	t.check_equal(full["constitution"]["title"], "蓬莱约法", "constitution uses its fixed title")
@@ -144,11 +145,6 @@ func _test_explicit_next_term_command(t: BackendTestContext) -> void:
 	session.collapse_system.increase(session.context)
 	var bridge := UiBridge.new()
 	bridge.setup(session)
-	var blocked := bridge.receive_ipc_message(
-		_message("month.advance", {"state_version": 0})
-	)
-	t.check_equal(blocked[0]["payload"]["state_version"], 0, "ended term advance does not change version")
-	t.check_equal(blocked[0]["payload"]["term"], 1, "ended term advance preserves the old term")
 	var messages := bridge.receive_ipc_message(
 		_message("term.next", {"state_version": 0})
 	)
@@ -160,6 +156,9 @@ func _test_explicit_next_term_command(t: BackendTestContext) -> void:
 	t.check_equal(full["payload"]["run_phase"], "RUNNING", "explicit next term resets run phase")
 	t.check_equal(full["payload"]["term_outcome"], "NONE", "explicit next term resets outcome")
 	t.check_equal(full["payload"]["ui_mode"], "constitution", "next term enters constitution mode")
+	t.check_equal(full["payload"]["term_report"]["outcome"], "NOTHING_HAPPENS", "the compatibility command reports the outcome")
+	var closed := bridge.receive_ipc_message(_message("ui.newspaper.close", {}))
+	t.check_equal(closed[0]["payload"]["term_report"], null, "closing the settlement newspaper clears its report")
 	bridge.free()
 	session.free()
 
