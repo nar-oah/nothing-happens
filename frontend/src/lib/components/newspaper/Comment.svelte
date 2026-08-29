@@ -1,19 +1,20 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { untrack } from 'svelte';
 	import MorphText from '../text/MorphText.svelte';
 	type Props = { title: string[]; comment: string[] };
 	let { title, comment }: Props = $props();
-	let index = $state(0);
+	let index = $state(
+		untrack(() => {
+			const itemCount = Math.min(title.length, comment.length);
+			return itemCount > 0 ? Math.floor(Math.random() * itemCount) : 0;
+		})
+	);
 	let hovering = $state(false);
 	const count = $derived(Math.min(title.length, comment.length));
 	const nextIndex = $derived(count > 0 ? (index + 1) % count : 0);
 	const displayIndex = $derived(hovering ? nextIndex : index);
 	const displayTitle = $derived(title[displayIndex] ?? '');
 	const displayComment = $derived(comment[displayIndex] ?? '');
-
-	onMount(() => {
-		if (count > 0) index = Math.floor(Math.random() * count);
-	});
 
 	function advance() {
 		index = nextIndex;
