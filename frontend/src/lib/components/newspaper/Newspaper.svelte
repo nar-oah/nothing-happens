@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onDestroy } from 'svelte';
 	import { VERTICAL_FOLD_HEIGHT, VERTICAL_FOLD_WIDTH } from '../memorial/constants';
 	import MemorialHorizontalFold from '../memorial/horizontal/MemorialHorizontalFold.svelte';
 	import Calendar from './Calendar.svelte';
@@ -50,6 +51,7 @@
 		onFolded
 	}: Props = $props();
 	let foldReported = false;
+	let foldTimer: ReturnType<typeof setTimeout> | undefined;
 	const sortedEvents = $derived([...events].sort((a, b) => a.countdown - b.countdown));
 	const pages = $derived.by((): NewspaperPage[] => {
 		const result: NewspaperPage[] = [{ kind: 'top' }, { kind: 'metrics' }];
@@ -83,17 +85,36 @@
 			.reduce((x, skew) => x + NEWSPAPER_FOLD_HEIGHT * Math.tan((skew * Math.PI) / 180), 0);
 	}
 
-	function finishFold(event: TransitionEvent): void {
-		if (open || foldReported || event.propertyName !== 'transform') return;
-		if (!(event.target instanceof HTMLElement)) return;
-		if (!event.target.classList.contains('memorial-fold-shape')) return;
+	function finishFold(): void {
+		if (open || foldReported) return;
 		foldReported = true;
+		foldTimer = undefined;
 		onFolded?.();
 	}
 
+	function clearFoldTimer(): void {
+		if (foldTimer === undefined) return;
+		clearTimeout(foldTimer);
+		foldTimer = undefined;
+	}
+
+	function getFoldDuration(count: number): number {
+		const positionDuration = 520 + Math.max(0, count - 1) * 32;
+		const straightenDuration = 620 + 260;
+		return Math.max(positionDuration, straightenDuration) + 20;
+	}
+
 	$effect(() => {
-		if (open) foldReported = false;
+		clearFoldTimer();
+		if (open) {
+			foldReported = false;
+			return;
+		}
+		if (foldReported) return;
+		foldTimer = setTimeout(finishFold, getFoldDuration(pages.length));
 	});
+
+	onDestroy(clearFoldTimer);
 </script>
 
 <article
@@ -101,7 +122,6 @@
 	style:--width={`${NEWSPAPER_FOLD_WIDTH}px`}
 	style:--height={`${pages.length * NEWSPAPER_FOLD_HEIGHT}px`}
 	aria-label={`第 ${year} 年 ${month} 月弦外报`}
-	ontransitionend={finishFold}
 >
 	{#each pages as page, index (index)}
 		<MemorialHorizontalFold
