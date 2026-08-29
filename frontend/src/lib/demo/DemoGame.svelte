@@ -65,8 +65,8 @@
 			}
 		],
 		comment: {
-			title: '危机，还是事件？',
-			comment: '我们是在解决问题，\n还是在证明危机存在？'
+			title: ['危机，还是事件？'],
+			comment: ['我们是在解决问题，\n还是在证明危机存在？']
 		}
 	};
 	const MOCK_NEWSPAPER_CLOSE_TARGET: Exclude<ViewName, 'Newspaper'> = 'Constitution';
