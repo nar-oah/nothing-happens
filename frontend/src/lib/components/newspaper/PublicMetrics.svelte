@@ -17,6 +17,7 @@
 
 <div
 	class="flex h-full w-full flex-col gap-[3px] overflow-hidden px-8 py-5"
+	role="presentation"
 	onmouseenter={() => (hovering = true)}
 	onmouseleave={() => (hovering = false)}
 >
