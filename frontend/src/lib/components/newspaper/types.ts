@@ -35,8 +35,8 @@ export type NewspaperEventData = {
 };
 
 export type NewspaperCommentData = {
-	title: string;
-	comment: string;
+	title: string[];
+	comment: string[];
 };
 
 export const NEWSPAPER_METRIC_ORDER: Metric[] = [
