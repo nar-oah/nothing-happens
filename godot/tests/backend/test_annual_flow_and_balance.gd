@@ -158,18 +158,18 @@ func _test_annual_expectations_rebuild_from_month_zero_economy(t: BackendTestCon
 	t.check_equal(higher_state.get_expectation(Metric.Id.INVESTMENT), 220, "new month-zero economy becomes the next target baseline")
 	higher_session.free()
 
-	var lower := t.make_race("lower")
-	lower.decrease_tax = true
-	var lower_article := t.make_article(lower, true, 0.10)
-	var lower_session := t.make_session(
-		[lower], [t.make_group("group")], t.make_seats(1, "lower"), [lower_article]
+	var tax_race := t.make_race("tax")
+	tax_race.increase_tax = true
+	var tax_article := t.make_article(tax_race, true, 0.10)
+	var tax_session := t.make_session(
+		[tax_race], [t.make_group("group")], t.make_seats(1, "tax"), [tax_article]
 	)
-	var lower_state := lower_session.state.get_race(lower)
-	t.check_equal(lower_state.get_expectation(Metric.Id.TAX), 90, "lower stance applies the constitution rate to the opening economy")
-	lower_session.state.metrics.tax = 80
-	lower_session.annual_settlement_system.settle_year(lower_session.context)
-	t.check_equal(lower_state.get_expectation(Metric.Id.TAX), 72, "lower target rebuilds from the new month-zero economy")
-	lower_session.free()
+	var tax_state := tax_session.state.get_race(tax_race)
+	t.check_equal(tax_state.get_expectation(Metric.Id.TAX), 110, "tax expectation uses the same positive-only requirement direction")
+	tax_session.state.metrics.tax = 80
+	tax_session.annual_settlement_system.settle_year(tax_session.context)
+	t.check_equal(tax_state.get_expectation(Metric.Id.TAX), 88, "positive tax target rebuilds from the new month-zero economy")
+	tax_session.free()
 
 	var balance := GameBalanceDefinition.new()
 	balance.proposal_magnitude_growth_per_year = 0.10
@@ -198,7 +198,7 @@ func _test_zero_growth_still_allows_gap_event(t: BackendTestContext) -> void:
 func _test_biyi_adjustment_is_proportional(t: BackendTestContext) -> void:
 	var race := BiyiRaceDefinition.new()
 	race.display_name = "biyi"
-	race.decrease_tax = true
+	race.increase_tax = true
 	race.yin_tax = true
 	var article := BiyiConstitutionArticleDefinition.new()
 	article.display_name = "yin yang"
@@ -213,15 +213,15 @@ func _test_biyi_adjustment_is_proportional(t: BackendTestContext) -> void:
 	session.state.month = 1
 	t.check_equal(
 		session.race_system.get_effective_expectation(race_state, Metric.Id.TAX, session.context),
-		180,
-		"yin month adjusts ten percent of current target"
+		220,
+		"yin month tightens the active yin requirement by ten percent"
 	)
 	t.check(race.is_vote_metric_active(Metric.Id.TAX, session.context), "yin metric is active in yin month")
 	session.state.month = 2
 	t.check_equal(
 		session.race_system.get_effective_expectation(race_state, Metric.Id.TAX, session.context),
-		220,
-		"yang month reverses the proportional adjustment"
+		180,
+		"yang month relaxes the inactive yin requirement by ten percent"
 	)
 	t.check(not race.is_vote_metric_active(Metric.Id.TAX, session.context), "yin metric is inactive in yang month")
 	session.free()
