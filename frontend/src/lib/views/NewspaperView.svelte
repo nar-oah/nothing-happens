@@ -163,11 +163,13 @@
 			</div>
 		</div>
 	</div>
-	<div class="top-controls">
-		<div class="top-items" aria-hidden="true"></div>
-		<ChoreSwitch left="保存" right="读取" />
-	</div>
-	<div class="state-slot"><GameStateDisplay {primary} {secondary} /></div>
+	{#if backgroundCovered}
+		<div class="top-controls">
+			<div class="top-items" aria-hidden="true"></div>
+			<ChoreSwitch left="保存" right="读取" />
+		</div>
+		<div class="state-slot"><GameStateDisplay {primary} {secondary} /></div>
+	{/if}
 </main>
 
 <style>
