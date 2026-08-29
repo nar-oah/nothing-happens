@@ -1,9 +1,9 @@
 export const MetricText = {
-	Tax: '税課',
-	Price: '物價',
-	Wage: '工錢',
-	Employment: '用工',
-	Trade: '商貿',
+	Tax: '稅課',
+	Consumption: '消費',
+	Production: '生產',
+	Employment: '就業',
+	Investment: '投資',
 	Lag: '滞后'
 } as const;
 
