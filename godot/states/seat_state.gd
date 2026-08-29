@@ -24,8 +24,6 @@ func _init(
 	fixed_race = null if source_definition == null else source_definition.fixed_race
 	if source_race != null:
 		race = source_race
-	elif source_definition != null and source_definition.anchor_race != null:
-		race = source_definition.anchor_race
 	else:
 		race = fixed_race
 	base_group = source_base_group
