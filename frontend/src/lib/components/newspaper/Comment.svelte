@@ -1,20 +1,30 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import { NEWSPAPER_COMMENTS } from '$lib/content/newspaper-comments';
 	import MorphText from '../text/MorphText.svelte';
+
 	type Props = { title: string[]; comment: string[] };
 	let { title, comment }: Props = $props();
+	const items = $derived.by(() => {
+		const providedCount = Math.min(title.length, comment.length);
+		if (providedCount > 0) {
+			return Array.from({ length: providedCount }, (_, index) => ({
+				title: title[index] ?? '',
+				comment: comment[index] ?? ''
+			}));
+		}
+		return NEWSPAPER_COMMENTS;
+	});
 	let index = $state(
-		untrack(() => {
-			const itemCount = Math.min(title.length, comment.length);
-			return itemCount > 0 ? Math.floor(Math.random() * itemCount) : 0;
-		})
+		untrack(() => (NEWSPAPER_COMMENTS.length > 0 ? Math.floor(Math.random() * NEWSPAPER_COMMENTS.length) : 0))
 	);
 	let hovering = $state(false);
-	const count = $derived(Math.min(title.length, comment.length));
-	const nextIndex = $derived(count > 0 ? (index + 1) % count : 0);
-	const displayIndex = $derived(hovering ? nextIndex : index);
-	const displayTitle = $derived(title[displayIndex] ?? '');
-	const displayComment = $derived(comment[displayIndex] ?? '');
+	const count = $derived(items.length);
+	const safeIndex = $derived(count > 0 ? index % count : 0);
+	const nextIndex = $derived(count > 0 ? (safeIndex + 1) % count : 0);
+	const displayIndex = $derived(hovering ? nextIndex : safeIndex);
+	const displayTitle = $derived(items[displayIndex]?.title ?? '');
+	const displayComment = $derived(items[displayIndex]?.comment ?? '');
 
 	function advance() {
 		index = nextIndex;
@@ -34,7 +44,7 @@
 >
 	<div class="flex w-full shrink-0 items-start gap-8 overflow-hidden">
 		<p class="typo-newspaper-headline min-w-0 flex-1">
-			{#key index}
+			{#key displayIndex}
 				<MorphText text={displayTitle} />
 			{/key}
 		</p>
@@ -44,7 +54,7 @@
 	</div>
 	<div class="h-px w-full shrink-0 bg-ink-primary"></div>
 	<p class="typo-newspaper-subhead w-full shrink-0">
-		{#key index}
+		{#key displayIndex}
 			<MorphText text={displayComment} />
 		{/key}
 	</p>
