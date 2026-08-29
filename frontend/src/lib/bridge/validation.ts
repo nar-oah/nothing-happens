@@ -212,10 +212,10 @@ function isMetricValues(value: unknown): value is MetricValues {
 	return (
 		isRecord(value) &&
 		isNumber(value.tax) &&
-		isNumber(value.price) &&
-		isNumber(value.wage) &&
+		isNumber(value.consumption) &&
+		isNumber(value.production) &&
 		isNumber(value.employment) &&
-		isNumber(value.trade)
+		isNumber(value.investment)
 	);
 }
 
@@ -226,10 +226,10 @@ function isInterestGroup(value: unknown): value is InterestGroupDefinition {
 		typeof value.description === 'string' &&
 		isNumber(value.base_column_weight) &&
 		typeof value.decrease_tax === 'boolean' &&
-		typeof value.decrease_price === 'boolean' &&
-		typeof value.decrease_wage === 'boolean' &&
+		typeof value.decrease_consumption === 'boolean' &&
+		typeof value.decrease_production === 'boolean' &&
 		typeof value.decrease_employment === 'boolean' &&
-		typeof value.decrease_trade === 'boolean'
+		typeof value.decrease_investment === 'boolean'
 	);
 }
 
@@ -483,10 +483,10 @@ function isProposalResult(value: unknown): boolean {
 function isMetric(value: unknown): boolean {
 	return (
 		value === Metric.TAX ||
-		value === Metric.PRICE ||
-		value === Metric.WAGE ||
+		value === Metric.CONSUMPTION ||
+		value === Metric.PRODUCTION ||
 		value === Metric.EMPLOYMENT ||
-		value === Metric.TRADE
+		value === Metric.INVESTMENT
 	);
 }
 
