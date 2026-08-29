@@ -95,6 +95,7 @@
 			return [
 				{
 					race,
+					description: event.event_description,
 					metric: event.metric,
 					value: event.value,
 					countdown: event.countdown,
