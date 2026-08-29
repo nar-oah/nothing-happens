@@ -14,8 +14,10 @@
 	let props: Props = $props();
 </script>
 
-	{#if 'title' in props}
-	<div class="flex h-full w-full flex-col items-start gap-2 overflow-hidden px-8 py-[6px] text-ink-primary">
+{#if 'title' in props}
+	<div
+		class="flex h-full w-full flex-col items-start gap-2 overflow-hidden px-8 py-[6px] text-ink-primary"
+	>
 		<p class="typo-newspaper-headline shrink-0">{props.title}</p>
 		<p class="typo-newspaper-body min-w-full w-min whitespace-pre-line">{props.content}</p>
 	</div>
@@ -31,8 +33,9 @@
 				<div class="flex shrink-0 items-start gap-8 whitespace-nowrap">
 					<p class="typo-newspaper-headline shrink-0">{getNewspaperRaceLabel(props.race)}</p>
 					<div class="typo-newspaper-caption flex shrink-0 items-center gap-[3px]">
-						<span>需求</span><span>/</span><span>{getNewspaperMetricLabel(props.metric)}</span
-						><span>{props.value}</span>
+						<span>需求</span><span>/</span><span>{getNewspaperMetricLabel(props.metric)}</span><span
+							>{props.value}</span
+						>
 					</div>
 				</div>
 				<p class="typo-newspaper-body min-w-full w-min">

@@ -125,7 +125,11 @@
 	let termReport = $derived(snapshot?.term_report ?? null);
 	let newspaperFront = $derived(termReport ? deriveTermReportFront(termReport) : undefined);
 	let newspaperMetrics = $derived(
-		snapshot ? (termReport ? deriveTermReportMetrics(termReport) : deriveNewspaperMetrics(snapshot)) : []
+		snapshot
+			? termReport
+				? deriveTermReportMetrics(termReport)
+				: deriveNewspaperMetrics(snapshot)
+			: []
 	);
 	let newspaperEvents = $derived(snapshot && !termReport ? deriveNewspaperEvents(snapshot) : []);
 	let frame = $derived(

@@ -159,7 +159,7 @@
 									{events}
 									{comment}
 									{onAdvance}
-									onFolded={onFolded}
+									{onFolded}
 									open={!folded}
 									disabled={interactionDisabled}
 								/>
