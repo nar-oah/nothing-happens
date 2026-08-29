@@ -72,13 +72,11 @@
 		});
 		return [
 			...sectionPages,
-			...detailPages.map(
-				(content, index): ConstitutionPage => ({
-					type: 'detail',
-					title: index === 0 ? row.text : '',
-					contents: [content]
-				})
-			),
+			...detailPages.map((content, index): ConstitutionPage => ({
+				type: 'detail',
+				title: index === 0 ? row.text : '',
+				contents: [content]
+			})),
 			...row.policies.map((policy): ConstitutionPage => ({ type: 'policy', content: policy }))
 		];
 	});
@@ -90,7 +88,11 @@
 		pendingSelection = undefined;
 	});
 
-	function openRow(sectionTitle: string, rowIndex: number, row: MemorialConstitutionRowContentData) {
+	function openRow(
+		sectionTitle: string,
+		rowIndex: number,
+		row: MemorialConstitutionRowContentData
+	) {
 		if (row.articleRef === undefined) return;
 		expandedRow = { sectionTitle, rowIndex };
 	}
