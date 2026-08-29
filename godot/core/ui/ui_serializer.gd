@@ -4,25 +4,25 @@ class_name UiSerializer
 
 func metric_values(values: MetricValues) -> Dictionary:
 	if values == null:
-		return {"tax": 0, "price": 0, "wage": 0, "employment": 0, "trade": 0}
+		return {"tax": 0, "consumption": 0, "production": 0, "employment": 0, "investment": 0}
 	return {
 		"tax": values.tax,
-		"price": values.price,
-		"wage": values.wage,
+		"consumption": values.consumption,
+		"production": values.production,
 		"employment": values.employment,
-		"trade": values.trade,
+		"investment": values.investment,
 	}
 
 
 func metric_vector(values: MetricVector) -> Dictionary:
 	if values == null:
-		return {"tax": 0, "price": 0, "wage": 0, "employment": 0, "trade": 0}
+		return {"tax": 0, "consumption": 0, "production": 0, "employment": 0, "investment": 0}
 	return {
 		"tax": values.tax,
-		"price": values.price,
-		"wage": values.wage,
+		"consumption": values.consumption,
+		"production": values.production,
 		"employment": values.employment,
-		"trade": values.trade,
+		"investment": values.investment,
 	}
 
 
@@ -34,10 +34,10 @@ func interest_group(definition: InterestGroupDefinition) -> Variant:
 		"description": definition.description,
 		"base_column_weight": definition.base_column_weight,
 		"decrease_tax": definition.decrease_tax,
-		"decrease_price": definition.decrease_price,
-		"decrease_wage": definition.decrease_wage,
+		"decrease_consumption": definition.decrease_consumption,
+		"decrease_production": definition.decrease_production,
 		"decrease_employment": definition.decrease_employment,
-		"decrease_trade": definition.decrease_trade,
+		"decrease_investment": definition.decrease_investment,
 	}
 
 
