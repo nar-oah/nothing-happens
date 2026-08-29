@@ -6,7 +6,6 @@ const BackendTestContext = preload("res://tests/backend/backend_test_context.gd"
 func run(t: BackendTestContext) -> void:
 	_test_board_navigation_unlocks_and_terminal_mutex(t)
 	_test_column_unlock_ipc_stays_in_month_zero(t)
-	_test_formal_opening_uses_five_anchors_and_twenty_random_seats(t)
 	_test_variable_seat_denominators(t)
 	_test_group_coloring_bias_and_hard_rule_layers(t)
 
@@ -154,55 +153,6 @@ func _test_column_unlock_ipc_stays_in_month_zero(t: BackendTestContext) -> void:
 	t.check_equal(full["payload"]["constitution"]["available_governing_months"], 0, "unlock syncs meta budget")
 	t.check(full["payload"]["constitution"]["columns"][1]["unlocked"], "unlock syncs column state")
 	bridge.free()
-	session.free()
-
-
-func _test_formal_opening_uses_five_anchors_and_twenty_random_seats(t: BackendTestContext) -> void:
-	var zhushui: RaceDefinition = ZhushuiRaceDefinition.new()
-	zhushui.display_name = "驻岁"
-	var human := t.make_race("人类")
-	var nanke := t.make_race("南柯")
-	var biyi := t.make_race("比翼")
-	var yano := t.make_race("偃偶")
-	var peach := t.make_race("桃花妖")
-	var races: Array[RaceDefinition] = [zhushui, human, nanke, biyi, yano, peach]
-	var rows: Array[ConstitutionRowDefinition] = []
-	for index in range(races.size()):
-		rows.append(_make_row(StringName("opening_%s" % index), races[index].display_name, races[index], index))
-	var center := _make_column(&"center", "常制", 0)
-	for row in rows:
-		_add_article(center, row, "%s常制" % row.display_name)
-	var board := _make_board([center])
-	var seats: Array[SeatDefinition] = [
-		t.make_seat("久视", zhushui),
-		t.make_seat("会同", human),
-		t.make_seat("槐安", nanke),
-		t.make_seat("连理", biyi),
-		t.make_seat("桃源", peach),
-	]
-	for index in range(20):
-		seats.append(t.make_seat("random_%s" % index))
-	var groups: Array[InterestGroupDefinition] = [t.make_group("opening group")]
-	var session := _make_board_session(races, groups, seats, board)
-
-	t.check_equal(session.state.seats.size(), 25, "formal opening keeps 25 seats")
-	t.check_equal(session.parliament_system.get_variable_seats(session.state).size(), 24, "only Zhushui is fixed")
-	t.check_equal(session.parliament_system.get_race_seat_count(session.state, zhushui), 1, "Zhushui stays at one seat")
-	var anchor_races: Array[RaceDefinition] = [zhushui, human, nanke, biyi, peach]
-	for index in range(anchor_races.size()):
-		t.check(session.state.seats[index].race == anchor_races[index], "every formal anchor keeps its race")
-	var random_count := 0
-	for seat in session.state.seats:
-		if seat.definition.anchor_race != null:
-			continue
-		random_count += 1
-		t.check(seat.race != null, "every random seat receives a race")
-		t.check(not (seat.race is ZhushuiRaceDefinition), "random seats never expand Zhushui")
-	t.check_equal(random_count, 20, "formal opening contains twenty random seats")
-	var non_zhushui_total := 0
-	for race in [human, nanke, biyi, yano, peach]:
-		non_zhushui_total += session.parliament_system.get_race_seat_count(session.state, race)
-	t.check_equal(non_zhushui_total, 24, "five non-Zhushui races fill variable seats")
 	session.free()
 
 

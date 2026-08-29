@@ -9,24 +9,14 @@ func initialize_seats(
 ) -> bool:
 	state.seats.clear()
 	var seen: Dictionary[SeatDefinition, bool] = {}
-	var anchor_races: Dictionary[RaceDefinition, bool] = {}
 	for definition in definitions:
 		if definition == null or seen.has(definition):
 			push_error("Seat definitions must be unique non-null Resources.")
 			return false
 		seen[definition] = true
-		if definition.anchor_race != null:
-			if definition.anchor_race not in traces or anchor_races.has(definition.anchor_race):
-				push_error("Each content race can own at most one opening anchor seat.")
-				return false
-			anchor_races[definition.anchor_race] = true
-		if definition.fixed_race != null:
-			if definition.fixed_race not in traces:
-				push_error("A fixed race seat must belong to a configured content race.")
-				return false
-			if definition.anchor_race != definition.fixed_race:
-				push_error("A permanent fixed seat must use the same race as its opening anchor.")
-				return false
+		if definition.fixed_race != null and definition.fixed_race not in traces:
+			push_error("A fixed race seat must belong to a configured content race.")
+			return false
 	for definition in definitions:
 		state.seats.append(SeatState.new(definition))
 	return true

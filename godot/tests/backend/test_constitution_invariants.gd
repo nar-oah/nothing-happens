@@ -5,7 +5,6 @@ const BackendTestContext = preload("res://tests/backend/backend_test_context.gd"
 
 func run(t: BackendTestContext) -> void:
 	_test_permanent_seats_survive_annual_allocation(t)
-	_test_legacy_anchor_does_not_override_zero_max(t)
 	_test_resolved_events_are_the_only_dynamic_race_weight(t)
 	_test_annual_group_coloring_and_archives(t)
 
@@ -14,8 +13,8 @@ func _test_permanent_seats_survive_annual_allocation(t: BackendTestContext) -> v
 	var race_a := t.make_race("annual a")
 	var race_b := t.make_race("annual b")
 	var definitions := t.make_seats(10, "permanent")
-	definitions[0].anchor_race = race_a
-	definitions[1].anchor_race = race_b
+	definitions[0].fixed_race = race_a
+	definitions[1].fixed_race = race_b
 	var session := t.make_session(
 		[race_a, race_b], [t.make_group("group")], definitions
 	)
@@ -37,33 +36,6 @@ func _test_permanent_seats_survive_annual_allocation(t: BackendTestContext) -> v
 			float(index + 1),
 			"annual settlement preserves seat runtime relation"
 		)
-	session.free()
-
-
-func _test_legacy_anchor_does_not_override_zero_max(t: BackendTestContext) -> void:
-	var anchored := t.make_race("anchored")
-	var removable := t.make_race("removable")
-	var filler := t.make_race("filler")
-	var anchored_article := t.make_article(anchored)
-	anchored_article.race_max_seat_rate = 0.0
-	var removable_article := t.make_article(removable)
-	removable_article.race_max_seat_rate = 0.0
-	var filler_article := t.make_article(filler)
-	var definitions := t.make_seats(5, "anchor")
-	definitions[0].anchor_race = anchored
-	var session := t.make_session(
-		[anchored, removable, filler],
-		[t.make_group("group")],
-		definitions,
-		[anchored_article, removable_article, filler_article]
-	)
-	# Ordinary anchors are opening placement hints only. In the legacy flat-article path,
-	# annual allocation is authoritative, so a zero active maximum removes that race even
-	# when a SeatDefinition still carries an old anchor_race value.
-	t.check_equal(t.count_race_seats(session.state, anchored), 0, "legacy anchor cannot override max rate zero")
-	t.check(session.state.seats[0].race == filler, "legacy anchor location remains reallocatable")
-	t.check_equal(t.count_race_seats(session.state, removable), 0, "unanchored max zero disappears")
-	t.check_equal(t.count_race_seats(session.state, filler), 5, "eligible race fills the variable pool")
 	session.free()
 
 

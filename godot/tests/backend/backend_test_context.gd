@@ -66,14 +66,12 @@ func make_group(display_name: String, weight: int = 1) -> InterestGroupDefinitio
 	return result
 
 
-func make_seat(display_name: String, anchor: RaceDefinition = null) -> SeatDefinition:
+func make_seat(display_name: String, race: RaceDefinition = null) -> SeatDefinition:
 	var result := SeatDefinition.new()
 	result.display_name = display_name
-	result.anchor_race = anchor
-	# Formal opening convention: only Zhushui's executive anchor is permanent. Other
-	# race anchors are opening assignments and remain part of the annual variable pool.
-	if anchor is ZhushuiRaceDefinition:
-		result.fixed_race = anchor
+	# Formal opening convention: Zhushui's executive seat is permanent.
+	if race is ZhushuiRaceDefinition:
+		result.fixed_race = race
 	return result
 
 
