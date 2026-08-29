@@ -7,31 +7,31 @@ class_name RaceDefinition
 
 @export_group("希望提高")
 @export var increase_tax: bool = false
-@export var increase_price: bool = false
-@export var increase_wage: bool = false
+@export var increase_consumption: bool = false
+@export var increase_production: bool = false
 @export var increase_employment: bool = false
-@export var increase_trade: bool = false
+@export var increase_investment: bool = false
 
 @export_group("希望降低")
 @export var decrease_tax: bool = false
-@export var decrease_price: bool = false
-@export var decrease_wage: bool = false
+@export var decrease_consumption: bool = false
+@export var decrease_production: bool = false
 @export var decrease_employment: bool = false
-@export var decrease_trade: bool = false
+@export var decrease_investment: bool = false
 
 
 func get_stance(metric: Metric.Id) -> Metric.Direction:
 	match metric:
 		Metric.Id.TAX:
 			return _resolve_stance(increase_tax, decrease_tax, metric)
-		Metric.Id.PRICE:
-			return _resolve_stance(increase_price, decrease_price, metric)
-		Metric.Id.WAGE:
-			return _resolve_stance(increase_wage, decrease_wage, metric)
+		Metric.Id.CONSUMPTION:
+			return _resolve_stance(increase_consumption, decrease_consumption, metric)
+		Metric.Id.PRODUCTION:
+			return _resolve_stance(increase_production, decrease_production, metric)
 		Metric.Id.EMPLOYMENT:
 			return _resolve_stance(increase_employment, decrease_employment, metric)
-		Metric.Id.TRADE:
-			return _resolve_stance(increase_trade, decrease_trade, metric)
+		Metric.Id.INVESTMENT:
+			return _resolve_stance(increase_investment, decrease_investment, metric)
 	return Metric.Direction.NONE
 
 
@@ -73,6 +73,29 @@ func _resolve_stance(increase: bool, decrease: bool, metric: Metric.Id) -> Metri
 	if decrease:
 		return Metric.Direction.LOWER
 	return Metric.Direction.NONE
+
+
+func _set(property: StringName, value: Variant) -> bool:
+	match property:
+		&"increase_price":
+			increase_consumption = bool(value)
+			return true
+		&"increase_wage":
+			increase_production = bool(value)
+			return true
+		&"increase_trade":
+			increase_investment = bool(value)
+			return true
+		&"decrease_price":
+			decrease_consumption = bool(value)
+			return true
+		&"decrease_wage":
+			decrease_production = bool(value)
+			return true
+		&"decrease_trade":
+			decrease_investment = bool(value)
+			return true
+	return false
 
 
 func _debug_name() -> String:
