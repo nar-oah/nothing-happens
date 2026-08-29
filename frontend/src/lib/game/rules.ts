@@ -28,9 +28,9 @@ const METRIC_KEYS: Record<Metric, keyof MetricValues> = {
 };
 
 export const METRIC_DISPLAY_NAMES: Record<Metric, string> = {
-	[Metric.TAX]: '稅課',
+	[Metric.TAX]: '税課',
 	[Metric.CONSUMPTION]: '消費',
-	[Metric.PRODUCTION]: '生產',
+	[Metric.PRODUCTION]: '生産',
 	[Metric.EMPLOYMENT]: '就業',
 	[Metric.INVESTMENT]: '投資'
 };

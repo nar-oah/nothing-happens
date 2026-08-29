@@ -208,7 +208,7 @@ test('proposal selection is capped at three and selected refs move first unchang
 
 test('three proposal preview shows min~max ranges', () => {
 	const preview = createProposalSynthesisPreview(proposals);
-	assert.equal(preview.metrics.find((metric) => metric.text === '稅課')?.value, '-9~-2');
+	assert.equal(preview.metrics.find((metric) => metric.text === '税課')?.value, '-9~-2');
 	assert.equal(preview.metrics.find((metric) => metric.text === '投資')?.value, '-3~-1');
 });
 
@@ -219,7 +219,7 @@ test('preview keeps only the largest reverse metric with stable ties', () => {
 	const preview = createProposalSynthesisPreview([first, second, third]);
 	const reverse = preview.metrics.filter((metric) => metric.isReverse);
 	assert.equal(reverse.length, 1);
-	assert.equal(reverse[0].text, '稅課');
+	assert.equal(reverse[0].text, '税課');
 	assert.equal(reverse[0].value, 8);
 	assert.equal(preview.reverseSource, first);
 });

@@ -54,7 +54,7 @@ test('authoritative draft preview becomes existing Memorial metric props', () =>
 	assert.deepEqual(
 		preview.map(({ text, symbol, value }) => [text, symbol, value]),
 		[
-			['稅課', undefined, 0],
+			['税課', undefined, 0],
 			['消費', '-', 8],
 			['投資', undefined, 0]
 		]

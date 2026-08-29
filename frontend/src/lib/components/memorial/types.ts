@@ -1,7 +1,7 @@
 export const MetricText = {
-	Tax: '稅課',
+	Tax: '税課',
 	Consumption: '消費',
-	Production: '生產',
+	Production: '生産',
 	Employment: '就業',
 	Investment: '投資',
 	Lag: '滞后'

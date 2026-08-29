@@ -48,9 +48,9 @@ export const NEWSPAPER_METRIC_ORDER: Metric[] = [
 ];
 
 const METRIC_LABELS: Record<Metric, string> = {
-	[Metric.TAX]: '稅課',
+	[Metric.TAX]: '税課',
 	[Metric.CONSUMPTION]: '消費',
-	[Metric.PRODUCTION]: '生產',
+	[Metric.PRODUCTION]: '生産',
 	[Metric.EMPLOYMENT]: '就業',
 	[Metric.INVESTMENT]: '投資'
 };
