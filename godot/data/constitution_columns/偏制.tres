@@ -10,7 +10,6 @@
 
 [resource]
 script = ExtResource("1")
-id = &"deviation"
 display_name = "偏制"
 unlock_cost_months = 12
 articles = Array[ExtResource("1_cswg3")]([ExtResource("2"), ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("6")])

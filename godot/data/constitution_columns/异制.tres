@@ -8,7 +8,6 @@
 
 [resource]
 script = ExtResource("1")
-id = &"exceptional"
 display_name = "异制"
 unlock_cost_months = 36
 articles = Array[ExtResource("1_hhf82")]([ExtResource("2"), ExtResource("3"), ExtResource("4")])

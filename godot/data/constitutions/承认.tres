@@ -7,7 +7,7 @@
 [ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="3_8onv3"]
 [ext_resource type="Resource" uid="uid://c2eco18e42n34" path="res://data/races/偃偶.tres" id="3_race_yano"]
 [ext_resource type="Resource" uid="uid://bp366yyqyg6le" path="res://data/constitutions/有限.tres" id="4_prereq"]
-[ext_resource type="Resource" path="res://data/interest_groups/造身公所.tres" id="5_group_1"]
+[ext_resource type="Resource" uid="uid://b7vlc4eb8m4io" path="res://data/interest_groups/造身公所.tres" id="5_group_1"]
 [ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="6_seat_condition_script"]
 [ext_resource type="Resource" uid="uid://boq6isoei3e55" path="res://data/policies/自主身契.tres" id="8_policy_1"]
 [ext_resource type="Resource" uid="uid://cxnr2v5cpw160" path="res://data/policies/行身信贷.tres" id="9_policy_2"]

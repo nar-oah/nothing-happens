@@ -11,7 +11,7 @@
 [ext_resource type="Resource" uid="uid://o7sgl3rsvmrs" path="res://data/policies/行身维修.tres" id="6_policy_3"]
 [ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="12_kppqt"]
 [ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="condition_script"]
-[ext_resource type="Resource" path="res://data/interest_groups/造身公所.tres" id="group"]
+[ext_resource type="Resource" uid="uid://b7vlc4eb8m4io" path="res://data/interest_groups/造身公所.tres" id="group"]
 [ext_resource type="Resource" uid="uid://cqpejxjyt0cyq" path="res://data/constitution_rows/偃偶.tres" id="row"]
 
 [sub_resource type="Resource" id="Resource_condition"]

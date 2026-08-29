@@ -5,6 +5,7 @@
 [resource]
 script = ExtResource("1_8dbvb")
 display_name = "永乐局"
+description = "从永乐港的贡船、码头、仓栈与远洋船队中成长起来的庞大商办机构，几乎垄断了蓬莱与外界之间的航运。漫长海路总与沉船、失货和延期相伴，永乐局于是又替船货承担风险，并由此发展出保险、信托、股份等尚显稚嫩的金融业务。今天，人们托它把货送往世界，也把一部分风险、财富与未来交到它手中。"
 base_column_weight = 5
 decrease_employment = true
 decrease_trade = true
