@@ -11,10 +11,10 @@ import type { DraftSyncDto, LiveGameState } from './types.ts';
 
 export const zeroMetrics = (): MetricValues => ({
 	tax: 0,
-	price: 0,
-	wage: 0,
+	consumption: 0,
+	production: 0,
 	employment: 0,
-	trade: 0
+	investment: 0
 });
 
 export const testGroup: InterestGroupDefinition = {
@@ -22,16 +22,16 @@ export const testGroup: InterestGroupDefinition = {
 	description: '造身公所简介',
 	base_column_weight: 5,
 	decrease_tax: false,
-	decrease_price: true,
-	decrease_wage: false,
+	decrease_consumption: true,
+	decrease_production: false,
 	decrease_employment: true,
-	decrease_trade: false
+	decrease_investment: false
 };
 
 export const testProposal: Proposal = {
 	source_group: testGroup,
-	base_effect: { ...zeroMetrics(), price: 8 },
-	positive_effect: { ...zeroMetrics(), trade: 8 },
+	base_effect: { ...zeroMetrics(), consumption: -8 },
+	positive_effect: { ...zeroMetrics(), investment: 8 },
 	lag_months: 6,
 	donation_offer: 5,
 	bonus_choice_resolved: false,
@@ -41,16 +41,16 @@ export const testProposal: Proposal = {
 export const testPolicy: PolicyDefinition = {
 	display_name: '勘合互市',
 	condition: {
-		left_metric: Metric.TRADE,
+		left_metric: Metric.INVESTMENT,
 		operator: MetricConditionOperator.GREATER_THAN,
 		right_metric: Metric.TAX,
 		right_multiplier: 1
 	},
 	effects: [
 		{
-			target_metric: Metric.TRADE,
+			target_metric: Metric.INVESTMENT,
 			formula: PolicyEffectFormula.METRIC_GAP,
-			source_a: Metric.TRADE,
+			source_a: Metric.INVESTMENT,
 			source_b: Metric.TAX,
 			multiplier: -0.3
 		}
@@ -58,7 +58,7 @@ export const testPolicy: PolicyDefinition = {
 };
 
 export function makeLiveState(stateVersion = 1): LiveGameState {
-	const current = { tax: 100, price: 100, wage: 100, employment: 100, trade: 100 };
+	const current = { tax: 100, consumption: 100, production: 100, employment: 100, investment: 100 };
 	const vote = {
 		passed: true,
 		submitted: false,
@@ -148,7 +148,7 @@ export function makeLiveState(stateVersion = 1): LiveGameState {
 				display_name: '人类',
 				description: '人类简介',
 				seat_count: 1,
-				expectations: [{ metric: Metric.TRADE, target: 110, direction: 1 }],
+				expectations: [{ metric: Metric.INVESTMENT, target: 110, direction: 1 }],
 				resolved_events_this_year: 2,
 				last_year_resolved_events: 1
 			}
@@ -176,9 +176,9 @@ export function makeLiveState(stateVersion = 1): LiveGameState {
 		active_bill: null,
 		draft_preview: {
 			current_metrics: current,
-			pure_proposal_target: { ...current, price: 108 },
-			immediate_policy_result: { ...current, price: 108, trade: 96 },
-			projected_metrics: { ...current, price: 116, trade: 96 },
+			pure_proposal_target: { ...current, consumption: 92 },
+			immediate_policy_result: current,
+			projected_metrics: { ...current, consumption: 92 },
 			vote
 		},
 		pending_dialogue: { hand_index: 0, proposal: testProposal }
