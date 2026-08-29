@@ -70,28 +70,28 @@ func create_active_states(proposals: Array[ProposalInstance]) -> Array[ActivePro
 
 func calculate_digested_anchor(bill: ActiveBillState) -> MetricValues:
 	var tax := float(bill.start_values.tax)
-	var price := float(bill.start_values.price)
-	var wage := float(bill.start_values.wage)
+	var consumption := float(bill.start_values.consumption)
+	var production := float(bill.start_values.production)
 	var employment := float(bill.start_values.employment)
-	var trade := float(bill.start_values.trade)
+	var investment := float(bill.start_values.investment)
 
 	for active_proposal in bill.proposals:
 		var effect := active_proposal.proposal.get_total_effect()
 		var progress := active_proposal.get_digestion_progress()
 
 		tax += effect.tax * progress
-		price += effect.price * progress
-		wage += effect.wage * progress
+		consumption += effect.consumption * progress
+		production += effect.production * progress
 		employment += effect.employment * progress
-		trade += effect.trade * progress
+		investment += effect.investment * progress
 
 	var result := MetricValues.new()
 
 	result.tax = roundi(tax)
-	result.price = roundi(price)
-	result.wage = roundi(wage)
+	result.consumption = roundi(consumption)
+	result.production = roundi(production)
 	result.employment = roundi(employment)
-	result.trade = roundi(trade)
+	result.investment = roundi(investment)
 
 	return result
 
@@ -135,7 +135,7 @@ func add_positive_trait(
 		float(base_magnitude)
 		* inflation_system.get_proposal_magnitude_multiplier(year, balance)
 	)
-	proposal.positive_effect.set_value(metric, magnitude * Metric.favorable_sign(metric))
+	proposal.positive_effect.set_value(metric, magnitude)
 	proposal.donation_offer = float(absi(magnitude)) * balance.donation_per_positive_point
 	proposal.bonus_choice_resolved = false
 	proposal.positive_trait_accepted = false
@@ -306,7 +306,7 @@ func merge_three(
 		var upgraded := roundi(
 			pow(float(selected_magnitude) + converted, balance.merge_upgrade_exponent)
 		)
-		result.positive_effect.set_value(metric, upgraded * Metric.favorable_sign(metric))
+		result.positive_effect.set_value(metric, upgraded)
 		result.donation_offer = float(upgraded) * balance.donation_per_positive_point
 		result.bonus_choice_resolved = selected_positive.bonus_choice_resolved
 		result.positive_trait_accepted = selected_positive.positive_trait_accepted
