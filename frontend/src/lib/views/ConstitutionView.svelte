@@ -10,11 +10,12 @@
 
 	type Props = Pick<
 		ViewFrameProps,
-		'raceItems' | 'interestGroupItems' | 'gameState' | 'term' | 'year' | 'month' | 'onNewspaperOpen'
+		'raceItems' | 'interestGroupItems' | 'term' | 'year' | 'month' | 'onNewspaperOpen'
 	> & {
 		title: string;
 		constitution: MemorialConstitutionData;
 		columns: ConstitutionColumnDto[];
+		governingMonths: number;
 		onArticleSelectionChange?: (articleRef: number, selected: boolean) => void;
 		onColumnUnlock?: (columnIndex: number) => void;
 		onSubmit?: () => void;
@@ -23,7 +24,6 @@
 	let {
 		raceItems,
 		interestGroupItems,
-		gameState,
 		term,
 		year,
 		month,
@@ -31,11 +31,16 @@
 		title,
 		constitution,
 		columns,
+		governingMonths,
 		onArticleSelectionChange,
 		onColumnUnlock,
 		onSubmit
 	}: Props = $props();
 	let confirmMode = $state(false);
+	let gameState = $derived({
+		primary: { text: '执政年数', value: Math.floor(governingMonths / 12), isRow: false },
+		secondary: { text: '执政月数', value: governingMonths % 12, limit: 12, isRow: false }
+	});
 	let unlockableSections = $derived(
 		columns.filter((column) => !column.unlocked && column.can_unlock).map((column) => column.display_name)
 	);

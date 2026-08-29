@@ -214,7 +214,7 @@
 		<ConstitutionView
 			raceItems={mockRaceTopItems}
 			interestGroupItems={mockInterestGroupTopItems}
-			gameState={mockState}
+			governingMonths={30}
 			term={frame.term}
 			year={frame.year}
 			month={frame.month}

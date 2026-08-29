@@ -322,7 +322,7 @@
 		<ConstitutionView
 			raceItems={topItems.raceItems}
 			interestGroupItems={topItems.interestGroupItems}
-			gameState={frame.gameState}
+			governingMonths={snapshot.constitution.available_governing_months}
 			term={frame.term}
 			year={frame.year}
 			month={frame.month}
