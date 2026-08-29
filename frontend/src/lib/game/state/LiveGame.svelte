@@ -14,6 +14,10 @@
 		type NewspaperEventData,
 		type NewspaperMetricData
 	} from '$lib/components/newspaper/types';
+	import {
+		deriveTermReportFront,
+		deriveTermReportMetrics
+	} from '$lib/components/newspaper/term-report';
 	import { Metric } from '$lib/game/types';
 	import ConstitutionView from '$lib/views/ConstitutionView.svelte';
 	import DialogueView from '$lib/views/DialogueView.svelte';
@@ -100,7 +104,9 @@
 	let selectedConstitutionArticle = $state<number>();
 	let newspaperOpen = $state(true);
 	let newspaperBusy = $state(false);
+	let newspaperFolded = $state(false);
 	let newspaperLeaving = $state(false);
+	let newspaperFoldResolver: (() => void) | null = null;
 	let pendingNewspaperAction: NewspaperTransitionAction | null = null;
 	const unsubscribe = gameStore.subscribe((value) => (storeValue = value));
 	let snapshot = $derived(storeValue.snapshot);
@@ -116,8 +122,12 @@
 	let pendingDialogue = $derived(
 		snapshot ? deriveDialoguePresentation(snapshot.pending_dialogue) : null
 	);
-	let newspaperMetrics = $derived(snapshot ? deriveNewspaperMetrics(snapshot) : []);
-	let newspaperEvents = $derived(snapshot ? deriveNewspaperEvents(snapshot) : []);
+	let termReport = $derived(snapshot?.term_report ?? null);
+	let newspaperFront = $derived(termReport ? deriveTermReportFront(termReport) : undefined);
+	let newspaperMetrics = $derived(
+		snapshot ? (termReport ? deriveTermReportMetrics(termReport) : deriveNewspaperMetrics(snapshot)) : []
+	);
+	let newspaperEvents = $derived(snapshot && !termReport ? deriveNewspaperEvents(snapshot) : []);
 	let frame = $derived(
 		snapshot && gameState
 			? {
@@ -186,6 +196,7 @@
 		if (newspaperOpen) return;
 		pendingNewspaperAction = null;
 		newspaperBusy = false;
+		newspaperFolded = false;
 		newspaperLeaving = false;
 		newspaperOpen = true;
 	}
@@ -194,6 +205,7 @@
 		if (newspaperOpen || newspaperBusy) return;
 		pendingNewspaperAction = action;
 		newspaperBusy = true;
+		newspaperFolded = false;
 		newspaperLeaving = false;
 		newspaperOpen = true;
 	}
@@ -215,12 +227,20 @@
 	async function advanceFromNewspaper(): Promise<void> {
 		if (newspaperBusy || newspaperLeaving) return;
 		newspaperBusy = true;
+		const foldComplete = beginNewspaperFold();
 		try {
-			await requestMutation('month.advance', {});
+			await Promise.all([foldComplete, requestMutation('month.advance', {})]);
 			await tick();
+			if (storeValue.snapshot?.term_report) {
+				newspaperFolded = false;
+				newspaperBusy = false;
+				return;
+			}
 			newspaperLeaving = true;
 		} catch (error: unknown) {
+			await foldComplete;
 			console.error('Month advance failed', error);
+			newspaperFolded = false;
 			newspaperBusy = false;
 		}
 	}
@@ -228,25 +248,42 @@
 	async function requestNewspaperClose(): Promise<void> {
 		if (newspaperBusy || newspaperLeaving) return;
 		newspaperBusy = true;
+		const foldComplete = beginNewspaperFold();
 		const requestClient = client;
 		if (!requestClient) {
+			await foldComplete;
 			newspaperLeaving = true;
 			return;
 		}
 		try {
-			await requestClient.request('ui.newspaper.close', {});
+			await Promise.all([foldComplete, requestClient.request('ui.newspaper.close', {})]);
 			await tick();
 			newspaperLeaving = true;
 		} catch (error: unknown) {
+			await foldComplete;
 			console.error('Newspaper close sync failed', error);
+			newspaperFolded = false;
 			newspaperBusy = false;
 		}
+	}
+
+	function beginNewspaperFold(): Promise<void> {
+		newspaperFolded = true;
+		return new Promise((resolve) => (newspaperFoldResolver = resolve));
+	}
+
+	function finishNewspaperFold(): void {
+		const resolve = newspaperFoldResolver;
+		newspaperFoldResolver = null;
+		resolve?.();
 	}
 
 	function finishNewspaperClose(): void {
 		newspaperOpen = false;
 		newspaperBusy = false;
+		newspaperFolded = false;
 		newspaperLeaving = false;
+		newspaperFoldResolver = null;
 		pendingNewspaperAction = null;
 	}
 
@@ -343,13 +380,16 @@
 			year={snapshot.year}
 			month={snapshot.month}
 			metrics={newspaperMetrics}
+			front={newspaperFront}
 			events={newspaperEvents}
 			comment={{ title: [''], comment: [''] }}
 			busy={newspaperBusy}
+			folded={newspaperFolded}
 			leaving={newspaperLeaving}
 			onCovered={handleNewspaperCovered}
-			onAdvance={advanceFromNewspaper}
+			onAdvance={termReport ? undefined : advanceFromNewspaper}
 			onRequestClose={requestNewspaperClose}
+			onFolded={finishNewspaperFold}
 			onClosed={finishNewspaperClose}
 		/>
 	{/if}
