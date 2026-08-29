@@ -160,9 +160,21 @@ func _test_collapse_month_restarts_before_sync(t: BackendTestContext) -> void:
 	t.check_equal(full["payload"]["month"], 0, "the collapse response resets to month zero")
 	t.check_equal(full["payload"]["ui_mode"], "constitution", "the collapse response opens constitution")
 	t.check_equal(full["payload"]["world_scene"], "parliament", "the next-term world is ready before sync")
-	t.check_equal(full["payload"]["term_report"]["outcome"], "COLLAPSE", "the response preserves the old outcome")
-	t.check_equal(full["payload"]["term_report"]["previous_governing_months"], 0, "the report starts from old currency")
-	t.check_equal(full["payload"]["term_report"]["current_governing_months"], 1, "the report awards the elapsed month")
+	t.check_equal(
+		full["payload"]["term_report"]["outcome"],
+		"COLLAPSE",
+		"the response preserves the old outcome"
+	)
+	t.check_equal(
+		full["payload"]["term_report"]["previous_governing_months"],
+		0,
+		"the report starts from old currency"
+	)
+	t.check_equal(
+		full["payload"]["term_report"]["current_governing_months"],
+		1,
+		"the report awards the elapsed month"
+	)
 	t.check_equal(full["payload"]["month_report"], null, "the fresh run has no stale monthly report")
 	bridge.free()
 	session.free()
@@ -257,7 +269,11 @@ func _test_opening_draw_and_term_lifecycle(t: BackendTestContext) -> void:
 	t.check_equal(session.state.proposal_hand.size(), 0, "the next term waits until January to draw")
 	t.check_equal(session.state.events.size(), 0, "the next term starts without stale events")
 	t.check_equal(session.meta_progression.available_governing_months, 1, "the ended January becomes governing currency")
-	t.check_equal(session.term_report["outcome"], RunState.TermOutcome.NOTHING_HAPPENS, "settlement preserves the outcome")
+	t.check_equal(
+		session.term_report["outcome"],
+		RunState.TermOutcome.NOTHING_HAPPENS,
+		"settlement preserves the outcome"
+	)
 	t.check_equal(session.term_report["previous_governing_months"], 0, "settlement records the previous currency")
 	t.check_equal(session.term_report["current_governing_months"], 1, "settlement records the awarded currency")
 	t.check(not session.start_next_term(), "the compatibility API cannot skip a running term")
@@ -345,11 +361,31 @@ func _test_term_settlement_resets_board_run_state(t: BackendTestContext) -> void
 		"the reset returns every constitution row to the zero-cost center"
 	)
 	t.check(session.meta_progression.is_column_unlocked(outward), "unlocked columns persist between terms")
-	t.check_equal(session.meta_progression.available_governing_months, 19, "year two month three awards fifteen months")
-	t.check_equal(session.meta_progression.lifetime_governing_months, 15, "lifetime currency records the full term")
-	t.check_equal(session.term_report["outcome"], RunState.TermOutcome.COLLAPSE, "the report keeps the old outcome")
-	t.check_equal(session.term_report["previous_governing_months"], 4, "the report uses spendable currency before settlement")
-	t.check_equal(session.term_report["current_governing_months"], 19, "the report uses spendable currency after settlement")
+	t.check_equal(
+		session.meta_progression.available_governing_months,
+		19,
+		"year two month three awards fifteen months"
+	)
+	t.check_equal(
+		session.meta_progression.lifetime_governing_months,
+		15,
+		"lifetime currency records the full term"
+	)
+	t.check_equal(
+		session.term_report["outcome"],
+		RunState.TermOutcome.COLLAPSE,
+		"the report keeps the old outcome"
+	)
+	t.check_equal(
+		session.term_report["previous_governing_months"],
+		4,
+		"the report uses spendable currency before settlement"
+	)
+	t.check_equal(
+		session.term_report["current_governing_months"],
+		19,
+		"the report uses spendable currency after settlement"
+	)
 	for seat in session.state.seats:
 		t.check(seat not in old_seats, "the reset creates a new randomized seat state")
 		t.check_equal(seat.race, race, "every new seat receives an opening allocation")

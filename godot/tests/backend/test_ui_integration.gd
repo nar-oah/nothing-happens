@@ -156,7 +156,11 @@ func _test_explicit_next_term_command(t: BackendTestContext) -> void:
 	t.check_equal(full["payload"]["run_phase"], "RUNNING", "explicit next term resets run phase")
 	t.check_equal(full["payload"]["term_outcome"], "NONE", "explicit next term resets outcome")
 	t.check_equal(full["payload"]["ui_mode"], "constitution", "next term enters constitution mode")
-	t.check_equal(full["payload"]["term_report"]["outcome"], "NOTHING_HAPPENS", "the compatibility command reports the outcome")
+	t.check_equal(
+		full["payload"]["term_report"]["outcome"],
+		"NOTHING_HAPPENS",
+		"the compatibility command reports the outcome"
+	)
 	var closed := bridge.receive_ipc_message(_message("ui.newspaper.close", {}))
 	t.check_equal(closed[0]["payload"]["term_report"], null, "closing the settlement newspaper clears its report")
 	bridge.free()

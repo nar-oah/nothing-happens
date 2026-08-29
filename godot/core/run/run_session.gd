@@ -145,10 +145,18 @@ func _start_term(term_number: int) -> bool:
 
 
 func advance_month() -> bool:
-	var advanced := true if state.run_phase == RunState.RunPhase.TERM_ENDED else flow_controller.advance_month()
+	var advanced := (
+		true
+		if state.run_phase == RunState.RunPhase.TERM_ENDED
+		else flow_controller.advance_month()
+	)
 	if not advanced:
 		return false
-	return _settle_and_start_next_term() if state.run_phase == RunState.RunPhase.TERM_ENDED else true
+	return (
+		_settle_and_start_next_term()
+		if state.run_phase == RunState.RunPhase.TERM_ENDED
+		else true
+	)
 
 
 func start_next_term() -> bool:
