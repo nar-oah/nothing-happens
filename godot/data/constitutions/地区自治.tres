@@ -12,7 +12,7 @@
 [ext_resource type="Resource" uid="uid://cy6isbo6ilvjh" path="res://data/policies/各地自给.tres" id="7_policy_2"]
 [ext_resource type="Resource" uid="uid://b5w6n7hgkbbhi" path="res://data/policies/地方平准.tres" id="8_policy_3"]
 [ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="12_1s73p"]
-[ext_resource type="Resource" path="res://data/constitution_rows/桃源.tres" id="row"]
+[ext_resource type="Resource" uid="uid://cq8xj0frv0cdf" path="res://data/constitution_rows/桃源.tres" id="row"]
 
 [sub_resource type="Resource" id="Resource_seat_condition"]
 script = ExtResource("5_seat_condition_script")

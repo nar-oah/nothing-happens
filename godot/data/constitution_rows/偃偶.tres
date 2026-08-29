@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="ConstitutionRowDefinition" format=3]
+[gd_resource type="Resource" script_class="ConstitutionRowDefinition" format=3 uid="uid://cqpejxjyt0cyq"]
 
 [ext_resource type="Script" uid="uid://ckrs2sqbfq880" path="res://definitions/constitution_row_definition.gd" id="1_script"]
 [ext_resource type="Resource" uid="uid://c2eco18e42n34" path="res://data/races/偃偶.tres" id="2_race"]

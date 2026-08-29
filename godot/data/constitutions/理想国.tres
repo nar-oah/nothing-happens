@@ -13,7 +13,7 @@
 [ext_resource type="Resource" uid="uid://bje4ksj84sn0r" path="res://data/policies/共同劳动.tres" id="9_policy_2"]
 [ext_resource type="Resource" uid="uid://500xq3v2208e" path="res://data/policies/未然公用.tres" id="10_policy_3"]
 [ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="13_crkel"]
-[ext_resource type="Resource" path="res://data/constitution_rows/团体.tres" id="row"]
+[ext_resource type="Resource" uid="uid://dl4flgxtqjpim" path="res://data/constitution_rows/团体.tres" id="row"]
 
 [sub_resource type="Resource" id="Resource_influence_1"]
 script = ExtResource("7_influence_rule_script")

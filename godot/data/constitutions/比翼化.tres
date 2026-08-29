@@ -6,13 +6,13 @@
 [ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_fxjlp"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
 [ext_resource type="Resource" uid="uid://bw162ei21njtt" path="res://data/races/比翼.tres" id="3_race_biyi"]
-[ext_resource type="Resource" path="res://data/constitutions/包容.tres" id="4_prereq"]
+[ext_resource type="Resource" uid="uid://cbaegioaf86au" path="res://data/constitutions/包容.tres" id="4_prereq"]
 [ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="5_seat_condition_script"]
 [ext_resource type="Resource" uid="uid://cevrii67ltmsg" path="res://data/policies/阴历平准.tres" id="6_policy_1"]
 [ext_resource type="Resource" uid="uid://bpj8sxytmtoyp" path="res://data/policies/阳历分利.tres" id="7_policy_2"]
 [ext_resource type="Resource" uid="uid://dl3mgnbq5hgfp" path="res://data/policies/阴阳转录.tres" id="8_policy_3"]
 [ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="12_353y4"]
-[ext_resource type="Resource" path="res://data/constitution_rows/文化.tres" id="row"]
+[ext_resource type="Resource" uid="uid://b5clravmnjms4" path="res://data/constitution_rows/文化.tres" id="row"]
 
 [sub_resource type="Resource" id="Resource_seat_condition"]
 script = ExtResource("5_seat_condition_script")

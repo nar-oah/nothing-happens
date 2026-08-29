@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="ConstitutionRowDefinition" format=3]
+[gd_resource type="Resource" script_class="ConstitutionRowDefinition" format=3 uid="uid://bjubbxjboutnj"]
 
 [ext_resource type="Script" uid="uid://ckrs2sqbfq880" path="res://definitions/constitution_row_definition.gd" id="1_script"]
 [ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/人类.tres" id="2_race"]
@@ -8,4 +8,3 @@ script = ExtResource("1_script")
 id = &"diplomacy"
 display_name = "外交"
 race = ExtResource("2_race")
-display_order = 0

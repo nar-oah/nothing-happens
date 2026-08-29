@@ -13,7 +13,7 @@
 [ext_resource type="Resource" uid="uid://cxnr2v5cpw160" path="res://data/policies/行身信贷.tres" id="9_policy_2"]
 [ext_resource type="Resource" uid="uid://dhsgt5yf783d8" path="res://data/policies/自营维修.tres" id="10_policy_3"]
 [ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="13_n4y35"]
-[ext_resource type="Resource" path="res://data/constitution_rows/偃偶.tres" id="row"]
+[ext_resource type="Resource" uid="uid://cqpejxjyt0cyq" path="res://data/constitution_rows/偃偶.tres" id="row"]
 
 [sub_resource type="Resource" id="Resource_seat_condition"]
 script = ExtResource("6_seat_condition_script")

@@ -7,5 +7,5 @@
 script = ExtResource("1_qxpgu")
 display_name = "连理"
 description = "比翼保存文字、历法与谱系传统最深的旧城，城中至今遍布校书馆、旧历院与私人藏书楼。当地人习惯认为许多后来被称作“蓬莱共同传统”的东西，不过是外人重新命名过的连理旧学。"
-anchor_race = ExtResource("1_40216")
+fixed_race = ExtResource("1_40216")
 metadata/_custom_type_script = "uid://of78ek0nhty6"

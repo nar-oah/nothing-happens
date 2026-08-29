@@ -15,7 +15,7 @@
 [ext_resource type="Resource" uid="uid://d0tsptffgoh8s" path="res://data/policies/官营平价.tres" id="11_policy_1"]
 [ext_resource type="Resource" uid="uid://bs7ofkv8hds3c" path="res://data/policies/官业扩工.tres" id="12_policy_2"]
 [ext_resource type="Resource" uid="uid://rj2c4acnwl5f" path="res://data/policies/统购统销.tres" id="13_policy_3"]
-[ext_resource type="Resource" path="res://data/constitution_rows/文化.tres" id="row"]
+[ext_resource type="Resource" uid="uid://b5clravmnjms4" path="res://data/constitution_rows/文化.tres" id="row"]
 
 [sub_resource type="Resource" id="Resource_influence_1"]
 script = ExtResource("10_influence_rule_script")
