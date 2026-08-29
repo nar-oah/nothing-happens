@@ -214,12 +214,20 @@
 		const action = pendingNewspaperAction;
 		if (!action) return;
 		pendingNewspaperAction = null;
+		const foldComplete = beginNewspaperFold();
 		try {
-			await action();
+			await Promise.all([foldComplete, action()]);
 			await tick();
+			if (storeValue.snapshot?.term_report) {
+				newspaperFolded = false;
+				newspaperBusy = false;
+				return;
+			}
 			newspaperLeaving = true;
 		} catch (error: unknown) {
+			await foldComplete;
 			console.error('Newspaper transition failed', error);
+			newspaperFolded = false;
 			newspaperBusy = false;
 		}
 	}
