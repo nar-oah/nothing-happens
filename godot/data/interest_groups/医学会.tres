@@ -7,3 +7,5 @@ script = ExtResource("1_script")
 display_name = "医学会"
 description = "人类医药传入蓬莱后，人们很快发现，同一味药、同一种疗法落在不同种族身上，往往会产生截然不同的结果。来自世界各地的医生因此汇聚蓬莱，与长期保存异族知识的比翼学者共同建立了医学会。如今，从药物、诊疗到异族病例与医学知识，几乎都掌握在这个学术共同体手中——它既是研究蓬莱生命的最高学府，也是蓬莱医药业事实上的垄断者。"
 base_column_weight = 2
+decrease_consumption = true
+decrease_investment = true

@@ -22,7 +22,7 @@ metadata/_custom_type_script = "uid://djwe47mhwecbs"
 script = ExtResource("1_effect")
 target_metric = 1
 source_b = 1
-multiplier = -0.25
+multiplier = 0.25
 metadata/_custom_type_script = "uid://djwe47mhwecbs"
 
 [resource]

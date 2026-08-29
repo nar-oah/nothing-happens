@@ -7,22 +7,22 @@
 [sub_resource type="Resource" id="Condition"]
 script = ExtResource("2_condition")
 operator = 2
-right_metric = 1
+right_metric = 3
 metadata/_custom_type_script = "uid://bogqw2drp125w"
 
 [sub_resource type="Resource" id="Effect_1"]
 script = ExtResource("1_effect")
 source_a = 0
-source_b = 1
+source_b = 3
 multiplier = -0.4
 metadata/_custom_type_script = "uid://djwe47mhwecbs"
 
 [sub_resource type="Resource" id="Effect_2"]
 script = ExtResource("1_effect")
-target_metric = 1
+target_metric = 3
 source_a = 0
-source_b = 1
-multiplier = -0.2
+source_b = 3
+multiplier = 0.2
 metadata/_custom_type_script = "uid://djwe47mhwecbs"
 
 [resource]
