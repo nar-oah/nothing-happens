@@ -28,15 +28,7 @@
 		onAdvance?: () => void;
 	};
 
-	let {
-		year,
-		month,
-		metrics,
-		events,
-		comment,
-		disabled = false,
-		onAdvance
-	}: Props = $props();
+	let { year, month, metrics, events, comment, disabled = false, onAdvance }: Props = $props();
 	const sortedEvents = $derived([...events].sort((a, b) => a.countdown - b.countdown));
 	const pages = $derived.by((): NewspaperPage[] => {
 		const result: NewspaperPage[] = [{ kind: 'top' }, { kind: 'metrics' }];
