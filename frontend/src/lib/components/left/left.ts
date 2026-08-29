@@ -30,10 +30,10 @@ export const LEFT_KIND_LABELS: Record<LeftItemKind, string> = {
 
 export const LEFT_METRIC_LABELS: Record<Metric, string> = {
 	[Metric.TAX]: '税课',
-	[Metric.PRICE]: '物价',
-	[Metric.WAGE]: '工钱',
-	[Metric.EMPLOYMENT]: '用工',
-	[Metric.TRADE]: '商贸'
+	[Metric.CONSUMPTION]: '消费',
+	[Metric.PRODUCTION]: '生产',
+	[Metric.EMPLOYMENT]: '就业',
+	[Metric.INVESTMENT]: '投资'
 };
 
 export function getLeftSecondaryMode(scene: LeftScene): Exclude<LeftMode, 'archive'> | undefined {
