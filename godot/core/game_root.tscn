@@ -16,7 +16,7 @@
 [ext_resource type="Resource" uid="uid://by7u482sgaihw" path="res://data/interest_groups/听弦塔.tres" id="14_6fjwy"]
 [ext_resource type="Resource" uid="uid://cux21kxjuvshw" path="res://data/interest_groups/永乐局.tres" id="15_38qif"]
 [ext_resource type="Resource" uid="uid://b7vlc4eb8m4io" path="res://data/interest_groups/造身公所.tres" id="17_voci3"]
-[ext_resource type="Resource" path="res://data/interest_groups/铅字报馆.tres" id="18_dhh7q"]
+[ext_resource type="Resource" uid="uid://pd7b0qkrdw6u" path="res://data/interest_groups/铅字报馆.tres" id="18_dhh7q"]
 [ext_resource type="Script" uid="uid://of78ek0nhty6" path="res://definitions/seat_definition.gd" id="19_4n2pu"]
 [ext_resource type="Resource" uid="uid://becl4oht0txi3" path="res://data/seats/久视.tres" id="20_a6cpr"]
 [ext_resource type="Resource" uid="uid://cpywr77227gt0" path="res://data/seats/云津.tres" id="21_kqsq3"]
