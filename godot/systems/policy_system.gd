@@ -9,14 +9,18 @@ func create_states(definitions: Array[PolicyDefinition]) -> Array[PolicyState]:
 	return result
 
 
-func resolve_policy_chain(state: RunState) -> void:
+func resolve_policy_chain(state: RunState) -> Array[PolicyDefinition]:
+	var triggered: Array[PolicyDefinition] = []
 	var bill := state.active_bill
 	if bill == null:
-		return
+		return triggered
 	while true:
 		var triggered_batch := _find_triggered_batch(bill, state.metrics)
 		if triggered_batch.is_empty():
-			return
+			return triggered
+		for policy_state in triggered_batch:
+			if policy_state != null and policy_state.definition != null:
+				triggered.append(policy_state.definition)
 		_resolve_batch(triggered_batch, state)
 
 
