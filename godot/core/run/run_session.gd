@@ -265,7 +265,7 @@ func _resolve_term_start_front(current_state: RunState) -> Variant:
 	if current_state.year != 1 or current_state.month != 1:
 		return null
 	return _newspaper_front(
-		"诸族共推驻岁　第%d次入主会同" % current_state.term,
+		"第%d次入主会同" % current_state.term,
 		"新一任联合政府开议。各族在彼此之间挑了一圈，最终还是把会同的印信交到驻岁案前；至少在谁也不肯让步的时候，长生者看起来还算能等。"
 	)
 
