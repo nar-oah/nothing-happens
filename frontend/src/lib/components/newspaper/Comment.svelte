@@ -42,7 +42,9 @@
 		</div>
 	</div>
 	<div class="h-px w-full shrink-0 bg-ink-primary"></div>
-	<p class="typo-newspaper-subhead w-full shrink-0">
+	<p
+		class="typo-newspaper-subhead w-full shrink-0 [overflow-wrap:anywhere] [&>span]:whitespace-normal"
+	>
 		{#key index}
 			<MorphText text={displayComment} />
 		{/key}
