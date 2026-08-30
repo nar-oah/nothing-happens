@@ -84,5 +84,5 @@ export function getNewspaperEventStateLabel(state: NewspaperEventState): string 
 }
 
 export function formatNewspaperNumber(value: number): string {
-	return String(Math.max(0, Math.trunc(value))).padStart(2, '0');
+	return value === 0 ? '談判' : String(Math.max(0, Math.trunc(value))).padStart(2, '0');
 }

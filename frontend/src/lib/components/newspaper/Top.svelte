@@ -41,9 +41,7 @@
 	<div class="flex w-full shrink-0 items-start gap-12 overflow-hidden text-ink-primary">
 		<div class="flex min-w-0 flex-1 flex-col items-start overflow-hidden">
 			<p class="typo-newspaper-masthead w-full">
-				<MorphText
-					text={hovering && !advanceDisabled ? (month === 12 ? '谈判' : '次月') : '弦外'}
-				/>
+				<MorphText text={hovering && !advanceDisabled ? '次月' : '弦外'} />
 			</p>
 			<p class="typo-newspaper-caption w-full">XIANWAI · THE OUT-OF-DISTRIBUTION TIMES</p>
 		</div>
