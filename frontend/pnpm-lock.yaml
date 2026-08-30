@@ -8,9 +8,9 @@ importers:
 
   .:
     dependencies:
-      chinese-simple2traditional:
-        specifier: ^2.3.2
-        version: 2.3.2
+      opencc-js:
+        specifier: ^1.4.2
+        version: 1.4.2
     devDependencies:
       '@eslint/js':
         specifier: ^10.0.1
@@ -623,9 +623,6 @@ packages:
     resolution: {integrity: sha512-tixWYgm5ZoOD+3g6UTea91eow5z6AAHaho3g0V9CNSNb45gM8SmflpAc+GRd1InC4AqN/07Unrgp56Y94N9hJQ==}
     engines: {node: '>=20.19.0'}
 
-  chinese-simple2traditional@2.3.2:
-    resolution: {integrity: sha512-zgvXTpDelAOtM6GIqLLWTe3Ot2a3WrV1ZJvnXhz+Nz1flnMRaBi602UOg8u/elsHbIVIOgT2jRpa2TbnHaXdYg==}
-
   chokidar@4.0.3:
     resolution: {integrity: sha512-Qgzu8kfBvo+cA4962jnP1KkS6Dop5NS6g7R5LFYJr4b8Ub94PPQXUksCw9PvXoeXPRRddRNC5C1JQUR2SMGtnA==}
     engines: {node: '>= 14.16.0'}
@@ -1027,6 +1024,9 @@ packages:
 
   ofetch@1.5.1:
     resolution: {integrity: sha512-2W4oUZlVaqAPAil6FUg/difl6YhqhUR7x2eZY4bQCko22UXg3hptq9KLQdqFClV+Wu85UX7hNtdGTngi/1BxcA==}
+
+  opencc-js@1.4.2:
+    resolution: {integrity: sha512-EdcspgdROiCCZDM+jZR6Pa670xW+EW2QhctPBQ8gRjg6lrx4IHEl+2s+kt5izk/TkxVRgdWuFgaGkaEdIUfdaw==}
 
   optionator@0.9.4:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==}
@@ -1883,8 +1883,6 @@ snapshots:
 
   cac@7.0.0: {}
 
-  chinese-simple2traditional@2.3.2: {}
-
   chokidar@4.0.3:
     dependencies:
       readdirp: 4.1.2
@@ -2238,6 +2236,8 @@ snapshots:
       destr: 2.0.5
       node-fetch-native: 1.6.7
       ufo: 1.6.4
+
+  opencc-js@1.4.2: {}
 
   optionator@0.9.4:
     dependencies:

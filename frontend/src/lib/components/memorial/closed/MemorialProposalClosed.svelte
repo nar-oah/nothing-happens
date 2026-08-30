@@ -4,7 +4,7 @@
 	import MemorialMetric from '../shared/MemorialMetric.svelte';
 	import MemorialTitle from '../shared/MemorialTitle.svelte';
 	import type { MemorialMetricData } from '../types';
-	import { toTraditional } from 'chinese-simple2traditional';
+	import OpenCC from 'opencc-js';
 
 	type Props = {
 		title: string;
@@ -13,6 +13,10 @@
 	};
 
 	let { title, lag, metrics }: Props = $props();
+	const toJapanese = OpenCC.Converter({
+		from: 'cn',
+		to: 'jp'
+	});
 </script>
 
 <MemorialClosedFrame>
@@ -25,7 +29,7 @@
 			{/each}
 		</div>
 		<div class="mr-8 flex shrink-0 flex-col items-end gap-8 pt-8">
-			<MemorialTitle text={toTraditional(title)} />
+			<MemorialTitle text={toJapanese(title)} />
 			<MemorialLag time={lag} />
 		</div>
 	</div>
