@@ -1,7 +1,6 @@
 <script lang="ts">
 	import {
 		formatNewspaperNumber,
-		getNewspaperEventDescription,
 		getNewspaperEventStateLabel,
 		getNewspaperMetricLabel,
 		getNewspaperRaceLabel,
@@ -10,9 +9,8 @@
 
 	type Props = NewspaperEventData;
 
-	let { countdown, metric, race, state, strength, value }: Props = $props();
+	let { countdown, description, metric, race, state, strength, value }: Props = $props();
 	const countdownText = $derived(formatNewspaperNumber(countdown));
-	const description = $derived(getNewspaperEventDescription(race));
 </script>
 
 <div class="flex h-full w-full items-start gap-8 overflow-hidden px-8 py-5">

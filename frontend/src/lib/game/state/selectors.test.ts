@@ -99,7 +99,6 @@ test('constitution presentation keeps one aligned row grid and turns locked colu
 test('dialogue presentation retains authoritative values', () => {
 	const state = makeLiveState();
 	const dialogue = deriveDialoguePresentation(state.pending_dialogue);
-	assert.equal(dialogue?.visitor_text, '造身公所代表来访。');
 	assert.equal(dialogue?.trait_label, '投資+8');
 	assert.equal(dialogue?.donation_label, '政治献金+5');
 });

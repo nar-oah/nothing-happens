@@ -49,6 +49,8 @@
 		events: [
 			{
 				race: NewspaperRace.NANKE,
+				description:
+					'南柯承担蓬莱最重的现实劳动，也最在意劳动是否还有位置、成果是否能换成生活。就业或消费落后时，他们会认为现实正在离梦中那个更好的社会越来越远。',
 				metric: Metric.PRODUCTION,
 				value: 52,
 				countdown: 3,
@@ -57,17 +59,15 @@
 			},
 			{
 				race: NewspaperRace.BIYI,
+				description:
+					'比翼把知识地位的流失首先体验为职位与发展机会减少。就业不足会成为两半共同的焦虑；阴月又担心公共机构缺少税课，阳月则担心新的知识产业缺少投资。',
 				metric: Metric.CONSUMPTION,
 				value: 60,
 				countdown: 7,
 				strength: 72,
 				state: NewspaperEventState.POSTPONED
 			}
-		],
-		comment: {
-			title: ['危机，还是事件？', '增长，还是幻觉？'],
-			comment: ['我们是在解决问题，\n还是在证明危机存在？', '数字已经变好，\n生活是否也随之改变？']
-		}
+		]
 	};
 	const MOCK_NEWSPAPER_CLOSE_TARGET: Exclude<ViewName, 'Newspaper'> = 'Constitution';
 	let activeView = $state<ViewName>('Office');

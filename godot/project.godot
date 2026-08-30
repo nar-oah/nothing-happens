@@ -14,18 +14,10 @@ config/name="godot"
 run/main_scene="uid://dd2d3ryrnbww7"
 config/features=PackedStringArray("4.7", "Mobile")
 
-[autoload]
-
-DialogueManager="*uid://c3rodes2l3gxb"
-
 [display]
 
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
-
-[editor_plugins]
-
-enabled=PackedStringArray("res://addons/dialogue_manager/plugin.cfg")
 
 [physics]
 

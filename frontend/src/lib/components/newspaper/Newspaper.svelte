@@ -9,7 +9,6 @@
 	import PublicMetrics from './PublicMetrics.svelte';
 	import Top from './Top.svelte';
 	import type {
-		NewspaperCommentData,
 		NewspaperEventData,
 		NewspaperFrontData,
 		NewspaperMetricData
@@ -31,7 +30,6 @@
 		metrics: NewspaperMetricData[];
 		front?: NewspaperFrontData;
 		events: NewspaperEventData[];
-		comment: NewspaperCommentData;
 		disabled?: boolean;
 		open?: boolean;
 		onAdvance?: () => void;
@@ -44,7 +42,6 @@
 		metrics,
 		front,
 		events,
-		comment,
 		disabled = false,
 		open = true,
 		onAdvance,
@@ -146,7 +143,7 @@
 			{:else if page.kind === 'calendar'}
 				<Calendar {month} />
 			{:else}
-				<Comment {...comment} />
+				<Comment />
 			{/if}
 		</MemorialHorizontalFold>
 	{/each}

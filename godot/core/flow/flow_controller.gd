@@ -96,6 +96,7 @@ func _record_month_report(
 		state.month_report_events.append(
 			{
 				"race_display_name": "" if event.race == null else event.race.display_name,
+				"event_description": "" if event.race == null else event.race.event_description,
 				"metric": int(event.metric),
 				"value": context.event_system.get_current_requirement(event),
 				"countdown": maxi(context.balance.event_lifetime_months - event.months_alive, 0),

@@ -6,7 +6,6 @@
 	import GameStateDisplay from '$lib/components/state/GameStateDisplay.svelte';
 	import type { StateItem } from '$lib/components/state/GameStateDisplay.svelte';
 	import type {
-		NewspaperCommentData,
 		NewspaperEventData,
 		NewspaperFrontData,
 		NewspaperMetricData
@@ -19,7 +18,6 @@
 		metrics: NewspaperMetricData[];
 		front?: NewspaperFrontData;
 		events: NewspaperEventData[];
-		comment: NewspaperCommentData;
 		busy?: boolean;
 		folded?: boolean;
 		leaving?: boolean;
@@ -40,7 +38,6 @@
 		metrics,
 		front,
 		events,
-		comment,
 		busy = false,
 		folded = false,
 		leaving = false,
@@ -157,7 +154,6 @@
 									{metrics}
 									{front}
 									{events}
-									{comment}
 									{onAdvance}
 									{onFolded}
 									open={!folded}

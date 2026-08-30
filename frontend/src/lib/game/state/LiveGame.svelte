@@ -95,6 +95,7 @@
 			return [
 				{
 					race,
+					description: event.event_description,
 					metric: event.metric,
 					value: event.value,
 					countdown: event.countdown,
@@ -415,7 +416,6 @@
 			metrics={newspaperEdition.metrics}
 			front={newspaperEdition.front}
 			events={newspaperEdition.events}
-			comment={{ title: [''], comment: [''] }}
 			busy={newspaperBusy}
 			folded={newspaperFolded}
 			leaving={newspaperLeaving}
