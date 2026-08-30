@@ -7,6 +7,7 @@
 script = ExtResource("2_qanow")
 display_name = "偃偶"
 description = "偃偶既是有姓名、有责任、有选票的公民，又是能够买卖、出租、抵押和出口的商品。它们要求更完整的人格权，却并不打算因此放弃身契，反而认为只有真正拥有自己，才有资格决定怎样出售自己。偃偶争取的因此不是逃离市场，而是取得作为一个完整的人进入市场、甚至把自己卖得更彻底的权利。"
+event_description = "偃偶的社会存在依赖持续制造、维修、机谱设施与新行身。生产或投资落后时，他们看到的不只是经济停滞，而是自身无法继续扩张、维护和延续。"
 fixed_interest_group = ExtResource("3_group")
 increase_production = true
 increase_investment = true
