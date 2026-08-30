@@ -6,12 +6,10 @@
 	import GameStateDisplay from '$lib/components/state/GameStateDisplay.svelte';
 	import type { StateItem } from '$lib/components/state/GameStateDisplay.svelte';
 	import type {
-		NewspaperCommentData,
 		NewspaperEventData,
 		NewspaperFrontData,
 		NewspaperMetricData
 	} from '$lib/components/newspaper/types';
-	import { NEWSPAPER_COMMENTS } from '$lib/content/newspaper-comments';
 
 	type NewspaperMotionPhase = 'entering' | 'active' | 'leaving';
 	type Props = {
@@ -20,7 +18,6 @@
 		metrics: NewspaperMetricData[];
 		front?: NewspaperFrontData;
 		events: NewspaperEventData[];
-		comment: NewspaperCommentData;
 		busy?: boolean;
 		folded?: boolean;
 		leaving?: boolean;
@@ -34,10 +31,6 @@
 	const ROTATION_RADIANS = (Math.abs(ROTATION_DEGREES) * Math.PI) / 180;
 	const ROTATION_SIN = Math.sin(ROTATION_RADIANS);
 	const ROTATION_COS = Math.cos(ROTATION_RADIANS);
-	const DEFAULT_COMMENT: NewspaperCommentData = {
-		title: NEWSPAPER_COMMENTS.map((item) => item.title),
-		comment: NEWSPAPER_COMMENTS.map((item) => item.comment)
-	};
 
 	let {
 		year,
@@ -45,7 +38,6 @@
 		metrics,
 		front,
 		events,
-		comment,
 		busy = false,
 		folded = false,
 		leaving = false,
@@ -61,9 +53,6 @@
 	let motionPhase = $state<NewspaperMotionPhase>('entering');
 	let backgroundCovered = $state(false);
 	let scrollElement: HTMLDivElement;
-	const resolvedComment = $derived(
-		Math.min(comment.title.length, comment.comment.length) > 0 ? comment : DEFAULT_COMMENT
-	);
 	const pageCount = $derived(4 + events.length + (front ? 1 : 0));
 	const baseHeight = $derived(pageCount * VERTICAL_FOLD_WIDTH);
 	const scale = $derived(viewportWidth / VERTICAL_FOLD_HEIGHT);
@@ -165,7 +154,6 @@
 									{metrics}
 									{front}
 									{events}
-									comment={resolvedComment}
 									{onAdvance}
 									{onFolded}
 									open={!folded}
