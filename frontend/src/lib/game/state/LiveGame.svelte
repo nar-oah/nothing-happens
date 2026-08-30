@@ -416,7 +416,6 @@
 			metrics={newspaperEdition.metrics}
 			front={newspaperEdition.front}
 			events={newspaperEdition.events}
-			comment={{ title: [], comment: [] }}
 			busy={newspaperBusy}
 			folded={newspaperFolded}
 			leaving={newspaperLeaving}
