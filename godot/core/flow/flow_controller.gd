@@ -27,7 +27,8 @@ func advance_month() -> bool:
 			definition.on_month_start(context, race_state)
 	context.constitution_system.on_month_start(context)
 	context.market_system.settle_month(context)
-	_record_triggered_policies(context.policy_system.resolve_policy_chain_with_report(context.state))
+	context.policy_system.resolve_policy_chain(context.state)
+	_record_triggered_policies(context.policy_system.last_triggered_definitions)
 	context.event_system.try_generate_month(context)
 	context.event_system.settle_month(context)
 	context.event_system.update_information(context)
@@ -56,7 +57,8 @@ func enact_bill(draft: DraftBillState) -> void:
 	context.parliament_system.record_authorized_proposal_slots(
 		context.state, draft.proposals
 	)
-	_record_triggered_policies(context.policy_system.resolve_policy_chain_with_report(context.state))
+	context.policy_system.resolve_policy_chain(context.state)
+	_record_triggered_policies(context.policy_system.last_triggered_definitions)
 
 
 func submit_draft(draft: DraftBillState) -> VoteResultState:
