@@ -9,7 +9,15 @@ func create_states(definitions: Array[PolicyDefinition]) -> Array[PolicyState]:
 	return result
 
 
-func resolve_policy_chain(state: RunState) -> Array[PolicyDefinition]:
+func resolve_policy_chain(state: RunState) -> void:
+	_resolve_policy_chain_with_report(state)
+
+
+func resolve_policy_chain_with_report(state: RunState) -> Array[PolicyDefinition]:
+	return _resolve_policy_chain_with_report(state)
+
+
+func _resolve_policy_chain_with_report(state: RunState) -> Array[PolicyDefinition]:
 	var triggered: Array[PolicyDefinition] = []
 	var bill := state.active_bill
 	if bill == null:
@@ -22,6 +30,7 @@ func resolve_policy_chain(state: RunState) -> Array[PolicyDefinition]:
 			if policy_state != null and policy_state.definition != null:
 				triggered.append(policy_state.definition)
 		_resolve_batch(triggered_batch, state)
+	return triggered
 
 
 func calculate_immediate_result(
