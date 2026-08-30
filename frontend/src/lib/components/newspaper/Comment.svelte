@@ -1,20 +1,19 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import { NEWSPAPER_COMMENTS } from '$lib/content/newspaper-comments';
 	import MorphText from '../text/MorphText.svelte';
-	type Props = { title: string[]; comment: string[] };
-	let { title, comment }: Props = $props();
+
 	let index = $state(
-		untrack(() => {
-			const itemCount = Math.min(title.length, comment.length);
-			return itemCount > 0 ? Math.floor(Math.random() * itemCount) : 0;
-		})
+		untrack(() =>
+			NEWSPAPER_COMMENTS.length > 0 ? Math.floor(Math.random() * NEWSPAPER_COMMENTS.length) : 0
+		)
 	);
 	let hovering = $state(false);
-	const count = $derived(Math.min(title.length, comment.length));
+	const count = NEWSPAPER_COMMENTS.length;
 	const nextIndex = $derived(count > 0 ? (index + 1) % count : 0);
 	const displayIndex = $derived(hovering ? nextIndex : index);
-	const displayTitle = $derived(title[displayIndex] ?? '');
-	const displayComment = $derived(comment[displayIndex] ?? '');
+	const displayTitle = $derived(NEWSPAPER_COMMENTS[displayIndex]?.title ?? '');
+	const displayComment = $derived(NEWSPAPER_COMMENTS[displayIndex]?.comment ?? '');
 
 	function advance() {
 		index = nextIndex;
