@@ -108,11 +108,12 @@
 
 	function deriveNewspaperEdition(state: LiveGameState): NewspaperEdition {
 		const report = state.term_report;
+		const front = report ? deriveTermReportFront(report) : state.newspaper_front ?? undefined;
 		return {
 			year: state.year,
 			month: state.month,
 			metrics: report ? deriveTermReportMetrics(report) : deriveNewspaperMetrics(state),
-			...(report ? { front: deriveTermReportFront(report) } : {}),
+			...(front ? { front } : {}),
 			events: report ? [] : deriveNewspaperEvents(state)
 		};
 	}
@@ -420,7 +421,7 @@
 			folded={newspaperFolded}
 			leaving={newspaperLeaving}
 			onCovered={handleNewspaperCovered}
-			onAdvance={newspaperEdition.front ? undefined : advanceFromNewspaper}
+			onAdvance={snapshot.term_report ? undefined : advanceFromNewspaper}
 			onRequestClose={requestNewspaperClose}
 			onFolded={finishNewspaperFold}
 			onClosed={finishNewspaperClose}
