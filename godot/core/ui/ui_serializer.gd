@@ -219,6 +219,10 @@ func month_report(state: RunState) -> Variant:
 	}
 
 
+func newspaper_front(state: RunState) -> Variant:
+	return null if state.newspaper_front.is_empty() else state.newspaper_front.duplicate(true)
+
+
 func term_report(session: RunSession) -> Variant:
 	if session.term_report.is_empty():
 		return null
@@ -245,6 +249,7 @@ func full_state(
 		"governing_months": state.governing_months,
 		"metrics": metric_values(state.metrics),
 		"month_report": month_report(state),
+		"newspaper_front": newspaper_front(state),
 		"term_report": term_report(session),
 		"proposal_hand": _proposals(state.proposal_hand),
 		"saved_bills": _bills(state.saved_bills),

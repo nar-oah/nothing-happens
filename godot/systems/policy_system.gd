@@ -1,6 +1,8 @@
 extends RefCounted
 class_name PolicySystem
 
+var last_triggered_definitions: Array[PolicyDefinition] = []
+
 
 func create_states(definitions: Array[PolicyDefinition]) -> Array[PolicyState]:
 	var result: Array[PolicyState] = []
@@ -10,6 +12,7 @@ func create_states(definitions: Array[PolicyDefinition]) -> Array[PolicyState]:
 
 
 func resolve_policy_chain(state: RunState) -> void:
+	last_triggered_definitions.clear()
 	var bill := state.active_bill
 	if bill == null:
 		return
@@ -17,6 +20,9 @@ func resolve_policy_chain(state: RunState) -> void:
 		var triggered_batch := _find_triggered_batch(bill, state.metrics)
 		if triggered_batch.is_empty():
 			return
+		for policy_state in triggered_batch:
+			if policy_state != null and policy_state.definition != null:
+				last_triggered_definitions.append(policy_state.definition)
 		_resolve_batch(triggered_batch, state)
 
 

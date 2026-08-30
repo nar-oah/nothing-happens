@@ -158,6 +158,11 @@ export type ActiveBillDto = {
 	policies: ActivePolicyDto[];
 };
 
+export type NewspaperFrontDto = {
+	title: string;
+	content: string;
+};
+
 export type MonthReportEventPhase = 0 | 1 | 2;
 
 export type MonthReportEventDto = {
@@ -218,6 +223,7 @@ export type LiveGameState = GameStatusDto & {
 	draft_preview: DraftPreviewDto;
 	pending_dialogue: PendingDialogueDto | null;
 	month_report?: MonthReportDto | null;
+	newspaper_front?: NewspaperFrontDto | null;
 	term_report?: TermReportDto | null;
 };
 

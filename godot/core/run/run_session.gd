@@ -31,8 +31,10 @@ var constitution_system: ConstitutionSystem
 var collapse_system: CollapseSystem
 var annual_settlement_system: AnnualSettlementSystem
 var flow_controller: FlowController
+var newspaper_front_resolvers: Array[Callable] = []
 var term_report: Dictionary = {}
 var _last_awarded_term: int = 0
+var _previous_newspaper_collapse: int = 0
 
 
 func configure_content(
@@ -141,6 +143,8 @@ func _start_term(term_number: int) -> bool:
 	race_system.rebuild_annual_expectations(context)
 	flow_controller = FlowController.new()
 	flow_controller.setup(context)
+	_previous_newspaper_collapse = state.collapse_level
+	_configure_newspaper_front_resolvers()
 	return true
 
 
@@ -152,6 +156,8 @@ func advance_month() -> bool:
 	)
 	if not advanced:
 		return false
+	if state.run_phase != RunState.RunPhase.TERM_ENDED:
+		_resolve_newspaper_front(state)
 	return (
 		_settle_and_start_next_term()
 		if state.run_phase == RunState.RunPhase.TERM_ENDED
@@ -222,3 +228,145 @@ func accept_proposal_trait(proposal: ProposalInstance) -> bool:
 
 func convert_proposal_trait_to_donation(proposal: ProposalInstance) -> bool:
 	return proposal_system.resolve_bonus_choice(state, proposal, false)
+
+
+func _configure_newspaper_front_resolvers() -> void:
+	newspaper_front_resolvers.clear()
+	newspaper_front_resolvers.append(Callable(self, "_resolve_no_event_front"))
+	newspaper_front_resolvers.append(Callable(self, "_resolve_term_start_front"))
+	newspaper_front_resolvers.append(Callable(self, "_resolve_bill_passed_front"))
+	newspaper_front_resolvers.append(Callable(self, "_resolve_policy_triggered_front"))
+	newspaper_front_resolvers.append(Callable(self, "_resolve_collapse_50_front"))
+	newspaper_front_resolvers.append(Callable(self, "_resolve_collapse_80_front"))
+	newspaper_front_resolvers.append(Callable(self, "_resolve_collapse_90_front"))
+
+
+func _resolve_newspaper_front(current_state: RunState) -> void:
+	current_state.newspaper_front.clear()
+	for resolver in newspaper_front_resolvers:
+		var result: Variant = resolver.call(current_state)
+		if result is Dictionary and not result.is_empty():
+			current_state.newspaper_front = result.duplicate(true)
+	current_state.newspaper_pending_bill = null
+	current_state.newspaper_triggered_policies.clear()
+	_previous_newspaper_collapse = current_state.collapse_level
+
+
+func _resolve_no_event_front(current_state: RunState) -> Variant:
+	if not current_state.month_report_events.is_empty():
+		return null
+	return _newspaper_front(
+		"无事发生？",
+		"本月没有任何种族事件达到公开门槛。报馆未能找到足以占据头版的危机，只得提醒读者：没有消息，或许正是最值得警惕的消息。"
+	)
+
+
+func _resolve_term_start_front(current_state: RunState) -> Variant:
+	if current_state.year != 1 or current_state.month != 1:
+		return null
+	return _newspaper_front(
+		"第%d次入主会同" % current_state.term,
+		"新一任联合政府开议。各族在彼此之间挑了一圈，最终还是把会同的印信交到驻岁案前；至少在谁也不肯让步的时候，长生者看起来还算能等。"
+	)
+
+
+func _resolve_bill_passed_front(current_state: RunState) -> Variant:
+	var bill := current_state.newspaper_pending_bill
+	if bill == null:
+		return null
+	var bill_name := "新法案" if bill.title.strip_edges().is_empty() else "《%s》" % bill.title.strip_edges()
+	var reductions := _expected_monthly_bill_reductions(bill)
+	var reduction_text := (
+		"按所含提案的形成速度估算，五项公共指标平均每月没有净下降"
+		if reductions.is_empty()
+		else "按所含提案的形成速度估算，平均每月预计减少：%s" % "、".join(reductions)
+	)
+	return _newspaper_front(
+		"%s获议会通过" % bill_name,
+		"新法已经生效。%s；实际月度路径仍可能短暂偏离。" % reduction_text
+	)
+
+
+func _resolve_policy_triggered_front(current_state: RunState) -> Variant:
+	if current_state.newspaper_triggered_policies.is_empty():
+		return null
+	var names := PackedStringArray()
+	for definition in current_state.newspaper_triggered_policies:
+		if definition != null:
+			names.append("《%s》" % definition.display_name)
+	if names.is_empty():
+		return null
+	if names.size() == 1:
+		return _newspaper_front(
+			"%s触发　授权即时生效" % names[0],
+			"本月账簿关系满足既定条件，%s随即执行。其影响已经记入当前市场状态；若由此带动其它政策条件，同月连锁也已一并结算。" % names[0]
+		)
+	return _newspaper_front(
+		"%d项政策相继触发" % names.size(),
+		"本月市场关系连续触及既定条款，%s即时生效。各项影响与由此产生的连锁变化，均已记入本期账簿。" % "、".join(names)
+	)
+
+
+func _resolve_collapse_50_front(current_state: RunState) -> Variant:
+	if not _crossed_collapse_threshold(current_state, 50):
+		return null
+	return _newspaper_front(
+		"危机预期过半　议会警告声渐密",
+		"各族对全面崩溃的共同预期已经越过半数。报馆、议员与来访者开始反复引用彼此的警告；但截至目前，仍没有证据能够证明一场全面灾难已经发生。"
+	)
+
+
+func _resolve_collapse_80_front(current_state: RunState) -> Variant:
+	if not _crossed_collapse_threshold(current_state, 80):
+		return null
+	return _newspaper_front(
+		"八成相信危机将至　会同难闻别声",
+		"崩溃预期已经越过八成。原本彼此矛盾的警告开始汇成同一种结论：必须立刻做些什么。至于灾难本身，仍没有一项账簿记录能够单独证实它。"
+	)
+
+
+func _resolve_collapse_90_front(current_state: RunState) -> Variant:
+	if not _crossed_collapse_threshold(current_state, 90):
+		return null
+	return _newspaper_front(
+		"九成危言同指一处　已经没有时间了",
+		"崩溃预期越过九成，会同几乎无人再讨论危机是否会来，只争论它将在何时到来。越是缺少确定证据，新的期限、推算和补救方案反而越快出现。"
+	)
+
+
+func _crossed_collapse_threshold(current_state: RunState, percent: int) -> bool:
+	if balance == null or balance.max_collapse <= 0:
+		return false
+	var threshold := ceili(float(balance.max_collapse) * float(percent) / 100.0)
+	return _previous_newspaper_collapse < threshold and current_state.collapse_level >= threshold
+
+
+func _expected_monthly_bill_reductions(bill: ActiveBillState) -> PackedStringArray:
+	var totals: Dictionary = {}
+	for metric in Metric.all_ids():
+		totals[metric] = 0.0
+	for active_proposal in bill.proposals:
+		if active_proposal == null or active_proposal.proposal == null:
+			continue
+		var proposal := active_proposal.proposal
+		var effect := proposal.get_total_effect()
+		var lag := maxi(proposal.lag_months, 1)
+		for metric in Metric.all_ids():
+			totals[metric] = float(totals[metric]) + float(effect.get_value(metric)) / float(lag)
+	var reductions := PackedStringArray()
+	for metric in Metric.all_ids():
+		var delta := float(totals[metric])
+		if delta >= -0.05:
+			continue
+		reductions.append("%s约%s" % [Metric.display_name(metric), _format_front_number(absf(delta))])
+	return reductions
+
+
+func _format_front_number(value: float) -> String:
+	if is_equal_approx(value, roundf(value)):
+		return str(roundi(value))
+	return "%.1f" % value
+
+
+func _newspaper_front(title: String, content: String) -> Dictionary:
+	return {"title": title, "content": content}
