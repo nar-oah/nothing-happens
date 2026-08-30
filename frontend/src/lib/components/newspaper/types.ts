@@ -32,17 +32,12 @@ export type NewspaperFrontData = {
 
 export type NewspaperEventData = {
 	race: NewspaperRace;
-	description?: string;
+	description: string;
 	metric: Metric;
 	value: number;
 	countdown: number;
 	strength: number;
 	state: NewspaperEventState;
-};
-
-export type NewspaperCommentData = {
-	title: string[];
-	comment: string[];
 };
 
 export const NEWSPAPER_METRIC_ORDER: Metric[] = [
