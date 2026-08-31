@@ -35,7 +35,7 @@ func _test_donation_pool_spending_and_detection(t: BackendTestContext) -> void:
 	balance.donation_detection_probability = 0.0
 	var article := t.make_article(race)
 	var detection := DonationDetectionEffect.new()
-	detection.detection_probability = 1.0
+	detection.probability = 1.0
 	article.effects.append(detection)
 	var session := t.make_session([race], [group], t.make_seats(2, "donation"), [article], balance)
 	var first_seat := session.state.seats[0]
