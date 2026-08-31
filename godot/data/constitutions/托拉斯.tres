@@ -1,34 +1,76 @@
 [gd_resource type="Resource" script_class="ConstitutionArticleDefinition" format=3 uid="uid://cearrchs215h0"]
 
-[ext_resource type="Script" uid="uid://dajy5425i5dpq" path="res://definitions/constitution_article_definition.gd" id="1_article_script"]
-[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="1_oxs0a"]
-[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_g5wit"]
-[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
-[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="3_kafho"]
-[ext_resource type="Resource" uid="uid://c2eco18e42n34" path="res://data/races/偃偶.tres" id="3_race_yano"]
-[ext_resource type="Resource" uid="uid://cwg5ec0qduwd" path="res://data/constitutions/承认.tres" id="4_prereq"]
-[ext_resource type="Resource" uid="uid://bi88cp6wyendn" path="res://data/policies/全业并购.tres" id="5_policy_1"]
-[ext_resource type="Resource" uid="uid://c256dkijh3g8y" path="res://data/policies/统一定价.tres" id="6_policy_2"]
-[ext_resource type="Resource" uid="uid://5i0u8uobs8sd" path="res://data/policies/自动替工.tres" id="7_policy_3"]
-[ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="13_2mc4c"]
-[ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="condition_script"]
-[ext_resource type="Resource" uid="uid://b7vlc4eb8m4io" path="res://data/interest_groups/造身公所.tres" id="group"]
-[ext_resource type="Resource" uid="uid://cqpejxjyt0cyq" path="res://data/constitution_rows/偃偶.tres" id="row"]
+[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="24_2vfxq"]
+[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="25_2yxc2"]
+[ext_resource type="Script" uid="uid://dajy5425i5dpq" path="res://definitions/constitution_article_definition.gd" id="article_script_1"]
+[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="condition_type_4"]
+[ext_resource type="Script" uid="uid://cpc61vbc5rd11" path="res://definitions/constitution_effect.gd" id="effect_type_3"]
+[ext_resource type="Script" uid="uid://bxk3ulvgcdh1p" path="res://definitions/constitution_effects/group_merge_effect.gd" id="effscript_merge_29"]
+[ext_resource type="Script" uid="uid://3ubhh0j1oj6w" path="res://definitions/constitution_effects/modify_interest_group_effect.gd" id="effscript_modify_group_27"]
+[ext_resource type="Script" uid="uid://ccj4ntfstuxfm" path="res://definitions/constitution_effects/modify_race_effect.gd" id="effscript_modify_race_15"]
+[ext_resource type="Script" uid="uid://4himuh5fg8m4" path="res://definitions/constitution_effects/petition_effect.gd" id="effscript_petition_30"]
+[ext_resource type="Script" uid="uid://dijsxl05i7yxo" path="res://definitions/constitution_effects/race_seat_effect.gd" id="effscript_race_seat_13"]
+[ext_resource type="Resource" uid="uid://b7vlc4eb8m4io" path="res://data/interest_groups/造身公所.tres" id="group_12"]
+[ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="group_type_6"]
+[ext_resource type="Resource" uid="uid://bi88cp6wyendn" path="res://data/policies/全业并购.tres" id="policy_8"]
+[ext_resource type="Resource" uid="uid://c256dkijh3g8y" path="res://data/policies/统一定价.tres" id="policy_9"]
+[ext_resource type="Resource" uid="uid://5i0u8uobs8sd" path="res://data/policies/自动替工.tres" id="policy_10"]
+[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="policy_type_2"]
+[ext_resource type="Resource" uid="uid://c2eco18e42n34" path="res://data/races/偃偶.tres" id="race_14"]
+[ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/人类.tres" id="race_16"]
+[ext_resource type="Resource" uid="uid://bw162ei21njtt" path="res://data/races/比翼.tres" id="race_17"]
+[ext_resource type="Resource" uid="uid://b4e7rdu770lrv" path="res://data/races/桃花妖.tres" id="race_18"]
+[ext_resource type="Resource" uid="uid://bto7mkhf8cqca" path="res://data/races/南柯.tres" id="race_19"]
+[ext_resource type="Resource" uid="uid://dknll48i00v4u" path="res://data/races/驻岁.tres" id="race_20"]
+[ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="race_type_5"]
+[ext_resource type="Resource" uid="uid://cqpejxjyt0cyq" path="res://data/constitution_rows/偃偶.tres" id="row_7"]
+[ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="seat_condition_script_11"]
+[ext_resource type="Resource" path="res://data/races/variants/托拉斯/人类（托拉斯）.tres" id="variant_21"]
+[ext_resource type="Resource" path="res://data/races/variants/托拉斯/比翼（托拉斯）.tres" id="variant_22"]
+[ext_resource type="Resource" path="res://data/races/variants/托拉斯/偃偶（托拉斯）.tres" id="variant_23"]
+[ext_resource type="Resource" path="res://data/races/variants/托拉斯/桃花妖（托拉斯）.tres" id="variant_24"]
+[ext_resource type="Resource" path="res://data/races/variants/托拉斯/南柯（托拉斯）.tres" id="variant_25"]
+[ext_resource type="Resource" path="res://data/races/variants/托拉斯/驻岁（托拉斯）.tres" id="variant_26"]
+[ext_resource type="Resource" path="res://data/interest_groups/variants/造身公所（托拉斯）.tres" id="variant_group_28"]
 
-[sub_resource type="Resource" id="Resource_condition"]
-script = ExtResource("condition_script")
-interest_group = ExtResource("group")
+[sub_resource type="Resource" id="Effect_1"]
+script = ExtResource("effscript_race_seat_13")
+races = Array[ExtResource("race_type_5")]([ExtResource("race_14")])
+
+[sub_resource type="Resource" id="Effect_2"]
+script = ExtResource("effscript_modify_race_15")
+target_races = Array[ExtResource("race_type_5")]([ExtResource("race_16"), ExtResource("race_17"), ExtResource("race_14"), ExtResource("race_18"), ExtResource("race_19"), ExtResource("race_20")])
+source_races = Array[ExtResource("race_type_5")]([ExtResource("variant_21"), ExtResource("variant_22"), ExtResource("variant_23"), ExtResource("variant_24"), ExtResource("variant_25"), ExtResource("variant_26")])
+
+[sub_resource type="Resource" id="Effect_3"]
+script = ExtResource("effscript_modify_group_27")
+target_groups = Array[ExtResource("group_type_6")]([ExtResource("group_12")])
+source_groups = Array[ExtResource("group_type_6")]([ExtResource("variant_group_28")])
+
+[sub_resource type="Resource" id="Effect_4"]
+script = ExtResource("effscript_merge_29")
+target_group = ExtResource("group_12")
+threshold = 1.0
+
+[sub_resource type="Resource" id="Effect_5"]
+script = ExtResource("effscript_petition_30")
+count_races = Array[ExtResource("race_type_5")]([ExtResource("race_16"), ExtResource("race_17"), ExtResource("race_14"), ExtResource("race_18"), ExtResource("race_19"), ExtResource("race_20")])
+event_races = Array[ExtResource("race_type_5")]([ExtResource("race_16")])
+fixed_count = 3
+
+[sub_resource type="Resource" id="Condition_1"]
+script = ExtResource("seat_condition_script_11")
+interest_group = ExtResource("group_12")
 required_rate = 0.9
 
 [resource]
-script = ExtResource("1_article_script")
+script = ExtResource("article_script_1")
 display_name = "托拉斯"
 description = "当所有身体都可以自由交易，所有产业都可以自由兼并，最后留下的最自由状态，也许就是所有人面对同一个买家。
 托拉斯把产业集团、合同标准、行身市场乃至议会影响收进一个组织。偃偶终于成为完整的市场主体，也因此迎来了一个可以把完整的“自己”全部交给市场的世界。
 他们没有摆脱商品身份，只是让商品与公民之间最后那条界线失去了意义。"
-row = ExtResource("row")
+row = ExtResource("row_7")
 is_terminal = true
-race = ExtResource("3_race_yano")
-prerequisite = ExtResource("4_prereq")
-seat_condition = SubResource("Resource_condition")
-policies = Array[ExtResource("2_policy_script")]([ExtResource("5_policy_1"), ExtResource("6_policy_2"), ExtResource("7_policy_3")])
+seat_condition = SubResource("Condition_1")
+policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
+effects = Array[ExtResource("effect_type_3")]([SubResource("Effect_1"), SubResource("Effect_2"), SubResource("Effect_3"), SubResource("Effect_4"), SubResource("Effect_5")])

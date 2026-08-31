@@ -1,31 +1,43 @@
 [gd_resource type="Resource" script_class="ConstitutionArticleDefinition" format=3 uid="uid://bpw0qny2boax0"]
 
-[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="1_0qqdk"]
-[ext_resource type="Script" uid="uid://dajy5425i5dpq" path="res://definitions/constitution_article_definition.gd" id="1_article_script"]
-[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="1_hvbr0"]
-[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_1vvyq"]
-[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
-[ext_resource type="Resource" uid="uid://b4e7rdu770lrv" path="res://data/races/桃花妖.tres" id="3_race_peach"]
-[ext_resource type="Resource" uid="uid://brf58w2wswch1" path="res://data/constitutions/自治.tres" id="4_prereq"]
-[ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="5_seat_condition_script"]
-[ext_resource type="Resource" uid="uid://bnyvicjgl8uey" path="res://data/policies/闭关减市.tres" id="6_policy_1"]
-[ext_resource type="Resource" uid="uid://cq1ot5f7pmk3b" path="res://data/policies/归田自给.tres" id="7_policy_2"]
-[ext_resource type="Resource" uid="uid://cg0ej8imb83y3" path="res://data/policies/族内免征.tres" id="8_policy_3"]
-[ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="12_eapqt"]
-[ext_resource type="Resource" uid="uid://cq8xj0frv0cdf" path="res://data/constitution_rows/桃源.tres" id="row"]
+[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="8_vnl51"]
+[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="9_s71yj"]
+[ext_resource type="Script" uid="uid://dajy5425i5dpq" path="res://definitions/constitution_article_definition.gd" id="article_script_1"]
+[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="condition_type_4"]
+[ext_resource type="Script" uid="uid://cpc61vbc5rd11" path="res://definitions/constitution_effect.gd" id="effect_type_3"]
+[ext_resource type="Script" uid="uid://cyqxth3loyawx" path="res://definitions/constitution_effects/local_interest_group_effect.gd" id="effscript_local_group_15"]
+[ext_resource type="Script" uid="uid://ccj4ntfstuxfm" path="res://definitions/constitution_effects/modify_race_effect.gd" id="effscript_modify_race_13"]
+[ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="group_type_6"]
+[ext_resource type="Resource" uid="uid://bnyvicjgl8uey" path="res://data/policies/闭关减市.tres" id="policy_8"]
+[ext_resource type="Resource" uid="uid://cq1ot5f7pmk3b" path="res://data/policies/归田自给.tres" id="policy_9"]
+[ext_resource type="Resource" uid="uid://cg0ej8imb83y3" path="res://data/policies/族内免征.tres" id="policy_10"]
+[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="policy_type_2"]
+[ext_resource type="Resource" uid="uid://b4e7rdu770lrv" path="res://data/races/桃花妖.tres" id="race_12"]
+[ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="race_type_5"]
+[ext_resource type="Resource" uid="uid://cq8xj0frv0cdf" path="res://data/constitution_rows/桃源.tres" id="row_7"]
+[ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="seat_condition_script_11"]
+[ext_resource type="Resource" path="res://data/races/variants/桃源/桃花妖（封闭）.tres" id="variant_14"]
 
-[sub_resource type="Resource" id="Resource_seat_condition"]
-script = ExtResource("5_seat_condition_script")
-race = ExtResource("3_race_peach")
+[sub_resource type="Resource" id="Effect_1"]
+script = ExtResource("effscript_modify_race_13")
+target_races = Array[ExtResource("race_type_5")]([ExtResource("race_12")])
+source_races = Array[ExtResource("race_type_5")]([ExtResource("variant_14")])
+
+[sub_resource type="Resource" id="Effect_2"]
+script = ExtResource("effscript_local_group_15")
+races = Array[ExtResource("race_type_5")]([ExtResource("race_12")])
+
+[sub_resource type="Resource" id="Condition_1"]
+script = ExtResource("seat_condition_script_11")
+race = ExtResource("race_12")
 required_rate = 0.5
 
 [resource]
-script = ExtResource("1_article_script")
+script = ExtResource("article_script_1")
 display_name = "封闭"
 description = "桃花妖看见的答案比其他人简单得多：麻烦之所以越来越多，是因为路开得太多。
 于是每个地方重新只为自己负责，每名议员先回答故土的需要，再谈全岛的宏大方案。蓬莱仍有议会，但桃源不再愿意让一个跨岛组织替所有村镇同时作答。"
-row = ExtResource("row")
-race = ExtResource("3_race_peach")
-prerequisite = ExtResource("4_prereq")
-seat_condition = SubResource("Resource_seat_condition")
-policies = Array[ExtResource("2_policy_script")]([ExtResource("6_policy_1"), ExtResource("7_policy_2"), ExtResource("8_policy_3")])
+row = ExtResource("row_7")
+seat_condition = SubResource("Condition_1")
+policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
+effects = Array[ExtResource("effect_type_3")]([SubResource("Effect_1"), SubResource("Effect_2")])

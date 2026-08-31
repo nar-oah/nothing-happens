@@ -1,24 +1,45 @@
-[gd_resource type="Resource" script_class="RegulationConstitutionArticleDefinition" format=3 uid="uid://dnw80vwvu2hi5"]
+[gd_resource type="Resource" script_class="ConstitutionArticleDefinition" format=3 uid="uid://dnw80vwvu2hi5"]
 
-[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="1_0nrug"]
-[ext_resource type="Script" uid="uid://bqftg57rtalf1" path="res://definitions/regulation_constitution_article_definition.gd" id="1_article_script"]
-[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_n7ag6"]
-[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
-[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="3_mrquw"]
-[ext_resource type="Resource" uid="uid://dknll48i00v4u" path="res://data/races/驻岁.tres" id="3_race_zhushui"]
-[ext_resource type="Resource" uid="uid://c5g3c2ddcydgs" path="res://data/policies/权宜平准.tres" id="4_policy_1"]
-[ext_resource type="Resource" uid="uid://c3lw0bc4rhf4r" path="res://data/policies/特旨通商.tres" id="5_policy_2"]
-[ext_resource type="Resource" uid="uid://d4l6vd3cswlv7" path="res://data/policies/临机调工.tres" id="6_policy_3"]
-[ext_resource type="Resource" uid="uid://cl8wvh82je431" path="res://data/constitution_rows/监管.tres" id="row"]
+[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="9_7i8f4"]
+[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="10_emaho"]
+[ext_resource type="Script" uid="uid://dajy5425i5dpq" path="res://definitions/constitution_article_definition.gd" id="article_script_1"]
+[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="condition_type_4"]
+[ext_resource type="Script" uid="uid://cpc61vbc5rd11" path="res://definitions/constitution_effect.gd" id="effect_type_3"]
+[ext_resource type="Script" uid="uid://bwxgn4rh6kt3v" path="res://definitions/constitution_effects/donation_detection_effect.gd" id="effscript_donation_15"]
+[ext_resource type="Script" uid="uid://d7jfq853aemy" path="res://definitions/constitution_effects/expectation_growth_effect.gd" id="effscript_growth_13"]
+[ext_resource type="Script" uid="uid://dbweki6m0jjf5" path="res://definitions/constitution_effects/event_intel_probability_effect.gd" id="effscript_intel_14"]
+[ext_resource type="Script" uid="uid://dijsxl05i7yxo" path="res://definitions/constitution_effects/race_seat_effect.gd" id="effscript_race_seat_11"]
+[ext_resource type="Resource" uid="uid://c5g3c2ddcydgs" path="res://data/policies/权宜平准.tres" id="policy_8"]
+[ext_resource type="Resource" uid="uid://c3lw0bc4rhf4r" path="res://data/policies/特旨通商.tres" id="policy_9"]
+[ext_resource type="Resource" uid="uid://d4l6vd3cswlv7" path="res://data/policies/临机调工.tres" id="policy_10"]
+[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="policy_type_2"]
+[ext_resource type="Resource" uid="uid://dknll48i00v4u" path="res://data/races/驻岁.tres" id="race_12"]
+[ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="race_type_5"]
+[ext_resource type="Resource" uid="uid://cl8wvh82je431" path="res://data/constitution_rows/监管.tres" id="row_7"]
+
+[sub_resource type="Resource" id="Effect_1"]
+script = ExtResource("effscript_race_seat_11")
+races = Array[ExtResource("race_type_5")]([ExtResource("race_12")])
+participates_in_variable_seat_allocation = false
+
+[sub_resource type="Resource" id="Effect_2"]
+script = ExtResource("effscript_growth_13")
+races = Array[ExtResource("race_type_5")]([ExtResource("race_12")])
+growth_modifier = -1.0
+
+[sub_resource type="Resource" id="Effect_3"]
+script = ExtResource("effscript_intel_14")
+races = Array[ExtResource("race_type_5")]([ExtResource("race_12")])
+probability_modifier = 1.0
+
+[sub_resource type="Resource" id="Effect_4"]
+script = ExtResource("effscript_donation_15")
 
 [resource]
-script = ExtResource("1_article_script")
-donation_detection_probability = 0.0
+script = ExtResource("article_script_1")
 display_name = "哲人王"
 description = "蓬莱把政权交给驻岁，本来就是因为相信活得足够久的人能够看得比普通人更远。
 既然执政者已经见过几代人的兴衰，又何必让那些只能看到眼前几十年的人监督他们？哲人王制度建立在一份简单而危险的信任上：长寿本身足以保证审慎。"
-row = ExtResource("row")
-race = ExtResource("3_race_zhushui")
-participates_in_variable_seat_allocation = false
-expectation_growth_rate = -1.0
-policies = Array[ExtResource("2_policy_script")]([ExtResource("4_policy_1"), ExtResource("5_policy_2"), ExtResource("6_policy_3")])
+row = ExtResource("row_7")
+policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
+effects = Array[ExtResource("effect_type_3")]([SubResource("Effect_1"), SubResource("Effect_2"), SubResource("Effect_3"), SubResource("Effect_4")])

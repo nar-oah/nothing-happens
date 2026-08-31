@@ -1,33 +1,50 @@
-[gd_resource type="Resource" script_class="LocalAutonomyConstitutionArticleDefinition" format=3 uid="uid://dce70h370cmcp"]
+[gd_resource type="Resource" script_class="ConstitutionArticleDefinition" format=3 uid="uid://dce70h370cmcp"]
 
-[ext_resource type="Script" uid="uid://dv3eypbtseh1p" path="res://definitions/local_autonomy_constitution_article_definition.gd" id="1_article_script"]
-[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="1_h4ttb"]
-[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="1_imfq5"]
-[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_cjewm"]
-[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
-[ext_resource type="Resource" uid="uid://b4e7rdu770lrv" path="res://data/races/桃花妖.tres" id="3_race_peach"]
-[ext_resource type="Resource" uid="uid://bpw0qny2boax0" path="res://data/constitutions/封闭.tres" id="4_prereq"]
-[ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="5_seat_condition_script"]
-[ext_resource type="Resource" uid="uid://dee3tls8eebax" path="res://data/policies/一地一议.tres" id="6_policy_1"]
-[ext_resource type="Resource" uid="uid://cy6isbo6ilvjh" path="res://data/policies/各地自给.tres" id="7_policy_2"]
-[ext_resource type="Resource" uid="uid://b5w6n7hgkbbhi" path="res://data/policies/地方平准.tres" id="8_policy_3"]
-[ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="12_1s73p"]
-[ext_resource type="Resource" uid="uid://cq8xj0frv0cdf" path="res://data/constitution_rows/桃源.tres" id="row"]
+[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="13_8bc06"]
+[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="14_qfh7q"]
+[ext_resource type="Script" uid="uid://dajy5425i5dpq" path="res://definitions/constitution_article_definition.gd" id="article_script_1"]
+[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="condition_type_4"]
+[ext_resource type="Script" uid="uid://cpc61vbc5rd11" path="res://definitions/constitution_effect.gd" id="effect_type_3"]
+[ext_resource type="Script" uid="uid://cyqxth3loyawx" path="res://definitions/constitution_effects/local_interest_group_effect.gd" id="effscript_local_group_15"]
+[ext_resource type="Script" uid="uid://ccj4ntfstuxfm" path="res://definitions/constitution_effects/modify_race_effect.gd" id="effscript_modify_race_13"]
+[ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="group_type_6"]
+[ext_resource type="Resource" uid="uid://dee3tls8eebax" path="res://data/policies/一地一议.tres" id="policy_8"]
+[ext_resource type="Resource" uid="uid://cy6isbo6ilvjh" path="res://data/policies/各地自给.tres" id="policy_9"]
+[ext_resource type="Resource" uid="uid://b5w6n7hgkbbhi" path="res://data/policies/地方平准.tres" id="policy_10"]
+[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="policy_type_2"]
+[ext_resource type="Resource" uid="uid://b4e7rdu770lrv" path="res://data/races/桃花妖.tres" id="race_12"]
+[ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/人类.tres" id="race_16"]
+[ext_resource type="Resource" uid="uid://bw162ei21njtt" path="res://data/races/比翼.tres" id="race_17"]
+[ext_resource type="Resource" uid="uid://c2eco18e42n34" path="res://data/races/偃偶.tres" id="race_18"]
+[ext_resource type="Resource" uid="uid://bto7mkhf8cqca" path="res://data/races/南柯.tres" id="race_19"]
+[ext_resource type="Resource" uid="uid://dknll48i00v4u" path="res://data/races/驻岁.tres" id="race_20"]
+[ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="race_type_5"]
+[ext_resource type="Resource" uid="uid://cq8xj0frv0cdf" path="res://data/constitution_rows/桃源.tres" id="row_7"]
+[ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="seat_condition_script_11"]
+[ext_resource type="Resource" path="res://data/races/variants/桃源/桃花妖（地区自治）.tres" id="variant_14"]
 
-[sub_resource type="Resource" id="Resource_seat_condition"]
-script = ExtResource("5_seat_condition_script")
-race = ExtResource("3_race_peach")
+[sub_resource type="Resource" id="Effect_1"]
+script = ExtResource("effscript_modify_race_13")
+target_races = Array[ExtResource("race_type_5")]([ExtResource("race_12")])
+source_races = Array[ExtResource("race_type_5")]([ExtResource("variant_14")])
+
+[sub_resource type="Resource" id="Effect_2"]
+script = ExtResource("effscript_local_group_15")
+races = Array[ExtResource("race_type_5")]([ExtResource("race_16"), ExtResource("race_17"), ExtResource("race_18"), ExtResource("race_12"), ExtResource("race_19"), ExtResource("race_20")])
+
+[sub_resource type="Resource" id="Condition_1"]
+script = ExtResource("seat_condition_script_11")
+race = ExtResource("race_12")
 required_rate = 0.9
 
 [resource]
-script = ExtResource("1_article_script")
+script = ExtResource("article_script_1")
 display_name = "地区自治"
 description = "如果每个地方都有自己的土地、祖先、生活和麻烦，那么“整个蓬莱共同的利益”究竟是谁的利益？
 地区自治把这个怀疑贯彻到底。跨地区集团退出议会，每一席只代表一个具体地方；任何想改变全岛的方案，都必须重新面对那些地图上彼此分开的生活。
 议会最终变成了蓬莱本身：许多地方彼此相邻，却再没有谁能轻易替所有地方说话。"
-row = ExtResource("row")
+row = ExtResource("row_7")
 is_terminal = true
-race = ExtResource("3_race_peach")
-prerequisite = ExtResource("4_prereq")
-seat_condition = SubResource("Resource_seat_condition")
-policies = Array[ExtResource("2_policy_script")]([ExtResource("6_policy_1"), ExtResource("7_policy_2"), ExtResource("8_policy_3")])
+seat_condition = SubResource("Condition_1")
+policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
+effects = Array[ExtResource("effect_type_3")]([SubResource("Effect_1"), SubResource("Effect_2")])

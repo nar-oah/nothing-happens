@@ -1,65 +1,77 @@
-[gd_resource type="Resource" script_class="BiyiConstitutionArticleDefinition" format=3 uid="uid://do2fqf4b02kpc"]
+[gd_resource type="Resource" script_class="ConstitutionArticleDefinition" format=3 uid="uid://do2fqf4b02kpc"]
 
-[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="1_a88qu"]
-[ext_resource type="Script" uid="uid://dtldpcolvfdl0" path="res://definitions/biyi_constitution_article_definition.gd" id="1_article_script"]
-[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
-[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_wwtgu"]
-[ext_resource type="Resource" uid="uid://bw162ei21njtt" path="res://data/races/比翼.tres" id="3_race_biyi"]
-[ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/人类.tres" id="4_race_human"]
-[ext_resource type="Resource" uid="uid://bto7mkhf8cqca" path="res://data/races/南柯.tres" id="5_race_nanke"]
-[ext_resource type="Resource" uid="uid://b4e7rdu770lrv" path="res://data/races/桃花妖.tres" id="6_race_peach"]
-[ext_resource type="Resource" uid="uid://c2eco18e42n34" path="res://data/races/偃偶.tres" id="7_race_yano"]
-[ext_resource type="Resource" uid="uid://pdec6waifvom" path="res://data/constitutions/比翼化.tres" id="8_prereq"]
-[ext_resource type="Resource" uid="uid://nuiau2qkch4e" path="res://data/interest_groups/蓬莱公所.tres" id="9_group_1"]
-[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="10_influence_rule_script"]
-[ext_resource type="Resource" uid="uid://d0tsptffgoh8s" path="res://data/policies/官营平价.tres" id="11_policy_1"]
-[ext_resource type="Resource" uid="uid://bs7ofkv8hds3c" path="res://data/policies/官业扩工.tres" id="12_policy_2"]
-[ext_resource type="Resource" uid="uid://rj2c4acnwl5f" path="res://data/policies/统购统销.tres" id="13_policy_3"]
-[ext_resource type="Resource" uid="uid://b5clravmnjms4" path="res://data/constitution_rows/文化.tres" id="row"]
+[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="25_1r7y4"]
+[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="26_f60io"]
+[ext_resource type="Script" uid="uid://dajy5425i5dpq" path="res://definitions/constitution_article_definition.gd" id="article_script_1"]
+[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="condition_type_4"]
+[ext_resource type="Script" uid="uid://cpc61vbc5rd11" path="res://definitions/constitution_effect.gd" id="effect_type_3"]
+[ext_resource type="Script" uid="uid://deskdxywl7uny" path="res://definitions/constitution_effects/interest_group_influence_bonus_effect.gd" id="effscript_influence_28"]
+[ext_resource type="Script" uid="uid://bxk3ulvgcdh1p" path="res://definitions/constitution_effects/group_merge_effect.gd" id="effscript_merge_30"]
+[ext_resource type="Script" uid="uid://ccj4ntfstuxfm" path="res://definitions/constitution_effects/modify_race_effect.gd" id="effscript_modify_race_15"]
+[ext_resource type="Resource" uid="uid://lr28x7rgd732" path="res://data/interest_groups/医学会.tres" id="group_12"]
+[ext_resource type="Resource" uid="uid://by7u482sgaihw" path="res://data/interest_groups/听弦塔.tres" id="group_13"]
+[ext_resource type="Resource" uid="uid://b7vlc4eb8m4io" path="res://data/interest_groups/造身公所.tres" id="group_14"]
+[ext_resource type="Resource" uid="uid://nuiau2qkch4e" path="res://data/interest_groups/蓬莱公所.tres" id="group_29"]
+[ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="group_type_6"]
+[ext_resource type="Resource" uid="uid://d0tsptffgoh8s" path="res://data/policies/官营平价.tres" id="policy_8"]
+[ext_resource type="Resource" uid="uid://bs7ofkv8hds3c" path="res://data/policies/官业扩工.tres" id="policy_9"]
+[ext_resource type="Resource" uid="uid://rj2c4acnwl5f" path="res://data/policies/统购统销.tres" id="policy_10"]
+[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="policy_type_2"]
+[ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/人类.tres" id="race_16"]
+[ext_resource type="Resource" uid="uid://bw162ei21njtt" path="res://data/races/比翼.tres" id="race_17"]
+[ext_resource type="Resource" uid="uid://c2eco18e42n34" path="res://data/races/偃偶.tres" id="race_18"]
+[ext_resource type="Resource" uid="uid://b4e7rdu770lrv" path="res://data/races/桃花妖.tres" id="race_19"]
+[ext_resource type="Resource" uid="uid://bto7mkhf8cqca" path="res://data/races/南柯.tres" id="race_20"]
+[ext_resource type="Resource" uid="uid://dknll48i00v4u" path="res://data/races/驻岁.tres" id="race_21"]
+[ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="race_type_5"]
+[ext_resource type="Resource" uid="uid://b5clravmnjms4" path="res://data/constitution_rows/文化.tres" id="row_7"]
+[ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="seat_condition_script_11"]
+[ext_resource type="Resource" path="res://data/races/variants/文化/人类（阴阳）.tres" id="variant_22"]
+[ext_resource type="Resource" path="res://data/races/variants/文化/比翼（阴阳）.tres" id="variant_23"]
+[ext_resource type="Resource" path="res://data/races/variants/文化/偃偶（阴阳）.tres" id="variant_24"]
+[ext_resource type="Resource" path="res://data/races/variants/文化/桃花妖（阴阳）.tres" id="variant_25"]
+[ext_resource type="Resource" path="res://data/races/variants/文化/南柯（阴阳）.tres" id="variant_26"]
+[ext_resource type="Resource" path="res://data/races/variants/文化/驻岁（阴阳）.tres" id="variant_27"]
 
-[sub_resource type="Resource" id="Resource_influence_1"]
-script = ExtResource("10_influence_rule_script")
-race = ExtResource("3_race_biyi")
-interest_group = ExtResource("9_group_1")
-mode = 0
-rate = 0.5
+[sub_resource type="Resource" id="Condition_101"]
+script = ExtResource("seat_condition_script_11")
+interest_group = ExtResource("group_12")
+comparison = 3
+required_rate = 0.05
 
-[sub_resource type="Resource" id="Resource_influence_2"]
-script = ExtResource("10_influence_rule_script")
-race = ExtResource("4_race_human")
-interest_group = ExtResource("9_group_1")
-mode = 1
-rate = 0.5
+[sub_resource type="Resource" id="Condition_102"]
+script = ExtResource("seat_condition_script_11")
+interest_group = ExtResource("group_13")
+comparison = 3
+required_rate = 0.05
 
-[sub_resource type="Resource" id="Resource_influence_3"]
-script = ExtResource("10_influence_rule_script")
-race = ExtResource("7_race_yano")
-interest_group = ExtResource("9_group_1")
-mode = 1
-rate = 0.5
+[sub_resource type="Resource" id="Condition_103"]
+script = ExtResource("seat_condition_script_11")
+interest_group = ExtResource("group_14")
+comparison = 3
+required_rate = 0.05
 
-[sub_resource type="Resource" id="Resource_influence_4"]
-script = ExtResource("10_influence_rule_script")
-race = ExtResource("6_race_peach")
-interest_group = ExtResource("9_group_1")
-mode = 1
-rate = 0.5
+[sub_resource type="Resource" id="Effect_1"]
+script = ExtResource("effscript_modify_race_15")
+target_races = Array[ExtResource("race_type_5")]([ExtResource("race_16"), ExtResource("race_17"), ExtResource("race_18"), ExtResource("race_19"), ExtResource("race_20"), ExtResource("race_21")])
+source_races = Array[ExtResource("race_type_5")]([ExtResource("variant_22"), ExtResource("variant_23"), ExtResource("variant_24"), ExtResource("variant_25"), ExtResource("variant_26"), ExtResource("variant_27")])
 
-[sub_resource type="Resource" id="Resource_influence_5"]
-script = ExtResource("10_influence_rule_script")
-race = ExtResource("5_race_nanke")
-interest_group = ExtResource("9_group_1")
-mode = 1
-rate = 0.5
+[sub_resource type="Resource" id="Effect_2"]
+script = ExtResource("effscript_influence_28")
+interest_group = ExtResource("group_29")
+races = Array[ExtResource("race_type_5")]([ExtResource("race_17")])
+bonus_rate = 0.5
+
+[sub_resource type="Resource" id="Effect_3"]
+script = ExtResource("effscript_merge_30")
+target_group = ExtResource("group_29")
 
 [resource]
-script = ExtResource("1_article_script")
-yin_yang_adjustment_rate = 0.1
+script = ExtResource("article_script_1")
 display_name = "国有化"
 description = "外来的市场夺走了知识，本地的小集团又把公共需要切成各自的买卖。比翼给出的答案不是退回过去，而是让国家把这些东西重新收拢起来。
 于是产业、任命和资源开始汇入蓬莱公所。市场造成的混乱被统一调配取代，而谁能够解释“公共利益”，也越来越集中到同一个地方。"
-row = ExtResource("row")
-race = ExtResource("3_race_biyi")
-prerequisite = ExtResource("8_prereq")
-policies = Array[ExtResource("2_policy_script")]([ExtResource("11_policy_1"), ExtResource("12_policy_2"), ExtResource("13_policy_3")])
-influence_rules = Array[ExtResource("10_influence_rule_script")]([SubResource("Resource_influence_1"), SubResource("Resource_influence_2"), SubResource("Resource_influence_3"), SubResource("Resource_influence_4"), SubResource("Resource_influence_5")])
+row = ExtResource("row_7")
+conditions = Array[ExtResource("condition_type_4")]([SubResource("Condition_101"), SubResource("Condition_102"), SubResource("Condition_103")])
+policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
+effects = Array[ExtResource("effect_type_3")]([SubResource("Effect_1"), SubResource("Effect_2"), SubResource("Effect_3")])

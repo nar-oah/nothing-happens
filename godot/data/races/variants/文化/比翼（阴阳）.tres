@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="BiyiRaceDefinition" format=3]
+
+
+[ext_resource type="Script" path="res://definitions/biyi_race_definition.gd" id="script"]
+
+[resource]
+script = ExtResource("script")
+display_name = "比翼"
+description = "比翼曾替蓬莱保存文字、历法与知识，也因此长期把自己视为本土文化最可靠的解释者。汉语官署、印刷、海贸教育和外来技术让这种地位迅速消失，他们便把失业、传承断裂和机会减少理解成外来者夺走了原本属于自己的位置。于是，比翼越来越希望让本族语言、知识传统乃至政治组织重新成为蓬莱的中心。"
+event_description = "比翼把知识地位的流失首先体验为职位与发展机会减少。就业不足会成为两半共同的焦虑；阴月又担心公共机构缺少税课，阳月则担心新的知识产业缺少投资。"
+yin_yang_enabled = true
+increase_tax = true
+increase_employment = true
+increase_investment = true
+yin_tax = true

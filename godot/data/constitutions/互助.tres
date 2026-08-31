@@ -1,24 +1,31 @@
-[gd_resource type="Resource" script_class="NankeConstitutionArticleDefinition" format=3 uid="uid://ctgeqmbo0c1y2"]
+[gd_resource type="Resource" script_class="ConstitutionArticleDefinition" format=3 uid="uid://ctgeqmbo0c1y2"]
 
-[ext_resource type="Script" uid="uid://jgr73t04ui0t" path="res://definitions/nanke_constitution_article_definition.gd" id="1_article_script"]
-[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="1_n4b3o"]
-[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_fahs1"]
-[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
-[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="3_c4vmc"]
-[ext_resource type="Resource" uid="uid://bto7mkhf8cqca" path="res://data/races/南柯.tres" id="3_race_nanke"]
-[ext_resource type="Resource" uid="uid://clin7vlpgfkgw" path="res://data/constitutions/工会.tres" id="4_prereq"]
-[ext_resource type="Resource" uid="uid://b8m2jao836rm" path="res://data/policies/换班互济.tres" id="5_policy_1"]
-[ext_resource type="Resource" uid="uid://dbj7pruw111a2" path="res://data/policies/弦塔赊能.tres" id="6_policy_2"]
-[ext_resource type="Resource" uid="uid://ckm6a1ywjx4xh" path="res://data/policies/会账相助.tres" id="7_policy_3"]
-[ext_resource type="Resource" uid="uid://dl4flgxtqjpim" path="res://data/constitution_rows/团体.tres" id="row"]
+[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="7_0e8mi"]
+[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="8_7vhny"]
+[ext_resource type="Script" uid="uid://dajy5425i5dpq" path="res://definitions/constitution_article_definition.gd" id="article_script_1"]
+[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="condition_type_4"]
+[ext_resource type="Script" uid="uid://cpc61vbc5rd11" path="res://definitions/constitution_effect.gd" id="effect_type_3"]
+[ext_resource type="Script" uid="uid://ccj4ntfstuxfm" path="res://definitions/constitution_effects/modify_race_effect.gd" id="effscript_modify_race_11"]
+[ext_resource type="Resource" uid="uid://b8m2jao836rm" path="res://data/policies/换班互济.tres" id="policy_8"]
+[ext_resource type="Resource" uid="uid://dbj7pruw111a2" path="res://data/policies/弦塔赊能.tres" id="policy_9"]
+[ext_resource type="Resource" uid="uid://ckm6a1ywjx4xh" path="res://data/policies/会账相助.tres" id="policy_10"]
+[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="policy_type_2"]
+[ext_resource type="Resource" uid="uid://bto7mkhf8cqca" path="res://data/races/南柯.tres" id="race_12"]
+[ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="race_type_5"]
+[ext_resource type="Resource" uid="uid://dl4flgxtqjpim" path="res://data/constitution_rows/团体.tres" id="row_7"]
+[ext_resource type="Resource" path="res://data/races/variants/团体/南柯（互助）.tres" id="variant_13"]
+
+[sub_resource type="Resource" id="Effect_1"]
+script = ExtResource("effscript_modify_race_11")
+target_races = Array[ExtResource("race_type_5")]([ExtResource("race_12")])
+source_races = Array[ExtResource("race_type_5")]([ExtResource("variant_13")])
 
 [resource]
-script = ExtResource("1_article_script")
+script = ExtResource("article_script_1")
 display_name = "互助"
 description = "并不是所有共同劳动都需要一座正式组织，也不是所有争端都要变成谈判与罢工。
 互助让南柯重新依靠旧有的换班、照护、借贷和彼此顶工。它保留劳动者之间的联系，却放弃用一个统一组织去约束产业和议会。
 世界仍然很累，只是大家再次把如何撑下去当成彼此之间的私事。"
-row = ExtResource("row")
-race = ExtResource("3_race_nanke")
-prerequisite = ExtResource("4_prereq")
-policies = Array[ExtResource("2_policy_script")]([ExtResource("5_policy_1"), ExtResource("6_policy_2"), ExtResource("7_policy_3")])
+row = ExtResource("row_7")
+policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
+effects = Array[ExtResource("effect_type_3")]([SubResource("Effect_1")])

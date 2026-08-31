@@ -1,33 +1,44 @@
-[gd_resource type="Resource" script_class="NankeConstitutionArticleDefinition" format=3 uid="uid://clin7vlpgfkgw"]
+[gd_resource type="Resource" script_class="ConstitutionArticleDefinition" format=3 uid="uid://clin7vlpgfkgw"]
 
-[ext_resource type="Script" uid="uid://jgr73t04ui0t" path="res://definitions/nanke_constitution_article_definition.gd" id="1_article_script"]
-[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="1_i68hm"]
-[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_laevt"]
-[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
-[ext_resource type="Resource" uid="uid://bto7mkhf8cqca" path="res://data/races/南柯.tres" id="3_race_nanke"]
-[ext_resource type="Resource" uid="uid://by7u482sgaihw" path="res://data/interest_groups/听弦塔.tres" id="4_group_1"]
-[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="5_influence_rule_script"]
-[ext_resource type="Resource" uid="uid://fpu0irq6iwaf" path="res://data/policies/集体议价.tres" id="6_policy_1"]
-[ext_resource type="Resource" uid="uid://kdxjll3s3s55" path="res://data/policies/轮班限制.tres" id="7_policy_2"]
-[ext_resource type="Resource" uid="uid://dwyif7m5k2san" path="res://data/policies/生活津贴.tres" id="8_policy_3"]
-[ext_resource type="Resource" uid="uid://dl4flgxtqjpim" path="res://data/constitution_rows/团体.tres" id="row"]
+[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="10_cap3s"]
+[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="11_2elq8"]
+[ext_resource type="Script" uid="uid://dajy5425i5dpq" path="res://definitions/constitution_article_definition.gd" id="article_script_1"]
+[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="condition_type_4"]
+[ext_resource type="Script" uid="uid://cpc61vbc5rd11" path="res://definitions/constitution_effect.gd" id="effect_type_3"]
+[ext_resource type="Script" uid="uid://deskdxywl7uny" path="res://definitions/constitution_effects/interest_group_influence_bonus_effect.gd" id="effscript_influence_14"]
+[ext_resource type="Script" uid="uid://ccj4ntfstuxfm" path="res://definitions/constitution_effects/modify_race_effect.gd" id="effscript_modify_race_11"]
+[ext_resource type="Script" uid="uid://bebqvsjvk77lu" path="res://definitions/constitution_effects/strike_effect.gd" id="effscript_strike_16"]
+[ext_resource type="Resource" uid="uid://by7u482sgaihw" path="res://data/interest_groups/听弦塔.tres" id="group_15"]
+[ext_resource type="Resource" uid="uid://fpu0irq6iwaf" path="res://data/policies/集体议价.tres" id="policy_8"]
+[ext_resource type="Resource" uid="uid://kdxjll3s3s55" path="res://data/policies/轮班限制.tres" id="policy_9"]
+[ext_resource type="Resource" uid="uid://dwyif7m5k2san" path="res://data/policies/生活津贴.tres" id="policy_10"]
+[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="policy_type_2"]
+[ext_resource type="Resource" uid="uid://bto7mkhf8cqca" path="res://data/races/南柯.tres" id="race_12"]
+[ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="race_type_5"]
+[ext_resource type="Resource" uid="uid://dl4flgxtqjpim" path="res://data/constitution_rows/团体.tres" id="row_7"]
+[ext_resource type="Resource" path="res://data/races/variants/团体/南柯（工会）.tres" id="variant_13"]
 
-[sub_resource type="Resource" id="Resource_influence_1"]
-script = ExtResource("5_influence_rule_script")
-race = ExtResource("3_race_nanke")
-interest_group = ExtResource("4_group_1")
-mode = 0
-rate = 0.5
+[sub_resource type="Resource" id="Effect_1"]
+script = ExtResource("effscript_modify_race_11")
+target_races = Array[ExtResource("race_type_5")]([ExtResource("race_12")])
+source_races = Array[ExtResource("race_type_5")]([ExtResource("variant_13")])
+
+[sub_resource type="Resource" id="Effect_2"]
+script = ExtResource("effscript_influence_14")
+interest_group = ExtResource("group_15")
+races = Array[ExtResource("race_type_5")]([ExtResource("race_12")])
+bonus_rate = 0.5
+
+[sub_resource type="Resource" id="Effect_3"]
+script = ExtResource("effscript_strike_16")
+interest_group = ExtResource("group_15")
+races = Array[ExtResource("race_type_5")]([ExtResource("race_12")])
 
 [resource]
-script = ExtResource("1_article_script")
-absence_probability = 0.05
-strike_enabled = true
-strike_group = ExtResource("4_group_1")
+script = ExtResource("article_script_1")
 display_name = "工会"
 description = "南柯守着听弦塔、维修机器、制造未然胆，也最常被人抱怨“怎么又睡着了”。
 工会把一个长期被当作个人懒散的问题重新解释成劳动问题：若全岛都离不开南柯的技术，那么他们至少应当有权决定自己以什么条件继续工作。梦仍会偶尔把人带走，但现实里终于有人替醒着的人守住底线。"
-row = ExtResource("row")
-race = ExtResource("3_race_nanke")
-policies = Array[ExtResource("2_policy_script")]([ExtResource("6_policy_1"), ExtResource("7_policy_2"), ExtResource("8_policy_3")])
-influence_rules = Array[ExtResource("5_influence_rule_script")]([SubResource("Resource_influence_1")])
+row = ExtResource("row_7")
+policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
+effects = Array[ExtResource("effect_type_3")]([SubResource("Effect_1"), SubResource("Effect_2"), SubResource("Effect_3")])

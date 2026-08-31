@@ -1,11 +1,13 @@
 [gd_resource type="Resource" script_class="NankeRaceDefinition" format=3 uid="uid://bto7mkhf8cqca"]
 
-[ext_resource type="Script" uid="uid://c1ym6g0ye21fa" path="res://definitions/nanke_race_definition.gd" id="2_de8f7"]
+
+[ext_resource type="Script" path="res://definitions/nanke_race_definition.gd" id="script"]
 
 [resource]
-script = ExtResource("2_de8f7")
+script = ExtResource("script")
 display_name = "南柯"
 description = "南柯睡着时会进入一个已经实现其理想社会的“理想国”，醒来后却承担着蓬莱最繁重的取能、维修与未然工程。别人嘲笑他们贪睡，他们却比谁都清楚现实本可以有另一种活法。因此南柯要求更好的工钱与生活，并试图用工会、合作社，最终把梦里已经存在的制度真正造进现实。"
 event_description = "南柯承担蓬莱最重的现实劳动，也最在意劳动是否还有位置、成果是否能换成生活。就业或消费落后时，他们会认为现实正在离梦中那个更好的社会越来越远。"
 increase_consumption = true
 increase_employment = true
+absence_probability = 0.15

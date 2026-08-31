@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="RaceDefinition" format=3]
+
+
+[ext_resource type="Script" path="res://definitions/race_definition.gd" id="script"]
+
+[resource]
+script = ExtResource("script")
+display_name = "人类（官员）"
+description = "蓬莱的人类议员首先是大明的朝使。他们依靠永乐港维持朝贡、海贸和一条需要不断补充未然的全球航路，而蓬莱原生种族越被期限、竞争和劳作压迫，产生的未然也越多。因此朝廷总能把更重的征敛、更低的工钱和更繁忙的贸易解释成“国用所需”，并要求更多议员听从永乐轮运局——不是因为人类更多，而是因为控制航路便足以控制很多事情。\n在行省制度下，该族议员以朝廷官员身份参与政务，并额外服从人类官署所关心的税课与生产要求。"
+event_description = "朝使把税课与生产视为维持联合官署、岁贡和远洋航路的根本。征敛不足或产出落后，都会被解释为蓬莱正在脱离朝廷能够掌握的秩序。"
+increase_tax = true
+increase_production = true
