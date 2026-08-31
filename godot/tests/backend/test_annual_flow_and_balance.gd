@@ -12,8 +12,7 @@ func run(t: BackendTestContext) -> void:
 func _test_expectation_growth_effect_modifies_active_race_growth(t: BackendTestContext) -> void:
 	var race := t.make_race("growth")
 	race.increase_tax = true
-	race.expectation_growth_rate = 0.2
-	var article := t.make_article(race)
+	var article := t.make_article(race, true, 0.2)
 	var growth := ExpectationGrowthEffect.new()
 	growth.races = [race]
 	growth.growth_modifier = -0.5
