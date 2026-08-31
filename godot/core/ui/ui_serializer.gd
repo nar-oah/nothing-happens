@@ -94,9 +94,11 @@ func active_bill(value: ActiveBillState) -> Variant:
 	return {"title": value.title, "start_values": metric_values(value.start_values), "pure_target": metric_values(value.pure_target), "proposals": proposals, "policies": policies}
 
 
-func vote_result(result: VoteResultState, session: RunSession) -> Dictionary:
+func vote_result(result: VoteResultState, source: Variant) -> Dictionary:
 	if result == null:
 		return {"passed": false, "submitted": false, "support_count": 0, "oppose_count": 0, "abstain_count": 0, "absent_count": 0, "present_count": 0, "seat_votes": []}
+	var session: RunSession = source if source is RunSession else null
+	var state: RunState = session.state if session != null else source as RunState
 	var seat_votes: Array = []
 	for current in result.seat_votes:
 		var seat := current.seat
@@ -104,10 +106,10 @@ func vote_result(result: VoteResultState, session: RunSession) -> Dictionary:
 		for reason in current.breakdown:
 			breakdown[str(reason)] = current.breakdown[reason]
 		seat_votes.append({
-			"seat_index": -1 if seat == null else session.state.seats.find(seat),
+			"seat_index": -1 if seat == null or state == null else state.seats.find(seat),
 			"seat_display_name": _seat_name(seat),
-			"race_display_name": _active_race_name(session, null if seat == null else seat.race),
-			"interest_group_display_name": _active_group_name(session, null if seat == null else seat.actual_group),
+			"race_display_name": _active_race_name_from_source(session, state, null if seat == null else seat.race),
+			"interest_group_display_name": _active_group_name_from_source(session, state, null if seat == null else seat.actual_group),
 			"position": int(current.position),
 			"score": current.score,
 			"breakdown": breakdown,
@@ -356,6 +358,34 @@ func _active_race_name(session: RunSession, definition: RaceDefinition) -> Strin
 func _active_group_name(session: RunSession, definition: InterestGroupDefinition) -> String:
 	var active := session.constitution_system.get_active_group_definition(session.context, definition)
 	return "" if active == null else active.display_name
+
+
+func _active_race_name_from_source(session: RunSession, state: RunState, definition: RaceDefinition) -> String:
+	if definition == null:
+		return ""
+	if session != null:
+		return _active_race_name(session, definition)
+	if state != null:
+		var race_state := state.get_race(definition)
+		if race_state != null and race_state.active_definition != null:
+			return race_state.active_definition.display_name
+	return definition.display_name
+
+
+func _active_group_name_from_source(session: RunSession, state: RunState, definition: InterestGroupDefinition) -> String:
+	if definition == null:
+		return ""
+	if session != null:
+		return _active_group_name(session, definition)
+	if state != null and state.constitution != null:
+		var canonical := definition
+		var visited: Dictionary[InterestGroupDefinition, bool] = {}
+		while state.constitution.group_mergers.has(canonical) and not visited.has(canonical):
+			visited[canonical] = true
+			canonical = state.constitution.group_mergers[canonical]
+		var active: InterestGroupDefinition = state.constitution.group_variants.get(canonical, canonical)
+		return "" if active == null else active.display_name
+	return definition.display_name
 
 
 func _seat_name(state: SeatState) -> String:
