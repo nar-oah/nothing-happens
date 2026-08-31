@@ -1,12 +1,19 @@
 extends RefCounted
 class_name ConstitutionSystem
 
+const DEFAULT_PARLIAMENT_NAME := "联合议会"
+
 
 func initialize(context: RunContext) -> bool:
 	context.state.constitution = ConstitutionState.new()
 	if context.constitution_board != null:
-		return _initialize_from_board(context)
-	return _initialize_legacy(context)
+		if not _initialize_from_board(context):
+			return false
+	else:
+		if not _initialize_flat_content(context):
+			return false
+	refresh_runtime(context)
+	return true
 
 
 func _initialize_from_board(context: RunContext) -> bool:
@@ -16,52 +23,68 @@ func _initialize_from_board(context: RunContext) -> bool:
 	var center := board.get_center_column_index()
 	for row in board.get_rows():
 		var initial := board.get_article(row, center)
-		if initial == null:
-			push_error("Every constitution row requires a center article.")
-			return false
-		if initial.get_race() != row.race:
-			push_error("Constitution row race must match its center article race.")
-			return false
-		if initial.is_terminal:
-			push_error("A center constitution article cannot be terminal.")
+		if initial == null or initial.is_terminal:
+			push_error("Every constitution row requires a non-terminal center article.")
 			return false
 		context.state.constitution.active_articles[row] = initial
 	context.constitution_articles = board.get_articles()
-	refresh_runtime(context)
 	return true
 
 
-func _initialize_legacy(context: RunContext) -> bool:
-	var seen: Dictionary[ConstitutionArticleDefinition, bool] = {}
+func _initialize_flat_content(context: RunContext) -> bool:
 	for definition in context.constitution_articles:
-		if definition == null or seen.has(definition) or definition.get_race() == null:
-			push_error("Constitution articles must be unique Resources owned by a content race.")
-			return false
-		seen[definition] = true
-	for race in context.race_definitions:
-		var initial: ConstitutionArticleDefinition
-		for definition in context.constitution_articles:
-			if definition.get_race() != race or not definition.is_initial:
-				continue
-			if initial != null:
-				push_error("A race can have at most one legacy initial constitution article.")
-				return false
-			initial = definition
-		if initial == null:
+		if definition == null or definition.get_race() == null or not definition.is_initial:
 			continue
-		var row := initial.row
+		var row := definition.row
 		if row == null:
 			row = ConstitutionRowDefinition.new()
-			row.display_name = race.display_name
-			row.race = race
-		context.state.constitution.active_articles[row] = initial
-	refresh_runtime(context)
-	return true
+			row.display_name = definition.get_race().display_name
+			row.race = definition.get_race()
+		context.state.constitution.active_articles[row] = definition
+	return not context.state.constitution.active_articles.is_empty()
 
 
-func activate_initial_articles(context: RunContext) -> void:
+func get_active_articles(context: RunContext) -> Array[ConstitutionArticleDefinition]:
+	var result: Array[ConstitutionArticleDefinition] = []
+	if context.constitution_board != null:
+		for row in context.constitution_board.get_rows():
+			var article := context.state.constitution.get_active_article_for_row(row)
+			if article != null:
+				result.append(article)
+		return result
+	for row in context.state.constitution.active_articles:
+		var article: ConstitutionArticleDefinition = context.state.constitution.active_articles[row]
+		if article != null:
+			result.append(article)
+	return result
+
+
+func get_active_effects(
+	context: RunContext, timing: int = -1
+) -> Array[ConstitutionEffect]:
+	var result: Array[ConstitutionEffect] = []
 	for article in get_active_articles(context):
-		article.on_activate(context)
+		for effect in article.effects:
+			if effect == null:
+				continue
+			if timing < 0 or int(effect.timing) == timing:
+				result.append(effect)
+	return result
+
+
+func run_effects(context: RunContext, timing: ConstitutionEffect.Timing) -> void:
+	for effect in get_active_effects(context, int(timing)):
+		effect.apply(context)
+
+
+func refresh_runtime(context: RunContext) -> void:
+	for race in context.state.races:
+		if race != null:
+			race.active_definition = race.definition
+	context.state.constitution.group_variants.clear()
+	context.state.constitution.group_mergers.clear()
+	context.state.constitution.local_interest_groups.clear()
+	run_effects(context, ConstitutionEffect.Timing.RUNTIME_REBUILD)
 
 
 func can_revise(context: RunContext, definition: ConstitutionArticleDefinition) -> bool:
@@ -72,7 +95,7 @@ func can_revise(context: RunContext, definition: ConstitutionArticleDefinition) 
 		if selected_terminal != null and selected_terminal != definition:
 			return false
 	if context.constitution_board == null:
-		return _can_revise_legacy(context, definition)
+		return definition.can_activate(context)
 	if context.state.month != 0 or definition.row == null:
 		return false
 	var board := context.constitution_board
@@ -85,33 +108,18 @@ func can_revise(context: RunContext, definition: ConstitutionArticleDefinition) 
 	if definition.row.free_navigation:
 		return definition.can_activate(context)
 	if not definition.row.ignores_column_unlocks:
-		if context.meta_progression == null:
-			return false
-		if not context.meta_progression.is_column_unlocked(board.columns[target_column]):
+		if context.meta_progression == null or not context.meta_progression.is_column_unlocked(board.columns[target_column]):
 			return false
 	var current_column := board.get_column_index_for_article(current)
 	var center := board.get_center_column_index()
 	if current_column < 0 or center < 0:
 		return false
-	var expected: ConstitutionArticleDefinition
-	if current_column == center:
-		if target_column < center:
-			expected = _next_article_outward(board, definition.row, current_column, -1)
-		elif target_column > center:
-			expected = _next_article_outward(board, definition.row, current_column, 1)
-	else:
-		var direction := -1 if current_column < center else 1
-		expected = _next_article_outward(board, definition.row, current_column, direction)
-	if expected != definition:
+	var direction := -1 if target_column < center else 1
+	if current_column != center:
+		direction = -1 if current_column < center else 1
+	if _next_article_outward(board, definition.row, current_column, direction) != definition:
 		return false
 	return definition.can_activate(context)
-
-
-func _can_revise_legacy(context: RunContext, definition: ConstitutionArticleDefinition) -> bool:
-	var race := definition.get_race()
-	if race == null or race not in context.race_definitions or definition not in context.constitution_articles:
-		return false
-	return context.state.constitution.get_active_article(race) != definition and definition.can_activate(context)
 
 
 func revise(context: RunContext, definition: ConstitutionArticleDefinition) -> bool:
@@ -126,33 +134,38 @@ func revise(context: RunContext, definition: ConstitutionArticleDefinition) -> b
 	if row == null:
 		return false
 	var previous := context.state.constitution.get_active_article_for_row(row)
-	var target_race := definition.get_race()
 	var race_snapshot: Dictionary[SeatState, RaceDefinition] = {}
 	var fixed_snapshot: Dictionary[SeatState, RaceDefinition] = {}
+	var base_snapshot: Dictionary[SeatState, InterestGroupDefinition] = {}
+	var annual_snapshot: Dictionary[SeatState, InterestGroupDefinition] = {}
+	var actual_snapshot: Dictionary[SeatState, InterestGroupDefinition] = {}
 	for seat in context.state.seats:
 		race_snapshot[seat] = seat.race
 		fixed_snapshot[seat] = seat.fixed_race
+		base_snapshot[seat] = seat.base_group
+		annual_snapshot[seat] = seat.annual_group
+		actual_snapshot[seat] = seat.actual_group
 	context.state.constitution.active_articles[row] = definition
-	if target_race != null and definition.revoke_fixed_seat:
-		context.parliament_system.revoke_fixed_seat(context, target_race)
-	if target_race != null and not context.race_system.enforce_constitution_constraints(context, target_race):
+	refresh_runtime(context)
+	run_effects(context, ConstitutionEffect.Timing.BEFORE_SEAT_ALLOCATION)
+	if not context.race_system.reconcile_seat_participation(context):
 		context.state.constitution.active_articles[row] = previous
 		for seat in context.state.seats:
-			seat.race = race_snapshot.get(seat)
-			seat.fixed_race = fixed_snapshot.get(seat)
+			seat.race = race_snapshot[seat]
+			seat.fixed_race = fixed_snapshot[seat]
+			seat.base_group = base_snapshot[seat]
+			seat.annual_group = annual_snapshot[seat]
+			seat.actual_group = actual_snapshot[seat]
 		refresh_runtime(context)
 		return false
-	if previous != null:
-		previous.on_deactivate(context)
-	_restore_constitution_base_groups(context)
-	apply_influence_rules(context)
-	refresh_runtime(context)
-	# A month-0 revision changes this year's expectation formula but not its baseline.
+	context.parliament_system.normalize_groups_after_race_change(context)
+	run_effects(context, ConstitutionEffect.Timing.AFTER_SEAT_ALLOCATION)
+	run_effects(context, ConstitutionEffect.Timing.AFTER_GROUP_ALLOCATION)
+	run_effects(context, ConstitutionEffect.Timing.ON_ACTIVATE)
 	context.race_system.rebuild_annual_expectations(context)
 	context.state.constitution.revision_available = false
 	if definition.is_terminal:
 		context.state.constitution.terminal_article = definition
-	definition.on_activate(context)
 	return true
 
 
@@ -171,41 +184,6 @@ func _next_article_outward(
 	return null
 
 
-func refresh_runtime(context: RunContext) -> void:
-	var state := context.state
-	state.petition_race = null
-	state.petition_limit = 0
-	state.donation_detection_probability = context.balance.donation_detection_probability
-	state.event_early_reveal_bonus_probability = 0.0
-	for race in state.races:
-		# Formal Board content always supplies an active article for every race row. Zero is a
-		# real growth rate, so there is deliberately no fallback to GameBalanceDefinition.
-		race.expectation_growth_rate = 0.0
-		race.visit_probability = 0.0
-		race.absence_probability = context.balance.normal_absence_probability
-		race.yin_yang_adjustment_rate = 0.0
-		race.strike_enabled = false
-		race.strike_group = null
-		race.strike_extends_to_group = false
-	for article in get_active_articles(context):
-		article.apply_runtime(context)
-
-
-func get_active_articles(context: RunContext) -> Array[ConstitutionArticleDefinition]:
-	var result: Array[ConstitutionArticleDefinition] = []
-	if context.constitution_board != null:
-		for row in context.constitution_board.get_rows():
-			var article := context.state.constitution.get_active_article_for_row(row)
-			if article != null:
-				result.append(article)
-		return result
-	for row in context.state.constitution.active_articles:
-		var article: ConstitutionArticleDefinition = context.state.constitution.active_articles[row]
-		if article != null:
-			result.append(article)
-	return result
-
-
 func get_available_policies(context: RunContext) -> Array[PolicyDefinition]:
 	var result: Array[PolicyDefinition] = []
 	for article in get_active_articles(context):
@@ -222,35 +200,76 @@ func get_available_policy(context: RunContext, display_name: String) -> PolicyDe
 	return null
 
 
+func get_active_race_definition(context: RunContext, race: RaceDefinition) -> RaceDefinition:
+	var state := null if context == null or context.state == null else context.state.get_race(race)
+	return race if state == null or state.active_definition == null else state.active_definition
+
+
+func resolve_group_identity(
+	context: RunContext, group: InterestGroupDefinition
+) -> InterestGroupDefinition:
+	if context == null or context.state == null:
+		return group
+	var current := group
+	var visited: Dictionary[InterestGroupDefinition, bool] = {}
+	while current != null and context.state.constitution.group_mergers.has(current):
+		if visited.has(current):
+			break
+		visited[current] = true
+		current = context.state.constitution.group_mergers[current]
+	return current
+
+
+func get_active_group_definition(
+	context: RunContext, group: InterestGroupDefinition
+) -> InterestGroupDefinition:
+	var identity := resolve_group_identity(context, group)
+	if identity == null:
+		return null
+	return context.state.constitution.group_variants.get(identity, identity)
+
+
 func get_effective_groups(context: RunContext) -> Array[InterestGroupDefinition]:
-	var result: Array[InterestGroupDefinition] = []
+	var identities: Array[InterestGroupDefinition] = []
 	for group in context.interest_groups:
-		_append_effective_group(result, context.state, group)
+		_append_group_identity(identities, context, group)
 	for race in context.race_definitions:
 		if race != null:
-			_append_effective_group(result, context.state, race.fixed_interest_group)
-	for seat in context.state.seats:
-		_append_effective_group(result, context.state, seat.base_group)
-		_append_effective_group(result, context.state, seat.annual_group)
-		_append_effective_group(result, context.state, seat.actual_group)
-	return result
+			_append_group_identity(identities, context, race.fixed_interest_group)
+	for local in context.state.constitution.local_interest_groups.values():
+		_append_group_identity(identities, context, local)
+	return identities
 
 
-func on_month_start(context: RunContext) -> void:
-	for article in get_active_articles(context):
-		article.on_month_start(context)
+func _append_group_identity(
+	result: Array[InterestGroupDefinition], context: RunContext, group: InterestGroupDefinition
+) -> void:
+	var identity := resolve_group_identity(context, group)
+	if identity != null and identity not in result:
+		result.append(identity)
 
 
-func on_year_settlement(context: RunContext) -> void:
-	for article in get_active_articles(context):
-		article.on_year_settlement(context)
-
-
-func modify_vote(vote_context: VoteContext) -> void:
-	if vote_context == null:
+func merge_groups_below_threshold(
+	context: RunContext, target_group: InterestGroupDefinition, threshold: float
+) -> void:
+	if target_group == null:
 		return
-	for article in get_active_articles(vote_context.run_context):
-		article.modify_vote(vote_context)
+	var target := resolve_group_identity(context, target_group)
+	var candidates: Array[InterestGroupDefinition] = []
+	for group in context.interest_groups:
+		if group != null and group not in candidates:
+			candidates.append(group)
+	for race in context.race_definitions:
+		if race != null and race.fixed_interest_group != null and race.fixed_interest_group not in candidates:
+			candidates.append(race.fixed_interest_group)
+	for group in candidates:
+		var identity := resolve_group_identity(context, group)
+		if identity == null or identity == target:
+			continue
+		if context.parliament_system.get_group_influence_rate(context.state, identity) < threshold:
+			context.state.constitution.group_mergers[identity] = target
+	for seat in context.state.seats:
+		seat.actual_group = resolve_group_identity(context, seat.actual_group)
 
 
 func race_participates_in_variable_seat_allocation(
@@ -258,8 +277,19 @@ func race_participates_in_variable_seat_allocation(
 ) -> bool:
 	if race == null or race is ZhushuiRaceDefinition:
 		return false
-	var article := context.state.constitution.get_active_article(race)
-	return true if article == null else article.participates_in_variable_seat_allocation
+	var result := true
+	for effect in get_active_effects(context, int(ConstitutionEffect.Timing.BEFORE_SEAT_ALLOCATION)):
+		if effect is RaceSeatEffect and effect.applies_to(race):
+			result = effect.participates_in_variable_seat_allocation
+	return result
+
+
+func race_fixed_seat_enabled(context: RunContext, race: RaceDefinition) -> bool:
+	var result := true
+	for effect in get_active_effects(context, int(ConstitutionEffect.Timing.BEFORE_SEAT_ALLOCATION)):
+		if effect is RaceSeatEffect and effect.applies_to(race):
+			result = effect.fixed_seat_enabled
+	return result
 
 
 func get_race_seat_constraint(context: RunContext, race: RaceDefinition) -> RaceSeatConstraint:
@@ -269,16 +299,7 @@ func get_race_seat_constraint(context: RunContext, race: RaceDefinition) -> Race
 	if not race_participates_in_variable_seat_allocation(context, race):
 		return RaceSeatConstraint.new(fixed_count, fixed_count)
 	var variable_pool := context.parliament_system.get_variable_seats(context.state).size()
-	var article := context.state.constitution.get_active_article(race)
-	var minimum_variable := 0
-	var maximum_variable := variable_pool
-	if article != null:
-		minimum_variable = ceili(article.race_min_seat_rate * variable_pool)
-		maximum_variable = floori(article.race_max_seat_rate * variable_pool)
-	return RaceSeatConstraint.new(
-		fixed_count + minimum_variable,
-		fixed_count + maximum_variable
-	)
+	return RaceSeatConstraint.new(fixed_count, fixed_count + variable_pool)
 
 
 func get_variable_race_seat_constraint(
@@ -286,127 +307,60 @@ func get_variable_race_seat_constraint(
 ) -> RaceSeatConstraint:
 	if not race_participates_in_variable_seat_allocation(context, race):
 		return RaceSeatConstraint.new(0, 0)
-	var final_constraint := get_race_seat_constraint(context, race)
-	var fixed_count := context.parliament_system.get_fixed_seat_count(context.state, race)
-	var variable_pool := context.parliament_system.get_variable_seats(context.state).size()
-	var minimum := maxi(final_constraint.minimum_count - fixed_count, 0)
-	var maximum := (
-		variable_pool
-		if final_constraint.maximum_count < 0
-		else maxi(final_constraint.maximum_count - fixed_count, 0)
-	)
-	return RaceSeatConstraint.new(minimum, mini(maximum, variable_pool))
+	return RaceSeatConstraint.new(0, context.parliament_system.get_variable_seats(context.state).size())
 
 
-func get_race_seat_constraints(context: RunContext) -> Dictionary[RaceDefinition, RaceSeatConstraint]:
-	var result: Dictionary[RaceDefinition, RaceSeatConstraint] = {}
-	for race in context.race_definitions:
-		result[race] = get_race_seat_constraint(context, race)
+func get_expectation_growth_multiplier(context: RunContext, race: RaceDefinition) -> float:
+	var result := 1.0
+	for effect in get_active_effects(context):
+		result *= effect.get_expectation_growth_multiplier(race)
+	return maxf(result, 0.0)
+
+
+func get_event_intel_probability_modifier(context: RunContext, race: RaceDefinition) -> float:
+	var result := 0.0
+	for effect in get_active_effects(context):
+		result += effect.get_event_intel_probability_modifier(race)
 	return result
 
 
-func get_group_biases_for_race(
-	context: RunContext, race: RaceDefinition
-) -> Array[ConstitutionGroupBiasDefinition]:
-	var article := context.state.constitution.get_active_article(race)
-	return [] if article == null else article.group_biases
+func get_donation_detection_probability(context: RunContext) -> float:
+	var result := context.balance.donation_detection_probability
+	for effect in get_active_effects(context):
+		result = effect.override_donation_detection_probability(result)
+	return clampf(result, 0.0, 1.0)
 
 
-func apply_influence_rules(context: RunContext) -> void:
-	for article in get_active_articles(context):
-		for rule in article.influence_rules:
-			if rule != null and rule.interest_group != null:
-				_apply_influence_rule(context, rule)
+func get_parliament_name(context: RunContext) -> String:
+	var result := DEFAULT_PARLIAMENT_NAME
+	for effect in get_active_effects(context):
+		result = effect.override_parliament_name(result)
+	return result
 
 
-func _apply_influence_rule(context: RunContext, rule: ConstitutionInfluenceRule) -> void:
-	var eligible := context.parliament_system.get_influenceable_seats(context.state, rule.race)
-	if eligible.is_empty():
+func get_petition_limit(context: RunContext) -> int:
+	var result := 0
+	for effect in get_active_effects(context):
+		result += maxi(effect.get_petition_count(context), 0)
+	return result
+
+
+func can_petition_event(context: RunContext, race: RaceDefinition) -> bool:
+	for effect in get_active_effects(context):
+		if effect.can_petition_event(race):
+			return true
+	return false
+
+
+func validate_draft(context: RunContext, draft: DraftBillState, pure_target: MetricValues) -> bool:
+	for effect in get_active_effects(context, int(ConstitutionEffect.Timing.BEFORE_DRAFT_SUBMIT)):
+		if not effect.validate_draft(context, draft, pure_target):
+			return false
+	return true
+
+
+func apply_vote_effects(vote_context: VoteContext) -> void:
+	if vote_context == null:
 		return
-	var desired := 0
-	match rule.mode:
-		ConstitutionInfluenceRule.Mode.MINIMUM:
-			desired = ceili(rule.rate * eligible.size())
-		ConstitutionInfluenceRule.Mode.MAXIMUM:
-			desired = floori(rule.rate * eligible.size())
-		ConstitutionInfluenceRule.Mode.TARGET:
-			desired = roundi(rule.rate * eligible.size())
-	var current: Array[SeatState] = []
-	for seat in eligible:
-		if seat.actual_group == rule.interest_group:
-			current.append(seat)
-	if rule.mode == ConstitutionInfluenceRule.Mode.MINIMUM and current.size() >= desired:
-		return
-	if rule.mode == ConstitutionInfluenceRule.Mode.MAXIMUM and current.size() <= desired:
-		return
-	var difference := desired - current.size()
-	if difference > 0:
-		for seat in eligible:
-			if difference <= 0:
-				break
-			if seat.actual_group == rule.interest_group:
-				continue
-			seat.actual_group = rule.interest_group
-			difference -= 1
-	elif difference < 0:
-		for seat in current:
-			if difference >= 0:
-				break
-			seat.actual_group = _fallback_group(context, seat, rule.interest_group)
-			difference += 1
-
-
-func _fallback_group(
-	context: RunContext,
-	seat: SeatState,
-	excluded: InterestGroupDefinition
-) -> InterestGroupDefinition:
-	if seat.race != null and seat.race.fixed_interest_group != null:
-		return _resolve_merger(context.state, seat.race.fixed_interest_group)
-	var underlying := seat.annual_group
-	if underlying == null:
-		underlying = seat.base_group
-	var base := _resolve_merger(context.state, underlying)
-	if base != null and base != excluded:
-		return base
-	for group in get_effective_groups(context):
-		if group != excluded:
-			return group
-	return null
-
-
-func _append_effective_group(
-	result: Array[InterestGroupDefinition],
-	state: RunState,
-	group: InterestGroupDefinition
-) -> void:
-	var effective := _resolve_merger(state, group)
-	if effective != null and effective not in result:
-		result.append(effective)
-
-
-func _resolve_merger(state: RunState, group: InterestGroupDefinition) -> InterestGroupDefinition:
-	var current := group
-	var visited: Dictionary[InterestGroupDefinition, bool] = {}
-	while current != null and state.constitution.group_mergers.has(current):
-		if visited.has(current):
-			break
-		visited[current] = true
-		current = state.constitution.group_mergers[current]
-	return current
-
-
-func _restore_constitution_base_groups(context: RunContext) -> void:
-	for seat in context.state.seats:
-		if seat.race == null or seat.race is ZhushuiRaceDefinition:
-			seat.actual_group = null
-			continue
-		if seat.race.fixed_interest_group != null:
-			seat.base_group = seat.race.fixed_interest_group
-			seat.annual_group = seat.race.fixed_interest_group
-			seat.actual_group = _resolve_merger(context.state, seat.race.fixed_interest_group)
-			continue
-		var underlying := seat.annual_group
-		if underlying == null:
-			underlying = seat.base_group
-		seat.actual_group = _resolve_merger(context.state, underlying)
+	for effect in get_active_effects(vote_context.run_context, int(ConstitutionEffect.Timing.BEFORE_SUPPORT_CALCULATION)):
+		effect.apply_vote(vote_context)

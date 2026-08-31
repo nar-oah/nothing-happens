@@ -5,25 +5,13 @@ class_name UiSerializer
 func metric_values(values: MetricValues) -> Dictionary:
 	if values == null:
 		return {"tax": 0, "consumption": 0, "production": 0, "employment": 0, "investment": 0}
-	return {
-		"tax": values.tax,
-		"consumption": values.consumption,
-		"production": values.production,
-		"employment": values.employment,
-		"investment": values.investment,
-	}
+	return {"tax": values.tax, "consumption": values.consumption, "production": values.production, "employment": values.employment, "investment": values.investment}
 
 
 func metric_vector(values: MetricVector) -> Dictionary:
 	if values == null:
 		return {"tax": 0, "consumption": 0, "production": 0, "employment": 0, "investment": 0}
-	return {
-		"tax": values.tax,
-		"consumption": values.consumption,
-		"production": values.production,
-		"employment": values.employment,
-		"investment": values.investment,
-	}
+	return {"tax": values.tax, "consumption": values.consumption, "production": values.production, "employment": values.employment, "investment": values.investment}
 
 
 func interest_group(definition: InterestGroupDefinition) -> Variant:
@@ -58,24 +46,13 @@ func proposal(value: ProposalInstance) -> Variant:
 func metric_condition(condition: MetricCondition) -> Variant:
 	if condition == null:
 		return null
-	return {
-		"left_metric": int(condition.left_metric),
-		"operator": int(condition.operator),
-		"right_metric": int(condition.right_metric),
-		"right_multiplier": condition.right_multiplier,
-	}
+	return {"left_metric": int(condition.left_metric), "operator": int(condition.operator), "right_metric": int(condition.right_metric), "right_multiplier": condition.right_multiplier}
 
 
 func policy_effect(effect: PolicyEffect) -> Variant:
 	if effect == null:
 		return null
-	return {
-		"target_metric": int(effect.target_metric),
-		"formula": int(effect.formula),
-		"source_a": int(effect.source_a),
-		"source_b": int(effect.source_b),
-		"multiplier": effect.multiplier,
-	}
+	return {"target_metric": int(effect.target_metric), "formula": int(effect.formula), "source_a": int(effect.source_a), "source_b": int(effect.source_b), "multiplier": effect.multiplier}
 
 
 func policy(definition: PolicyDefinition) -> Variant:
@@ -85,11 +62,7 @@ func policy(definition: PolicyDefinition) -> Variant:
 	for effect in definition.effects:
 		if effect != null:
 			effects.append(policy_effect(effect))
-	return {
-		"display_name": definition.display_name,
-		"condition": metric_condition(definition.condition),
-		"effects": effects,
-	}
+	return {"display_name": definition.display_name, "condition": metric_condition(definition.condition), "effects": effects}
 
 
 func bill(value: Variant) -> Variant:
@@ -113,66 +86,33 @@ func active_bill(value: ActiveBillState) -> Variant:
 	for current in value.proposals:
 		if current == null:
 			continue
-		proposals.append(
-			{
-				"proposal": proposal(current.proposal),
-				"digested_months": current.digested_months,
-				"digestion_progress": current.get_digestion_progress(),
-				"fully_digested": current.is_fully_digested(),
-			}
-		)
+		proposals.append({"proposal": proposal(current.proposal), "digested_months": current.digested_months, "digestion_progress": current.get_digestion_progress(), "fully_digested": current.is_fully_digested()})
 	var policies: Array = []
 	for current in value.policies:
 		if current != null:
 			policies.append({"definition": policy(current.definition), "triggered": current.triggered})
-	return {
-		"title": value.title,
-		"start_values": metric_values(value.start_values),
-		"pure_target": metric_values(value.pure_target),
-		"proposals": proposals,
-		"policies": policies,
-	}
+	return {"title": value.title, "start_values": metric_values(value.start_values), "pure_target": metric_values(value.pure_target), "proposals": proposals, "policies": policies}
 
 
-func vote_result(result: VoteResultState, state: RunState) -> Dictionary:
+func vote_result(result: VoteResultState, session: RunSession) -> Dictionary:
 	if result == null:
-		return {
-			"passed": false,
-			"submitted": false,
-			"support_count": 0,
-			"oppose_count": 0,
-			"abstain_count": 0,
-			"absent_count": 0,
-			"present_count": 0,
-			"seat_votes": [],
-		}
+		return {"passed": false, "submitted": false, "support_count": 0, "oppose_count": 0, "abstain_count": 0, "absent_count": 0, "present_count": 0, "seat_votes": []}
 	var seat_votes: Array = []
 	for current in result.seat_votes:
 		var seat := current.seat
 		var breakdown := {}
 		for reason in current.breakdown:
 			breakdown[str(reason)] = current.breakdown[reason]
-		seat_votes.append(
-			{
-				"seat_index": -1 if seat == null else state.seats.find(seat),
-				"seat_display_name": _seat_name(seat),
-				"race_display_name": _race_name(null if seat == null else seat.race),
-				"interest_group_display_name": _group_name(null if seat == null else seat.actual_group),
-				"position": int(current.position),
-				"score": current.score,
-				"breakdown": breakdown,
-			}
-		)
-	return {
-		"passed": result.passed,
-		"submitted": result.submitted,
-		"support_count": result.support_count,
-		"oppose_count": result.oppose_count,
-		"abstain_count": result.abstain_count,
-		"absent_count": result.absent_count,
-		"present_count": result.present_count(),
-		"seat_votes": seat_votes,
-	}
+		seat_votes.append({
+			"seat_index": -1 if seat == null else session.state.seats.find(seat),
+			"seat_display_name": _seat_name(seat),
+			"race_display_name": _active_race_name(session, null if seat == null else seat.race),
+			"interest_group_display_name": _active_group_name(session, null if seat == null else seat.actual_group),
+			"position": int(current.position),
+			"score": current.score,
+			"breakdown": breakdown,
+		})
+	return {"passed": result.passed, "submitted": result.submitted, "support_count": result.support_count, "oppose_count": result.oppose_count, "abstain_count": result.abstain_count, "absent_count": result.absent_count, "present_count": result.present_count(), "seat_votes": seat_votes}
 
 
 func draft_preview(session: RunSession) -> Dictionary:
@@ -182,18 +122,9 @@ func draft_preview(session: RunSession) -> Dictionary:
 	var immediate := session.policy_system.calculate_immediate_result(state.metrics, draft.policies)
 	var projected := pure_target.copy()
 	for metric in Metric.all_ids():
-		projected.set_value(
-			metric,
-			pure_target.get_value(metric) + immediate.get_value(metric) - state.metrics.get_value(metric)
-		)
+		projected.set_value(metric, pure_target.get_value(metric) + immediate.get_value(metric) - state.metrics.get_value(metric))
 	var vote := session.vote_system.preview_vote(draft, session.context)
-	return {
-		"current_metrics": metric_values(state.metrics),
-		"pure_proposal_target": metric_values(pure_target),
-		"immediate_policy_result": metric_values(immediate),
-		"projected_metrics": metric_values(projected),
-		"vote": vote_result(vote, state),
-	}
+	return {"current_metrics": metric_values(state.metrics), "pure_proposal_target": metric_values(pure_target), "immediate_policy_result": metric_values(immediate), "projected_metrics": metric_values(projected), "vote": vote_result(vote, session)}
 
 
 func pending_dialogue(state: RunState) -> Variant:
@@ -210,13 +141,7 @@ func month_report(state: RunState) -> Variant:
 	var report_events: Array = []
 	for current in state.month_report_events:
 		report_events.append(current.duplicate(true))
-	return {
-		"year": state.month_report_year,
-		"month": state.month_report_month,
-		"previous_metrics": metric_values(state.month_report_previous_metrics),
-		"current_metrics": metric_values(state.month_report_current_metrics),
-		"events": report_events,
-	}
+	return {"year": state.month_report_year, "month": state.month_report_month, "previous_metrics": metric_values(state.month_report_previous_metrics), "current_metrics": metric_values(state.month_report_current_metrics), "events": report_events}
 
 
 func newspaper_front(state: RunState) -> Variant:
@@ -226,16 +151,10 @@ func newspaper_front(state: RunState) -> Variant:
 func term_report(session: RunSession) -> Variant:
 	if session.term_report.is_empty():
 		return null
-	return {
-		"outcome": _term_outcome(session.term_report["outcome"]),
-		"previous_governing_months": session.term_report["previous_governing_months"],
-		"current_governing_months": session.term_report["current_governing_months"],
-	}
+	return {"outcome": _term_outcome(session.term_report["outcome"]), "previous_governing_months": session.term_report["previous_governing_months"], "current_governing_months": session.term_report["current_governing_months"]}
 
 
-func full_state(
-	session: RunSession, ui_mode: String, world_scene: String, state_version: int
-) -> Dictionary:
+func full_state(session: RunSession, ui_mode: String, world_scene: String, state_version: int) -> Dictionary:
 	var state := session.state
 	return {
 		"state_version": state_version,
@@ -254,9 +173,7 @@ func full_state(
 		"proposal_hand": _proposals(state.proposal_hand),
 		"saved_bills": _bills(state.saved_bills),
 		"draft_bill": bill(state.draft_bill),
-		"editing_saved_bill_index": (
-			null if state.editing_saved_bill_index == RunState.NEW_BILL_INDEX else state.editing_saved_bill_index
-		),
+		"editing_saved_bill_index": null if state.editing_saved_bill_index == RunState.NEW_BILL_INDEX else state.editing_saved_bill_index,
 		"available_policies": _policies(session.constitution_system.get_available_policies(session.context)),
 		"constitution": constitution(session),
 		"races": races(session),
@@ -282,29 +199,12 @@ func constitution(session: RunSession) -> Dictionary:
 	if board != null:
 		for column_index in range(board.columns.size()):
 			var column := board.columns[column_index]
-			columns.append(
-				{
-					"column_index": column_index,
-					"display_name": "" if column == null else column.display_name,
-					"unlock_cost_months": 0 if column == null else column.unlock_cost_months,
-					"unlocked": column != null and session.meta_progression.is_column_unlocked(column),
-					"can_unlock": column != null and session.meta_progression.can_unlock_column(board, column),
-				}
-			)
+			columns.append({"column_index": column_index, "display_name": "" if column == null else column.display_name, "unlock_cost_months": 0 if column == null else column.unlock_cost_months, "unlocked": column != null and session.meta_progression.is_column_unlocked(column), "can_unlock": column != null and session.meta_progression.can_unlock_column(board, column)})
 		var board_rows := board.get_rows()
 		for row_index in range(board_rows.size()):
 			var row := board_rows[row_index]
 			var active := session.state.constitution.get_active_article_for_row(row)
-			rows.append(
-				{
-					"row_index": row_index,
-					"display_name": row.display_name,
-					"race_display_name": _race_name(row.race),
-					"free_navigation": row.free_navigation,
-					"ignores_column_unlocks": row.ignores_column_unlocks,
-					"active_article_index": session.constitution_articles.find(active),
-				}
-			)
+			rows.append({"row_index": row_index, "display_name": row.display_name, "race_display_name": _active_race_name(session, row.race), "free_navigation": row.free_navigation, "ignores_column_unlocks": row.ignores_column_unlocks, "active_article_index": session.constitution_articles.find(active)})
 	var articles: Array = []
 	for index in range(session.constitution_articles.size()):
 		var current := session.constitution_articles[index]
@@ -314,7 +214,7 @@ func constitution(session: RunSession) -> Dictionary:
 		var row_display_name := ""
 		var is_active := false
 		if current != null:
-			row_display_name = _race_name(current.get_race())
+			row_display_name = _active_race_name(session, current.get_race())
 			if board != null and current.row != null:
 				var board_rows := board.get_rows()
 				row_index = board_rows.find(current.row)
@@ -326,25 +226,14 @@ func constitution(session: RunSession) -> Dictionary:
 		data["row_index"] = row_index
 		data["column_index"] = column_index
 		data["row_display_name"] = row_display_name
-		data["race_display_name"] = _race_name(null if current == null else current.get_race())
+		data["race_display_name"] = _active_race_name(session, null if current == null else current.get_race())
 		data["active"] = is_active
 		data["selected"] = is_active
 		data["eligible"] = session.constitution_system.can_revise(session.context, current)
 		data["is_terminal"] = current != null and current.is_terminal
 		data["requirement_percent"] = _article_requirement_percent(current)
 		articles.append(data)
-	return {
-		"title": "蓬莱约法",
-		"revision_available": session.state.constitution.revision_available,
-		"center_column_index": -1 if board == null else board.get_center_column_index(),
-		"available_governing_months": session.meta_progression.available_governing_months,
-		"lifetime_governing_months": session.meta_progression.lifetime_governing_months,
-		"terminal_article_index": session.constitution_articles.find(session.state.constitution.terminal_article),
-		"columns": columns,
-		"rows": rows,
-		"active_articles": active_articles,
-		"articles": articles,
-	}
+	return {"title": "蓬莱约法", "revision_available": session.state.constitution.revision_available, "center_column_index": -1 if board == null else board.get_center_column_index(), "available_governing_months": session.meta_progression.available_governing_months, "lifetime_governing_months": session.meta_progression.lifetime_governing_months, "terminal_article_index": session.constitution_articles.find(session.state.constitution.terminal_article), "columns": columns, "rows": rows, "active_articles": active_articles, "articles": articles}
 
 
 func races(session: RunSession) -> Array:
@@ -356,33 +245,19 @@ func races(session: RunSession) -> Array:
 		var seat_count := session.parliament_system.get_race_seat_count(session.state, current.definition)
 		if seat_count <= 0:
 			continue
+		var active := current.active_definition if current.active_definition != null else current.definition
 		var expectations: Array = []
-		for metric in current.definition.get_stance_metrics():
-			expectations.append(
-				{
-					"metric": int(metric),
-					"target": session.race_system.get_effective_expectation(current, metric, session.context),
-					"direction": int(current.definition.get_stance(metric)),
-				}
-			)
-		result.append(
-			{
-				"race_index": index,
-				"display_name": current.definition.display_name,
-				"description": current.definition.description,
-				"seat_count": seat_count,
-				"expectations": expectations,
-				"resolved_events_this_year": current.resolved_events_this_year,
-				"last_year_resolved_events": current.last_year_resolved_events,
-			}
-		)
+		for metric in active.get_stance_metrics():
+			expectations.append({"metric": int(metric), "target": session.race_system.get_effective_expectation(current, metric, session.context), "direction": int(active.get_stance(metric))})
+		result.append({"race_index": index, "display_name": active.display_name, "description": active.description, "seat_count": seat_count, "expectations": expectations, "resolved_events_this_year": current.resolved_events_this_year, "last_year_resolved_events": current.last_year_resolved_events})
 	return result
 
 
 func interest_groups(session: RunSession) -> Array:
 	var result: Array = []
 	for current in session.constitution_system.get_effective_groups(session.context):
-		var data: Dictionary = interest_group(current)
+		var active := session.constitution_system.get_active_group_definition(session.context, current)
+		var data: Dictionary = interest_group(active)
 		data["influence_count"] = session.parliament_system.get_group_influence_count(session.state, current)
 		data["influence_rate"] = session.parliament_system.get_group_influence_rate(session.state, current)
 		result.append(data)
@@ -393,15 +268,7 @@ func seats(session: RunSession) -> Array:
 	var result: Array = []
 	for index in range(session.state.seats.size()):
 		var current := session.state.seats[index]
-		result.append(
-			{
-				"seat_index": index,
-				"display_name": _seat_name(current),
-				"race_display_name": _race_name(current.race),
-				"interest_group_display_name": _group_name(current.actual_group),
-				"personal_relation": current.personal_relation,
-			}
-		)
+		result.append({"seat_index": index, "display_name": _seat_name(current), "race_display_name": _active_race_name(session, current.race), "interest_group_display_name": _active_group_name(session, current.actual_group), "personal_relation": current.personal_relation})
 	return result
 
 
@@ -411,33 +278,12 @@ func parliament(session: RunSession) -> Dictionary:
 		race_counts.append({"display_name": race["display_name"], "seat_count": race["seat_count"]})
 	var group_influence: Array = []
 	for group in interest_groups(session):
-		group_influence.append(
-			{
-				"display_name": group["display_name"],
-				"influence_count": group["influence_count"],
-				"influence_rate": group["influence_rate"],
-			}
-		)
-	return {
-		"total_seats": session.state.seats.size(),
-		"race_seat_counts": race_counts,
-		"interest_group_influence": group_influence,
-	}
+		group_influence.append({"display_name": group["display_name"], "influence_count": group["influence_count"], "influence_rate": group["influence_rate"]})
+	return {"display_name": session.constitution_system.get_parliament_name(session.context), "total_seats": session.state.seats.size(), "race_seat_counts": race_counts, "interest_group_influence": group_influence}
 
 
 func game_status(session: RunSession) -> Dictionary:
-	return {
-		"term": session.state.term,
-		"year": session.state.year,
-		"month": session.state.month,
-		"run_phase": _run_phase(session.state.run_phase),
-		"term_outcome": _term_outcome(session.state.term_outcome),
-		"governing_months": session.state.governing_months,
-		"metrics": metric_values(session.state.metrics),
-		"political_donation_pool": session.state.political_donation_pool,
-		"collapse_level": session.state.collapse_level,
-		"max_collapse": session.balance.max_collapse,
-	}
+	return {"term": session.state.term, "year": session.state.year, "month": session.state.month, "run_phase": _run_phase(session.state.run_phase), "term_outcome": _term_outcome(session.state.term_outcome), "governing_months": session.state.governing_months, "metrics": metric_values(session.state.metrics), "political_donation_pool": session.state.political_donation_pool, "collapse_level": session.state.collapse_level, "max_collapse": session.balance.max_collapse}
 
 
 func _run_phase(value: RunState.RunPhase) -> String:
@@ -456,13 +302,12 @@ func _term_outcome(value: RunState.TermOutcome) -> String:
 
 func _article(definition: ConstitutionArticleDefinition, article_index: int) -> Dictionary:
 	if definition == null:
-		return {"article_index": article_index, "display_name": "", "content": "", "policies": []}
-	return {
-		"article_index": article_index,
-		"display_name": definition.display_name,
-		"content": definition.description,
-		"policies": _policies(definition.policies),
-	}
+		return {"article_index": article_index, "display_name": "", "content": "", "policies": [], "effects": []}
+	var effects: Array = []
+	for effect in definition.effects:
+		if effect != null:
+			effects.append({"display_name": effect.display_name, "description": effect.get_description(), "timing": int(effect.timing)})
+	return {"article_index": article_index, "display_name": definition.display_name, "content": definition.description, "policies": _policies(definition.policies), "effects": effects}
 
 
 func _article_requirement_percent(definition: ConstitutionArticleDefinition) -> Variant:
@@ -503,12 +348,14 @@ func _bills(values: Array[SavedBillState]) -> Array:
 	return result
 
 
-func _race_name(definition: RaceDefinition) -> String:
-	return "" if definition == null else definition.display_name
+func _active_race_name(session: RunSession, definition: RaceDefinition) -> String:
+	var active := session.constitution_system.get_active_race_definition(session.context, definition)
+	return "" if active == null else active.display_name
 
 
-func _group_name(definition: InterestGroupDefinition) -> String:
-	return "" if definition == null else definition.display_name
+func _active_group_name(session: RunSession, definition: InterestGroupDefinition) -> String:
+	var active := session.constitution_system.get_active_group_definition(session.context, definition)
+	return "" if active == null else active.display_name
 
 
 func _seat_name(state: SeatState) -> String:

@@ -16,13 +16,8 @@ class_name BiyiRaceDefinition
 @export var yang_investment: bool = false
 
 
-func on_month_start(context, race_state) -> void:
-	if race_state != null:
-		race_state.yin_active = _is_yin_month(context)
-
-
 func modify_vote(vote_context) -> void:
-	if vote_context == null or vote_context.vote == null or vote_context.seat == null:
+	if not yin_yang_enabled or vote_context == null or vote_context.vote == null or vote_context.seat == null:
 		return
 	var relation: float = (
 		vote_context.seat.odd_month_relation
@@ -33,19 +28,20 @@ func modify_vote(vote_context) -> void:
 
 
 func is_vote_metric_active(metric: Metric.Id, context) -> bool:
+	if not yin_yang_enabled:
+		return true
 	return is_yin_metric(metric) if _is_yin_month(context) else is_yang_metric(metric)
 
 
 func get_effective_expectation(
-	base_target: int, metric: Metric.Id, context, race_state
+	base_target: int, metric: Metric.Id, context, _race_state
 ) -> int:
-	if race_state == null:
+	if not yin_yang_enabled:
 		return base_target
 	var month_sign := get_yin_yang_month_sign(metric, context.state.month)
 	if month_sign == 0 or get_stance(metric) == Metric.Direction.NONE:
 		return base_target
-	var adjustment := float(month_sign) * float(race_state.yin_yang_adjustment_rate)
-	return roundi(float(base_target) * (1.0 + adjustment))
+	return roundi(float(base_target) * (1.0 + float(month_sign) * yin_yang_adjustment_rate))
 
 
 func is_yin_metric(metric: Metric.Id) -> bool:

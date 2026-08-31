@@ -6,7 +6,13 @@ class_name GroupMergeEffect
 
 
 func _init() -> void:
+	display_name = "利益集团合并"
 	timing = Timing.ON_ACTIVATE
+
+
+func apply(context: RunContext) -> void:
+	if context != null and context.constitution_system != null:
+		context.constitution_system.merge_groups_below_threshold(context, target_group, threshold)
 
 
 func get_description() -> String:

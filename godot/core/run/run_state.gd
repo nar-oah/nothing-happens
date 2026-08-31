@@ -42,11 +42,8 @@ var last_annual_proposal_slot_counts: Dictionary[InterestGroupDefinition, int] =
 var last_annual_source_shares: Dictionary[InterestGroupDefinition, float] = {}
 var vote_donations: Dictionary[SeatDefinition, float] = {}
 var political_donation_pool: float = 0.0
-var petition_race: RaceDefinition
-var petition_limit: int = 0
+# Petition capacity is derived from active effects; only actual usage is mutable state.
 var petition_used_this_year: int = 0
-var donation_detection_probability: float = 0.0
-var event_early_reveal_bonus_probability: float = 0.0
 var collapse_level: int = 0
 var run_phase: RunPhase = RunPhase.RUNNING
 var term_outcome: TermOutcome = TermOutcome.NONE

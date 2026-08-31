@@ -7,7 +7,17 @@ class_name InterestGroupInfluenceBonusEffect
 
 
 func _init() -> void:
+	display_name = "利益集团影响"
 	timing = Timing.AFTER_GROUP_ALLOCATION
+
+
+func apply(context: RunContext) -> void:
+	if context != null and context.parliament_system != null:
+		context.parliament_system.apply_influence_bonus(context, self)
+
+
+func applies_to(race: RaceDefinition) -> bool:
+	return _matches_race(races, race)
 
 
 func get_description() -> String:

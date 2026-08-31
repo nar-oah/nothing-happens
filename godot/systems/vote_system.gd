@@ -12,11 +12,10 @@ func calculate_vote(
 	var result := VoteResultState.new()
 	if draft == null:
 		return result
-	var projected := _calculate_projected_metrics(draft, context)
+	var pure_target := context.proposal_system.calculate_pure_target(context.state.metrics, draft.proposals)
+	var projected := _calculate_projected_metrics(draft, pure_target, context)
 	for seat in context.state.seats:
-		var vote := _calculate_seat_vote(
-			seat, draft, projected, context, resolve_randomness
-		)
+		var vote := _calculate_seat_vote(seat, draft, pure_target, projected, context, resolve_randomness)
 		result.seat_votes.append(vote)
 		_count_position(result, vote.position)
 	result.passed = result.present_count() > 0 and result.support_count * 2 > result.present_count()
@@ -24,12 +23,7 @@ func calculate_vote(
 
 
 func set_donation(context: RunContext, seat: SeatState, support_amount: float) -> bool:
-	if (
-		seat == null
-		or seat.definition == null
-		or seat not in context.state.seats
-		or support_amount <= 0.0
-	):
+	if seat == null or seat.definition == null or seat not in context.state.seats or support_amount <= 0.0:
 		return false
 	var previous: float = context.state.vote_donations.get(seat.definition, 0.0)
 	var additional := support_amount - previous
@@ -42,11 +36,10 @@ func set_donation(context: RunContext, seat: SeatState, support_amount: float) -
 
 func resolve_donation_detection(context: RunContext) -> int:
 	var detected := 0
+	var probability := context.constitution_system.get_donation_detection_probability(context)
 	for seat_definition in context.state.vote_donations:
 		var amount: float = context.state.vote_donations[seat_definition]
-		if amount <= 0.0:
-			continue
-		if not context.random_system.chance(context.state.donation_detection_probability):
+		if amount <= 0.0 or not context.random_system.chance(probability):
 			continue
 		detected += 1
 		context.collapse_system.increase(context)
@@ -58,52 +51,35 @@ func clear_donations(state: RunState) -> void:
 
 
 func _calculate_projected_metrics(
-	draft: DraftBillState, context: RunContext
+	draft: DraftBillState, pure_target: MetricValues, context: RunContext
 ) -> MetricValues:
-	var projected := context.proposal_system.calculate_pure_target(
-		context.state.metrics, draft.proposals
-	)
-	var immediate := context.policy_system.calculate_immediate_result(
-		context.state.metrics, draft.policies
-	)
+	var projected := pure_target.copy()
+	var immediate := context.policy_system.calculate_immediate_result(context.state.metrics, draft.policies)
 	for metric in Metric.all_ids():
-		projected.set_value(
-			metric,
-			projected.get_value(metric)
-			+ immediate.get_value(metric)
-			- context.state.metrics.get_value(metric)
-		)
+		projected.set_value(metric, pure_target.get_value(metric) + immediate.get_value(metric) - context.state.metrics.get_value(metric))
 	return projected
 
 
 func _calculate_seat_vote(
-	seat: SeatState,
-	draft: DraftBillState,
-	projected: MetricValues,
-	context: RunContext,
-	resolve_randomness: bool
+	seat: SeatState, draft: DraftBillState, pure_target: MetricValues,
+	projected: MetricValues, context: RunContext, resolve_randomness: bool
 ) -> SeatVoteState:
 	var vote := SeatVoteState.new()
 	vote.seat = seat
-	var race := context.state.get_race(seat.race)
-	if race == null or race.definition == null:
+	var race_state := context.state.get_race(seat.race)
+	if race_state == null:
 		vote.position = SeatVoteState.Position.ABSTAIN
 		return vote
-	vote.add_reason(
-		&"race_expectation", _race_expectation_score(race, projected, context)
-	)
-	vote.add_reason(
-		&"proposal_source", _proposal_source_score(seat.actual_group, draft, context.balance)
-	)
+	var active_race := race_state.active_definition
+	if active_race == null:
+		active_race = race_state.definition
+	vote.add_reason(&"race_expectation", _race_expectation_score(race_state, projected, context))
+	vote.add_reason(&"proposal_source", _group_support_score(seat.actual_group, draft, projected, context))
 	vote.add_reason(&"personal_relation", seat.personal_relation)
-	vote.add_reason(
-		&"political_donation", context.state.vote_donations.get(seat.definition, 0.0)
-	)
-	var vote_context := VoteContext.new(
-		context, seat, race, draft, projected, vote, resolve_randomness
-	)
-	race.definition.modify_vote(vote_context)
-	context.constitution_system.modify_vote(vote_context)
+	vote.add_reason(&"political_donation", context.state.vote_donations.get(seat.definition, 0.0))
+	var vote_context := VoteContext.new(context, seat, race_state, draft, pure_target, projected, vote, resolve_randomness)
+	active_race.modify_vote(vote_context)
+	context.constitution_system.apply_vote_effects(vote_context)
 	if vote_context.locked_position >= 0:
 		vote.position = vote_context.locked_position as SeatVoteState.Position
 	elif vote_context.position_override >= 0:
@@ -116,9 +92,12 @@ func _calculate_seat_vote(
 func _race_expectation_score(
 	race: RaceState, projected: MetricValues, context: RunContext
 ) -> float:
+	var active := race.active_definition
+	if active == null:
+		active = race.definition
 	var score := 0.0
-	for metric in race.definition.get_stance_metrics():
-		if not race.definition.is_vote_metric_active(metric, context):
+	for metric in active.get_stance_metrics():
+		if not active.is_vote_metric_active(metric, context):
 			continue
 		var target := context.race_system.get_effective_expectation(race, metric, context)
 		var before_gap := maxf(float(target - context.state.metrics.get_value(metric)), 0.0)
@@ -130,17 +109,23 @@ func _race_expectation_score(
 	return score
 
 
-func _proposal_source_score(
-	group: InterestGroupDefinition,
-	draft: DraftBillState,
-	balance: GameBalanceDefinition
+func _group_support_score(
+	group: InterestGroupDefinition, draft: DraftBillState,
+	projected: MetricValues, context: RunContext
 ) -> float:
-	if group == null:
+	var identity := context.constitution_system.resolve_group_identity(context, group)
+	var active := context.constitution_system.get_active_group_definition(context, identity)
+	if active == null:
 		return 0.0
+	if active.race != null:
+		var race_state := context.state.get_race(active.race)
+		return 0.0 if race_state == null else _race_expectation_score(race_state, projected, context)
 	var score := 0.0
 	for proposal in draft.proposals:
-		if proposal.source_group == group:
-			score += balance.proposal_support
+		if proposal == null:
+			continue
+		if context.constitution_system.resolve_group_identity(context, proposal.source_group) == identity:
+			score += context.balance.proposal_support
 	return score
 
 

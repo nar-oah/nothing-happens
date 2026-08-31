@@ -7,7 +7,17 @@ class_name RaceSeatEffect
 
 
 func _init() -> void:
+	display_name = "种族席位"
 	timing = Timing.BEFORE_SEAT_ALLOCATION
+
+
+func apply(context: RunContext) -> void:
+	if context != null and context.parliament_system != null:
+		context.parliament_system.apply_race_seat_effect(context, self)
+
+
+func applies_to(race: RaceDefinition) -> bool:
+	return _matches_race(races, race)
 
 
 func get_description() -> String:
