@@ -14,7 +14,7 @@ func initialize_seats(
 			push_error("Seat definitions must be unique non-null Resources.")
 			return false
 		seen[definition] = true
-		if definition.fixed_race != null and definition.fixed_race not in traces:
+		if definition.fixed_race != null and definition.fixed_race not in races:
 			push_error("A fixed race seat must belong to a configured content race.")
 			return false
 	for definition in definitions:
