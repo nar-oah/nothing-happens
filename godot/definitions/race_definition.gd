@@ -5,6 +5,7 @@ class_name RaceDefinition
 @export_multiline var description: String
 @export_multiline var event_description: String
 @export var fixed_interest_group: InterestGroupDefinition
+@export var yin_yang_enabled: bool = false
 
 @export_group("希望提高")
 @export var increase_tax: bool = false

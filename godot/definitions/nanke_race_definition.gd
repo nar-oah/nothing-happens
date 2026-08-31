@@ -1,6 +1,8 @@
 extends RaceDefinition
 class_name NankeRaceDefinition
 
+@export_range(0.0, 1.0, 0.01) var absence_probability: float = 0.15
+
 
 func modify_vote(vote_context) -> void:
 	if (
