@@ -128,6 +128,45 @@ test('IPC rejects the legacy flat constitution payload shape', () => {
 	);
 });
 
+test('IPC requires constitution effects and parliament display metadata', () => {
+	const valid = makeLiveState(8);
+	valid.constitution.active_articles[0].effects = [
+		{ display_name: '奏请', description: '每年可奏请一次', timing: 0 }
+	];
+	valid.constitution.articles[0].effects = [
+		{ display_name: '奏请', description: '每年可奏请一次', timing: 0 }
+	];
+	assert.equal(
+		decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: valid })).ok,
+		true
+	);
+
+	const missingEffects = JSON.parse(JSON.stringify(valid)) as Record<string, unknown>;
+	const missingEffectsConstitution = missingEffects.constitution as Record<string, unknown>;
+	const missingEffectsArticles = missingEffectsConstitution.active_articles as Record<string, unknown>[];
+	delete missingEffectsArticles[0].effects;
+	assert.deepEqual(
+		decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: missingEffects })),
+		{ ok: false, error: 'Invalid payload for state.full' }
+	);
+
+	const invalidEffect = JSON.parse(JSON.stringify(valid)) as Record<string, unknown>;
+	const invalidEffectConstitution = invalidEffect.constitution as Record<string, unknown>;
+	const invalidEffectArticles = invalidEffectConstitution.active_articles as Record<string, unknown>[];
+	invalidEffectArticles[0].effects = [{ display_name: '奏请', description: '说明', timing: -1 }];
+	assert.deepEqual(
+		decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: invalidEffect })),
+		{ ok: false, error: 'Invalid payload for state.full' }
+	);
+
+	const missingParliamentName = JSON.parse(JSON.stringify(valid)) as Record<string, unknown>;
+	delete (missingParliamentName.parliament as Record<string, unknown>).display_name;
+	assert.deepEqual(
+		decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: missingParliamentName })),
+		{ ok: false, error: 'Invalid payload for state.full' }
+	);
+});
+
 test('IPC decode rejects malformed JSON, unknown types, and invalid payloads', () => {
 	assert.deepEqual(decodeInboundMessage('{'), { ok: false, error: 'Malformed JSON' });
 	assert.deepEqual(decodeInboundMessage(JSON.stringify({ type: 'unknown', payload: {} })), {
