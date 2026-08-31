@@ -32,6 +32,7 @@ class_name ConstitutionArticleDefinition
 
 @export_group("内容")
 @export var policies: Array[PolicyDefinition] = []
+@export var effects: Array[ConstitutionEffect] = []
 @export var group_biases: Array[ConstitutionGroupBiasDefinition] = []
 @export var influence_rules: Array[ConstitutionInfluenceRule] = []
 
