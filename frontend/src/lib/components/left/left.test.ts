@@ -108,8 +108,8 @@ const items: LeftItem[] = [
 		constitution: {
 			title: '约法',
 			active_articles: [
-				{ display_name: '节点一', content: '', policies: [policy] },
-				{ display_name: '节点二', content: '', policies: [secondArticlePolicy] }
+				{ display_name: '节点一', content: '', policies: [policy], effects: [] },
+				{ display_name: '节点二', content: '', policies: [secondArticlePolicy], effects: [] }
 			]
 		}
 	},

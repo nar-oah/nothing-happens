@@ -12,7 +12,6 @@ func advance_month() -> bool:
 	if context.state.run_phase != RunState.RunPhase.RUNNING:
 		return false
 	if context.state.month == 0:
-		# Leaving month 0 without revising explicitly forfeits this year's revision.
 		context.state.constitution.revision_available = false
 		context.time_system.advance_month(context.state)
 		if context.state.year == 1 and context.state.governing_months == 0:
@@ -21,11 +20,12 @@ func advance_month() -> bool:
 	var report_year := context.state.year
 	var report_month := context.state.month
 	var report_previous_metrics := context.state.metrics.copy()
-	for definition in context.race_definitions:
-		var race_state := context.state.get_race(definition)
-		if race_state != null:
-			definition.on_month_start(context, race_state)
-	context.constitution_system.on_month_start(context)
+	for race_state in context.state.races:
+		if race_state == null:
+			continue
+		var active := race_state.active_definition
+		if active != null:
+			active.on_month_start(context, race_state)
 	context.market_system.settle_month(context)
 	context.policy_system.resolve_policy_chain(context.state)
 	_record_triggered_policies(context.policy_system.last_triggered_definitions)
@@ -45,32 +45,21 @@ func advance_month() -> bool:
 
 
 func enact_bill(draft: DraftBillState) -> void:
-	if (
-		context.state.run_phase != RunState.RunPhase.RUNNING
-		or not context.draft_bill_system.is_ready_to_submit(context, draft)
-	):
+	if context.state.run_phase != RunState.RunPhase.RUNNING or not context.draft_bill_system.is_ready_to_submit(context, draft):
 		push_error("Cannot enact an unavailable or unresolved draft.")
 		return
 	var new_bill := _build_active_bill(draft)
 	context.state.active_bill = new_bill
 	context.state.newspaper_pending_bill = new_bill
-	context.parliament_system.record_authorized_proposal_slots(
-		context.state, draft.proposals
-	)
+	context.parliament_system.record_authorized_proposal_slots(context.state, draft.proposals)
 	context.policy_system.resolve_policy_chain(context.state)
 	_record_triggered_policies(context.policy_system.last_triggered_definitions)
 
 
 func submit_draft(draft: DraftBillState) -> VoteResultState:
 	var result := VoteResultState.new()
-	if (
-		context.state.run_phase != RunState.RunPhase.RUNNING
-		or not context.draft_bill_system.is_ready_to_submit(context, draft)
-	):
+	if context.state.run_phase != RunState.RunPhase.RUNNING or not context.draft_bill_system.is_ready_to_submit(context, draft):
 		return result
-	# Saving happens before the vote, so saved_bills is the authoritative record that the
-	# player has ever submitted a bill this term. Collapse uses the array itself to decide
-	# whether the "nothing happens" outcome is still possible.
 	context.draft_bill_system.save_draft(context.state, draft)
 	result = context.vote_system.calculate_vote(draft, context, true)
 	result.submitted = true
@@ -91,9 +80,7 @@ func _record_triggered_policies(definitions: Array[PolicyDefinition]) -> void:
 		context.state.newspaper_triggered_policies.append(definition)
 
 
-func _record_month_report(
-	report_year: int, report_month: int, previous_metrics: MetricValues
-) -> void:
+func _record_month_report(report_year: int, report_month: int, previous_metrics: MetricValues) -> void:
 	var state := context.state
 	state.month_report_year = report_year
 	state.month_report_month = report_month
@@ -103,26 +90,23 @@ func _record_month_report(
 	for event in state.events:
 		if event == null or not event.is_active() or not event.published:
 			continue
-		state.month_report_events.append(
-			{
-				"race_display_name": "" if event.race == null else event.race.display_name,
-				"event_description": "" if event.race == null else event.race.event_description,
-				"metric": int(event.metric),
-				"value": context.event_system.get_current_requirement(event),
-				"countdown": maxi(context.balance.event_lifetime_months - event.months_alive, 0),
-				"strength": roundi(clampf(event.growth_progress, 0.0, 1.0) * 100.0),
-				"phase": int(event.phase),
-			}
-		)
+		var active_race := context.constitution_system.get_active_race_definition(context, event.race)
+		state.month_report_events.append({
+			"race_display_name": "" if active_race == null else active_race.display_name,
+			"event_description": "" if active_race == null else active_race.event_description,
+			"metric": int(event.metric),
+			"value": context.event_system.get_current_requirement(event),
+			"countdown": maxi(context.balance.event_lifetime_months - event.months_alive, 0),
+			"strength": roundi(clampf(event.growth_progress, 0.0, 1.0) * 100.0),
+			"phase": int(event.phase),
+		})
 
 
 func _build_active_bill(draft: DraftBillState) -> ActiveBillState:
 	var bill := ActiveBillState.new()
 	bill.title = draft.title
 	bill.start_values = context.state.metrics.copy()
-	bill.pure_target = context.proposal_system.calculate_pure_target(
-		bill.start_values, draft.proposals
-	)
+	bill.pure_target = context.proposal_system.calculate_pure_target(bill.start_values, draft.proposals)
 	bill.proposals = context.proposal_system.create_active_states(draft.proposals)
 	bill.policies = context.policy_system.create_states(draft.policies)
 	return bill

@@ -1,32 +1,39 @@
 [gd_resource type="Resource" script_class="ConstitutionArticleDefinition" format=3 uid="uid://bp366yyqyg6le"]
 
-[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="1_6umtg"]
-[ext_resource type="Script" uid="uid://dajy5425i5dpq" path="res://definitions/constitution_article_definition.gd" id="1_article_script"]
-[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_pgq5k"]
-[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
-[ext_resource type="Resource" uid="uid://c2eco18e42n34" path="res://data/races/偃偶.tres" id="3_race_yano"]
-[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="3_tbrb2"]
-[ext_resource type="Resource" uid="uid://crp5hwj3gy3re" path="res://data/policies/机件配给.tres" id="4_policy_1"]
-[ext_resource type="Resource" uid="uid://c75roafw522lh" path="res://data/policies/租身周转.tres" id="5_policy_2"]
-[ext_resource type="Resource" uid="uid://o7sgl3rsvmrs" path="res://data/policies/行身维修.tres" id="6_policy_3"]
-[ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="12_kppqt"]
-[ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="condition_script"]
-[ext_resource type="Resource" uid="uid://b7vlc4eb8m4io" path="res://data/interest_groups/造身公所.tres" id="group"]
-[ext_resource type="Resource" uid="uid://cqpejxjyt0cyq" path="res://data/constitution_rows/偃偶.tres" id="row"]
+[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="6_kppqt"]
+[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="7_apwxi"]
+[ext_resource type="Script" uid="uid://dajy5425i5dpq" path="res://definitions/constitution_article_definition.gd" id="article_script_1"]
+[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="condition_type_4"]
+[ext_resource type="Script" uid="uid://cpc61vbc5rd11" path="res://definitions/constitution_effect.gd" id="effect_type_3"]
+[ext_resource type="Script" uid="uid://dijsxl05i7yxo" path="res://definitions/constitution_effects/race_seat_effect.gd" id="effscript_race_seat_13"]
+[ext_resource type="Resource" uid="uid://b7vlc4eb8m4io" path="res://data/interest_groups/造身公所.tres" id="group_12"]
+[ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="group_type_6"]
+[ext_resource type="Resource" uid="uid://crp5hwj3gy3re" path="res://data/policies/机件配给.tres" id="policy_8"]
+[ext_resource type="Resource" uid="uid://c75roafw522lh" path="res://data/policies/租身周转.tres" id="policy_9"]
+[ext_resource type="Resource" uid="uid://o7sgl3rsvmrs" path="res://data/policies/行身维修.tres" id="policy_10"]
+[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="policy_type_2"]
+[ext_resource type="Resource" uid="uid://c2eco18e42n34" path="res://data/races/偃偶.tres" id="race_14"]
+[ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="race_type_5"]
+[ext_resource type="Resource" uid="uid://cqpejxjyt0cyq" path="res://data/constitution_rows/偃偶.tres" id="row_7"]
+[ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="seat_condition_script_11"]
 
-[sub_resource type="Resource" id="Resource_condition"]
-script = ExtResource("condition_script")
-interest_group = ExtResource("group")
+[sub_resource type="Resource" id="Effect_1"]
+script = ExtResource("effscript_race_seat_13")
+races = Array[ExtResource("race_type_5")]([ExtResource("race_14")])
+participates_in_variable_seat_allocation = false
+
+[sub_resource type="Resource" id="Condition_1"]
+script = ExtResource("seat_condition_script_11")
+interest_group = ExtResource("group_12")
 comparison = 3
 required_rate = 0.2
 
 [resource]
-script = ExtResource("1_article_script")
+script = ExtResource("article_script_1")
 display_name = "有限"
 description = "偃偶可以拥有姓名、财产、合同和议席，也可以像货物一样被登记、出租、抵押和转卖。
 蓬莱没有解决这个矛盾，只是学会了同时承认两边都是真的。一具行身既是公民，也是商品；只要日子还能继续，这份“一身两籍”就被视作足够合理。"
-row = ExtResource("row")
-race = ExtResource("3_race_yano")
-seat_condition = SubResource("Resource_condition")
-participates_in_variable_seat_allocation = false
-policies = Array[ExtResource("2_policy_script")]([ExtResource("4_policy_1"), ExtResource("5_policy_2"), ExtResource("6_policy_3")])
+row = ExtResource("row_7")
+seat_condition = SubResource("Condition_1")
+policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
+effects = Array[ExtResource("effect_type_3")]([SubResource("Effect_1")])

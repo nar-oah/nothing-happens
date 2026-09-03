@@ -1,23 +1,20 @@
-[gd_resource type="Resource" script_class="BiyiConstitutionArticleDefinition" format=3 uid="uid://wk1diblt1g84"]
+[gd_resource type="Resource" script_class="ConstitutionArticleDefinition" format=3 uid="uid://wk1diblt1g84"]
 
-[ext_resource type="Script" uid="uid://dtldpcolvfdl0" path="res://definitions/biyi_constitution_article_definition.gd" id="1_article_script"]
-[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="1_xvx5s"]
-[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_gsnwe"]
-[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
-[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="3_g0bdh"]
-[ext_resource type="Resource" uid="uid://bw162ei21njtt" path="res://data/races/比翼.tres" id="3_race_biyi"]
-[ext_resource type="Resource" uid="uid://cbaegioaf86au" path="res://data/constitutions/包容.tres" id="4_prereq"]
-[ext_resource type="Resource" uid="uid://y84xypvxaa1x" path="res://data/policies/同文公契.tres" id="5_policy_1"]
-[ext_resource type="Resource" uid="uid://57c1t5qw14ti" path="res://data/policies/官学定式.tres" id="6_policy_2"]
-[ext_resource type="Resource" uid="uid://b7uffp7omnmmg" path="res://data/policies/一体征解.tres" id="7_policy_3"]
-[ext_resource type="Resource" uid="uid://b5clravmnjms4" path="res://data/constitution_rows/文化.tres" id="row"]
+[ext_resource type="Script" path="res://definitions/constitution_article_definition.gd" id="article_script_1"]
+[ext_resource type="Script" path="res://definitions/policy_definition.gd" id="policy_type_2"]
+[ext_resource type="Script" path="res://definitions/constitution_effect.gd" id="effect_type_3"]
+[ext_resource type="Script" path="res://definitions/constitution_condition.gd" id="condition_type_4"]
+[ext_resource type="Script" path="res://definitions/race_definition.gd" id="race_type_5"]
+[ext_resource type="Script" path="res://definitions/interest_group_definition.gd" id="group_type_6"]
+[ext_resource type="Resource" path="res://data/constitution_rows/文化.tres" id="row_7"]
+[ext_resource type="Resource" path="res://data/policies/同文公契.tres" id="policy_8"]
+[ext_resource type="Resource" path="res://data/policies/官学定式.tres" id="policy_9"]
+[ext_resource type="Resource" path="res://data/policies/一体征解.tres" id="policy_10"]
 
 [resource]
-script = ExtResource("1_article_script")
+script = ExtResource("article_script_1")
 display_name = "汉化"
-description = "既然大家已经在同一个政府、同一个市场和同一份报纸里生活，为什么还要维持一套只有少数人掌握的文字与历法？
-汉化把这种疑问变成制度答案：公共生活只保留汉语，比翼旧有的知识体系退出官署与教育。它让交流变得简单，也告诉比翼，他们最珍视的那些东西今后只能算私人的旧习。"
-row = ExtResource("row")
-race = ExtResource("3_race_biyi")
-prerequisite = ExtResource("4_prereq")
-policies = Array[ExtResource("2_policy_script")]([ExtResource("5_policy_1"), ExtResource("6_policy_2"), ExtResource("7_policy_3")])
+description = "既然大家已经在同一个政府、同一个市场和同一份报纸里生活，为什么还要维持一套只有少数人掌握的文字与历法？\n汉化把这种疑问变成制度答案：公共生活只保留汉语，比翼旧有的知识体系退出官署与教育。它让交流变得简单，也告诉比翼，他们最珍视的那些东西今后只能算私人的旧习。"
+row = ExtResource("row_7")
+policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
+effects = Array[ExtResource("effect_type_3")]([])

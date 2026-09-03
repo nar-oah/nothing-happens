@@ -123,7 +123,7 @@ export function makeLiveState(stateVersion = 1): LiveGameState {
 				}
 			],
 			active_articles: [
-				{ article_index: 0, display_name: '外藩', content: '', policies: [testPolicy] }
+				{ article_index: 0, display_name: '外藩', content: '', policies: [testPolicy], effects: [] }
 			],
 			articles: [
 				{
@@ -135,6 +135,7 @@ export function makeLiveState(stateVersion = 1): LiveGameState {
 					display_name: '外藩',
 					content: '',
 					policies: [testPolicy],
+					effects: [],
 					active: true,
 					selected: true,
 					eligible: false,
@@ -165,6 +166,7 @@ export function makeLiveState(stateVersion = 1): LiveGameState {
 			}
 		],
 		parliament: {
+			display_name: '联合议会',
 			total_seats: 1,
 			race_seat_counts: [{ display_name: '人类', seat_count: 1 }],
 			interest_group_influence: [

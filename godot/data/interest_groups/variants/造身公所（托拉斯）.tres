@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="InterestGroupDefinition" format=3]
+
+[ext_resource type="Script" path="res://definitions/interest_group_definition.gd" id="script"]
+
+[resource]
+script = ExtResource("script")
+display_name = "托拉斯"
+description = "造身公所吞并其它利益集团后形成的唯一产业组织。原有集团在运行时保留各自资源身份，但名称、描述与政治模板统一为托拉斯。"
+base_column_weight = 5
+decrease_employment = true
+decrease_tax = true

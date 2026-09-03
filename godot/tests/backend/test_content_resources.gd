@@ -2,6 +2,7 @@ extends RefCounted
 
 const BackendTestContext = preload("res://tests/backend/backend_test_context.gd")
 const ConstitutionBoard = preload("res://data/constitutions/constitution_board.tres")
+const ConstitutionArticleScript = preload("res://definitions/constitution_article_definition.gd")
 
 
 func run(t: BackendTestContext) -> void:
@@ -27,6 +28,12 @@ func _test_formal_constitution_board_resources(t: BackendTestContext) -> void:
 	t.check_equal(articles.size(), 27, "formal constitution board contains exactly twenty-seven real nodes")
 	var terminal_names: Array[String] = []
 	for article in articles:
+		t.check(
+			article.get_script() == ConstitutionArticleScript,
+			"every formal constitution node composes effects on the base article script"
+		)
+		for effect in article.effects:
+			t.check(effect != null, "formal constitution effects are valid Resource references")
 		if article.is_terminal:
 			terminal_names.append(article.display_name)
 	terminal_names.sort()

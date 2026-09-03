@@ -1,46 +1,70 @@
-[gd_resource type="Resource" script_class="NankeConstitutionArticleDefinition" format=3 uid="uid://dt0eb2yskqtv3"]
+[gd_resource type="Resource" script_class="ConstitutionArticleDefinition" format=3 uid="uid://dt0eb2yskqtv3"]
 
-[ext_resource type="Script" uid="uid://jgr73t04ui0t" path="res://definitions/nanke_constitution_article_definition.gd" id="1_article_script"]
-[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="1_atj7j"]
-[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
-[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_rw0l6"]
-[ext_resource type="Resource" uid="uid://bto7mkhf8cqca" path="res://data/races/南柯.tres" id="3_race_nanke"]
-[ext_resource type="Resource" uid="uid://dgtt2bc8wps1" path="res://data/constitutions/合作社.tres" id="4_prereq"]
-[ext_resource type="Resource" uid="uid://by7u482sgaihw" path="res://data/interest_groups/听弦塔.tres" id="5_group_1"]
-[ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="6_seat_condition_script"]
-[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="7_influence_rule_script"]
-[ext_resource type="Resource" uid="uid://cmx3hkmc86ste" path="res://data/policies/梦中机具.tres" id="8_policy_1"]
-[ext_resource type="Resource" uid="uid://bje4ksj84sn0r" path="res://data/policies/共同劳动.tres" id="9_policy_2"]
-[ext_resource type="Resource" uid="uid://500xq3v2208e" path="res://data/policies/未然公用.tres" id="10_policy_3"]
-[ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="13_crkel"]
-[ext_resource type="Resource" uid="uid://dl4flgxtqjpim" path="res://data/constitution_rows/团体.tres" id="row"]
+[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="17_2mu18"]
+[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="18_ibvxh"]
+[ext_resource type="Script" uid="uid://dajy5425i5dpq" path="res://definitions/constitution_article_definition.gd" id="article_script_1"]
+[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="condition_type_4"]
+[ext_resource type="Script" uid="uid://cpc61vbc5rd11" path="res://definitions/constitution_effect.gd" id="effect_type_3"]
+[ext_resource type="Script" uid="uid://cwldqqpalb8sc" path="res://definitions/constitution_effects/draft_metric_requirement_effect.gd" id="effscript_draft_requirement_23"]
+[ext_resource type="Script" uid="uid://cl20jnnufvy50" path="res://definitions/constitution_effects/government_display_effect.gd" id="effscript_government_24"]
+[ext_resource type="Script" uid="uid://deskdxywl7uny" path="res://definitions/constitution_effects/interest_group_influence_bonus_effect.gd" id="effscript_influence_16"]
+[ext_resource type="Script" uid="uid://ccj4ntfstuxfm" path="res://definitions/constitution_effects/modify_race_effect.gd" id="effscript_modify_race_13"]
+[ext_resource type="Script" uid="uid://bebqvsjvk77lu" path="res://definitions/constitution_effects/strike_effect.gd" id="effscript_strike_17"]
+[ext_resource type="Resource" uid="uid://by7u482sgaihw" path="res://data/interest_groups/听弦塔.tres" id="group_12"]
+[ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="group_type_6"]
+[ext_resource type="Resource" uid="uid://cmx3hkmc86ste" path="res://data/policies/梦中机具.tres" id="policy_8"]
+[ext_resource type="Resource" uid="uid://bje4ksj84sn0r" path="res://data/policies/共同劳动.tres" id="policy_9"]
+[ext_resource type="Resource" uid="uid://500xq3v2208e" path="res://data/policies/未然公用.tres" id="policy_10"]
+[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="policy_type_2"]
+[ext_resource type="Resource" uid="uid://bto7mkhf8cqca" path="res://data/races/南柯.tres" id="race_14"]
+[ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/人类.tres" id="race_18"]
+[ext_resource type="Resource" uid="uid://bw162ei21njtt" path="res://data/races/比翼.tres" id="race_19"]
+[ext_resource type="Resource" uid="uid://c2eco18e42n34" path="res://data/races/偃偶.tres" id="race_20"]
+[ext_resource type="Resource" uid="uid://b4e7rdu770lrv" path="res://data/races/桃花妖.tres" id="race_21"]
+[ext_resource type="Resource" uid="uid://dknll48i00v4u" path="res://data/races/驻岁.tres" id="race_22"]
+[ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="race_type_5"]
+[ext_resource type="Resource" uid="uid://dl4flgxtqjpim" path="res://data/constitution_rows/团体.tres" id="row_7"]
+[ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="seat_condition_script_11"]
+[ext_resource type="Resource" path="res://data/races/variants/团体/南柯（理想国）.tres" id="variant_15"]
 
-[sub_resource type="Resource" id="Resource_influence_1"]
-script = ExtResource("7_influence_rule_script")
-race = ExtResource("3_race_nanke")
-interest_group = ExtResource("5_group_1")
-mode = 0
-rate = 0.7
+[sub_resource type="Resource" id="Effect_1"]
+script = ExtResource("effscript_modify_race_13")
+target_races = Array[ExtResource("race_type_5")]([ExtResource("race_14")])
+source_races = Array[ExtResource("race_type_5")]([ExtResource("variant_15")])
 
-[sub_resource type="Resource" id="Resource_seat_condition"]
-script = ExtResource("6_seat_condition_script")
-interest_group = ExtResource("5_group_1")
+[sub_resource type="Resource" id="Effect_2"]
+script = ExtResource("effscript_influence_16")
+interest_group = ExtResource("group_12")
+races = Array[ExtResource("race_type_5")]([ExtResource("race_14")])
+bonus_rate = 0.7
+
+[sub_resource type="Resource" id="Effect_3"]
+script = ExtResource("effscript_strike_17")
+interest_group = ExtResource("group_12")
+races = Array[ExtResource("race_type_5")]([ExtResource("race_18"), ExtResource("race_19"), ExtResource("race_20"), ExtResource("race_21"), ExtResource("race_14"), ExtResource("race_22")])
+
+[sub_resource type="Resource" id="Effect_4"]
+script = ExtResource("effscript_draft_requirement_23")
+races = Array[ExtResource("race_type_5")]([ExtResource("race_14")])
+metrics = Array[int]([1, 3])
+
+[sub_resource type="Resource" id="Effect_5"]
+script = ExtResource("effscript_government_24")
+parliament_name = "理想国议会"
+
+[sub_resource type="Resource" id="Condition_1"]
+script = ExtResource("seat_condition_script_11")
+interest_group = ExtResource("group_12")
 required_rate = 0.9
 
 [resource]
-script = ExtResource("1_article_script")
-absence_probability = 0.05
-strike_enabled = true
-strike_group = ExtResource("5_group_1")
-strike_extends_to_group = true
+script = ExtResource("article_script_1")
 display_name = "理想国"
 description = "南柯睡着时曾无数次生活在另一个世界。那里有更先进的工具、更好的劳动制度，也有一种不必把疲惫当成发展代价的生活。
 他们并不知道现实一定会走到那里，所以决定亲手把它建出来。
 理想国不是预言实现，而是南柯终于拒绝在醒来后接受“现实只能如此”。从此，梦中的标准不再是慰藉，而成为现实制度必须达到的最低线。"
-row = ExtResource("row")
+row = ExtResource("row_7")
 is_terminal = true
-race = ExtResource("3_race_nanke")
-prerequisite = ExtResource("4_prereq")
-seat_condition = SubResource("Resource_seat_condition")
-policies = Array[ExtResource("2_policy_script")]([ExtResource("8_policy_1"), ExtResource("9_policy_2"), ExtResource("10_policy_3")])
-influence_rules = Array[ExtResource("7_influence_rule_script")]([SubResource("Resource_influence_1")])
+seat_condition = SubResource("Condition_1")
+policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
+effects = Array[ExtResource("effect_type_3")]([SubResource("Effect_1"), SubResource("Effect_2"), SubResource("Effect_3"), SubResource("Effect_4"), SubResource("Effect_5")])

@@ -25,19 +25,16 @@ func try_generate_month(context: RunContext) -> Array[EventState]:
 	return generated
 
 
-func spawn_event(
-	context: RunContext, race: RaceDefinition, metric: Metric.Id
-) -> EventState:
-	if context == null or context.state == null or race == null:
-		return null
-	if _get_race_seat_count(context.state, race) == 0:
+func spawn_event(context: RunContext, race: RaceDefinition, metric: Metric.Id) -> EventState:
+	if context == null or context.state == null or race == null or _get_race_seat_count(context.state, race) == 0:
 		return null
 	if has_active_event(context.state, race, metric):
 		return null
 	var race_state := context.state.get_race(race)
 	if race_state == null:
 		return null
-	if race.get_stance(metric) == Metric.Direction.NONE:
+	var active := race_state.active_definition
+	if active == null or active.get_stance(metric) == Metric.Direction.NONE:
 		return null
 	var target := context.race_system.get_effective_expectation(race_state, metric, context)
 	var baseline := context.state.metrics.get_value(metric)
@@ -56,11 +53,7 @@ func settle_month(context: RunContext) -> void:
 			continue
 		event.months_alive += 1
 		var forced_public := _force_public_window(event, context.balance)
-		if forced_public:
-			# Becoming public starts satisfaction settlement immediately. Unknown events before
-			# this point deliberately only grow and cannot disappear off-screen.
-			_update_known_event(event, context)
-		elif event.known:
+		if forced_public or event.known:
 			_update_known_event(event, context)
 		else:
 			_advance_growth(event, context.balance)
@@ -72,19 +65,17 @@ func update_information(context: RunContext) -> void:
 	if context == null or context.state == null or context.balance == null:
 		return
 	for event in context.state.events:
-		if event == null or not event.is_active():
-			continue
-		if event.published or event.known:
+		if event == null or not event.is_active() or event.published or event.known:
 			continue
 		if _force_public_window(event, context.balance):
 			_update_known_event(event, context)
 			continue
-		var probability: float = (
+		var probability := (
 			float(_get_race_seat_count(context.state, event.race))
 			* context.balance.event_early_reveal_probability_per_seat
-			+ context.state.event_early_reveal_bonus_probability
+			+ context.constitution_system.get_event_intel_probability_modifier(context, event.race)
 		)
-		if context.random_system.chance(probability):
+		if context.random_system.chance(clampf(probability, 0.0, 1.0)):
 			event.known = true
 			_update_known_event(event, context)
 
@@ -92,18 +83,10 @@ func update_information(context: RunContext) -> void:
 func get_current_requirement(event: EventState) -> int:
 	if event == null:
 		return 0
-	return roundi(
-		lerpf(
-			float(event.baseline_value),
-			float(event.full_target),
-			clampf(event.growth_progress, 0.0, 1.0)
-		)
-	)
+	return roundi(lerpf(float(event.baseline_value), float(event.full_target), clampf(event.growth_progress, 0.0, 1.0)))
 
 
-func has_active_event(
-	state: RunState, race: RaceDefinition, metric: Metric.Id
-) -> bool:
+func has_active_event(state: RunState, race: RaceDefinition, metric: Metric.Id) -> bool:
 	if state == null or race == null:
 		return false
 	for event in state.events:
@@ -118,26 +101,21 @@ func _get_eligible_races(context: RunContext) -> Array[RaceDefinition]:
 		if race_state == null or race_state.definition == null:
 			continue
 		var race := race_state.definition
-		if _get_race_seat_count(context.state, race) == 0:
-			continue
-		if not _get_eligible_metrics(context, race).is_empty():
+		if _get_race_seat_count(context.state, race) > 0 and not _get_eligible_metrics(context, race).is_empty():
 			result.append(race)
 	return result
 
 
-func _get_eligible_metrics(
-	context: RunContext, race: RaceDefinition
-) -> Array[Metric.Id]:
+func _get_eligible_metrics(context: RunContext, race: RaceDefinition) -> Array[Metric.Id]:
 	var result: Array[Metric.Id] = []
 	var race_state := context.state.get_race(race)
-	if race_state == null:
+	if race_state == null or race_state.active_definition == null:
 		return result
-	for metric in race.get_stance_metrics():
+	for metric in race_state.active_definition.get_stance_metrics():
 		if has_active_event(context.state, race, metric):
 			continue
 		var target := context.race_system.get_effective_expectation(race_state, metric, context)
-		var current := context.state.metrics.get_value(metric)
-		if current < target:
+		if context.state.metrics.get_value(metric) < target:
 			result.append(metric)
 	return result
 
@@ -150,9 +128,7 @@ func _get_race_seat_count(state: RunState, race: RaceDefinition) -> int:
 	return result
 
 
-func _force_public_window(
-	event: EventState, balance: GameBalanceDefinition
-) -> bool:
+func _force_public_window(event: EventState, balance: GameBalanceDefinition) -> bool:
 	var lifetime := maxi(balance.event_lifetime_months, 1)
 	var public_remaining := clampi(balance.event_public_remaining_months, 0, lifetime)
 	var remaining := maxi(lifetime - event.months_alive, 0)
@@ -170,11 +146,7 @@ func _advance_growth(event: EventState, balance: GameBalanceDefinition) -> void:
 	var lifetime := maxi(balance.event_lifetime_months, 1)
 	var public_remaining := clampi(balance.event_public_remaining_months, 0, lifetime)
 	var growth_months := maxi(lifetime - public_remaining, 1)
-	event.growth_progress = clampf(
-		event.growth_progress + 1.0 / float(growth_months),
-		0.0,
-		1.0
-	)
+	event.growth_progress = clampf(event.growth_progress + 1.0 / float(growth_months), 0.0, 1.0)
 
 
 func _update_known_event(event: EventState, context: RunContext) -> void:
@@ -186,16 +158,11 @@ func _update_known_event(event: EventState, context: RunContext) -> void:
 	if event.satisfaction_rate < context.balance.event_relief_satisfaction_threshold:
 		event.phase = EventState.Phase.PAUSED
 		return
-	# Zero-floor events (currently Zhushui's negative-metric warnings) have no deeper demand:
-	# once the real value is back at or beyond zero, the concern is already fully satisfied.
 	if event.full_target == 0 and event.baseline_value < 0:
 		_resolve(event, context.state)
 		return
 	event.phase = EventState.Phase.RELIEVING
-	event.growth_progress = maxf(
-		0.0,
-		event.growth_progress - context.balance.event_relief_progress_per_month
-	)
+	event.growth_progress = maxf(0.0, event.growth_progress - context.balance.event_relief_progress_per_month)
 	if is_zero_approx(event.growth_progress):
 		_resolve(event, context.state)
 

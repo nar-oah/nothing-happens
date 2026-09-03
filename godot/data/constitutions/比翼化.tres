@@ -1,32 +1,48 @@
-[gd_resource type="Resource" script_class="BiyiConstitutionArticleDefinition" format=3 uid="uid://pdec6waifvom"]
+[gd_resource type="Resource" script_class="ConstitutionArticleDefinition" format=3 uid="uid://pdec6waifvom"]
 
-[ext_resource type="Script" uid="uid://dtldpcolvfdl0" path="res://definitions/biyi_constitution_article_definition.gd" id="1_article_script"]
-[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="1_ou8f8"]
-[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="1_pi8wa"]
-[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_fxjlp"]
-[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
-[ext_resource type="Resource" uid="uid://bw162ei21njtt" path="res://data/races/比翼.tres" id="3_race_biyi"]
-[ext_resource type="Resource" uid="uid://cbaegioaf86au" path="res://data/constitutions/包容.tres" id="4_prereq"]
-[ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="5_seat_condition_script"]
-[ext_resource type="Resource" uid="uid://cevrii67ltmsg" path="res://data/policies/阴历平准.tres" id="6_policy_1"]
-[ext_resource type="Resource" uid="uid://bpj8sxytmtoyp" path="res://data/policies/阳历分利.tres" id="7_policy_2"]
-[ext_resource type="Resource" uid="uid://dl3mgnbq5hgfp" path="res://data/policies/阴阳转录.tres" id="8_policy_3"]
-[ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="12_353y4"]
-[ext_resource type="Resource" uid="uid://b5clravmnjms4" path="res://data/constitution_rows/文化.tres" id="row"]
+[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="17_gh40o"]
+[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="18_dxa2x"]
+[ext_resource type="Script" uid="uid://dajy5425i5dpq" path="res://definitions/constitution_article_definition.gd" id="article_script_1"]
+[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="condition_type_4"]
+[ext_resource type="Script" uid="uid://cpc61vbc5rd11" path="res://definitions/constitution_effect.gd" id="effect_type_3"]
+[ext_resource type="Script" uid="uid://ccj4ntfstuxfm" path="res://definitions/constitution_effects/modify_race_effect.gd" id="effscript_modify_race_13"]
+[ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="group_type_6"]
+[ext_resource type="Resource" uid="uid://cevrii67ltmsg" path="res://data/policies/阴历平准.tres" id="policy_8"]
+[ext_resource type="Resource" uid="uid://bpj8sxytmtoyp" path="res://data/policies/阳历分利.tres" id="policy_9"]
+[ext_resource type="Resource" uid="uid://dl3mgnbq5hgfp" path="res://data/policies/阴阳转录.tres" id="policy_10"]
+[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="policy_type_2"]
+[ext_resource type="Resource" uid="uid://bw162ei21njtt" path="res://data/races/比翼.tres" id="race_12"]
+[ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/人类.tres" id="race_14"]
+[ext_resource type="Resource" uid="uid://c2eco18e42n34" path="res://data/races/偃偶.tres" id="race_15"]
+[ext_resource type="Resource" uid="uid://b4e7rdu770lrv" path="res://data/races/桃花妖.tres" id="race_16"]
+[ext_resource type="Resource" uid="uid://bto7mkhf8cqca" path="res://data/races/南柯.tres" id="race_17"]
+[ext_resource type="Resource" uid="uid://dknll48i00v4u" path="res://data/races/驻岁.tres" id="race_18"]
+[ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="race_type_5"]
+[ext_resource type="Resource" uid="uid://b5clravmnjms4" path="res://data/constitution_rows/文化.tres" id="row_7"]
+[ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="seat_condition_script_11"]
+[ext_resource type="Resource" path="res://data/races/variants/文化/人类（阴阳）.tres" id="variant_19"]
+[ext_resource type="Resource" path="res://data/races/variants/文化/比翼（阴阳）.tres" id="variant_20"]
+[ext_resource type="Resource" path="res://data/races/variants/文化/偃偶（阴阳）.tres" id="variant_21"]
+[ext_resource type="Resource" path="res://data/races/variants/文化/桃花妖（阴阳）.tres" id="variant_22"]
+[ext_resource type="Resource" path="res://data/races/variants/文化/南柯（阴阳）.tres" id="variant_23"]
+[ext_resource type="Resource" path="res://data/races/variants/文化/驻岁（阴阳）.tres" id="variant_24"]
 
-[sub_resource type="Resource" id="Resource_seat_condition"]
-script = ExtResource("5_seat_condition_script")
-race = ExtResource("3_race_biyi")
+[sub_resource type="Resource" id="Effect_1"]
+script = ExtResource("effscript_modify_race_13")
+target_races = Array[ExtResource("race_type_5")]([ExtResource("race_14"), ExtResource("race_12"), ExtResource("race_15"), ExtResource("race_16"), ExtResource("race_17"), ExtResource("race_18")])
+source_races = Array[ExtResource("race_type_5")]([ExtResource("variant_19"), ExtResource("variant_20"), ExtResource("variant_21"), ExtResource("variant_22"), ExtResource("variant_23"), ExtResource("variant_24")])
+
+[sub_resource type="Resource" id="Condition_1"]
+script = ExtResource("seat_condition_script_11")
+race = ExtResource("race_12")
 required_rate = 0.5
 
 [resource]
-script = ExtResource("1_article_script")
-yin_yang_adjustment_rate = 0.1
+script = ExtResource("article_script_1")
 display_name = "比翼化"
 description = "如果蓬莱必须拥有一种共同文化，比翼相信最合适的当然是自己保存了数百年的那一种。
 他们曾经替全岛记事、定历、传授知识；如今，他们要求国家重新承认这份古老资格。比翼化不是单纯恢复旧文字，而是把比翼理解世界的方式重新变成所有人的公共规则。"
-row = ExtResource("row")
-race = ExtResource("3_race_biyi")
-prerequisite = ExtResource("4_prereq")
-seat_condition = SubResource("Resource_seat_condition")
-policies = Array[ExtResource("2_policy_script")]([ExtResource("6_policy_1"), ExtResource("7_policy_2"), ExtResource("8_policy_3")])
+row = ExtResource("row_7")
+seat_condition = SubResource("Condition_1")
+policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
+effects = Array[ExtResource("effect_type_3")]([SubResource("Effect_1")])

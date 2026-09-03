@@ -4,6 +4,9 @@ class_name InterestGroupDefinition
 @export var display_name: String
 @export_multiline var description: String
 @export_range(1, 999, 1) var base_column_weight: int = 3
+# Non-null means this group's support follows the selected race instead of proposal use.
+# Runtime proposal-pool behavior will be implemented in the later system refactor.
+@export var race: RaceDefinition
 
 @export_group("希望降低")
 @export var decrease_tax: bool = false

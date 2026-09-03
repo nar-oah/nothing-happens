@@ -290,13 +290,23 @@ function isBill(value: unknown): value is Bill {
 	);
 }
 
+function isConstitutionEffect(value: unknown): boolean {
+	return (
+		isRecord(value) &&
+		typeof value.display_name === 'string' &&
+		typeof value.description === 'string' &&
+		isNonnegativeInteger(value.timing)
+	);
+}
+
 function isConstitutionArticle(value: unknown): value is ConstitutionArticleDto {
 	return (
 		isRecord(value) &&
 		isNonnegativeInteger(value.article_index) &&
 		typeof value.display_name === 'string' &&
 		typeof value.content === 'string' &&
-		isArrayOf(value.policies, isPolicy)
+		isArrayOf(value.policies, isPolicy) &&
+		isArrayOf(value.effects, isConstitutionEffect)
 	);
 }
 
@@ -398,6 +408,7 @@ function isSeatSummary(value: unknown): value is SeatSummaryDto {
 function isParliamentSummary(value: unknown): value is ParliamentSummaryDto {
 	return (
 		isRecord(value) &&
+		typeof value.display_name === 'string' &&
 		isNonnegativeInteger(value.total_seats) &&
 		isArrayOf(
 			value.race_seat_counts,

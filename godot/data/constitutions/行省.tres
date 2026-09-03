@@ -1,34 +1,66 @@
-[gd_resource type="Resource" script_class="HumanConstitutionArticleDefinition" format=3 uid="uid://cxvj1gdwormg8"]
+[gd_resource type="Resource" script_class="ConstitutionArticleDefinition" format=3 uid="uid://cxvj1gdwormg8"]
 
-[ext_resource type="Script" uid="uid://tmkjsuwecnwg" path="res://definitions/human_constitution_article_definition.gd" id="1_article_script"]
-[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="1_dtaxe"]
-[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="1_hrbgp"]
-[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_cvp6l"]
-[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
-[ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/人类.tres" id="3_race_human"]
-[ext_resource type="Resource" uid="uid://d2060urv5hhfb" path="res://data/constitutions/内附.tres" id="4_prereq"]
-[ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="5_seat_condition_script"]
-[ext_resource type="Resource" uid="uid://ctdshm7piam16" path="res://data/policies/平准官仓.tres" id="6_policy_1"]
-[ext_resource type="Resource" uid="uid://dsbfw6wkdld46" path="res://data/policies/驿运统筹.tres" id="7_policy_2"]
-[ext_resource type="Resource" uid="uid://cjq1ijklbkgf0" path="res://data/policies/徭役统筹.tres" id="8_policy_3"]
-[ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="12_2c8gl"]
-[ext_resource type="Resource" uid="uid://bjubbxjboutnj" path="res://data/constitution_rows/外交.tres" id="row"]
+[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="20_322pv"]
+[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="21_13r1r"]
+[ext_resource type="Script" uid="uid://dajy5425i5dpq" path="res://definitions/constitution_article_definition.gd" id="article_script_1"]
+[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="condition_type_4"]
+[ext_resource type="Script" uid="uid://cpc61vbc5rd11" path="res://definitions/constitution_effect.gd" id="effect_type_3"]
+[ext_resource type="Script" uid="uid://cl20jnnufvy50" path="res://definitions/constitution_effects/government_display_effect.gd" id="effscript_government_27"]
+[ext_resource type="Script" uid="uid://ccj4ntfstuxfm" path="res://definitions/constitution_effects/modify_race_effect.gd" id="effscript_modify_race_14"]
+[ext_resource type="Script" uid="uid://4himuh5fg8m4" path="res://definitions/constitution_effects/petition_effect.gd" id="effscript_petition_26"]
+[ext_resource type="Script" uid="uid://dijsxl05i7yxo" path="res://definitions/constitution_effects/race_seat_effect.gd" id="effscript_race_seat_13"]
+[ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="group_type_6"]
+[ext_resource type="Resource" uid="uid://ctdshm7piam16" path="res://data/policies/平准官仓.tres" id="policy_8"]
+[ext_resource type="Resource" uid="uid://dsbfw6wkdld46" path="res://data/policies/驿运统筹.tres" id="policy_9"]
+[ext_resource type="Resource" uid="uid://cjq1ijklbkgf0" path="res://data/policies/徭役统筹.tres" id="policy_10"]
+[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="policy_type_2"]
+[ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/人类.tres" id="race_12"]
+[ext_resource type="Resource" uid="uid://bw162ei21njtt" path="res://data/races/比翼.tres" id="race_15"]
+[ext_resource type="Resource" uid="uid://c2eco18e42n34" path="res://data/races/偃偶.tres" id="race_16"]
+[ext_resource type="Resource" uid="uid://b4e7rdu770lrv" path="res://data/races/桃花妖.tres" id="race_17"]
+[ext_resource type="Resource" uid="uid://bto7mkhf8cqca" path="res://data/races/南柯.tres" id="race_18"]
+[ext_resource type="Resource" uid="uid://dknll48i00v4u" path="res://data/races/驻岁.tres" id="race_19"]
+[ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="race_type_5"]
+[ext_resource type="Resource" uid="uid://bjubbxjboutnj" path="res://data/constitution_rows/外交.tres" id="row_7"]
+[ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="seat_condition_script_11"]
+[ext_resource type="Resource" path="res://data/races/variants/官员/人类（官员）.tres" id="variant_20"]
+[ext_resource type="Resource" path="res://data/races/variants/官员/比翼（官员）.tres" id="variant_21"]
+[ext_resource type="Resource" path="res://data/races/variants/官员/偃偶（官员）.tres" id="variant_22"]
+[ext_resource type="Resource" path="res://data/races/variants/官员/桃花妖（官员）.tres" id="variant_23"]
+[ext_resource type="Resource" path="res://data/races/variants/官员/南柯（官员）.tres" id="variant_24"]
+[ext_resource type="Resource" path="res://data/races/variants/官员/驻岁（官员）.tres" id="variant_25"]
 
-[sub_resource type="Resource" id="Resource_seat_condition"]
-script = ExtResource("5_seat_condition_script")
-race = ExtResource("3_race_human")
+[sub_resource type="Resource" id="Effect_1"]
+script = ExtResource("effscript_race_seat_13")
+races = Array[ExtResource("race_type_5")]([ExtResource("race_12")])
+
+[sub_resource type="Resource" id="Effect_2"]
+script = ExtResource("effscript_modify_race_14")
+target_races = Array[ExtResource("race_type_5")]([ExtResource("race_12"), ExtResource("race_15"), ExtResource("race_16"), ExtResource("race_17"), ExtResource("race_18"), ExtResource("race_19")])
+source_races = Array[ExtResource("race_type_5")]([ExtResource("variant_20"), ExtResource("variant_21"), ExtResource("variant_22"), ExtResource("variant_23"), ExtResource("variant_24"), ExtResource("variant_25")])
+
+[sub_resource type="Resource" id="Effect_3"]
+script = ExtResource("effscript_petition_26")
+count_races = Array[ExtResource("race_type_5")]([ExtResource("race_12"), ExtResource("race_15"), ExtResource("race_16"), ExtResource("race_17"), ExtResource("race_18"), ExtResource("race_19")])
+event_races = Array[ExtResource("race_type_5")]([ExtResource("race_12"), ExtResource("race_15"), ExtResource("race_16"), ExtResource("race_17"), ExtResource("race_18"), ExtResource("race_19")])
+seat_ratio = 0.5
+
+[sub_resource type="Resource" id="Effect_4"]
+script = ExtResource("effscript_government_27")
+parliament_name = "衙门"
+
+[sub_resource type="Resource" id="Condition_1"]
+script = ExtResource("seat_condition_script_11")
+race = ExtResource("race_12")
 required_rate = 0.9
 
 [resource]
-script = ExtResource("1_article_script")
-petition_limit = 5
+script = ExtResource("article_script_1")
 display_name = "行省"
 description = "争论结束了：蓬莱是大明的一省。
 原来的议员仍然坐在那里，各族的产业、恩怨和生活也没有凭空消失，只是他们从此不再以本族的名义决定国家应该成为什么样子。旧议会没有被摧毁，它只是换了匾额，然后继续办公。"
-row = ExtResource("row")
+row = ExtResource("row_7")
 is_terminal = true
-race = ExtResource("3_race_human")
-prerequisite = ExtResource("4_prereq")
-seat_condition = SubResource("Resource_seat_condition")
-race_min_seat_rate = 0.9
-policies = Array[ExtResource("2_policy_script")]([ExtResource("6_policy_1"), ExtResource("7_policy_2"), ExtResource("8_policy_3")])
+seat_condition = SubResource("Condition_1")
+policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
+effects = Array[ExtResource("effect_type_3")]([SubResource("Effect_1"), SubResource("Effect_2"), SubResource("Effect_3"), SubResource("Effect_4")])

@@ -3,12 +3,9 @@ class_name DraftBillSystem
 
 
 func move_proposal_from_hand(state: RunState, hand_index: int) -> bool:
-	if hand_index < 0 or hand_index >= state.proposal_hand.size():
+	if hand_index < 0 or hand_index >= state.proposal_hand.size() or state.proposal_hand[hand_index].is_bonus_choice_pending():
 		return false
-	if state.proposal_hand[hand_index].is_bonus_choice_pending():
-		return false
-	var proposal := state.take_proposal_from_hand(hand_index)
-	state.draft_bill.proposals.append(proposal)
+	state.draft_bill.proposals.append(state.take_proposal_from_hand(hand_index))
 	return true
 
 
@@ -38,9 +35,7 @@ func remove_policy(state: RunState, draft_index: int) -> bool:
 
 
 func add_available_policy(context: RunContext, policy: PolicyDefinition) -> bool:
-	if policy == null:
-		return false
-	return add_available_policy_by_name(context, policy.display_name)
+	return false if policy == null else add_available_policy_by_name(context, policy.display_name)
 
 
 func add_available_policy_by_name(context: RunContext, display_name: String) -> bool:
@@ -52,26 +47,17 @@ func is_ready_to_submit(context: RunContext, draft: DraftBillState) -> bool:
 	if context == null or draft == null or draft.is_empty():
 		return false
 	for policy in draft.policies:
-		if (
-			policy == null
-			or context.constitution_system.get_available_policy(
-				context, policy.display_name
-			) == null
-		):
+		if policy == null or context.constitution_system.get_available_policy(context, policy.display_name) == null:
 			return false
 	for proposal in draft.proposals:
 		if proposal == null or proposal.is_bonus_choice_pending():
 			return false
-	return true
+	var pure_target := context.proposal_system.calculate_pure_target(context.state.metrics, draft.proposals)
+	return context.constitution_system.validate_draft(context, draft, pure_target)
 
 
 func reorder_proposal(state: RunState, from_index: int, to_index: int) -> bool:
-	if (
-		from_index < 0
-		or from_index >= state.draft_bill.proposals.size()
-		or to_index < 0
-		or to_index >= state.draft_bill.proposals.size()
-	):
+	if from_index < 0 or from_index >= state.draft_bill.proposals.size() or to_index < 0 or to_index >= state.draft_bill.proposals.size():
 		return false
 	var proposal: ProposalInstance = state.draft_bill.proposals.pop_at(from_index)
 	state.draft_bill.proposals.insert(to_index, proposal)
@@ -79,12 +65,7 @@ func reorder_proposal(state: RunState, from_index: int, to_index: int) -> bool:
 
 
 func reorder_policy(state: RunState, from_index: int, to_index: int) -> bool:
-	if (
-		from_index < 0
-		or from_index >= state.draft_bill.policies.size()
-		or to_index < 0
-		or to_index >= state.draft_bill.policies.size()
-	):
+	if from_index < 0 or from_index >= state.draft_bill.policies.size() or to_index < 0 or to_index >= state.draft_bill.policies.size():
 		return false
 	var policy: PolicyDefinition = state.draft_bill.policies.pop_at(from_index)
 	state.draft_bill.policies.insert(to_index, policy)
@@ -111,13 +92,9 @@ func load_saved_bill_for_editing(context: RunContext, saved_index: int) -> bool:
 	clear_draft(state)
 	state.draft_bill.title = saved.title
 	state.editing_saved_bill_index = saved_index
-	var matches := context.proposal_system.match_equivalent_proposals(
-		saved.proposals, state.proposal_hand
-	)
+	var matches := context.proposal_system.match_equivalent_proposals(saved.proposals, state.proposal_hand)
 	for proposal in matches:
-		if proposal == null:
-			continue
-		if state.reserve_proposal_from_hand(proposal):
+		if proposal != null and state.reserve_proposal_from_hand(proposal):
 			state.draft_bill.proposals.append(proposal)
 	for saved_policy in saved.policies:
 		if saved_policy != null:

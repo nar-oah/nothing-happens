@@ -1,33 +1,49 @@
-[gd_resource type="Resource" script_class="FreeTradeMergerConstitutionArticleDefinition" format=3 uid="uid://culfnut5w8uh2"]
+[gd_resource type="Resource" script_class="ConstitutionArticleDefinition" format=3 uid="uid://culfnut5w8uh2"]
 
-[ext_resource type="Script" uid="uid://cuee63qimx3p2" path="res://definitions/free_trade_merger_constitution_article_definition.gd" id="1_article_script"]
-[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="1_w8iph"]
-[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="2_policy_script"]
-[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="2_siktm"]
-[ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/人类.tres" id="3_race_human"]
-[ext_resource type="Resource" uid="uid://biywjnnwikuif" path="res://data/constitutions/朝贡.tres" id="4_prereq"]
-[ext_resource type="Resource" uid="uid://cux21kxjuvshw" path="res://data/interest_groups/永乐局.tres" id="5_group_1"]
-[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="6_influence_rule_script"]
-[ext_resource type="Resource" uid="uid://cycomgnbb7lqs" path="res://data/policies/竞价通商.tres" id="7_policy_1"]
-[ext_resource type="Resource" uid="uid://d3k0p8rtxf85j" path="res://data/policies/裁撤关卡.tres" id="8_policy_2"]
-[ext_resource type="Resource" uid="uid://dgamx4ym0hwv0" path="res://data/policies/航路套利.tres" id="9_policy_3"]
-[ext_resource type="Resource" uid="uid://bjubbxjboutnj" path="res://data/constitution_rows/外交.tres" id="row"]
+[ext_resource type="Script" uid="uid://1iue0gluluuw" path="res://definitions/constitution_group_bias_definition.gd" id="12_whhl0"]
+[ext_resource type="Script" uid="uid://xgasfiu7hs26" path="res://definitions/constitution_influence_rule.gd" id="13_q03ns"]
+[ext_resource type="Script" uid="uid://dajy5425i5dpq" path="res://definitions/constitution_article_definition.gd" id="article_script_1"]
+[ext_resource type="Script" uid="uid://c5ct5ji7ovdaw" path="res://definitions/constitution_condition.gd" id="condition_type_4"]
+[ext_resource type="Script" uid="uid://cpc61vbc5rd11" path="res://definitions/constitution_effect.gd" id="effect_type_3"]
+[ext_resource type="Script" uid="uid://bxk3ulvgcdh1p" path="res://definitions/constitution_effects/group_merge_effect.gd" id="effscript_merge_16"]
+[ext_resource type="Script" uid="uid://3ubhh0j1oj6w" path="res://definitions/constitution_effects/modify_interest_group_effect.gd" id="effscript_modify_group_13"]
+[ext_resource type="Script" uid="uid://4himuh5fg8m4" path="res://definitions/constitution_effects/petition_effect.gd" id="effscript_petition_17"]
+[ext_resource type="Script" uid="uid://dijsxl05i7yxo" path="res://definitions/constitution_effects/race_seat_effect.gd" id="effscript_race_seat_11"]
+[ext_resource type="Resource" uid="uid://cux21kxjuvshw" path="res://data/interest_groups/永乐局.tres" id="group_14"]
+[ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="group_type_6"]
+[ext_resource type="Resource" uid="uid://cycomgnbb7lqs" path="res://data/policies/竞价通商.tres" id="policy_8"]
+[ext_resource type="Resource" uid="uid://d3k0p8rtxf85j" path="res://data/policies/裁撤关卡.tres" id="policy_9"]
+[ext_resource type="Resource" uid="uid://dgamx4ym0hwv0" path="res://data/policies/航路套利.tres" id="policy_10"]
+[ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="policy_type_2"]
+[ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/人类.tres" id="race_12"]
+[ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="race_type_5"]
+[ext_resource type="Resource" uid="uid://bjubbxjboutnj" path="res://data/constitution_rows/外交.tres" id="row_7"]
+[ext_resource type="Resource" path="res://data/interest_groups/variants/永乐局（自由贸易）.tres" id="variant_group_15"]
 
-[sub_resource type="Resource" id="Resource_influence_1"]
-script = ExtResource("6_influence_rule_script")
-race = ExtResource("3_race_human")
-interest_group = ExtResource("5_group_1")
-rate = 1.0
+[sub_resource type="Resource" id="Effect_1"]
+script = ExtResource("effscript_race_seat_11")
+races = Array[ExtResource("race_type_5")]([ExtResource("race_12")])
+participates_in_variable_seat_allocation = false
+
+[sub_resource type="Resource" id="Effect_2"]
+script = ExtResource("effscript_modify_group_13")
+target_groups = Array[ExtResource("group_type_6")]([ExtResource("group_14")])
+source_groups = Array[ExtResource("group_type_6")]([ExtResource("variant_group_15")])
+
+[sub_resource type="Resource" id="Effect_3"]
+script = ExtResource("effscript_merge_16")
+target_group = ExtResource("group_14")
+
+[sub_resource type="Resource" id="Effect_4"]
+script = ExtResource("effscript_petition_17")
+count_races = Array[ExtResource("race_type_5")]([ExtResource("race_12")])
+event_races = Array[ExtResource("race_type_5")]([ExtResource("race_12")])
 
 [resource]
-script = ExtResource("1_article_script")
+script = ExtResource("article_script_1")
 display_name = "自由贸易"
 description = "大明的旗号可以留在港口，但货物不该因为挂着谁的旗就先过栈桥。
 自由贸易取消朝廷在航路、关税和货物上的优先权，把永乐港变成所有商人都按同一套规矩竞争的港口。可当旧有特权真正消失，原本只想做生意的轮运局，也会突然发现自己肩上还有“官督”二字。"
-row = ExtResource("row")
-race = ExtResource("3_race_human")
-prerequisite = ExtResource("4_prereq")
-race_max_seat_rate = 0.0
-participates_in_variable_seat_allocation = false
-policies = Array[ExtResource("2_policy_script")]([ExtResource("7_policy_1"), ExtResource("8_policy_2"), ExtResource("9_policy_3")])
-influence_rules = Array[ExtResource("6_influence_rule_script")]([SubResource("Resource_influence_1")])
+row = ExtResource("row_7")
+policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
+effects = Array[ExtResource("effect_type_3")]([SubResource("Effect_1"), SubResource("Effect_2"), SubResource("Effect_3"), SubResource("Effect_4")])

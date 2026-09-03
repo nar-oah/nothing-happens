@@ -220,12 +220,14 @@ export const mockConstitution: Constitution = {
 		{
 			display_name: '外藩',
 			content: '',
-			policies: mockPolicies.slice(0, 3)
+			policies: mockPolicies.slice(0, 3),
+			effects: []
 		},
 		{
 			display_name: '工会',
 			content: '',
-			policies: mockPolicies.slice(3)
+			policies: mockPolicies.slice(3),
+			effects: []
 		}
 	]
 };

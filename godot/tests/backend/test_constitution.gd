@@ -4,305 +4,129 @@ const BackendTestContext = preload("res://tests/backend/backend_test_context.gd"
 
 
 func run(t: BackendTestContext) -> void:
-	_test_three_seat_condition_scopes(t)
-	_test_legacy_flat_article_revision_compatibility(t)
-	_test_policy_union_and_resource_deduplication(t)
-	_test_influence_rule_modes(t)
-	_test_revision_preserves_annual_group_layer(t)
-	_test_local_autonomy_runtime_resources(t)
-	_test_human_petition_runtime(t)
+	_test_conditions_and_policy_union(t)
+	_test_race_and_group_variants(t)
+	_test_local_interest_groups(t)
+	_test_group_merge_preserves_canonical_identity(t)
+	_test_petition_is_capacity_not_seat_reassignment(t)
 
 
-func _test_three_seat_condition_scopes(t: BackendTestContext) -> void:
+func _test_conditions_and_policy_union(t: BackendTestContext) -> void:
 	var race_a := t.make_race("race a")
 	var race_b := t.make_race("race b")
 	var group_a := t.make_group("group a")
 	var group_b := t.make_group("group b")
-	var session := t.make_session(
-		[race_a, race_b], [group_a, group_b], t.make_seats(4, "conditions")
-	)
-	for index in range(4):
-		var seat := session.state.seats[index]
-		seat.race = race_a if index < 2 else race_b
-		seat.base_group = group_a if index % 2 == 0 else group_b
-		seat.actual_group = seat.base_group
-
-	var race_condition := ConstitutionSeatCondition.new()
-	race_condition.race = race_a
-	race_condition.required_rate = 0.5
-	t.check(race_condition.is_met(session.context), "race condition uses all permanent seats")
-	race_condition.required_rate = 0.51
-	t.check(not race_condition.is_met(session.context), "race condition rejects rate above share")
-
-	var global_group := ConstitutionSeatCondition.new()
-	global_group.interest_group = group_a
-	global_group.required_rate = 0.5
-	t.check(global_group.is_met(session.context), "global group rate uses influenceable seats")
-	global_group.required_rate = 0.51
-	t.check(not global_group.is_met(session.context), "global group boundary is exact")
-
-	var scoped_group := ConstitutionSeatCondition.new()
-	scoped_group.race = race_a
-	scoped_group.interest_group = group_a
-	scoped_group.required_rate = 0.5
-	t.check(scoped_group.is_met(session.context), "scoped group rate uses that race's seats")
-	scoped_group.required_rate = 0.51
-	t.check(not scoped_group.is_met(session.context), "scoped group rate rejects excess threshold")
-	session.free()
-
-
-func _test_legacy_flat_article_revision_compatibility(t: BackendTestContext) -> void:
-	var race := t.make_race("legacy")
-	var initial := t.make_article(race)
-	initial.display_name = "initial"
-	var next := t.make_article(race, false)
-	next.display_name = "next"
-	var session := t.make_session(
-		[race], [t.make_group("group")], t.make_seats(2, "legacy"), [initial, next]
-	)
-	t.check(
-		session.state.constitution.get_active_article(race) == initial,
-		"legacy flat content still selects its marked initial article"
-	)
-	t.check(
-		session.constitution_system.can_revise(session.context, next),
-		"legacy flat content can still revise without board navigation"
-	)
-	var collapse_before_revision := session.state.collapse_level
-	t.check(session.revise_constitution(next), "legacy revision activates the selected Resource")
-	t.check_equal(session.state.collapse_level, collapse_before_revision, "constitution revision adds no collapse")
-	t.check(session.state.saved_bills.is_empty(), "constitution revision does not save a bill")
-	t.check(
-		session.state.constitution.get_active_article(race) == next,
-		"legacy active article remains queryable by race Resource"
-	)
-	t.check(not session.state.constitution.revision_available, "legacy revision still consumes annual revision")
-	session.free()
-
-
-func _test_policy_union_and_resource_deduplication(t: BackendTestContext) -> void:
-	var race_a := t.make_race("policy a")
-	var race_b := t.make_race("policy b")
 	var shared := PolicyDefinition.new()
-	shared.display_name = "same"
+	shared.display_name = "shared"
 	var distinct := PolicyDefinition.new()
 	distinct.display_name = "distinct"
-	var unavailable := PolicyDefinition.new()
-	unavailable.display_name = "unavailable"
 	var article_a := t.make_article(race_a)
 	article_a.policies = [shared, distinct]
 	var article_b := t.make_article(race_b)
 	article_b.policies = [shared]
-	var session := t.make_session(
-		[race_a, race_b], [t.make_group("group")], t.make_seats(2, "policies"),
-		[article_a, article_b]
-	)
+	var session := t.make_session([race_a, race_b], [group_a, group_b], t.make_seats(4, "conditions"), [article_a, article_b])
 	var available := session.constitution_system.get_available_policies(session.context)
-	t.check_equal(available.size(), 2, "active article policies form a Resource union")
-	t.check(shared in available and distinct in available, "unique policy Resources remain available")
-	t.check(
-		session.draft_bill_system.add_available_policy(session.context, shared),
-		"available policy enters draft"
-	)
-	t.check(
-		not session.draft_bill_system.add_available_policy(session.context, shared),
-		"the same policy Resource cannot duplicate"
-	)
-	t.check(
-		session.draft_bill_system.add_available_policy_by_name(session.context, distinct.display_name),
-		"an available policy can be referenced by its unique display name"
-	)
-	t.check(
-		not session.draft_bill_system.add_available_policy(session.context, unavailable),
-		"policy outside active articles is unavailable"
-	)
+	t.check_equal(available.size(), 2, "active articles expose a deduplicated policy Resource union")
+	for index in range(session.state.seats.size()):
+		var seat := session.state.seats[index]
+		seat.race = race_a if index < 2 else race_b
+		seat.actual_group = group_a if index % 2 == 0 else group_b
+	var race_condition := ConstitutionSeatCondition.new()
+	race_condition.race = race_a
+	race_condition.required_rate = 0.5
+	t.check(race_condition.is_met(session.context), "race condition uses current variable seat share")
+	var group_condition := ConstitutionSeatCondition.new()
+	group_condition.interest_group = group_a
+	group_condition.required_rate = 0.5
+	t.check(group_condition.is_met(session.context), "group condition uses current influence share")
 	session.free()
 
 
-func _test_influence_rule_modes(t: BackendTestContext) -> void:
-	var race_a := t.make_race("influence a")
-	var race_b := t.make_race("influence b")
-	var base := t.make_group("base")
-	var target := t.make_group("target")
-	var article_a := t.make_article(race_a)
-	var article_b := t.make_article(race_b)
-	var session := t.make_session(
-		[race_a, race_b], [base, target], t.make_seats(6, "influence"),
-		[article_a, article_b]
-	)
-	for seat in session.state.seats:
-		seat.base_group = base
-		seat.actual_group = base
-
-	article_a.influence_rules = [
-		t.make_rule(ConstitutionInfluenceRule.Mode.TARGET, target, 0.5, race_a)
-	]
-	session.constitution_system.apply_influence_rules(session.context)
-	t.check_equal(t.count_group_seats(session.state, target, race_a), 2, "scoped target rounds to rate")
-	t.check_equal(t.count_group_seats(session.state, target, race_b), 0, "scoped target leaves other race")
-
-	article_a.influence_rules = [
-		t.make_rule(ConstitutionInfluenceRule.Mode.MAXIMUM, target, 0.0, race_a)
-	]
-	session.constitution_system.apply_influence_rules(session.context)
-	t.check_equal(t.count_group_seats(session.state, target, race_a), 0, "maximum removes excess influence")
-
-	article_a.influence_rules = [
-		t.make_rule(ConstitutionInfluenceRule.Mode.MINIMUM, target, 0.5)
-	]
-	session.constitution_system.apply_influence_rules(session.context)
-	t.check_equal(t.count_group_seats(session.state, target), 3, "global minimum raises total influence")
-
-	article_a.influence_rules = []
-	article_b.influence_rules = [
-		t.make_rule(ConstitutionInfluenceRule.Mode.TARGET, target, 1.0, race_b)
-	]
-	session.constitution_system.apply_influence_rules(session.context)
-	t.check_equal(t.count_group_seats(session.state, target, race_b), 3, "race target can reach one hundred percent")
+func _test_race_and_group_variants(t: BackendTestContext) -> void:
+	var race := t.make_race("canonical race")
+	var race_variant := t.make_race("variant race")
+	race_variant.description = "variant description"
+	var group := t.make_group("canonical group")
+	var group_variant := t.make_group("variant group")
+	var article := t.make_article(race)
+	var race_effect := ModifyRaceEffect.new()
+	race_effect.target_races = [race]
+	race_effect.source_races = [race_variant]
+	var group_effect := ModifyInterestGroupEffect.new()
+	group_effect.target_groups = [group]
+	group_effect.source_groups = [group_variant]
+	article.effects = [race_effect, group_effect]
+	var session := t.make_session([race], [group], t.make_seats(3, "variant"), [article])
+	var race_state := session.state.get_race(race)
+	t.check(race_state.definition == race, "race canonical identity remains stable")
+	t.check(race_state.active_definition == race_variant, "ModifyRaceEffect selects active race variant")
+	t.check(session.constitution_system.get_active_group_definition(session.context, group) == group_variant, "ModifyInterestGroupEffect selects active group variant")
+	var dto := UiSerializer.new().full_state(session, "office", "office", 0)
+	t.check_equal(dto["races"][0]["display_name"], "variant race", "UI serializes active race variant")
+	t.check_equal(dto["interest_groups"][0]["display_name"], "variant group", "UI serializes active group variant")
 	session.free()
 
 
-func _test_local_autonomy_runtime_resources(t: BackendTestContext) -> void:
+func _test_local_interest_groups(t: BackendTestContext) -> void:
 	var race := t.make_race("local race")
-	var other_race := t.make_race("other race")
-	var base_group := t.make_group("base")
-	var rule_group := t.make_group("ordinary rule")
-	var article := LocalAutonomyConstitutionArticleDefinition.new()
-	article.display_name = "local autonomy"
-	article.race = race
-	article.is_initial = true
-	article.influence_rules = [
-		t.make_rule(ConstitutionInfluenceRule.Mode.TARGET, rule_group, 1.0)
-	]
-	var replacement := t.make_article(race, false)
-	replacement.display_name = "centralized"
-	var other_initial := t.make_article(other_race)
-	var other_next := t.make_article(other_race, false)
-	var definitions := t.make_seats(4, "location")
-	for definition in definitions:
+	var group := t.make_group("base group")
+	var article := t.make_article(race)
+	var local_effect := LocalInterestGroupEffect.new()
+	local_effect.races = [race]
+	local_effect.decrease_metric = Metric.Id.TAX
+	article.effects.append(local_effect)
+	var seats := t.make_seats(3, "local")
+	for definition in seats:
 		definition.description = "%s description" % definition.display_name
-	var session := t.make_session(
-		[race, other_race], [base_group, rule_group], definitions,
-		[article, replacement, other_initial, other_next]
-	)
-	var locals := session.state.constitution.local_interest_groups
-	t.check_equal(locals.size(), definitions.size(), "one runtime local group per SeatDefinition")
-	var remembered: Dictionary[SeatDefinition, InterestGroupDefinition] = locals.duplicate()
+	var session := t.make_session([race], [group], seats, [article])
+	t.check_equal(session.state.constitution.local_interest_groups.size(), seats.size(), "local effect creates one group per seat definition")
 	var unique: Dictionary[InterestGroupDefinition, bool] = {}
-	for definition in definitions:
-		var group: InterestGroupDefinition = locals[definition]
-		unique[group] = true
-		t.check_equal(group.display_name, definition.display_name, "local name comes from location")
-		t.check_equal(
-			group.description, definition.description, "local description comes from location"
-		)
-		t.check(group.decrease_tax, "local group only cares about lower tax")
-		t.check(
-			not group.decrease_consumption
-			and not group.decrease_production
-			and not group.decrease_employment
-			and not group.decrease_investment,
-			"other local stances remain false"
-		)
-	t.check_equal(unique.size(), definitions.size(), "each location owns a unique Resource")
-	article.on_activate(session.context)
-	for definition in definitions:
-		t.check(
-			session.state.constitution.local_interest_groups[definition] == remembered[definition],
-			"repeated activation preserves runtime Resource identity"
-		)
 	for seat in session.state.seats:
-		t.check(
-			seat.actual_group == remembered[seat.definition],
-			"special local overlay wins over ordinary influence rules at startup"
-		)
-	session.annual_settlement_system.settle_year(session.context)
-	for seat in session.state.seats:
-		t.check(
-			seat.actual_group == remembered[seat.definition],
-			"special local overlay keeps the same precedence at annual settlement"
-		)
-	t.check(session.revise_constitution(other_next), "another race can revise while local autonomy stays active")
-	for seat in session.state.seats:
-		t.check(
-			seat.actual_group == remembered[seat.definition],
-			"unrelated revision preserves the active local overlay"
-		)
-	session.state.constitution.revision_available = true
-	t.check(session.revise_constitution(replacement), "local autonomy can be deactivated")
-	var effective := session.constitution_system.get_effective_groups(session.context)
-	for seat in session.state.seats:
-		t.check(
-			seat.actual_group == seat.annual_group,
-			"deactivation restores the underlying annual group"
-		)
-		t.check(
-			not effective.has(remembered[seat.definition]),
-			"inactive historical local groups do not leak into effective content"
-		)
+		var local := seat.actual_group
+		unique[local] = true
+		t.check(local == session.state.constitution.local_interest_groups[seat.definition], "seat uses its own local group")
+		t.check(local.decrease_tax, "local group stance follows effect metric")
+		t.check_equal(local.description, seat.definition.description, "local group inherits location description")
+	t.check_equal(unique.size(), seats.size(), "local groups are unique Resources")
 	session.free()
 
 
-func _test_revision_preserves_annual_group_layer(t: BackendTestContext) -> void:
-	var race_a := t.make_race("merger race")
-	var race_b := t.make_race("revised race")
+func _test_group_merge_preserves_canonical_identity(t: BackendTestContext) -> void:
+	var race := t.make_race("merge race")
+	var target := t.make_group("target")
 	var weak := t.make_group("weak")
-	var strong := t.make_group("strong")
-	var article_a := t.make_article(race_a)
-	var article_b := t.make_article(race_b)
-	var next_b := t.make_article(race_b, false)
-	var session := t.make_session(
-		[race_a, race_b], [weak, strong], t.make_seats(4, "annual layer"),
-		[article_a, article_b, next_b]
-	)
+	var article := t.make_article(race)
+	var session := t.make_session([race], [target, weak], t.make_seats(10, "merge"), [article])
+	for index in range(session.state.seats.size()):
+		session.state.seats[index].actual_group = target if index < 9 else weak
+	var merge := GroupMergeEffect.new()
+	merge.target_group = target
+	merge.threshold = 0.2
+	merge.apply(session.context)
+	t.check(session.constitution_system.resolve_group_identity(session.context, weak) == target, "weak canonical group resolves to merger target")
+	t.check(session.context.interest_groups.has(weak), "merge does not delete canonical content Resource")
 	for seat in session.state.seats:
-		seat.annual_group = weak
-		seat.actual_group = strong
-	session.state.constitution.group_mergers[weak] = strong
-	t.check(session.revise_constitution(next_b), "unrelated article revision succeeds")
-	for seat in session.state.seats:
-		t.check(seat.annual_group == weak, "revision preserves raw annual coloring")
-		t.check(seat.actual_group == strong, "revision reapplies active merger to annual coloring")
+		t.check(seat.actual_group == target, "merge rewrites current effective seat influence")
 	session.free()
 
 
-func _test_human_petition_runtime(t: BackendTestContext) -> void:
+func _test_petition_is_capacity_not_seat_reassignment(t: BackendTestContext) -> void:
 	var human := t.make_race("human")
-	var donor := t.make_race("donor")
-	var filler := t.make_race("filler")
-	var human_article := HumanConstitutionArticleDefinition.new()
-	human_article.display_name = "petition constitution"
-	human_article.race = human
-	human_article.is_initial = true
-	human_article.petition_limit = 2
-	human_article.race_max_seat_rate = 0.75
-	var donor_article := t.make_article(donor)
-	var filler_article := t.make_article(filler)
-	var definitions := t.make_seats(4, "petition")
-	var session := t.make_session(
-		[human, donor, filler], [t.make_group("group")], definitions,
-		[human_article, donor_article, filler_article]
-	)
-	t.check_equal(session.state.petition_limit, 2, "petition limit comes from active Human article")
-	t.check(session.state.petition_race == human, "petition race is a direct Resource")
-	t.check_equal(t.count_race_seats(session.state, human), 2, "fixture starts below petition max")
-	var collapse_before_petition := session.state.collapse_level
-	t.check(session.use_petition(), "petition immediately reassigns a legal variable seat")
-	t.check_equal(session.state.collapse_level, collapse_before_petition, "imperial petition adds no collapse")
-	t.check(session.state.saved_bills.is_empty(), "imperial petition does not save a bill")
-	t.check_equal(t.count_race_seats(session.state, human), 3, "petition changes the current parliament")
-	t.check_equal(session.state.petition_used_this_year, 1, "State records annual petition usage")
-	t.check(not session.use_petition(), "petition fails when target is at active max")
-	t.check_equal(session.state.petition_used_this_year, 1, "failed petition consumes no use")
-
-	var next := HumanConstitutionArticleDefinition.new()
-	next.display_name = "expanded petition"
-	next.race = human
-	next.petition_limit = 3
-	next.race_max_seat_rate = 1.0
-	session.context.constitution_articles.append(next)
-	session.state.constitution.revision_available = true
-	t.check(session.revise_constitution(next), "Human constitution can change in legacy compatibility mode")
-	t.check_equal(session.state.petition_limit, 3, "new article refreshes petition limit")
-	t.check_equal(session.state.petition_used_this_year, 1, "midyear revision does not reset usage")
+	var other := t.make_race("other")
+	var group := t.make_group("petition group")
+	var article := t.make_article(human)
+	var petition := PetitionEffect.new()
+	petition.count_races = []
+	petition.event_races = []
+	petition.seat_ratio = 0.5
+	article.effects.append(petition)
+	var session := t.make_session([human, other], [group], t.make_seats(5, "petition"), [article, t.make_article(other)])
+	var before: Array[RaceDefinition] = []
+	for seat in session.state.seats:
+		before.append(seat.race)
+	t.check_equal(session.constitution_system.get_petition_limit(session.context), 3, "petition uses ceil(total seats × ratio)")
+	t.check(session.use_petition(), "petition consumes available annual capacity")
+	t.check_equal(session.state.petition_used_this_year, 1, "petition usage is persisted separately from capacity")
+	for index in range(session.state.seats.size()):
+		t.check(session.state.seats[index].race == before[index], "petition never reassigns parliament seats")
 	session.free()

@@ -13,7 +13,7 @@ func run(t: BackendTestContext) -> void:
 	_test_merge_uses_group_resource_identity(t)
 	_test_resource_keyed_annual_sources_and_stable_order(t)
 	_test_failed_draft_does_not_record_sources(t)
-	_test_visit_probability_comes_from_race_state(t)
+	_test_visit_probability_comes_from_active_race_definition(t)
 
 
 func _test_resource_identity(t: BackendTestContext) -> void:
@@ -299,7 +299,7 @@ func _test_failed_draft_does_not_record_sources(t: BackendTestContext) -> void:
 	session.free()
 
 
-func _test_visit_probability_comes_from_race_state(t: BackendTestContext) -> void:
+func _test_visit_probability_comes_from_active_race_definition(t: BackendTestContext) -> void:
 	var race := t.make_race("visitor")
 	var group := t.make_group("visiting group")
 	group.decrease_consumption = true
@@ -319,9 +319,11 @@ func _test_visit_probability_comes_from_race_state(t: BackendTestContext) -> voi
 	t.check_equal(visits.size(), 1, "visit probability one creates a visit regardless of seat ratio")
 	t.check(visits[0].source_group == group, "successful visit chooses the seat's group Resource")
 	t.check(visits[0].has_positive_trait(), "active visit receives a positive trait")
-	session.state.get_race(race).visit_probability = 0.0
+	var race_state := session.state.get_race(race)
+	t.check(race_state.active_definition == race, "canonical race is active before a constitution variant replaces it")
+	race_state.active_definition.visit_probability = 0.0
 	t.check_equal(
 		session.proposal_system.resolve_active_visits(session.context).size(), 0,
-		"visit probability zero prevents visits"
+		"visit probability zero on the active race definition prevents visits"
 	)
 	session.free()
