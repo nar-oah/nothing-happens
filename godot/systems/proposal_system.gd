@@ -164,13 +164,12 @@ func draw_automatic_proposal(context: RunContext) -> ProposalInstance:
 
 
 func draw_automatic_proposals(context: RunContext) -> void:
-	var proposals: Array[ProposalInstance] = []
 	for _index in range(context.balance.automatic_draw_count):
 		var proposal := draw_automatic_proposal(context)
 		if proposal != null:
 			add_to_hand(context.state, proposal)
-			proposals.append(proposal)
-	resolve_active_visits(context, proposals)
+			var proposals: Array[ProposalInstance] = [proposal]
+			resolve_active_visits(context, proposals)
 
 
 func resolve_active_visits(

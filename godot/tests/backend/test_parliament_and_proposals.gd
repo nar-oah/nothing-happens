@@ -371,6 +371,10 @@ func _test_active_visits_follow_automatic_sources(t: BackendTestContext) -> void
 		random.calls.find(&"source") < random.calls.find(&"visit_chance"),
 		"the automatic source-group draw occurs before its visit roll"
 	)
+	t.check(
+		random.calls.find(&"visit_chance") < random.calls.rfind(&"source"),
+		"each successful automatic proposal gets its visit roll before the next source draw"
+	)
 
 	visitor_a.visit_probability = 1.0
 	visitor_b.visit_probability = 1.0
