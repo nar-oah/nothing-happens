@@ -372,6 +372,12 @@ func _test_office_visit_dialogue_queue(t: BackendTestContext) -> void:
 		},
 		"event-intel dialogue contains structured current requirement"
 	)
+	var unopened_messages := bridge.receive_ipc_message(
+		_message("office.visit.resolve", {"state_version": 1})
+	)
+	t.check_equal(unopened_messages[0]["type"], "command.error", "office mode cannot resolve the next visit")
+	t.check_equal(bridge.state_version, 1, "rejected unopened visit does not advance version")
+	t.check(session.state.office_visits[0] == event_visit, "rejected unopened visit keeps the queue")
 	t.check(bridge.open_current_office_visit(), "second visit also requires an explicit open")
 	var event_messages := bridge.receive_ipc_message(
 		_message("office.visit.resolve", {"state_version": 1})

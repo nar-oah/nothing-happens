@@ -177,7 +177,7 @@ func resolve_active_visits(
 ) -> Array[ProposalInstance]:
 	var result: Array[ProposalInstance] = []
 	for proposal in proposals:
-		if proposal == null or not context.random_system.chance(context.balance.proposal_visit_probability):
+		if proposal == null or proposal.office_visit_created or not context.random_system.chance(context.balance.proposal_visit_probability):
 			continue
 		var source := context.constitution_system.resolve_group_identity(context, proposal.source_group)
 		if source == null:
@@ -198,6 +198,7 @@ func resolve_active_visits(
 		visit.race = visitor_race
 		visit.proposal = proposal
 		context.state.office_visits.append(visit)
+		proposal.office_visit_created = true
 		result.append(proposal)
 	return result
 

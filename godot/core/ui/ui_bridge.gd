@@ -407,6 +407,13 @@ func _handle_office_visit_resolve(
 			message["request_id"]
 		)
 		return
+	if ui_mode != "dialogue":
+		_append_mutation_error(
+			messages,
+			{"code": "office_visit_not_open", "message": "The current office visit is not open."},
+			message["request_id"]
+		)
+		return
 	var visit := state.office_visits[0]
 	if visit.kind == OfficeVisitState.Kind.INTEREST_GROUP:
 		var accept_trait: Variant = message["payload"].get("accept_trait")

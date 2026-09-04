@@ -8,6 +8,7 @@ var lag_months: int = 1
 var donation_offer: float = 0.0
 var bonus_choice_resolved: bool = true
 var positive_trait_accepted: bool = true
+var office_visit_created: bool = false
 
 
 func _init() -> void:

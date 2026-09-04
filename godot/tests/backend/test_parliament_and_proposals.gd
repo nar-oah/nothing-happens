@@ -381,6 +381,12 @@ func _test_active_visits_follow_automatic_sources(t: BackendTestContext) -> void
 		random.calls.find(&"visit_chance") < random.calls.rfind(&"source"),
 		"each successful automatic proposal gets its visit roll before the next source draw"
 	)
+	var first_visit := session.state.office_visits[0]
+	session.proposal_system.resolve_active_visits(
+		session.context, [session.state.proposal_hand[0], session.state.proposal_hand[0]]
+	)
+	t.check_equal(session.state.office_visits.size(), 2, "one automatic proposal cannot queue twice")
+	t.check(session.state.office_visits[0] == first_visit, "duplicate visit checks keep the original record")
 
 	balance.proposal_visit_probability = 0.0
 	random.chance_probabilities.clear()
