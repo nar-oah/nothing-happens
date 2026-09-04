@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://dtdircy18pgt8"]
+
+[ext_resource type="Script" uid="uid://boe1oape1chs0" path="res://worlds/interactables/office_visitor.gd" id="1_y442v"]
+[ext_resource type="Texture2D" uid="uid://dav2drum00ulb" path="res://assets/races/驻岁.png" id="2_t1nbh"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_q46x6"]
+size = Vector2(1675, 1382)
+
+[node name="OfficeVisitor" type="Area2D" unique_id=359364638]
+script = ExtResource("1_y442v")
+
+[node name="Visual" type="Sprite2D" parent="." unique_id=24110937]
+texture = ExtResource("2_t1nbh")
+
+[node name="Hitbox" type="CollisionShape2D" parent="." unique_id=1420238239]
+position = Vector2(1.5, -67)
+shape = SubResource("RectangleShape2D_q46x6")

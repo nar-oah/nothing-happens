@@ -1,6 +1,10 @@
 extends Node2D
 
 signal parliament_requested
+signal visitor_requested
+
+@export var assistant_race: RaceDefinition
+@onready var visitor: OfficeVisitor = $CenterAnchor/Visitor
 
 var visitor_races: Array[RaceDefinition] = []
 
@@ -8,6 +12,7 @@ var visitor_races: Array[RaceDefinition] = []
 func _ready() -> void:
 	get_viewport().size_changed.connect(_update_layout)
 	_update_layout()
+	_refresh_visitor()
 
 
 func _update_layout() -> void:
@@ -21,8 +26,19 @@ func _on_door_clicked() -> void:
 	parliament_requested.emit()
 
 
+func _on_visitor_clicked() -> void:
+	if has_visitors():
+		visitor_requested.emit()
+
+
 func set_visitor_races(value: Array[RaceDefinition]) -> void:
 	visitor_races = value
+	_refresh_visitor()
+
+
+func set_assistant_race(value: RaceDefinition) -> void:
+	assistant_race = value
+	_refresh_visitor()
 
 
 func has_visitors() -> bool:
@@ -31,3 +47,8 @@ func has_visitors() -> bool:
 
 func get_current_visitor() -> RaceDefinition:
 	return null if visitor_races.is_empty() else visitor_races[0]
+
+
+func _refresh_visitor() -> void:
+	var race := get_current_visitor() if has_visitors() else assistant_race
+	visitor.set_portrait(race.portrait)

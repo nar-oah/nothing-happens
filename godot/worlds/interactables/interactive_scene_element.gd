@@ -13,11 +13,6 @@ func _ready() -> void:
 	mouse_exited.connect(_on_mouse_exited)
 
 
-func set_texture(texture: Texture2D) -> void:
-	normal_texture = texture
-	visual.texture = texture
-
-
 func _on_mouse_entered() -> void:
 	visual.texture = hover_texture if is_instance_of(hover_texture, Texture2D) else normal_texture
 
