@@ -164,51 +164,38 @@ func draw_automatic_proposal(context: RunContext) -> ProposalInstance:
 
 
 func draw_automatic_proposals(context: RunContext) -> void:
+	var proposals: Array[ProposalInstance] = []
 	for _index in range(context.balance.automatic_draw_count):
 		var proposal := draw_automatic_proposal(context)
 		if proposal != null:
 			add_to_hand(context.state, proposal)
+			proposals.append(proposal)
+	resolve_active_visits(context, proposals)
 
 
-func resolve_active_visits(context: RunContext) -> Array[ProposalInstance]:
+func resolve_active_visits(
+	context: RunContext, proposals: Array[ProposalInstance] = []
+) -> Array[ProposalInstance]:
 	var result: Array[ProposalInstance] = []
-	for race_definition in context.race_definitions:
-		var seats := context.parliament_system.get_race_seats(context.state, race_definition)
-		if seats.is_empty():
+	for proposal in proposals:
+		if proposal == null or not context.random_system.chance(context.balance.proposal_visit_probability):
 			continue
-		var race_state := context.state.get_race(race_definition)
-		var active_race := null if race_state == null else race_state.active_definition
-		if active_race == null or not context.random_system.chance(active_race.visit_probability):
-			continue
-		var source := _choose_visit_source(seats, context)
+		var source := context.constitution_system.resolve_group_identity(context, proposal.source_group)
 		if source == null:
 			continue
-		var proposal := _generate_proposal_for_context(source, context)
-		if proposal == null:
+		var seats: Array[SeatState] = []
+		for seat in context.state.seats:
+			var group := context.constitution_system.resolve_group_identity(context, seat.actual_group)
+			if seat.race != null and group == source:
+				seats.append(seat)
+		if seats.is_empty():
+			continue
+		var visitor_race := seats[context.random_system.random_int(0, seats.size() - 1)].race
+		if visitor_race == null:
 			continue
 		add_positive_trait(proposal, context.state.year, context.inflation_system, context.balance, context.random_system)
-		add_to_hand(context.state, proposal)
 		result.append(proposal)
 	return result
-
-
-func _choose_visit_source(seats: Array[SeatState], context: RunContext) -> InterestGroupDefinition:
-	var candidates: Array[InterestGroupDefinition] = []
-	var counts: Dictionary[InterestGroupDefinition, int] = {}
-	for seat in seats:
-		var group := context.constitution_system.resolve_group_identity(context, seat.actual_group)
-		var active := context.constitution_system.get_active_group_definition(context, group)
-		if group == null or active == null or active.race != null or active.get_stance_metrics().is_empty():
-			continue
-		if not counts.has(group):
-			candidates.append(group)
-			counts[group] = 0
-		counts[group] += 1
-	var weights: Array[float] = []
-	for group in candidates:
-		weights.append(float(counts[group]))
-	var selected_index := context.random_system.weighted_index(weights)
-	return null if selected_index < 0 else candidates[selected_index]
 
 
 func merge_three(state: RunState, mothers: Array[ProposalInstance], negative_base: ProposalInstance, balance: GameBalanceDefinition, selected_positive: ProposalInstance = null) -> ProposalInstance:
