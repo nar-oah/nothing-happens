@@ -184,7 +184,14 @@ export function makeLiveState(stateVersion = 1): LiveGameState {
 			projected_metrics: { ...current, consumption: 92 },
 			vote
 		},
-		pending_dialogue: { hand_index: 0, proposal: testProposal }
+		pending_dialogue: {
+			kind: 'interest_group',
+			race_name: '人类',
+			group_name: testGroup.display_name,
+			positive_metric: Metric.INVESTMENT,
+			positive_value: 8,
+			donation_offer: 5
+		}
 	};
 }
 

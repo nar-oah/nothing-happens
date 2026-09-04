@@ -357,18 +357,16 @@
 <svelte:head><title>Nothing Happens</title></svelte:head>
 {#if snapshot && frame}
 	{#if snapshot.ui_mode === 'dialogue' && pendingDialogue}
-		<DialogueView
-			{...frame}
-			onNewspaperOpen={openNewspaper}
-			dialogue={{
-				handIndex: pendingDialogue.hand_index,
-				groupName: snapshot.pending_dialogue!.proposal.source_group.display_name,
-				positiveEffect: pendingDialogue.trait_label,
-				donationOffer: pendingDialogue.donation_label
-			}}
-			onResolveBonus={(handIndex, acceptTrait) =>
-				mutate('proposal.bonus.resolve', { hand_index: handIndex, accept_trait: acceptTrait })}
-		/>
+			<DialogueView
+				{...frame}
+				onNewspaperOpen={openNewspaper}
+				dialogue={pendingDialogue}
+				onResolveVisit={(acceptTrait) =>
+					mutate(
+						'office.visit.resolve',
+						acceptTrait === undefined ? {} : { accept_trait: acceptTrait }
+					)}
+			/>
 	{:else if snapshot.ui_mode === 'parliament'}
 		<ParliamentView
 			{...frame}

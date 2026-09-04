@@ -2,32 +2,38 @@
 	import ChoreSwitch from '$lib/components/chore/ChoreSwitch.svelte';
 	import Dialog from '$lib/components/dialog/Dialog.svelte';
 	import TopDialog from '$lib/components/dialog/TopDialog.svelte';
-	import { createInterestGroupDialogueContent } from '$lib/components/dialog/content';
+	import {
+		createEventIntelDialogueContent,
+		createInterestGroupDialogueContent
+	} from '$lib/components/dialog/content';
 	import NewspaperEntry from '$lib/components/newspaper/NewspaperEntry.svelte';
 	import type { DialoguePresentation, ViewFrameProps } from './types';
 
 	type Props = Pick<ViewFrameProps, 'term' | 'year' | 'month' | 'onNewspaperOpen'> & {
 		dialogue: DialoguePresentation;
-		onResolveBonus?: (handIndex: number, acceptTrait: boolean) => void;
+		onResolveVisit?: (acceptTrait?: boolean) => void;
 	};
 
-	let { term, year, month, onNewspaperOpen, dialogue, onResolveBonus }: Props = $props();
+	let { term, year, month, onNewspaperOpen, dialogue, onResolveVisit }: Props = $props();
 	let donationChoice = $state(false);
 	const content = $derived(
-		createInterestGroupDialogueContent(
-			dialogue.groupName,
-			dialogue.positiveEffect,
-			dialogue.donationOffer
-		)
+		dialogue.kind === 'interest_group'
+			? createInterestGroupDialogueContent(
+					dialogue.groupName,
+					dialogue.positiveEffect,
+					dialogue.donationOffer
+				)
+			: createEventIntelDialogueContent({
+					raceName: dialogue.raceName,
+					metricName: dialogue.metricName,
+					requirement: dialogue.requirement,
+					strength: dialogue.strength
+				})
 	);
 
 	function advanceDialogue() {
-		onResolveBonus?.(dialogue.handIndex, !donationChoice);
+		onResolveVisit?.(dialogue.kind === 'interest_group' ? !donationChoice : undefined);
 	}
-
-	$effect(() => {
-		if (dialogue.handIndex >= 0) donationChoice = false;
-	});
 </script>
 
 <main class="game-view" aria-label="对话界面">
@@ -38,13 +44,15 @@
 	</div>
 
 	<div class="dialog-area">
-		<div class="choice-switch">
-			<ChoreSwitch
-				left={dialogue.positiveEffect}
-				right={dialogue.donationOffer}
-				bind:isSwitch={donationChoice}
-			/>
-		</div>
+		{#if dialogue.kind === 'interest_group'}
+			<div class="choice-switch">
+				<ChoreSwitch
+					left={dialogue.positiveEffect}
+					right={dialogue.donationOffer}
+					bind:isSwitch={donationChoice}
+				/>
+			</div>
+		{/if}
 		<Dialog text={content.body} onclick={advanceDialogue} />
 	</div>
 </main>
