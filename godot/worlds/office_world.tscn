@@ -6,23 +6,65 @@
 [ext_resource type="PackedScene" uid="uid://v3b0hlvpnjgu" path="res://worlds/interactables/ornament.tscn" id="3_odwa7"]
 [ext_resource type="PackedScene" uid="uid://cok3vmfex6phn" path="res://worlds/interactables/painting.tscn" id="4_ltqoq"]
 [ext_resource type="PackedScene" uid="uid://bea8aasp8jdxc" path="res://worlds/interactables/high_lamp.tscn" id="5_nl8yu"]
+[ext_resource type="Texture2D" uid="uid://ba2d1es4a6wlh" path="res://assets/office/big_rock.png" id="7_ltqoq"]
+[ext_resource type="Texture2D" uid="uid://dppuom4ypgok" path="res://assets/office/small_rock.png" id="8_nl8yu"]
 
 [node name="OfficeWorld" type="Node2D" unique_id=1059762548]
 script = ExtResource("1_5h8hf")
 
-[node name="Door" parent="." unique_id=2114060250 instance=ExtResource("1_ox7iv")]
-position = Vector2(1040, -100)
-
-[node name="Lamp" parent="." unique_id=368426627 instance=ExtResource("2_5h8hf")]
-position = Vector2(652, 454)
-
-[node name="Ornament" parent="." unique_id=2123455950 instance=ExtResource("3_odwa7")]
-position = Vector2(450, 478)
-
 [node name="Painting" parent="." unique_id=82985051 instance=ExtResource("4_ltqoq")]
-position = Vector2(175, 26)
+position = Vector2(1055, 295)
+scale = Vector2(0.6, 0.6)
 
-[node name="High Lamp" parent="." unique_id=411025428 instance=ExtResource("5_nl8yu")]
-position = Vector2(780, 266)
+[node name="Background" type="CanvasLayer" parent="." unique_id=902974542]
+layer = -10
 
-[connection signal="clicked" from="Door" to="." method="_on_door_clicked"]
+[node name="BaseColor" type="ColorRect" parent="Background" unique_id=1390739653]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.9372549, 0.72156864, 0.21176471, 1)
+
+[node name="Wall" type="ColorRect" parent="Background" unique_id=293487992]
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 0.7
+grow_horizontal = 2
+mouse_filter = 2
+color = Color(0.8627451, 0.6627451, 0.19607843, 1)
+
+[node name="LeftAnchor" type="Node2D" parent="." unique_id=996699010]
+position = Vector2(0, 1080)
+
+[node name="Lamp" parent="LeftAnchor" unique_id=368426627 instance=ExtResource("2_5h8hf")]
+z_index = 1
+position = Vector2(115, -165)
+
+[node name="High Lamp" parent="LeftAnchor" unique_id=411025428 instance=ExtResource("5_nl8yu")]
+position = Vector2(666, -615)
+
+[node name="Big Rock" type="Sprite2D" parent="LeftAnchor" unique_id=1050922794]
+position = Vector2(277, -325)
+texture = ExtResource("7_ltqoq")
+
+[node name="CenterAnchor" type="Node2D" parent="." unique_id=1365821839]
+position = Vector2(960, 1080)
+
+[node name="RightAnchor" type="Node2D" parent="." unique_id=692690267]
+position = Vector2(1920, 1080)
+
+[node name="Ornament" parent="RightAnchor" unique_id=2123455950 instance=ExtResource("3_odwa7")]
+position = Vector2(-471, -430)
+
+[node name="Door" parent="RightAnchor" unique_id=2114060250 instance=ExtResource("1_ox7iv")]
+position = Vector2(-135, -819)
+
+[node name="Small Rock" type="Sprite2D" parent="RightAnchor" unique_id=1246513176]
+z_index = 1
+position = Vector2(-145, -108)
+texture = ExtResource("8_nl8yu")
+
+[connection signal="clicked" from="RightAnchor/Door" to="." method="_on_door_clicked"]
