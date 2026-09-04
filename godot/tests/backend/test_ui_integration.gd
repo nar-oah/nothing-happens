@@ -16,6 +16,7 @@ func run(t: BackendTestContext) -> void:
 	_test_office_visit_donation_choice(t)
 	_test_explicit_next_term_command(t)
 	_test_normalized_input_regions(t)
+	_test_parliament_world_seats(t)
 	_test_game_root_shell(t)
 
 
@@ -426,6 +427,54 @@ func _test_normalized_input_regions(t: BackendTestContext) -> void:
 	texture.free()
 
 
+func _test_parliament_world_seats(t: BackendTestContext) -> void:
+	var seat_scene: PackedScene = load("res://worlds/parliament_seat.tscn")
+	var standalone: ParliamentSeat = seat_scene.instantiate()
+	Engine.get_main_loop().root.add_child(standalone)
+	t.check(standalone.get_node("Visual") is Sprite2D, "ParliamentSeat owns a Sprite2D Visual")
+	t.check(standalone.get_node("UIAnchor") is Marker2D, "ParliamentSeat owns a Marker2D UIAnchor")
+	var first := t.make_race("first parliament portrait")
+	first.portrait = ImageTexture.new()
+	standalone.seat_index = 4
+	standalone.set_race(first)
+	t.check_equal(standalone.seat_index, 4, "ParliamentSeat retains its RunState index")
+	t.check(standalone.visual.texture == first.portrait, "ParliamentSeat displays RaceDefinition portrait")
+	var viewport_size := standalone.get_viewport_rect().size
+	standalone.position = viewport_size * 0.5
+	var normalized := standalone.get_normalized_ui_anchor()
+	t.check_approx(normalized.x, 0.5, "ParliamentSeat normalizes anchor x in the viewport")
+	t.check_approx(normalized.y, 0.5, "ParliamentSeat normalizes anchor y in the viewport")
+	standalone.free()
+
+	var world_scene: PackedScene = load("res://worlds/parliament_world.tscn")
+	var world: ParliamentWorld = world_scene.instantiate()
+	Engine.get_main_loop().root.add_child(world)
+	var second := t.make_race("second parliament portrait")
+	second.portrait = ImageTexture.new()
+	var third := t.make_race("third parliament portrait")
+	third.portrait = ImageTexture.new()
+	var races: Array[RaceDefinition] = [first, second, third]
+	world.set_seat_races(races)
+	t.check_equal(world.seats.size(), races.size(), "ParliamentWorld follows the dynamic seat count")
+	for index in range(races.size()):
+		t.check_equal(world.seats[index].seat_index, index, "ParliamentWorld assigns stable seat indices")
+		t.check(world.seats[index].race == races[index], "ParliamentWorld assigns each active race")
+		t.check(world.seats[index].visual.texture == races[index].portrait, "ParliamentWorld updates each portrait")
+	world.seats[0].position = Vector2(120.0, 240.0)
+	world.set_seat_races([second, first, third])
+	t.check_equal(world.seats[0].position, Vector2(120.0, 240.0), "race updates preserve editor-authored seat positions")
+	world.set_seat_races([second])
+	t.check_equal(world.seats.size(), 1, "ParliamentWorld removes seats beyond RunState size")
+	t.check_equal(world.seats_root.get_child_count(), 1, "removed seats leave the active scene tree")
+	var anchors := world.get_seat_anchors()
+	t.check_equal(anchors.size(), 1, "ParliamentWorld returns one anchor per current seat")
+	t.check_equal(anchors[0].keys().size(), 3, "seat anchors contain no duplicated support data")
+	t.check_equal(anchors[0]["seat_index"], 0, "seat anchor keeps its seat index")
+	t.check(anchors[0]["x"] >= 0.0 and anchors[0]["x"] <= 1.0, "seat anchor x stays normalized")
+	t.check(anchors[0]["y"] >= 0.0 and anchors[0]["y"] <= 1.0, "seat anchor y stays normalized")
+	world.free()
+
+
 func _test_game_root_shell(t: BackendTestContext) -> void:
 	var scene: PackedScene = load("res://core/game_root.tscn")
 	var root: Node = scene.instantiate()
@@ -455,6 +504,16 @@ func _test_game_root_shell(t: BackendTestContext) -> void:
 	bridge.open_current_office_visit()
 	bridge.receive_ipc_message(_message("office.visit.resolve", {"state_version": 0}))
 	t.check(not office.call("has_visitors"), "resolved visit resyncs the current OfficeWorld")
+	var seat_state: SeatState = session.state.seats[0]
+	var seat_race_state: RaceState = session.state.get_race(seat_state.race)
+	var parliament_race := t.make_race("active parliament race")
+	parliament_race.portrait = ImageTexture.new()
+	seat_race_state.active_definition = parliament_race
+	bridge.set_ui_mode("parliament")
+	var parliament: ParliamentWorld = manager.current_world
+	t.check_equal(parliament.seats.size(), session.state.seats.size(), "loaded ParliamentWorld follows RunState seats")
+	t.check(parliament.seats[0].race == parliament_race, "ParliamentWorld receives active race definition")
+	t.check(parliament.seats[0].visual.texture == parliament_race.portrait, "active race portrait reaches ParliamentWorld")
 	root.free()
 
 
