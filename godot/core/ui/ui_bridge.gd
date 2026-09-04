@@ -26,7 +26,7 @@ func setup(session: RunSession, manager: Node = null, texture: Control = null) -
 	):
 		set_ui_mode("constitution", false)
 	else:
-		_refresh_dialogue_mode()
+		set_ui_mode("office", false)
 
 
 func set_cef_texture(texture: Control) -> void:
@@ -85,20 +85,12 @@ func receive_ipc_message(raw_message: String) -> Array[Dictionary]:
 func send_full_state(request_id: Variant = null) -> void:
 	if run_session == null or run_session.state == null:
 		return
-	_refresh_dialogue_mode()
 	_send_message(_full_state(request_id))
 
 
 func set_ui_mode(mode: String, send_sync: bool = true) -> bool:
 	if mode not in UiProtocol.UI_MODES:
 		return false
-	if (
-		run_session != null
-		and run_session.state != null
-		and run_session.state.run_phase == RunState.RunPhase.RUNNING
-		and _serializer.pending_dialogue(run_session.state) != null
-	):
-		mode = "dialogue"
 	ui_mode = mode
 	world_scene = "parliament" if mode in ["parliament", "constitution"] else "office"
 	if scene_manager != null:
@@ -108,6 +100,12 @@ func set_ui_mode(mode: String, send_sync: bool = true) -> bool:
 	if send_sync:
 		send_full_state()
 	return true
+
+
+func open_current_office_visit() -> bool:
+	if run_session == null or run_session.state == null or run_session.state.office_visits.is_empty():
+		return false
+	return set_ui_mode("dialogue")
 
 
 func handle_world_interaction(action: StringName, payload: Dictionary) -> void:
@@ -126,7 +124,6 @@ func _dispatch(message: Dictionary, messages: Array[Dictionary]) -> void:
 	var message_type: String = message["type"]
 	match message_type:
 		"ui.ready":
-			_refresh_dialogue_mode()
 			messages.append(_full_state(message["request_id"]))
 		"ui.input_regions":
 			_handle_input_regions(message, messages)
@@ -153,10 +150,10 @@ func _dispatch(message: Dictionary, messages: Array[Dictionary]) -> void:
 			_handle_bill_submit(message, messages)
 		"proposal.merge":
 			_handle_proposal_merge(message, messages)
-		"proposal.bonus.resolve":
-			_handle_bonus_resolve(message, messages)
+		"office.visit.resolve":
+			_handle_office_visit_resolve(message, messages)
 		"month.advance":
-			if _advance_month_and_refresh_mode():
+			if _advance_month_and_set_mode():
 				state_version += 1
 			messages.append(_full_state(message["request_id"]))
 		"term.next":
@@ -200,7 +197,6 @@ func _handle_mode_set(message: Dictionary, messages: Array[Dictionary]) -> void:
 
 func _handle_newspaper_close(message: Dictionary, messages: Array[Dictionary]) -> void:
 	run_session.clear_term_report()
-	_refresh_dialogue_mode()
 	set_ui_mode(ui_mode, false)
 	messages.append(_full_state(message["request_id"]))
 
@@ -310,7 +306,7 @@ func _handle_bill_submit(message: Dictionary, messages: Array[Dictionary]) -> vo
 		)
 		return
 	var vote_payload := _serializer.vote_result(result, run_session.state)
-	_advance_month_and_refresh_mode()
+	_advance_month_and_set_mode()
 	state_version += 1
 	var payload := {
 		"state_version": state_version,
@@ -324,7 +320,7 @@ func _handle_bill_submit(message: Dictionary, messages: Array[Dictionary]) -> vo
 		"active_bill": _serializer.active_bill(run_session.state.active_bill),
 		"status": _serializer.game_status(run_session),
 		"draft_preview": _serializer.draft_preview(run_session),
-		"pending_dialogue": _serializer.pending_dialogue(run_session.state),
+		"pending_dialogue": _serializer.pending_dialogue(run_session),
 		"ui_mode": ui_mode,
 		"world_scene": world_scene,
 	}
