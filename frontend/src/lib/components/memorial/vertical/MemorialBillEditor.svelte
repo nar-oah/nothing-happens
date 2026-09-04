@@ -32,7 +32,7 @@
 	let editingTitle = $state(false);
 	let titleDraft = $state('');
 	let titleInput = $state<HTMLInputElement>();
-	let displayTitle = $derived(bill.title.trim() || '新法案');
+	let displayTitle = $derived(bill.title || '新法案');
 	let lag = $derived(getBillLagMonths(bill.proposals));
 	let proposalPages = $derived(bill.proposals.map(proposalToMemorialContent));
 	let policyPages = $derived(bill.policies.map(policyToMemorialContent));
