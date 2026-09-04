@@ -19,6 +19,7 @@ class_name GameBalanceDefinition
 @export_range(0.0, 100.0, 0.05) var proposal_draw_reverse_factor: float = 3.0
 @export_range(0.0, 100.0, 0.05) var proposal_draw_min_weight: float = 0.5
 @export_range(0.0, 100.0, 0.05) var proposal_draw_max_weight: float = 2.0
+@export_range(0.0, 1.0, 0.01) var proposal_visit_probability: float = 0.2
 @export_range(0.0, 100.0, 0.05) var merge_conversion_ratio: float = 0.5
 @export_range(0.0, 100.0, 0.05) var merge_upgrade_exponent: float = 1.0
 @export_range(0.0, 100.0, 0.05) var donation_per_positive_point: float = 1.0

@@ -28,7 +28,21 @@ import type {
 
 export type GameStateDisplayProps = { primary: { text: string; value: number; isRow: false }; secondary: { text: string; value: number; limit: number; isRow: false } };
 export type LiveConstitutionMemorialData = MemorialConstitutionData;
-export type DialoguePresentation = { hand_index: number; trait_label: string; donation_label: string };
+export type DialoguePresentation =
+	| {
+			kind: 'interest_group';
+			raceName: string;
+			groupName: string;
+			positiveEffect: string;
+			donationOffer: string;
+	  }
+	| {
+			kind: 'event_intel';
+			raceName: string;
+			metricName: string;
+			requirement: number;
+			strength: number;
+	  };
 
 export function deriveLeftItems(state: LiveGameState): LeftItem[] {
 	const constitution: Constitution = {
@@ -86,13 +100,26 @@ export function deriveConstitutionMemorial(state: LiveGameState): LiveConstituti
 	return result;
 }
 
-export function deriveDialoguePresentation(pending: PendingDialogueDto | null): DialoguePresentation | null {
+export function deriveDialoguePresentation(
+	pending: PendingDialogueDto | null
+): DialoguePresentation | null {
 	if (!pending) return null;
-	const traitParts = METRICS.flatMap((metric) => {
-		const value = getMetricValue(pending.proposal.positive_effect, metric);
-		return value === 0 ? [] : [`${METRIC_DISPLAY_NAMES[metric]}${value > 0 ? '+' : ''}${formatNumber(value)}`];
-	});
-	return { hand_index: pending.hand_index, trait_label: traitParts.join('、') || '正面词条', donation_label: `政治献金+${formatNumber(pending.proposal.donation_offer)}` };
+	if (pending.kind === 'event_intel') {
+		return {
+			kind: pending.kind,
+			raceName: pending.race_name,
+			metricName: METRIC_DISPLAY_NAMES[pending.metric],
+			requirement: pending.requirement,
+			strength: pending.strength
+		};
+	}
+	return {
+		kind: pending.kind,
+		raceName: pending.race_name,
+		groupName: pending.group_name,
+		positiveEffect: `${METRIC_DISPLAY_NAMES[pending.positive_metric]}${pending.positive_value > 0 ? '+' : ''}${formatNumber(pending.positive_value)}`,
+		donationOffer: `政治献金+${formatNumber(pending.donation_offer)}`
+	};
 }
 
 function articleToMemorialRow(article: ConstitutionArticleStateDto): MemorialConstitutionRowContentData {

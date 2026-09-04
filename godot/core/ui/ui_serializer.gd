@@ -129,11 +129,37 @@ func draft_preview(session: RunSession) -> Dictionary:
 	return {"current_metrics": metric_values(state.metrics), "pure_proposal_target": metric_values(pure_target), "immediate_policy_result": metric_values(immediate), "projected_metrics": metric_values(projected), "vote": vote_result(vote, session)}
 
 
-func pending_dialogue(state: RunState) -> Variant:
-	for index in range(state.proposal_hand.size()):
-		var current := state.proposal_hand[index]
-		if current != null and current.is_bonus_choice_pending():
-			return {"hand_index": index, "proposal": proposal(current)}
+func pending_dialogue(session: RunSession) -> Variant:
+	if session == null or session.state == null or session.state.office_visits.is_empty():
+		return null
+	var visit := session.state.office_visits[0]
+	if visit == null or visit.race == null:
+		return null
+	match visit.kind:
+		OfficeVisitState.Kind.INTEREST_GROUP:
+			var current := visit.proposal
+			if current == null or current.source_group == null or not current.has_positive_trait():
+				return null
+			var positive_metric := current.get_positive_metric() as Metric.Id
+			return {
+				"kind": "interest_group",
+				"race_name": _active_race_name(session, visit.race),
+				"group_name": _active_group_name(session, current.source_group),
+				"positive_metric": int(positive_metric),
+				"positive_value": current.positive_effect.get_value(positive_metric),
+				"donation_offer": current.donation_offer,
+			}
+		OfficeVisitState.Kind.EVENT_INTEL:
+			var event := visit.event
+			if event == null:
+				return null
+			return {
+				"kind": "event_intel",
+				"race_name": _active_race_name(session, visit.race),
+				"metric": int(event.metric),
+				"requirement": session.event_system.get_current_requirement(event),
+				"strength": roundi(clampf(event.growth_progress, 0.0, 1.0) * 100.0),
+			}
 	return null
 
 
@@ -186,7 +212,7 @@ func full_state(session: RunSession, ui_mode: String, world_scene: String, state
 		"collapse_level": state.collapse_level,
 		"max_collapse": session.balance.max_collapse,
 		"draft_preview": draft_preview(session),
-		"pending_dialogue": pending_dialogue(state),
+		"pending_dialogue": pending_dialogue(session),
 		"active_bill": active_bill(state.active_bill),
 	}
 

@@ -12,7 +12,8 @@ func run(t: BackendTestContext) -> void:
 	_test_saved_bill_reconciliation(t)
 	_test_merge_refs(t)
 	_test_draft_preview(t)
-	_test_bonus_choice_sync(t)
+	_test_office_visit_dialogue_queue(t)
+	_test_office_visit_donation_choice(t)
 	_test_explicit_next_term_command(t)
 	_test_normalized_input_regions(t)
 	_test_game_root_shell(t)
@@ -36,6 +37,15 @@ func _test_protocol_envelopes(t: BackendTestContext) -> void:
 	)
 	t.check(ready["ok"], "encoded ready envelope decodes")
 	t.check_equal(ready["message"]["request_id"], "ready-request", "request id round trips")
+	var visit_resolve := protocol.decode(
+		protocol.encode("office.visit.resolve", {"state_version": 0}, "visit-request")
+	)
+	t.check(visit_resolve["ok"], "office visit command decodes")
+	t.check(protocol.is_gameplay_mutation("office.visit.resolve"), "office visit is a gameplay mutation")
+	var legacy_bonus := protocol.decode(
+		JSON.stringify({"type": "proposal.bonus.resolve", "payload": {}})
+	)
+	t.check(not legacy_bonus["ok"], "legacy proposal bonus command is removed")
 
 
 func _test_core_dto_serialization(t: BackendTestContext) -> void:
@@ -294,29 +304,115 @@ func _test_draft_preview(t: BackendTestContext) -> void:
 	session.free()
 
 
-func _test_bonus_choice_sync(t: BackendTestContext) -> void:
-	var race := t.make_race("dialogue race")
-	var group := t.make_group("dialogue group")
+func _test_office_visit_dialogue_queue(t: BackendTestContext) -> void:
+	var race := t.make_race("canonical dialogue race")
+	var active_race := t.make_race("active dialogue race")
+	var group := t.make_group("canonical dialogue group")
+	var active_group := t.make_group("active dialogue group")
 	var session := t.make_session([race], [group], t.make_seats(1, "dialogue"))
+	session.state.month = 1
+	session.state.get_race(race).active_definition = active_race
+	session.state.constitution.group_variants[group] = active_group
 	var proposal := t.make_proposal(group)
 	proposal.positive_effect.investment = 8
 	proposal.donation_offer = 8.0
 	proposal.bonus_choice_resolved = false
 	proposal.positive_trait_accepted = false
 	session.proposal_system.add_to_hand(session.state, proposal)
+	var serializer := UiSerializer.new()
+	t.check_equal(
+		serializer.pending_dialogue(session), null, "pending proposal alone creates no dialogue"
+	)
+	var proposal_visit := _interest_group_visit(race, proposal)
+	var event := EventState.new(race, Metric.Id.PRODUCTION, 20, 100)
+	event.known = true
+	event.growth_progress = 0.4
+	var event_visit := _event_intel_visit(race, event)
+	session.state.office_visits.append(proposal_visit)
+	session.state.office_visits.append(event_visit)
+	var proposal_dialogue: Dictionary = serializer.pending_dialogue(session)
+	t.check_equal(
+		proposal_dialogue,
+		{
+			"kind": "interest_group",
+			"race_name": "active dialogue race",
+			"group_name": "active dialogue group",
+			"positive_metric": int(Metric.Id.INVESTMENT),
+			"positive_value": 8,
+			"donation_offer": 8.0,
+		},
+		"interest-group dialogue contains only structured visit data"
+	)
+	t.check(not proposal_dialogue.has("proposal"), "dialogue DTO does not expose ProposalInstance")
+	t.check(not proposal_dialogue.has("hand_index"), "dialogue DTO has no proposal hand index")
 	var bridge := UiBridge.new()
 	bridge.setup(session)
-	t.check_equal(bridge.ui_mode, "dialogue", "pending proposal enters dialogue mode")
+	t.check_equal(bridge.ui_mode, "office", "queued visit does not automatically open dialogue")
+	t.check(bridge.open_current_office_visit(), "current office visit opens explicitly")
+	t.check_equal(bridge.ui_mode, "dialogue", "explicit visit open enters dialogue mode")
+	t.check_equal(session.state.office_visits.size(), 2, "opening a visit does not consume it")
 	var messages := bridge.receive_ipc_message(
-		_message(
-			"proposal.bonus.resolve",
-			{"state_version": 0, "hand_index": 0, "accept_trait": false}
-		)
+		_message("office.visit.resolve", {"state_version": 0, "accept_trait": true})
 	)
-	t.check_equal(messages[0]["type"], "proposal.sync", "bonus choice returns proposal sync")
-	t.check_equal(session.state.political_donation_pool, 8.0, "donation choice uses gameplay API")
-	t.check_equal(messages[0]["payload"]["pending_dialogue"], null, "resolved choice clears dialogue")
-	t.check_equal(messages[0]["payload"]["ui_mode"], "office", "last dialogue returns to office")
+	t.check_equal(messages[0]["type"], "state.full", "visit resolution returns full state")
+	t.check_equal(bridge.state_version, 1, "visit resolution advances state version")
+	t.check_equal(session.state.office_visits.size(), 1, "visit resolution pops only one item")
+	t.check(session.state.office_visits[0] == event_visit, "next queued visit keeps its identity")
+	t.check(proposal.has_positive_trait(), "accepting a visit keeps its positive trait")
+	t.check(proposal.bonus_choice_resolved and proposal.positive_trait_accepted, "accepting uses proposal gameplay API")
+	t.check_equal(bridge.ui_mode, "office", "resolving first visit returns to office")
+	t.check_equal(messages[0]["payload"]["ui_mode"], "office", "full state remains in office")
+	t.check_equal(
+		messages[0]["payload"]["pending_dialogue"],
+		{
+			"kind": "event_intel",
+			"race_name": "active dialogue race",
+			"metric": int(Metric.Id.PRODUCTION),
+			"requirement": 52,
+			"strength": 40,
+		},
+		"event-intel dialogue contains structured current requirement"
+	)
+	var unopened_messages := bridge.receive_ipc_message(
+		_message("office.visit.resolve", {"state_version": 1})
+	)
+	t.check_equal(unopened_messages[0]["type"], "command.error", "office mode cannot resolve the next visit")
+	t.check_equal(bridge.state_version, 1, "rejected unopened visit does not advance version")
+	t.check(session.state.office_visits[0] == event_visit, "rejected unopened visit keeps the queue")
+	t.check(bridge.open_current_office_visit(), "second visit also requires an explicit open")
+	var event_messages := bridge.receive_ipc_message(
+		_message("office.visit.resolve", {"state_version": 1})
+	)
+	t.check_equal(session.state.office_visits.size(), 0, "event acknowledgement pops the visit")
+	t.check(event.known, "event acknowledgement does not rewrite known event state")
+	t.check_equal(event_messages[0]["payload"]["ui_mode"], "office", "event returns to office")
+	t.check(not bridge.open_current_office_visit(), "empty visit queue cannot open dialogue")
+	bridge.free()
+	session.free()
+
+
+func _test_office_visit_donation_choice(t: BackendTestContext) -> void:
+	var race := t.make_race("donation visitor")
+	var group := t.make_group("donation group")
+	var session := t.make_session([race], [group], t.make_seats(1, "donation"))
+	session.state.month = 1
+	var proposal := t.make_proposal(group)
+	proposal.positive_effect.tax = 5
+	proposal.donation_offer = 10.0
+	proposal.bonus_choice_resolved = false
+	proposal.positive_trait_accepted = false
+	session.proposal_system.add_to_hand(session.state, proposal)
+	session.state.office_visits.append(_interest_group_visit(race, proposal))
+	var bridge := UiBridge.new()
+	bridge.setup(session)
+	bridge.open_current_office_visit()
+	bridge.receive_ipc_message(
+		_message("office.visit.resolve", {"state_version": 0, "accept_trait": false})
+	)
+	t.check(not proposal.has_positive_trait(), "donation choice clears the proposal trait")
+	t.check(proposal.bonus_choice_resolved and not proposal.positive_trait_accepted, "donation choice uses proposal gameplay API")
+	t.check_approx(session.state.political_donation_pool, 10.0, "donation choice funds the pool")
+	t.check(session.state.office_visits.is_empty(), "donation choice consumes its visit")
 	bridge.free()
 	session.free()
 
@@ -344,6 +440,21 @@ func _test_game_root_shell(t: BackendTestContext) -> void:
 	var ready := bridge.receive_ipc_message(_message("ui.ready", {}))
 	t.check_equal(ready[0]["type"], "state.full", "production GameRoot completes handshake")
 	t.check_equal(ready[0]["payload"]["metrics"]["tax"], 100, "production snapshot uses RunState")
+	var session: RunSession = root.get_node("RunSession")
+	var race_state := session.state.races[0]
+	var active_race := t.make_race("active office visitor")
+	race_state.active_definition = active_race
+	var event := EventState.new(race_state.definition, Metric.Id.TAX, 0, 100)
+	event.known = true
+	session.state.office_visits.append(_event_intel_visit(race_state.definition, event))
+	bridge.set_ui_mode("office")
+	var manager: SceneManager = root.get_node("SceneManager")
+	var office := manager.current_world
+	t.check(office.call("has_visitors"), "loaded OfficeWorld receives the visitor queue")
+	t.check(office.call("get_current_visitor") == active_race, "OfficeWorld receives active race definition")
+	bridge.open_current_office_visit()
+	bridge.receive_ipc_message(_message("office.visit.resolve", {"state_version": 0}))
+	t.check(not office.call("has_visitors"), "resolved visit resyncs the current OfficeWorld")
 	root.free()
 
 
@@ -362,6 +473,24 @@ func _make_policy(display_name: String) -> PolicyDefinition:
 	policy.condition = condition
 	policy.effects.append(effect)
 	return policy
+
+
+func _interest_group_visit(
+	race: RaceDefinition, proposal: ProposalInstance
+) -> OfficeVisitState:
+	var visit := OfficeVisitState.new()
+	visit.kind = OfficeVisitState.Kind.INTEREST_GROUP
+	visit.race = race
+	visit.proposal = proposal
+	return visit
+
+
+func _event_intel_visit(race: RaceDefinition, event: EventState) -> OfficeVisitState:
+	var visit := OfficeVisitState.new()
+	visit.kind = OfficeVisitState.Kind.EVENT_INTEL
+	visit.race = race
+	visit.event = event
+	return visit
 
 
 func _message(message_type: String, payload: Dictionary) -> String:

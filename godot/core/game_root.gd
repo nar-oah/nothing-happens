@@ -12,6 +12,7 @@ const CefTextureInputScript = preload("res://core/ui/cef_texture_input.gd")
 func _ready() -> void:
 	print("GameRoot started.")
 	run_session.start_new_run()
+	ui_bridge.outgoing_message.connect(_on_ui_message)
 	scene_manager.show_office()
 	var cef_texture := _create_cef_texture()
 	ui_bridge.setup(run_session, scene_manager, cef_texture)
@@ -47,7 +48,33 @@ func _create_cef_texture() -> Control:
 func _on_world_changed(scene_name: String, world: Node) -> void:
 	if scene_name == "office":
 		world.parliament_requested.connect(_on_parliament_requested)
+		world.visitor_requested.connect(_on_visitor_requested)
+		_sync_office_visitors(world)
 
 
 func _on_parliament_requested() -> void:
 	ui_bridge.set_ui_mode("parliament")
+
+
+func _on_visitor_requested() -> void:
+	ui_bridge.open_current_office_visit()
+
+
+func _on_ui_message(message: Dictionary) -> void:
+	if message.get("type") == "state.full" and scene_manager.current_scene_name == "office":
+		_sync_office_visitors(scene_manager.current_world)
+
+
+func _sync_office_visitors(world: Node) -> void:
+	if world == null or not world.has_method("set_visitor_races"):
+		return
+	var visitor_races: Array[RaceDefinition] = []
+	for visit in run_session.state.office_visits:
+		if visit == null or visit.race == null:
+			continue
+		var active := run_session.constitution_system.get_active_race_definition(
+			run_session.context, visit.race
+		)
+		if active != null:
+			visitor_races.append(active)
+	world.call("set_visitor_races", visitor_races)

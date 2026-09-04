@@ -37,7 +37,6 @@ func advance_month() -> bool:
 	if context.state.run_phase == RunState.RunPhase.TERM_ENDED:
 		return true
 	context.proposal_system.draw_automatic_proposals(context)
-	context.proposal_system.resolve_active_visits(context)
 	if context.state.month == 12:
 		context.annual_settlement_system.settle_year(context)
 	context.time_system.advance_month(context.state)
@@ -88,7 +87,7 @@ func _record_month_report(report_year: int, report_month: int, previous_metrics:
 	state.month_report_current_metrics = state.metrics.copy()
 	state.month_report_events.clear()
 	for event in state.events:
-		if event == null or not event.is_active() or not event.published:
+		if event == null or not event.is_active() or not event.known:
 			continue
 		var active_race := context.constitution_system.get_active_race_definition(context, event.race)
 		state.month_report_events.append({

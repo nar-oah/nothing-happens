@@ -30,6 +30,7 @@ var newspaper_triggered_policies: Array[PolicyDefinition] = []
 var active_bill: ActiveBillState
 var proposal_hand: Array[ProposalInstance] = []
 var proposal_acquisition_order: Array[ProposalInstance] = []
+var office_visits: Array[OfficeVisitState] = []
 var draft_bill: DraftBillState
 var saved_bills: Array[SavedBillState] = []
 var editing_saved_bill_index: int = NEW_BILL_INDEX

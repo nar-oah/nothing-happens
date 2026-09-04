@@ -1,6 +1,27 @@
 extends RefCounted
 
 const BackendTestContext = preload("res://tests/backend/backend_test_context.gd")
+const RandomSystemScript = preload("res://systems/random_system.gd")
+
+
+class VisitRandomSystem extends RandomSystemScript:
+	var calls: Array[StringName] = []
+	var chance_probabilities: Array[float] = []
+	var int_ranges: Array[Vector2i] = []
+
+	func weighted_index(weights: Array[float]) -> int:
+		calls.append(&"source")
+		return weights.size() - 1
+
+	func chance(probability: float) -> bool:
+		calls.append(&"visit_chance")
+		chance_probabilities.append(probability)
+		return probability >= 1.0
+
+	func random_int(min_value: int, max_value: int) -> int:
+		calls.append(&"random_int")
+		int_ranges.append(Vector2i(min_value, max_value))
+		return max_value
 
 
 func run(t: BackendTestContext) -> void:
@@ -13,7 +34,7 @@ func run(t: BackendTestContext) -> void:
 	_test_merge_uses_group_resource_identity(t)
 	_test_resource_keyed_annual_sources_and_stable_order(t)
 	_test_failed_draft_does_not_record_sources(t)
-	_test_visit_probability_comes_from_active_race_definition(t)
+	_test_active_visits_follow_automatic_sources(t)
 
 
 func _test_resource_identity(t: BackendTestContext) -> void:
@@ -299,31 +320,108 @@ func _test_failed_draft_does_not_record_sources(t: BackendTestContext) -> void:
 	session.free()
 
 
-func _test_visit_probability_comes_from_active_race_definition(t: BackendTestContext) -> void:
-	var race := t.make_race("visitor")
-	var group := t.make_group("visiting group")
-	group.decrease_consumption = true
-	var article := t.make_article(race, true, 0.0, 1.0)
+func _test_active_visits_follow_automatic_sources(t: BackendTestContext) -> void:
+	var other_race := t.make_race("other visitor")
+	var visitor_a := t.make_race("visitor a")
+	var visitor_b := t.make_race("visitor b")
+	var other_group := t.make_group("other group")
+	other_group.decrease_tax = true
+	var visiting_group := t.make_group("visiting group")
+	visiting_group.decrease_consumption = true
 	var balance := GameBalanceDefinition.new()
-	balance.automatic_draw_count = 0
+	balance.automatic_draw_count = 2
 	balance.event_spawn_count_min = 0
 	balance.event_spawn_count_max = 0
 	balance.proposal_negative_magnitude_min = 4
 	balance.proposal_negative_magnitude_max = 4
+	balance.proposal_lag_months_min = 2
+	balance.proposal_lag_months_max = 2
 	balance.proposal_positive_magnitude_min = 3
 	balance.proposal_positive_magnitude_max = 3
+	balance.donation_per_positive_point = 2.0
+	balance.proposal_visit_probability = 1.0
 	var session := t.make_session(
-		[race], [group], t.make_seats(1, "visit"), [article], balance
+		[other_race, visitor_a, visitor_b],
+		[other_group, visiting_group],
+		t.make_seats(3, "visit"),
+		[],
+		balance
 	)
-	var visits := session.proposal_system.resolve_active_visits(session.context)
-	t.check_equal(visits.size(), 1, "visit probability one creates a visit regardless of seat ratio")
-	t.check(visits[0].source_group == group, "successful visit chooses the seat's group Resource")
-	t.check(visits[0].has_positive_trait(), "active visit receives a positive trait")
-	var race_state := session.state.get_race(race)
-	t.check(race_state.active_definition == race, "canonical race is active before a constitution variant replaces it")
-	race_state.active_definition.visit_probability = 0.0
+	session.state.seats[0].race = other_race
+	session.state.seats[0].actual_group = other_group
+	session.state.seats[1].race = visitor_a
+	session.state.seats[1].actual_group = visiting_group
+	session.state.seats[2].race = visitor_b
+	session.state.seats[2].actual_group = visiting_group
+	var random := VisitRandomSystem.new()
+	session.random_system = random
+	session.context.random_system = random
+	session.proposal_system.draw_automatic_proposals(session.context)
+	t.check_equal(session.state.proposal_hand.size(), 2, "automatic draw still adds every generated proposal")
+	t.check_equal(session.state.office_visits.size(), 2, "each successful automatic proposal queues one office visit")
+	for index in range(session.state.proposal_hand.size()):
+		var proposal := session.state.proposal_hand[index]
+		var visit := session.state.office_visits[index]
+		t.check(proposal.source_group == visiting_group, "automatic draw determines the visiting group first")
+		t.check(proposal.has_positive_trait(), "a successful group visit adds the existing positive trait")
+		t.check_approx(proposal.donation_offer, 6.0, "visit donation derives from the positive magnitude")
+		t.check_equal(visit.kind, OfficeVisitState.Kind.INTEREST_GROUP, "automatic proposal queues an interest-group visit")
+		t.check(visit.race == visitor_b, "office visit stores the race selected from the matching seats")
+		t.check(visit.proposal == proposal, "office visit keeps the authoritative proposal-hand instance")
+	t.check_equal(random.chance_probabilities, [1.0, 1.0], "each automatic proposal receives one global visit roll")
 	t.check_equal(
-		session.proposal_system.resolve_active_visits(session.context).size(), 0,
-		"visit probability zero on the active race definition prevents visits"
+		random.int_ranges.count(Vector2i(0, 1)), 2,
+		"visitor race is randomly selected only from seats influenced by the drawn group"
 	)
+	t.check(
+		random.calls.find(&"source") < random.calls.find(&"visit_chance"),
+		"the automatic source-group draw occurs before its visit roll"
+	)
+	t.check(
+		random.calls.find(&"visit_chance") < random.calls.rfind(&"source"),
+		"each successful automatic proposal gets its visit roll before the next source draw"
+	)
+	var first_visit := session.state.office_visits[0]
+	session.proposal_system.resolve_active_visits(
+		session.context, [session.state.proposal_hand[0], session.state.proposal_hand[0]]
+	)
+	t.check_equal(session.state.office_visits.size(), 2, "one automatic proposal cannot queue twice")
+	t.check(session.state.office_visits[0] == first_visit, "duplicate visit checks keep the original record")
+
+	balance.proposal_visit_probability = 0.0
+	random.chance_probabilities.clear()
+	random.int_ranges.clear()
+	var ordinary_start := session.state.proposal_hand.size()
+	var existing_visit_count := session.state.office_visits.size()
+	session.proposal_system.draw_automatic_proposals(session.context)
+	t.check_equal(random.chance_probabilities, [0.0, 0.0], "the global probability is independently applied to later draws")
+	for index in range(ordinary_start, session.state.proposal_hand.size()):
+		t.check(
+			not session.state.proposal_hand[index].has_positive_trait(),
+			"a failed global group visit roll keeps the automatic proposal ordinary"
+		)
+	t.check_equal(random.int_ranges.count(Vector2i(0, 1)), 0, "a failed visit roll does not select a visitor seat")
+	t.check_equal(session.state.office_visits.size(), existing_visit_count, "a failed visit roll queues no office visit")
 	session.free()
+
+	var seated_group := t.make_group("seated without proposal")
+	var unseated_group := t.make_group("unseated visitor")
+	unseated_group.decrease_employment = true
+	var unseated_balance := GameBalanceDefinition.new()
+	unseated_balance.automatic_draw_count = 1
+	unseated_balance.proposal_visit_probability = 1.0
+	var unseated_session := t.make_session(
+		[visitor_a], [seated_group, unseated_group], t.make_seats(1, "unseated"), [], unseated_balance
+	)
+	unseated_session.state.seats[0].actual_group = seated_group
+	var unseated_random := VisitRandomSystem.new()
+	unseated_session.random_system = unseated_random
+	unseated_session.context.random_system = unseated_random
+	unseated_session.proposal_system.draw_automatic_proposals(unseated_session.context)
+	t.check(unseated_session.state.proposal_hand[0].source_group == unseated_group, "automatic draw may still choose an unseated group")
+	t.check(
+		not unseated_session.state.proposal_hand[0].has_positive_trait(),
+		"a group without any influenced seat cannot produce an active visit"
+	)
+	t.check(unseated_session.state.office_visits.is_empty(), "a group without influenced seats queues no office visit")
+	unseated_session.free()

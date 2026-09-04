@@ -108,7 +108,7 @@
 
 	function deriveNewspaperEdition(state: LiveGameState): NewspaperEdition {
 		const report = state.term_report;
-		const front = report ? deriveTermReportFront(report) : state.newspaper_front ?? undefined;
+		const front = report ? deriveTermReportFront(report) : (state.newspaper_front ?? undefined);
 		return {
 			year: state.year,
 			month: state.month,
@@ -360,14 +360,12 @@
 		<DialogueView
 			{...frame}
 			onNewspaperOpen={openNewspaper}
-			dialogue={{
-				handIndex: pendingDialogue.hand_index,
-				groupName: snapshot.pending_dialogue!.proposal.source_group.display_name,
-				positiveEffect: pendingDialogue.trait_label,
-				donationOffer: pendingDialogue.donation_label
-			}}
-			onResolveBonus={(handIndex, acceptTrait) =>
-				mutate('proposal.bonus.resolve', { hand_index: handIndex, accept_trait: acceptTrait })}
+			dialogue={pendingDialogue}
+			onResolveVisit={(acceptTrait) =>
+				mutate(
+					'office.visit.resolve',
+					acceptTrait === undefined ? {} : { accept_trait: acceptTrait }
+				)}
 		/>
 	{:else if snapshot.ui_mode === 'parliament'}
 		<ParliamentView

@@ -181,12 +181,13 @@
 			{...frame}
 			onNewspaperOpen={openNewspaper}
 			dialogue={{
-				handIndex: 0,
+				kind: 'interest_group',
+				raceName: '偃偶',
 				groupName: '造身公所',
 				positiveEffect: '投資+8',
 				donationOffer: '政治献金+5'
 			}}
-			onResolveBonus={(_, acceptTrait) =>
+			onResolveVisit={(acceptTrait) =>
 				console.info('Dialogue choice', acceptTrait ? 'trait' : 'donation')}
 		/>
 	{:else if activeView === 'Parliament'}

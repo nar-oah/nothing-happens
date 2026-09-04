@@ -5,10 +5,10 @@ class_name RaceDefinition
 @export_multiline var description: String
 @export_multiline var event_description: String
 @export var fixed_interest_group: InterestGroupDefinition
+@export var portrait: Texture2D
 
 @export_group("制度参数")
 @export_range(-1.0, 1.0, 0.01) var expectation_growth_rate: float = 0.10
-@export_range(0.0, 1.0, 0.01) var visit_probability: float = 0.0
 @export var yin_yang_enabled: bool = false
 @export_range(0.0, 1.0, 0.01) var yin_yang_adjustment_rate: float = 0.10
 
@@ -44,10 +44,13 @@ func is_vote_metric_active(_metric: Metric.Id, _context) -> bool:
 	return true
 
 
-func get_effective_expectation(
-	base_target: int, metric: Metric.Id, context, _race_state
-) -> int:
-	if not yin_yang_enabled or context == null or context.state == null or get_stance(metric) == Metric.Direction.NONE:
+func get_effective_expectation(base_target: int, metric: Metric.Id, context, _race_state) -> int:
+	if (
+		not yin_yang_enabled
+		or context == null
+		or context.state == null
+		or get_stance(metric) == Metric.Direction.NONE
+	):
 		return base_target
 	var sign := 1.0 if context.state.month % 2 == 1 else -1.0
 	return roundi(float(base_target) * (1.0 + sign * yin_yang_adjustment_rate))

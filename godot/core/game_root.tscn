@@ -74,7 +74,7 @@
 [ext_resource type="Resource" uid="uid://c7lo08fbvf5op" path="res://data/constitutions/锦衣卫.tres" id="72_7qj7d"]
 [ext_resource type="Script" uid="uid://bwxkupoah84lu" path="res://core/world/scene_manager.gd" id="73_scene_manager"]
 [ext_resource type="PackedScene" uid="uid://o0ltyn1r88fx" path="res://worlds/office_world.tscn" id="74_office_world"]
-[ext_resource type="PackedScene" path="res://worlds/parliament_world.tscn" id="75_parliament_world"]
+[ext_resource type="PackedScene" uid="uid://dqmb5k6l2ysti" path="res://worlds/parliament_world.tscn" id="75_parliament_world"]
 [ext_resource type="Script" uid="uid://bptnyjm08yiev" path="res://core/ui/ui_bridge.gd" id="76_ui_bridge"]
 [ext_resource type="Script" uid="uid://csskkp1dektw0" path="res://core/world/world_input_router.gd" id="77_input_router"]
 
