@@ -433,6 +433,20 @@ func _test_game_root_shell(t: BackendTestContext) -> void:
 	var ready := bridge.receive_ipc_message(_message("ui.ready", {}))
 	t.check_equal(ready[0]["type"], "state.full", "production GameRoot completes handshake")
 	t.check_equal(ready[0]["payload"]["metrics"]["tax"], 100, "production snapshot uses RunState")
+	var session: RunSession = root.get_node("RunSession")
+	var race_state := session.state.races[0]
+	var active_race := t.make_race("active office visitor")
+	race_state.active_definition = active_race
+	var event := EventState.new(race_state.definition, Metric.Id.TAX, 0, 100)
+	event.known = true
+	session.state.office_visits.append(_event_intel_visit(race_state.definition, event))
+	bridge.set_ui_mode("office")
+	var office := root.get_node("SceneManager").current_world
+	t.check(office.has_visitors(), "loaded OfficeWorld receives the visitor queue")
+	t.check(office.get_current_visitor() == active_race, "OfficeWorld receives active race definition")
+	bridge.open_current_office_visit()
+	bridge.receive_ipc_message(_message("office.visit.resolve", {"state_version": 0}))
+	t.check(not office.has_visitors(), "resolved visit resyncs the current OfficeWorld")
 	root.free()
 
 
