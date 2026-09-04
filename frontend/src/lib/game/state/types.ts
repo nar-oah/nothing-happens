@@ -29,7 +29,22 @@ export type ParliamentSummaryDto = { display_name: string; total_seats: number; 
 export type SeatVoteDto = { seat_index: number; seat_display_name: string; race_display_name: string; interest_group_display_name: string; position: 0 | 1 | 2 | 3; score: number; breakdown: Record<string, number> };
 export type VoteResultDto = { passed: boolean; submitted: boolean; support_count: number; oppose_count: number; abstain_count: number; absent_count: number; present_count: number; seat_votes: SeatVoteDto[] };
 export type DraftPreviewDto = { current_metrics: MetricValues; pure_proposal_target: MetricValues; immediate_policy_result: MetricValues; projected_metrics: MetricValues; vote: VoteResultDto };
-export type PendingDialogueDto = { hand_index: number; proposal: Proposal };
+export type PendingDialogueDto =
+	| {
+			kind: 'interest_group';
+			race_name: string;
+			group_name: string;
+			positive_metric: Metric;
+			positive_value: number;
+			donation_offer: number;
+	  }
+	| {
+			kind: 'event_intel';
+			race_name: string;
+			metric: Metric;
+			requirement: number;
+			strength: number;
+	  };
 export type ActiveProposalDto = { proposal: Proposal; digested_months: number; digestion_progress: number; fully_digested: boolean };
 export type ActivePolicyDto = { definition: PolicyDefinition; triggered: boolean };
 export type ActiveBillDto = { title: string; start_values: MetricValues; pure_target: MetricValues; proposals: ActiveProposalDto[]; policies: ActivePolicyDto[] };
@@ -65,5 +80,5 @@ export type LiveGameState = GameStatusDto & {
 };
 
 export type DraftSyncDto = { state_version: number; proposal_hand: Proposal[]; draft_bill: Bill; editing_saved_bill_index: number | null; draft_preview: DraftPreviewDto; saved_bills?: Bill[] };
-export type ProposalSyncDto = { state_version: number; proposal_hand: Proposal[]; result: { kind: 'merge'; proposal: Proposal } | { kind: 'bonus_choice'; hand_index: number; accept_trait: boolean; proposal: Proposal }; political_donation_pool: number; pending_dialogue: PendingDialogueDto | null; ui_mode: UiMode; world_scene: WorldScene };
+export type ProposalSyncDto = { state_version: number; proposal_hand: Proposal[]; result: { kind: 'merge'; proposal: Proposal }; political_donation_pool: number; pending_dialogue: PendingDialogueDto | null; ui_mode: UiMode; world_scene: WorldScene };
 export type BillResultDto = { state_version: number; submitted: boolean; passed: boolean; vote: VoteResultDto; saved_bills: Bill[]; proposal_hand: Proposal[]; draft_bill: Bill; editing_saved_bill_index: number | null; active_bill: ActiveBillDto | null; status: GameStatusDto; draft_preview: DraftPreviewDto; pending_dialogue: PendingDialogueDto | null; ui_mode: UiMode; world_scene: WorldScene };

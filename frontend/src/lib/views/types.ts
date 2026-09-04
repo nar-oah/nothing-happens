@@ -15,9 +15,4 @@ export type ViewFrameProps = {
 	onNewspaperOpen?: () => void;
 };
 
-export type DialoguePresentation = {
-	handIndex: number;
-	groupName: string;
-	positiveEffect: string;
-	donationOffer: string;
-};
+export type { DialoguePresentation } from '../game/state/selectors';

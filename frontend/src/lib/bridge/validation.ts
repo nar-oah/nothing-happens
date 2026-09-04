@@ -58,7 +58,7 @@ const outboundTypes = new Set<OutboundType>([
 	'bill.edit',
 	'bill.submit',
 	'proposal.merge',
-	'proposal.bonus.resolve',
+	'office.visit.resolve',
 	'constitution.revise',
 	'constitution.column.unlock',
 	'month.advance',
@@ -468,7 +468,21 @@ function isDraftPreview(value: unknown): value is DraftPreviewDto {
 }
 
 function isPendingDialogue(value: unknown): value is PendingDialogueDto {
-	return isRecord(value) && isNonnegativeInteger(value.hand_index) && isProposal(value.proposal);
+	if (!isRecord(value) || typeof value.race_name !== 'string') return false;
+	if (value.kind === 'interest_group') {
+		return (
+			typeof value.group_name === 'string' &&
+			isMetric(value.positive_metric) &&
+			isNumber(value.positive_value) &&
+			isNumber(value.donation_offer)
+		);
+	}
+	return (
+		value.kind === 'event_intel' &&
+		isMetric(value.metric) &&
+		isNumber(value.requirement) &&
+		isNumber(value.strength)
+	);
 }
 
 function isActiveBill(value: unknown): value is ActiveBillDto {
@@ -494,14 +508,7 @@ function isActiveBill(value: unknown): value is ActiveBillDto {
 }
 
 function isProposalResult(value: unknown): boolean {
-	if (!isRecord(value)) return false;
-	if (value.kind === 'merge') return isProposal(value.proposal);
-	return (
-		value.kind === 'bonus_choice' &&
-		isNonnegativeInteger(value.hand_index) &&
-		typeof value.accept_trait === 'boolean' &&
-		isProposal(value.proposal)
-	);
+	return isRecord(value) && value.kind === 'merge' && isProposal(value.proposal);
 }
 
 function isMetric(value: unknown): boolean {
