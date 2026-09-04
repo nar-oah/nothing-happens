@@ -453,5 +453,23 @@ func _make_policy(display_name: String) -> PolicyDefinition:
 	return policy
 
 
+func _interest_group_visit(
+	race: RaceDefinition, proposal: ProposalInstance
+) -> OfficeVisitState:
+	var visit := OfficeVisitState.new()
+	visit.kind = OfficeVisitState.Kind.INTEREST_GROUP
+	visit.race = race
+	visit.proposal = proposal
+	return visit
+
+
+func _event_intel_visit(race: RaceDefinition, event: EventState) -> OfficeVisitState:
+	var visit := OfficeVisitState.new()
+	visit.kind = OfficeVisitState.Kind.EVENT_INTEL
+	visit.race = race
+	visit.event = event
+	return visit
+
+
 func _message(message_type: String, payload: Dictionary) -> String:
 	return JSON.stringify({"type": message_type, "request_id": "test", "payload": payload})
