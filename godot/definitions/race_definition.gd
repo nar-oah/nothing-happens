@@ -5,6 +5,7 @@ class_name RaceDefinition
 @export_multiline var description: String
 @export_multiline var event_description: String
 @export var fixed_interest_group: InterestGroupDefinition
+@export var portrait: Texture2D
 
 @export_group("制度参数")
 @export_range(-1.0, 1.0, 0.01) var expectation_growth_rate: float = 0.10

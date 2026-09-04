@@ -1,13 +1,14 @@
-[gd_resource type="Resource" script_class="PeachRaceDefinition" format=3]
+[gd_resource type="Resource" script_class="PeachRaceDefinition" format=3 uid="uid://dr82p0mjsu4pl"]
 
-
-[ext_resource type="Script" path="res://definitions/peach_race_definition.gd" id="script"]
+[ext_resource type="Texture2D" uid="uid://bj84yocvtenty" path="res://assets/races/桃花妖.png" id="1_a5a1j"]
+[ext_resource type="Script" uid="uid://47x6how686q0" path="res://definitions/peach_race_definition.gd" id="script"]
 
 [resource]
 script = ExtResource("script")
 display_name = "桃花妖（开放）"
-description = "桃花妖曾生活在会主动遮蔽道路的桃源里，土地、宗族与生活资料很少需要服从外界的价格和期限。现代市场却把粮食、木材、土地和劳作都变成税课、货价和不断催促的供货单。于是他们相信疲惫并不是因为世界还不够开放，而是因为道路开得太多了——只要把权力重新收回地方，把往来慢下来，生活自然会恢复秩序。\n开放制度把族内政治权重压到最低，所有桃花妖议席在共识计算中等权。"
+description = "桃花妖曾生活在会主动遮蔽道路的桃源里，土地、宗族与生活资料很少需要服从外界的价格和期限。现代市场却把粮食、木材、土地和劳作都变成税课、货价和不断催促的供货单。于是他们相信疲惫并不是因为世界还不够开放，而是因为道路开得太多了——只要把权力重新收回地方，把往来慢下来，生活自然会恢复秩序。
+开放制度把族内政治权重压到最低，所有桃花妖议席在共识计算中等权。"
 event_description = "桃源关心的不是账面扩张，而是土地与生命资料是否仍然丰足，并真正进入日常生活。生产或消费落后时，他们会把原因归咎于外界征敛、贸易和现代化对地方生活的侵入。"
+portrait = ExtResource("1_a5a1j")
 increase_consumption = true
 increase_production = true
-max_elder_weight = 1
