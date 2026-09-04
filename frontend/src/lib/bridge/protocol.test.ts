@@ -242,10 +242,10 @@ test('IPC validates normalized parliament seat anchors', () => {
 
 	const missing = { ...valid } as Partial<typeof valid>;
 	delete missing.parliament_seat_anchors;
-	assert.deepEqual(
-		decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: missing })),
-		{ ok: false, error: 'Invalid payload for state.full' }
-	);
+	assert.deepEqual(decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: missing })), {
+		ok: false,
+		error: 'Invalid payload for state.full'
+	});
 
 	for (const parliament_seat_anchors of [
 		[{ seat_index: 0.5, x: 0.5, y: 0.5 }],

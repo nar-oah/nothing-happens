@@ -1,4 +1,4 @@
-	<script lang="ts">
+<script lang="ts">
 	import { onMount, untrack } from 'svelte';
 	import ChoreItem from '$lib/components/chore/ChoreItem.svelte';
 	import ChoreSwitch from '$lib/components/chore/ChoreSwitch.svelte';
@@ -10,11 +10,7 @@
 	import GameStateDisplay from '$lib/components/state/GameStateDisplay.svelte';
 	import Top from '$lib/components/top/Top.svelte';
 	import { reconcileSavedBill, type Bill, type PolicyDefinition, type Proposal } from '$lib/game';
-	import type {
-		ParliamentSeatAnchorDto,
-		SeatSummaryDto,
-		SeatVoteDto
-	} from '$lib/game/state/types';
+	import type { ParliamentSeatAnchorDto, SeatSummaryDto, SeatVoteDto } from '$lib/game/state/types';
 	import type { ViewFrameProps } from './types';
 
 	type AnchoredSeat = ParliamentSeatAnchorDto & {
@@ -136,9 +132,7 @@
 		currentAnchors: ParliamentSeatAnchorDto[],
 		currentVotes: SeatVoteDto[]
 	): AnchoredSeat[] {
-		const anchorsByIndex = new Map(
-			currentAnchors.map((anchor) => [anchor.seat_index, anchor])
-		);
+		const anchorsByIndex = new Map(currentAnchors.map((anchor) => [anchor.seat_index, anchor]));
 		const votesByIndex = new Map(currentVotes.map((vote) => [vote.seat_index, vote]));
 		return currentSeats.flatMap((seat): AnchoredSeat[] => {
 			const anchor = anchorsByIndex.get(seat.seat_index);
@@ -159,11 +153,7 @@
 <main class="game-view" aria-label="议会界面">
 	<div class="seat-layer">
 		{#each anchoredSeats as seat (seat.seat_index)}
-			<div
-				class="seat-anchor"
-				style:left={`${seat.x * 100}%`}
-				style:top={`${seat.y * 100}%`}
-			>
+			<div class="seat-anchor" style:left={`${seat.x * 100}%`} style:top={`${seat.y * 100}%`}>
 				<ChoreItem text={seat.interestGroupDisplayName} value={seat.score} isRow />
 			</div>
 		{/each}
