@@ -50,6 +50,8 @@ func _on_world_changed(scene_name: String, world: Node) -> void:
 		world.parliament_requested.connect(_on_parliament_requested)
 		world.visitor_requested.connect(_on_visitor_requested)
 		_sync_office_visitors(world)
+	elif scene_name == "parliament":
+		_sync_parliament_seats(world)
 
 
 func _on_parliament_requested() -> void:
@@ -61,8 +63,12 @@ func _on_visitor_requested() -> void:
 
 
 func _on_ui_message(message: Dictionary) -> void:
-	if message.get("type") == "state.full" and scene_manager.current_scene_name == "office":
+	if message.get("type") != "state.full":
+		return
+	if scene_manager.current_scene_name == "office":
 		_sync_office_visitors(scene_manager.current_world)
+	elif scene_manager.current_scene_name == "parliament":
+		_sync_parliament_seats(scene_manager.current_world)
 
 
 func _sync_office_visitors(world: Node) -> void:
@@ -78,3 +84,17 @@ func _sync_office_visitors(world: Node) -> void:
 		if active != null:
 			visitor_races.append(active)
 	world.call("set_visitor_races", visitor_races)
+
+
+func _sync_parliament_seats(world: Node) -> void:
+	if world == null or not world.has_method("set_seat_races"):
+		return
+	var seat_races: Array[RaceDefinition] = []
+	for seat in run_session.state.seats:
+		var active: RaceDefinition
+		if seat != null and seat.race != null:
+			active = run_session.constitution_system.get_active_race_definition(
+				run_session.context, seat.race
+			)
+		seat_races.append(active)
+	world.call("set_seat_races", seat_races)

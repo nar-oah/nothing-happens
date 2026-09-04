@@ -1,6 +1,11 @@
-[gd_scene format=3 uid="uid://dqmb5k6l2ysti"]
+[gd_scene load_steps=3 format=3 uid="uid://dqmb5k6l2ysti"]
+
+[ext_resource type="Script" path="res://worlds/parliament_world.gd" id="1_world"]
+[ext_resource type="PackedScene" path="res://worlds/parliament_seat.tscn" id="2_seat"]
 
 [node name="ParliamentWorld" type="Node2D" unique_id=1766632788]
+script = ExtResource("1_world")
+seat_scene = ExtResource("2_seat")
 
 [node name="Background" type="CanvasLayer" parent="." unique_id=1575129882]
 layer = -10
@@ -21,3 +26,5 @@ anchor_bottom = 0.7
 grow_horizontal = 2
 mouse_filter = 2
 color = Color(0.8627451, 0.6627451, 0.19607843, 1)
+
+[node name="Seats" type="Node2D" parent="."]
