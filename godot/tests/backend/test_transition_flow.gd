@@ -77,7 +77,6 @@ func _test_active_variant_growth_uses_month_zero_economy(t: BackendTestContext) 
 	var variant := t.make_race("growth variant")
 	variant.increase_production = true
 	variant.expectation_growth_rate = 0.10
-	variant.visit_probability = 0.75
 	var article := t.make_article(canonical)
 	var modify := ModifyRaceEffect.new()
 	modify.target_races = [canonical]
@@ -87,7 +86,6 @@ func _test_active_variant_growth_uses_month_zero_economy(t: BackendTestContext) 
 	var race_state := session.state.get_race(canonical)
 	t.check(race_state.definition == canonical, "transition keeps canonical race identity")
 	t.check(race_state.active_definition == variant, "transition exposes active race variant")
-	t.check_approx(race_state.active_definition.visit_probability, 0.75, "visit probability comes from active definition")
 	t.check_equal(race_state.get_expectation(Metric.Id.PRODUCTION, 0), 110, "opening target uses active variant growth")
 	session.state.metrics.production = 200
 	session.annual_settlement_system.settle_year(session.context)

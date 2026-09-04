@@ -85,8 +85,7 @@ func make_seats(count: int, prefix: String = "seat") -> Array[SeatDefinition]:
 func make_article(
 	race: RaceDefinition,
 	is_initial: bool = true,
-	growth_rate: float = 0.0,
-	visit_probability: float = 0.0
+	growth_rate: float = 0.0
 ) -> ConstitutionArticleDefinition:
 	var result := ConstitutionArticleDefinition.new()
 	result.display_name = "%s article" % race.display_name
@@ -94,7 +93,6 @@ func make_article(
 	result.is_initial = is_initial
 	if race != null:
 		race.expectation_growth_rate = growth_rate
-		race.visit_probability = visit_probability
 	return result
 
 
