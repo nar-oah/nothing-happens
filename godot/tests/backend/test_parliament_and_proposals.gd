@@ -376,8 +376,6 @@ func _test_active_visits_follow_automatic_sources(t: BackendTestContext) -> void
 		"each successful automatic proposal gets its visit roll before the next source draw"
 	)
 
-	visitor_a.visit_probability = 1.0
-	visitor_b.visit_probability = 1.0
 	balance.proposal_visit_probability = 0.0
 	random.chance_probabilities.clear()
 	random.int_ranges.clear()
@@ -387,7 +385,7 @@ func _test_active_visits_follow_automatic_sources(t: BackendTestContext) -> void
 	for index in range(ordinary_start, session.state.proposal_hand.size()):
 		t.check(
 			not session.state.proposal_hand[index].has_positive_trait(),
-			"race visit probability does not convert a failed group visit roll"
+			"a failed global group visit roll keeps the automatic proposal ordinary"
 		)
 	t.check_equal(random.int_ranges.count(Vector2i(0, 1)), 0, "a failed visit roll does not select a visitor seat")
 	session.free()
