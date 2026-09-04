@@ -358,10 +358,16 @@ func _test_active_visits_follow_automatic_sources(t: BackendTestContext) -> void
 	session.context.random_system = random
 	session.proposal_system.draw_automatic_proposals(session.context)
 	t.check_equal(session.state.proposal_hand.size(), 2, "automatic draw still adds every generated proposal")
-	for proposal in session.state.proposal_hand:
+	t.check_equal(session.state.office_visits.size(), 2, "each successful automatic proposal queues one office visit")
+	for index in range(session.state.proposal_hand.size()):
+		var proposal := session.state.proposal_hand[index]
+		var visit := session.state.office_visits[index]
 		t.check(proposal.source_group == visiting_group, "automatic draw determines the visiting group first")
 		t.check(proposal.has_positive_trait(), "a successful group visit adds the existing positive trait")
 		t.check_approx(proposal.donation_offer, 6.0, "visit donation derives from the positive magnitude")
+		t.check_equal(visit.kind, OfficeVisitState.Kind.INTEREST_GROUP, "automatic proposal queues an interest-group visit")
+		t.check(visit.race == visitor_b, "office visit stores the race selected from the matching seats")
+		t.check(visit.proposal == proposal, "office visit keeps the authoritative proposal-hand instance")
 	t.check_equal(random.chance_probabilities, [1.0, 1.0], "each automatic proposal receives one global visit roll")
 	t.check_equal(
 		random.int_ranges.count(Vector2i(0, 1)), 2,
@@ -380,6 +386,7 @@ func _test_active_visits_follow_automatic_sources(t: BackendTestContext) -> void
 	random.chance_probabilities.clear()
 	random.int_ranges.clear()
 	var ordinary_start := session.state.proposal_hand.size()
+	var existing_visit_count := session.state.office_visits.size()
 	session.proposal_system.draw_automatic_proposals(session.context)
 	t.check_equal(random.chance_probabilities, [0.0, 0.0], "the global probability is independently applied to later draws")
 	for index in range(ordinary_start, session.state.proposal_hand.size()):
@@ -388,6 +395,7 @@ func _test_active_visits_follow_automatic_sources(t: BackendTestContext) -> void
 			"a failed global group visit roll keeps the automatic proposal ordinary"
 		)
 	t.check_equal(random.int_ranges.count(Vector2i(0, 1)), 0, "a failed visit roll does not select a visitor seat")
+	t.check_equal(session.state.office_visits.size(), existing_visit_count, "a failed visit roll queues no office visit")
 	session.free()
 
 	var seated_group := t.make_group("seated without proposal")
@@ -409,4 +417,5 @@ func _test_active_visits_follow_automatic_sources(t: BackendTestContext) -> void
 		not unseated_session.state.proposal_hand[0].has_positive_trait(),
 		"a group without any influenced seat cannot produce an active visit"
 	)
+	t.check(unseated_session.state.office_visits.is_empty(), "a group without influenced seats queues no office visit")
 	unseated_session.free()
