@@ -350,6 +350,7 @@ func _test_office_visit_dialogue_queue(t: BackendTestContext) -> void:
 	t.check_equal(bridge.ui_mode, "office", "queued visit does not automatically open dialogue")
 	t.check(bridge.open_current_office_visit(), "current office visit opens explicitly")
 	t.check_equal(bridge.ui_mode, "dialogue", "explicit visit open enters dialogue mode")
+	t.check_equal(session.state.office_visits.size(), 2, "opening a visit does not consume it")
 	var messages := bridge.receive_ipc_message(
 		_message("office.visit.resolve", {"state_version": 0, "accept_trait": true})
 	)
