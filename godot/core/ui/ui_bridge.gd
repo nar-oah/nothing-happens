@@ -396,49 +396,46 @@ func _handle_proposal_merge(message: Dictionary, messages: Array[Dictionary]) ->
 	messages.append(_envelope("proposal.sync", _proposal_sync(result), message["request_id"]))
 
 
-func _handle_bonus_resolve(message: Dictionary, messages: Array[Dictionary]) -> void:
-	var payload: Dictionary = message["payload"]
-	var index := _protocol.read_int(payload, "hand_index")
-	var accept_trait: Variant = payload.get("accept_trait")
-	if not index["ok"]:
-		_append_mutation_error(messages, index["error"], message["request_id"])
-		return
-	if not accept_trait is bool:
+func _handle_office_visit_resolve(
+	message: Dictionary, messages: Array[Dictionary]
+) -> void:
+	var state := run_session.state
+	if state.office_visits.is_empty():
 		_append_mutation_error(
 			messages,
-			{"code": "invalid_field", "message": "payload.accept_trait must be boolean."},
+			{"code": "office_visit_missing", "message": "There is no office visit to resolve."},
 			message["request_id"]
 		)
 		return
-	if index["value"] < 0 or index["value"] >= run_session.state.proposal_hand.size():
-		_append_mutation_error(
-			messages,
-			{"code": "invalid_hand_index", "message": "Proposal hand index is invalid."},
-			message["request_id"]
+	var visit := state.office_visits[0]
+	if visit.kind == OfficeVisitState.Kind.INTEREST_GROUP:
+		var accept_trait: Variant = message["payload"].get("accept_trait")
+		if not accept_trait is bool:
+			_append_mutation_error(
+				messages,
+				{"code": "invalid_field", "message": "payload.accept_trait must be boolean."},
+				message["request_id"]
+			)
+			return
+		var resolved := (
+			run_session.accept_proposal_trait(visit.proposal)
+			if accept_trait
+			else run_session.convert_proposal_trait_to_donation(visit.proposal)
 		)
-		return
-	var current := run_session.state.proposal_hand[index["value"]]
-	var resolved := (
-		run_session.accept_proposal_trait(current)
-		if accept_trait
-		else run_session.convert_proposal_trait_to_donation(current)
-	)
-	if not resolved:
-		_append_mutation_error(
-			messages,
-			{"code": "bonus_choice_rejected", "message": "Proposal has no pending bonus choice."},
-			message["request_id"]
-		)
-		return
+		if not resolved:
+			_append_mutation_error(
+				messages,
+				{
+					"code": "office_visit_rejected",
+					"message": "Visit proposal has no pending bonus choice.",
+				},
+				message["request_id"]
+			)
+			return
+	state.office_visits.pop_front()
 	state_version += 1
-	_refresh_dialogue_mode()
-	var result := {
-		"kind": "bonus_choice",
-		"hand_index": index["value"],
-		"accept_trait": accept_trait,
-		"proposal": _serializer.proposal(current),
-	}
-	messages.append(_envelope("proposal.sync", _proposal_sync(result), message["request_id"]))
+	set_ui_mode("office", false)
+	messages.append(_full_state(message["request_id"]))
 
 
 func _handle_constitution_revise(message: Dictionary, messages: Array[Dictionary]) -> void:
@@ -460,7 +457,7 @@ func _handle_constitution_revise(message: Dictionary, messages: Array[Dictionary
 			message["request_id"]
 		)
 		return
-	_advance_month_and_refresh_mode()
+	_advance_month_and_set_mode()
 	state_version += 1
 	messages.append(_full_state(message["request_id"]))
 
