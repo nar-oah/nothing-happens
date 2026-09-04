@@ -492,6 +492,7 @@ func _test_game_root_shell(t: BackendTestContext) -> void:
 	var session: RunSession = root.get_node("RunSession")
 	var race_state := session.state.races[0]
 	var active_race := t.make_race("active office visitor")
+	active_race.portrait = ImageTexture.new()
 	race_state.active_definition = active_race
 	var event := EventState.new(race_state.definition, Metric.Id.TAX, 0, 100)
 	event.known = true
@@ -514,6 +515,12 @@ func _test_game_root_shell(t: BackendTestContext) -> void:
 	t.check_equal(parliament.seats.size(), session.state.seats.size(), "loaded ParliamentWorld follows RunState seats")
 	t.check(parliament.seats[0].race == parliament_race, "ParliamentWorld receives active race definition")
 	t.check(parliament.seats[0].visual.texture == parliament_race.portrait, "active race portrait reaches ParliamentWorld")
+	var parliament_ready := bridge.receive_ipc_message(_message("ui.ready", {}))
+	t.check_equal(
+		parliament_ready[0]["payload"]["parliament_seat_anchors"].size(),
+		session.state.seats.size(),
+		"parliament full state includes every world seat anchor"
+	)
 	root.free()
 
 
