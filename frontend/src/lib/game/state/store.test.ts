@@ -26,7 +26,9 @@ test('state.full replaces the complete snapshot', () => {
 test('domain sync immutably overwrites only its authoritative fields', () => {
 	const original = makeLiveState(1);
 	const value = { snapshot: original, error: null };
-	const updated = applyGameMessage(value, { type: 'draft.sync', payload: makeDraftSync(2) });
+	const draftSync = makeDraftSync(2);
+	draftSync.draft_preview.vote.seat_votes[0].score = 9;
+	const updated = applyGameMessage(value, { type: 'draft.sync', payload: draftSync });
 	assert.notEqual(updated.snapshot, original);
 	assert.equal(original.proposal_hand.length, 1);
 	assert.deepEqual(updated.snapshot?.proposal_hand, []);
@@ -34,6 +36,7 @@ test('domain sync immutably overwrites only its authoritative fields', () => {
 	assert.equal(updated.snapshot?.run_phase, original.run_phase);
 	assert.equal(updated.snapshot?.term_outcome, original.term_outcome);
 	assert.equal(updated.snapshot?.parliament_seat_anchors, original.parliament_seat_anchors);
+	assert.equal(updated.snapshot?.draft_preview.vote.seat_votes[0].score, 9);
 	assert.equal(updated.snapshot?.state_version, 2);
 });
 
