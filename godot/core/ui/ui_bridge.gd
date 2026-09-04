@@ -510,7 +510,7 @@ func _handle_term_next(message: Dictionary, messages: Array[Dictionary]) -> void
 	messages.append(_full_state(message["request_id"]))
 
 
-func _advance_month_and_refresh_mode() -> bool:
+func _advance_month_and_set_mode() -> bool:
 	if not run_session.advance_month():
 		return false
 	if run_session.state.run_phase == RunState.RunPhase.TERM_ENDED:
@@ -518,9 +518,7 @@ func _advance_month_and_refresh_mode() -> bool:
 	if run_session.state.month == 0:
 		set_ui_mode("constitution", false)
 		return true
-	_refresh_dialogue_mode()
-	if ui_mode != "dialogue":
-		set_ui_mode("office", false)
+	set_ui_mode("office", false)
 	return true
 
 
@@ -542,7 +540,7 @@ func _proposal_sync(result: Dictionary) -> Dictionary:
 		"proposal_hand": _serialize_hand(),
 		"result": result,
 		"political_donation_pool": run_session.state.political_donation_pool,
-		"pending_dialogue": _serializer.pending_dialogue(run_session.state),
+		"pending_dialogue": _serializer.pending_dialogue(run_session),
 		"ui_mode": ui_mode,
 		"world_scene": world_scene,
 	}
@@ -553,18 +551,6 @@ func _append_mutation_error(
 ) -> void:
 	messages.append(_error(error_value["code"], error_value["message"], request_id, true))
 	messages.append(_full_state(request_id))
-
-
-func _refresh_dialogue_mode() -> void:
-	if run_session == null or run_session.state == null:
-		return
-	if run_session.state.run_phase == RunState.RunPhase.TERM_ENDED:
-		return
-	var has_pending := _serializer.pending_dialogue(run_session.state) != null
-	if has_pending:
-		set_ui_mode("dialogue", false)
-	elif ui_mode == "dialogue":
-		set_ui_mode("office", false)
 
 
 func _full_state(request_id: Variant = null) -> Dictionary:
