@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://v3b0hlvpnjgu"]
+
+[ext_resource type="PackedScene" uid="uid://r6ev8vumbdcf" path="res://worlds/interactables/interactive_scene_element.tscn" id="1_sm1uq"]
+[ext_resource type="Texture2D" uid="uid://sevac1flk0gs" path="res://assets/office/ornament_hover.png" id="2_tho65"]
+[ext_resource type="Texture2D" uid="uid://dpjnp134travj" path="res://assets/office/ornament.png" id="3_5shwm"]
+
+[node name="InteractiveSceneElement" unique_id=2114060250 instance=ExtResource("1_sm1uq")]
+hover_texture = ExtResource("2_tho65")
+
+[node name="Visual" parent="." index="0" unique_id=858468202]
+texture = ExtResource("3_5shwm")
+
+[node name="Hitbox" parent="." index="1" unique_id=970013343]
+polygon = PackedVector2Array(-86, -81, -97, -68, -98, 154, 96, 156, 97, -65, 95, -80, 56, -80, 54, -155, -53, -156, -51, -82)
