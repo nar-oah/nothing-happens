@@ -132,6 +132,7 @@ func _test_full_state_and_saved_bill_indices(t: BackendTestContext) -> void:
 	)
 	t.check_equal(full["races"][0]["seat_count"], 2, "race summary uses actual seats")
 	t.check_equal(full["parliament"]["total_seats"], 2, "parliament summary uses actual pool")
+	t.check_equal(full["parliament_seat_anchors"], [], "serializer defaults to no world anchors")
 	t.check_equal(full["max_collapse"], session.balance.max_collapse, "status uses balance collapse limit")
 	var bridge := UiBridge.new()
 	bridge.setup(session)
