@@ -87,7 +87,7 @@ func _record_month_report(report_year: int, report_month: int, previous_metrics:
 	state.month_report_current_metrics = state.metrics.copy()
 	state.month_report_events.clear()
 	for event in state.events:
-		if event == null or not event.is_active() or not event.published:
+		if event == null or not event.is_active() or not event.known:
 			continue
 		var active_race := context.constitution_system.get_active_race_definition(context, event.race)
 		state.month_report_events.append({

@@ -91,8 +91,8 @@ func _test_hidden_growth_public_window_and_resolution(t: BackendTestContext) -> 
 	for index in range(8):
 		session.event_system.settle_month(session.context)
 	t.check_equal(event.months_alive, 9, "public window begins with three months remaining")
-	t.check(event.known and event.published, "public window forces publication")
-	t.check(session.state.office_visits.is_empty(), "forced publication does not queue an event-intel visit")
+	t.check(event.known, "public window forces disclosure")
+	t.check(session.state.office_visits.is_empty(), "forced disclosure does not queue an event-intel visit")
 	session.event_system.settle_month(session.context)
 	t.check_equal(event.phase, EventState.Phase.RESOLVED, "satisfied known event resolves")
 	t.check_equal(session.state.get_race(race).resolved_events_this_year, 1, "resolution increments annual race result")
@@ -112,7 +112,7 @@ func _test_forced_public_information_does_not_queue_visit(t: BackendTestContext)
 	)
 	event.months_alive = balance.event_lifetime_months - balance.event_public_remaining_months
 	session.event_system.update_information(session.context)
-	t.check(event.known and event.published, "information update forces an event in its public window")
+	t.check(event.known, "information update forces disclosure in the public window")
 	t.check(session.state.office_visits.is_empty(), "forced-public information update queues no event-intel visit")
 	session.free()
 
@@ -130,7 +130,7 @@ func _test_pause_relief_and_effect_early_reveal(t: BackendTestContext) -> void:
 	session.state.metrics.investment = 0
 	var event := session.event_system.spawn_event(session.context, race, Metric.Id.INVESTMENT)
 	session.event_system.update_information(session.context)
-	t.check(event.known and not event.published, "EventIntelProbabilityEffect reveals event without publishing it")
+	t.check(event.known, "EventIntelProbabilityEffect reveals event early")
 	t.check_equal(session.state.office_visits.size(), 1, "probability-based early information queues one office visit")
 	var visit := session.state.office_visits[0]
 	t.check_equal(visit.kind, OfficeVisitState.Kind.EVENT_INTEL, "early information queues an event-intel visit")
@@ -162,6 +162,6 @@ func _test_deadline_failure(t: BackendTestContext) -> void:
 		session.event_system.settle_month(session.context)
 	t.check_equal(event.months_alive, 12, "event fails at deadline")
 	t.check_equal(event.phase, EventState.Phase.FAILED, "unresolved event fails")
-	t.check(event.known and event.published, "failed event is public")
+	t.check(event.known, "failed event is known")
 	t.check_equal(session.state.collapse_level, 1, "failure adds one collapse step")
 	session.free()

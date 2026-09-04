@@ -65,7 +65,7 @@ func update_information(context: RunContext) -> void:
 	if context == null or context.state == null or context.balance == null:
 		return
 	for event in context.state.events:
-		if event == null or not event.is_active() or event.published or event.known:
+		if event == null or not event.is_active() or event.known:
 			continue
 		if _force_public_window(event, context.balance):
 			_update_known_event(event, context)
@@ -140,7 +140,6 @@ func _force_public_window(event: EventState, balance: GameBalanceDefinition) -> 
 	if remaining <= public_remaining and not event.public_window_entered:
 		event.growth_progress = 1.0
 		event.known = true
-		event.published = true
 		event.public_window_entered = true
 		event.phase = EventState.Phase.WORSENING
 		return true
@@ -198,5 +197,4 @@ func _fail(event: EventState, context: RunContext) -> void:
 		return
 	event.phase = EventState.Phase.FAILED
 	event.known = true
-	event.published = true
 	context.collapse_system.increase(context)
