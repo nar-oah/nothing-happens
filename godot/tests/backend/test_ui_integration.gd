@@ -448,6 +448,10 @@ func _test_parliament_world_seats(t: BackendTestContext) -> void:
 
 	var world_scene: PackedScene = load("res://worlds/parliament_world.tscn")
 	var world: ParliamentWorld = world_scene.instantiate()
+	var authored: ParliamentSeat = seat_scene.instantiate()
+	authored.seat_index = 0
+	authored.position = Vector2(120.0, 240.0)
+	world.get_node("Seats").add_child(authored)
 	Engine.get_main_loop().root.add_child(world)
 	var second := t.make_race("second parliament portrait")
 	second.portrait = ImageTexture.new()
@@ -456,11 +460,11 @@ func _test_parliament_world_seats(t: BackendTestContext) -> void:
 	var races: Array[RaceDefinition] = [first, second, third]
 	world.set_seat_races(races)
 	t.check_equal(world.seats.size(), races.size(), "ParliamentWorld follows the dynamic seat count")
+	t.check(world.seats[0] == authored, "ParliamentWorld reuses editor-authored seats")
 	for index in range(races.size()):
 		t.check_equal(world.seats[index].seat_index, index, "ParliamentWorld assigns stable seat indices")
 		t.check(world.seats[index].race == races[index], "ParliamentWorld assigns each active race")
 		t.check(world.seats[index].visual.texture == races[index].portrait, "ParliamentWorld updates each portrait")
-	world.seats[0].position = Vector2(120.0, 240.0)
 	world.set_seat_races([second, first, third])
 	t.check_equal(world.seats[0].position, Vector2(120.0, 240.0), "race updates preserve editor-authored seat positions")
 	world.set_seat_races([second])

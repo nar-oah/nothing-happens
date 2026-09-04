@@ -12,7 +12,10 @@ func _ready() -> void:
 	for child in seats_root.get_children():
 		if child is ParliamentSeat:
 			seats.append(child)
-	seats.sort_custom(func(first: ParliamentSeat, second: ParliamentSeat) -> bool: return first.seat_index < second.seat_index)
+	seats.sort_custom(
+		func(first: ParliamentSeat, second: ParliamentSeat) -> bool:
+			return first.seat_index < second.seat_index
+	)
 	if not seat_races.is_empty():
 		_refresh_seats()
 
