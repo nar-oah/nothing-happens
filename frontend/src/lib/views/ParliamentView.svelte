@@ -1,5 +1,6 @@
-<script lang="ts">
+	<script lang="ts">
 	import { onMount, untrack } from 'svelte';
+	import ChoreItem from '$lib/components/chore/ChoreItem.svelte';
 	import ChoreSwitch from '$lib/components/chore/ChoreSwitch.svelte';
 	import Left from '$lib/components/left/Left.svelte';
 	import type { BillLeftItem, LeftItem, LeftMode } from '$lib/components/left/types';
@@ -9,7 +10,17 @@
 	import GameStateDisplay from '$lib/components/state/GameStateDisplay.svelte';
 	import Top from '$lib/components/top/Top.svelte';
 	import { reconcileSavedBill, type Bill, type PolicyDefinition, type Proposal } from '$lib/game';
+	import type {
+		ParliamentSeatAnchorDto,
+		SeatSummaryDto,
+		SeatVoteDto
+	} from '$lib/game/state/types';
 	import type { ViewFrameProps } from './types';
+
+	type AnchoredSeat = ParliamentSeatAnchorDto & {
+		interestGroupDisplayName: string;
+		score: number;
+	};
 
 	type Props = ViewFrameProps & {
 		stateVersion: number;
@@ -17,6 +28,9 @@
 		proposalHand: Proposal[];
 		availablePolicies: PolicyDefinition[];
 		editingSavedBillIndex?: number;
+		seats: SeatSummaryDto[];
+		seatAnchors: ParliamentSeatAnchorDto[];
+		seatVotes: SeatVoteDto[];
 		preview: MemorialMetricData[];
 		voteCanPass: boolean;
 		onAddProposal?: (handIndex: number) => void;
@@ -44,6 +58,9 @@
 		proposalHand,
 		availablePolicies,
 		editingSavedBillIndex,
+		seats,
+		seatAnchors,
+		seatVotes,
 		preview,
 		voteCanPass,
 		onAddProposal,
@@ -65,6 +82,7 @@
 		policyDisplayNames: visibleDraft.policies.map((policy) => policy.display_name),
 		editingSavedBillIndex
 	});
+	let anchoredSeats = $derived(mergeSeats(seats, seatAnchors, seatVotes));
 	let editorScroller: HTMLDivElement;
 
 	onMount(() => {
@@ -112,9 +130,44 @@
 		onSubmit?.();
 		queueMicrotask(() => (voteMode = false));
 	}
+
+	function mergeSeats(
+		currentSeats: SeatSummaryDto[],
+		currentAnchors: ParliamentSeatAnchorDto[],
+		currentVotes: SeatVoteDto[]
+	): AnchoredSeat[] {
+		const anchorsByIndex = new Map(
+			currentAnchors.map((anchor) => [anchor.seat_index, anchor])
+		);
+		const votesByIndex = new Map(currentVotes.map((vote) => [vote.seat_index, vote]));
+		return currentSeats.flatMap((seat): AnchoredSeat[] => {
+			const anchor = anchorsByIndex.get(seat.seat_index);
+			const vote = votesByIndex.get(seat.seat_index);
+			return anchor && vote
+				? [
+						{
+							...anchor,
+							interestGroupDisplayName: seat.interest_group_display_name,
+							score: vote.score
+						}
+					]
+				: [];
+		});
+	}
 </script>
 
 <main class="game-view" aria-label="议会界面">
+	<div class="seat-layer">
+		{#each anchoredSeats as seat (seat.seat_index)}
+			<div
+				class="seat-anchor"
+				style:left={`${seat.x * 100}%`}
+				style:top={`${seat.y * 100}%`}
+			>
+				<ChoreItem text={seat.interestGroupDisplayName} value={seat.score} isRow />
+			</div>
+		{/each}
+	</div>
 	<Left
 		scene="parliament"
 		{items}
@@ -160,6 +213,17 @@
 		position: relative;
 		height: 100vh;
 		overflow: hidden;
+	}
+
+	.seat-layer {
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+	}
+
+	.seat-anchor {
+		position: absolute;
+		transform: translate(-50%, -50%);
 	}
 
 	.top-slot {

@@ -199,6 +199,9 @@
 			proposalHand={proposalHand.map((item) => item.proposal)}
 			availablePolicies={mockPolicies}
 			{editingSavedBillIndex}
+			seats={[]}
+			seatAnchors={[]}
+			seatVotes={[]}
 			{preview}
 			voteCanPass
 			onAddProposal={addProposal}
