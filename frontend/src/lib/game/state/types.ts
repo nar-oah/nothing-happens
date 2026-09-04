@@ -22,6 +22,7 @@ export type RaceExpectationDto = { metric: Metric; target: number; direction: Me
 export type RaceSummaryDto = { race_index: number; display_name: string; description: string; seat_count: number; expectations: RaceExpectationDto[]; resolved_events_this_year: number; last_year_resolved_events: number };
 export type InterestGroupSummaryDto = InterestGroupDefinition & { influence_count: number; influence_rate: number };
 export type SeatSummaryDto = { seat_index: number; display_name: string; race_display_name: string; interest_group_display_name: string; personal_relation: number };
+export type ParliamentSeatAnchorDto = { seat_index: number; x: number; y: number };
 export type ParliamentCountDto = { display_name: string; seat_count: number };
 export type ParliamentInfluenceDto = { display_name: string; influence_count: number; influence_rate: number };
 export type ParliamentSummaryDto = { display_name: string; total_seats: number; race_seat_counts: ParliamentCountDto[]; interest_group_influence: ParliamentInfluenceDto[] };
@@ -61,6 +62,7 @@ export type LiveGameState = GameStatusDto & {
 	state_version: number;
 	ui_mode: UiMode;
 	world_scene: WorldScene;
+	parliament_seat_anchors: ParliamentSeatAnchorDto[];
 	proposal_hand: Proposal[];
 	saved_bills: Bill[];
 	draft_bill: Bill;

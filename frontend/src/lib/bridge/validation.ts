@@ -20,6 +20,7 @@ import type {
 	GameStatusDto,
 	InterestGroupSummaryDto,
 	LiveGameState,
+	ParliamentSeatAnchorDto,
 	ParliamentSummaryDto,
 	PendingDialogueDto,
 	ProposalSyncDto,
@@ -99,6 +100,7 @@ export function isLiveGameState(value: unknown): value is LiveGameState {
 		isVersion(state.state_version) &&
 		isUiMode(state.ui_mode) &&
 		isWorldScene(state.world_scene) &&
+		isArrayOf(state.parliament_seat_anchors, isParliamentSeatAnchor) &&
 		isNonnegativeInteger(state.term) &&
 		isArrayOf(state.proposal_hand, isProposal) &&
 		isArrayOf(state.saved_bills, isBill) &&
@@ -405,6 +407,15 @@ function isSeatSummary(value: unknown): value is SeatSummaryDto {
 	);
 }
 
+function isParliamentSeatAnchor(value: unknown): value is ParliamentSeatAnchorDto {
+	return (
+		isRecord(value) &&
+		isNonnegativeInteger(value.seat_index) &&
+		isNormalizedCoordinate(value.x) &&
+		isNormalizedCoordinate(value.y)
+	);
+}
+
 function isParliamentSummary(value: unknown): value is ParliamentSummaryDto {
 	return (
 		isRecord(value) &&
@@ -558,6 +569,10 @@ function isNumberRecord(value: unknown): value is Record<string, number> {
 
 function isNumber(value: unknown): value is number {
 	return typeof value === 'number' && Number.isFinite(value);
+}
+
+function isNormalizedCoordinate(value: unknown): value is number {
+	return isNumber(value) && value >= 0 && value <= 1;
 }
 
 function isNonnegativeInteger(value: unknown): value is number {

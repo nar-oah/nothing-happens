@@ -33,6 +33,7 @@ test('domain sync immutably overwrites only its authoritative fields', () => {
 	assert.equal(updated.snapshot?.year, original.year);
 	assert.equal(updated.snapshot?.run_phase, original.run_phase);
 	assert.equal(updated.snapshot?.term_outcome, original.term_outcome);
+	assert.equal(updated.snapshot?.parliament_seat_anchors, original.parliament_seat_anchors);
 	assert.equal(updated.snapshot?.state_version, 2);
 });
 

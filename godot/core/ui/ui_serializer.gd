@@ -182,12 +182,19 @@ func term_report(session: RunSession) -> Variant:
 	return {"outcome": _term_outcome(session.term_report["outcome"]), "previous_governing_months": session.term_report["previous_governing_months"], "current_governing_months": session.term_report["current_governing_months"]}
 
 
-func full_state(session: RunSession, ui_mode: String, world_scene: String, state_version: int) -> Dictionary:
+func full_state(
+	session: RunSession,
+	ui_mode: String,
+	world_scene: String,
+	state_version: int,
+	parliament_seat_anchors: Array = []
+) -> Dictionary:
 	var state := session.state
 	return {
 		"state_version": state_version,
 		"ui_mode": ui_mode,
 		"world_scene": world_scene,
+		"parliament_seat_anchors": parliament_seat_anchors,
 		"term": state.term,
 		"year": state.year,
 		"month": state.month,

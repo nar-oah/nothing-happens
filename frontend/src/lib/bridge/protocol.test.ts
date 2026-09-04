@@ -229,6 +229,41 @@ test('IPC requires constitution effects and parliament display metadata', () => 
 	);
 });
 
+test('IPC validates normalized parliament seat anchors', () => {
+	const valid = makeLiveState(9);
+	valid.parliament_seat_anchors = [
+		{ seat_index: 0, x: 0, y: 1 },
+		{ seat_index: 1, x: 0.25, y: 0.75 }
+	];
+	assert.equal(
+		decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: valid })).ok,
+		true
+	);
+
+	const missing = { ...valid } as Partial<typeof valid>;
+	delete missing.parliament_seat_anchors;
+	assert.deepEqual(
+		decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: missing })),
+		{ ok: false, error: 'Invalid payload for state.full' }
+	);
+
+	for (const parliament_seat_anchors of [
+		[{ seat_index: 0.5, x: 0.5, y: 0.5 }],
+		[{ seat_index: 0, x: -0.01, y: 0.5 }],
+		[{ seat_index: 0, x: 0.5, y: 1.01 }]
+	]) {
+		assert.deepEqual(
+			decodeInboundMessage(
+				JSON.stringify({
+					type: 'state.full',
+					payload: { ...valid, parliament_seat_anchors }
+				})
+			),
+			{ ok: false, error: 'Invalid payload for state.full' }
+		);
+	}
+});
+
 test('IPC decode rejects malformed JSON, unknown types, and invalid payloads', () => {
 	assert.deepEqual(decodeInboundMessage('{'), { ok: false, error: 'Malformed JSON' });
 	assert.deepEqual(decodeInboundMessage(JSON.stringify({ type: 'unknown', payload: {} })), {

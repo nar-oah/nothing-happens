@@ -83,6 +83,7 @@ export function makeLiveState(stateVersion = 1): LiveGameState {
 		state_version: stateVersion,
 		ui_mode: 'office',
 		world_scene: 'office',
+		parliament_seat_anchors: [{ seat_index: 0, x: 0.5, y: 0.5 }],
 		term: 1,
 		year: 3,
 		month: 7,

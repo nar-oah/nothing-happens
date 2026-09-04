@@ -563,9 +563,25 @@ func _append_mutation_error(
 func _full_state(request_id: Variant = null) -> Dictionary:
 	return _envelope(
 		"state.full",
-		_serializer.full_state(run_session, ui_mode, world_scene, state_version),
+		_serializer.full_state(
+			run_session,
+			ui_mode,
+			world_scene,
+			state_version,
+			_parliament_seat_anchors()
+		),
 		request_id
 	)
+
+
+func _parliament_seat_anchors() -> Array:
+	if scene_manager == null or scene_manager.current_world == null:
+		return []
+	var world: Node = scene_manager.current_world
+	if not world.has_method("get_seat_anchors"):
+		return []
+	var anchors: Variant = world.call("get_seat_anchors")
+	return anchors if anchors is Array else []
 
 
 func _error(
