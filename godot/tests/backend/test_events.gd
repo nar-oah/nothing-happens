@@ -7,6 +7,7 @@ func run(t: BackendTestContext) -> void:
 	_test_generation_count_and_pair_identity(t)
 	_test_zero_seat_race_is_ineligible(t)
 	_test_hidden_growth_public_window_and_resolution(t)
+	_test_forced_public_information_does_not_queue_visit(t)
 	_test_pause_relief_and_effect_early_reveal(t)
 	_test_deadline_failure(t)
 
@@ -95,6 +96,24 @@ func _test_hidden_growth_public_window_and_resolution(t: BackendTestContext) -> 
 	session.event_system.settle_month(session.context)
 	t.check_equal(event.phase, EventState.Phase.RESOLVED, "satisfied known event resolves")
 	t.check_equal(session.state.get_race(race).resolved_events_this_year, 1, "resolution increments annual race result")
+	session.free()
+
+
+func _test_forced_public_information_does_not_queue_visit(t: BackendTestContext) -> void:
+	var race := t.make_race("forced public information")
+	race.increase_production = true
+	var balance := _event_balance()
+	var session := t.make_session(
+		[race], [t.make_group("group")], t.make_seats(1, "forced public"), [], balance
+	)
+	session.state.metrics.production = 0
+	var event := session.event_system.spawn_event(
+		session.context, race, Metric.Id.PRODUCTION
+	)
+	event.months_alive = balance.event_lifetime_months - balance.event_public_remaining_months
+	session.event_system.update_information(session.context)
+	t.check(event.known and event.published, "information update forces an event in its public window")
+	t.check(session.state.office_visits.is_empty(), "forced-public information update queues no event-intel visit")
 	session.free()
 
 
