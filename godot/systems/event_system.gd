@@ -77,6 +77,11 @@ func update_information(context: RunContext) -> void:
 		)
 		if context.random_system.chance(clampf(probability, 0.0, 1.0)):
 			event.known = true
+			var visit := OfficeVisitState.new()
+			visit.kind = OfficeVisitState.Kind.EVENT_INTEL
+			visit.race = event.race
+			visit.event = event
+			context.state.office_visits.append(visit)
 			_update_known_event(event, context)
 
 

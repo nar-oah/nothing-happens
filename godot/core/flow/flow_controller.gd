@@ -37,7 +37,6 @@ func advance_month() -> bool:
 	if context.state.run_phase == RunState.RunPhase.TERM_ENDED:
 		return true
 	context.proposal_system.draw_automatic_proposals(context)
-	context.proposal_system.resolve_active_visits(context)
 	if context.state.month == 12:
 		context.annual_settlement_system.settle_year(context)
 	context.time_system.advance_month(context.state)

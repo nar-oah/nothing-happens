@@ -193,6 +193,11 @@ func resolve_active_visits(
 		if visitor_race == null:
 			continue
 		add_positive_trait(proposal, context.state.year, context.inflation_system, context.balance, context.random_system)
+		var visit := OfficeVisitState.new()
+		visit.kind = OfficeVisitState.Kind.INTEREST_GROUP
+		visit.race = visitor_race
+		visit.proposal = proposal
+		context.state.office_visits.append(visit)
 		result.append(proposal)
 	return result
 
