@@ -73,7 +73,7 @@
 [ext_resource type="Resource" uid="uid://c3evhwfnxiem0" path="res://data/constitutions/透明政府.tres" id="71_ao0ki"]
 [ext_resource type="Resource" uid="uid://c7lo08fbvf5op" path="res://data/constitutions/锦衣卫.tres" id="72_7qj7d"]
 [ext_resource type="Script" uid="uid://bwxkupoah84lu" path="res://core/world/scene_manager.gd" id="73_scene_manager"]
-[ext_resource type="PackedScene" path="res://worlds/office_world.tscn" id="74_office_world"]
+[ext_resource type="PackedScene" uid="uid://o0ltyn1r88fx" path="res://worlds/office_world.tscn" id="74_office_world"]
 [ext_resource type="PackedScene" path="res://worlds/parliament_world.tscn" id="75_parliament_world"]
 [ext_resource type="Script" uid="uid://bptnyjm08yiev" path="res://core/ui/ui_bridge.gd" id="76_ui_bridge"]
 [ext_resource type="Script" uid="uid://csskkp1dektw0" path="res://core/world/world_input_router.gd" id="77_input_router"]
@@ -102,3 +102,5 @@ script = ExtResource("76_ui_bridge")
 script = ExtResource("77_input_router")
 
 [node name="UiLayer" type="CanvasLayer" parent="." unique_id=823296444]
+
+[connection signal="world_changed" from="SceneManager" to="." method="_on_world_changed"]
