@@ -441,12 +441,13 @@ func _test_game_root_shell(t: BackendTestContext) -> void:
 	event.known = true
 	session.state.office_visits.append(_event_intel_visit(race_state.definition, event))
 	bridge.set_ui_mode("office")
-	var office := root.get_node("SceneManager").current_world
-	t.check(office.has_visitors(), "loaded OfficeWorld receives the visitor queue")
-	t.check(office.get_current_visitor() == active_race, "OfficeWorld receives active race definition")
+	var manager: SceneManager = root.get_node("SceneManager")
+	var office := manager.current_world
+	t.check(office.call("has_visitors"), "loaded OfficeWorld receives the visitor queue")
+	t.check(office.call("get_current_visitor") == active_race, "OfficeWorld receives active race definition")
 	bridge.open_current_office_visit()
 	bridge.receive_ipc_message(_message("office.visit.resolve", {"state_version": 0}))
-	t.check(not office.has_visitors(), "resolved visit resyncs the current OfficeWorld")
+	t.check(not office.call("has_visitors"), "resolved visit resyncs the current OfficeWorld")
 	root.free()
 
 
