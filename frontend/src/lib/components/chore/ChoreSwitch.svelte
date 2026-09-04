@@ -3,10 +3,12 @@
 		left: string;
 		right: string;
 		isSwitch?: boolean;
+		disabled?: boolean;
 		onSwitchChange?: (isSwitch: boolean) => void;
 	};
 
-	let { left, right, isSwitch = $bindable(false), onSwitchChange }: Props = $props();
+	let { left, right, isSwitch = $bindable(false), disabled = false, onSwitchChange }: Props =
+		$props();
 
 	function toggle() {
 		isSwitch = !isSwitch;
@@ -16,9 +18,10 @@
 
 <button
 	type="button"
-	class="flex cursor-pointer flex-col items-start border-0 bg-transparent p-0 text-left"
+	class="flex cursor-pointer flex-col items-start border-0 bg-transparent p-0 text-left disabled:cursor-default"
 	aria-label={`切换至${isSwitch ? left : right}`}
 	aria-pressed={isSwitch}
+	{disabled}
 	data-block-world-input
 	onclick={toggle}
 >

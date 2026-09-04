@@ -137,6 +137,7 @@
 							left="草案"
 							right={voteCanPass ? '投票(可通过)' : '投票(不可通过)'}
 							bind:isSwitch={voteMode}
+							disabled={!voteCanPass}
 							onSwitchChange={submitDraft}
 						/>
 					</div>

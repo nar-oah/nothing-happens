@@ -32,6 +32,7 @@
 	let editingTitle = $state(false);
 	let titleDraft = $state('');
 	let titleInput = $state<HTMLInputElement>();
+	let displayTitle = $derived(bill.title.trim() || '新法案');
 	let lag = $derived(getBillLagMonths(bill.proposals));
 	let proposalPages = $derived(bill.proposals.map(proposalToMemorialContent));
 	let policyPages = $derived(bill.policies.map(policyToMemorialContent));
@@ -123,7 +124,7 @@
 							aria-label="重命名法案"
 							onclick={beginTitleEdit}
 						>
-							<MemorialTitleStrip text={bill.title} vertical />
+							<MemorialTitleStrip text={displayTitle} vertical />
 						</button>
 					{/if}
 				{/if}
