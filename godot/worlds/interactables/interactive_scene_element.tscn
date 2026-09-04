@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://r6ev8vumbdcf"]
+
+[ext_resource type="Script" uid="uid://c5wax6q2pyi2e" path="res://worlds/interactables/interactive_scene_element.gd" id="1_4pno3"]
+
+[node name="InteractiveSceneElement" type="Area2D" unique_id=2114060250]
+script = ExtResource("1_4pno3")
+
+[node name="Visual" type="Sprite2D" parent="." unique_id=858468202]
+
+[node name="Hitbox" type="CollisionPolygon2D" parent="." unique_id=970013343]

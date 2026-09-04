@@ -1,3 +1,23 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://dqmb5k6l2ysti"]
 
-[node name="ParliamentWorld" type="Node2D"]
+[node name="ParliamentWorld" type="Node2D" unique_id=1766632788]
+
+[node name="Background" type="CanvasLayer" parent="." unique_id=1575129882]
+layer = -10
+
+[node name="BaseColor" type="ColorRect" parent="Background" unique_id=908584524]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.9372549, 0.72156864, 0.21176471, 1)
+
+[node name="Wall" type="ColorRect" parent="Background" unique_id=606933897]
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 0.7
+grow_horizontal = 2
+mouse_filter = 2
+color = Color(0.8627451, 0.6627451, 0.19607843, 1)

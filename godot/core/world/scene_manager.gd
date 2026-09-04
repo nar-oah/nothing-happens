@@ -24,7 +24,7 @@ func _show(scene: PackedScene, scene_name: String) -> void:
 	if scene == null or current_scene_name == scene_name:
 		return
 	if current_world != null:
-		current_world.free()
+		current_world.queue_free()
 	current_world = scene.instantiate()
 	world.add_child(current_world)
 	current_scene_name = scene_name
