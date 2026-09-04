@@ -199,7 +199,10 @@ test('IPC requires constitution effects and parliament display metadata', () => 
 
 	const missingEffects = JSON.parse(JSON.stringify(valid)) as Record<string, unknown>;
 	const missingEffectsConstitution = missingEffects.constitution as Record<string, unknown>;
-	const missingEffectsArticles = missingEffectsConstitution.active_articles as Record<string, unknown>[];
+	const missingEffectsArticles = missingEffectsConstitution.active_articles as Record<
+		string,
+		unknown
+	>[];
 	delete missingEffectsArticles[0].effects;
 	assert.deepEqual(
 		decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: missingEffects })),
@@ -208,7 +211,10 @@ test('IPC requires constitution effects and parliament display metadata', () => 
 
 	const invalidEffect = JSON.parse(JSON.stringify(valid)) as Record<string, unknown>;
 	const invalidEffectConstitution = invalidEffect.constitution as Record<string, unknown>;
-	const invalidEffectArticles = invalidEffectConstitution.active_articles as Record<string, unknown>[];
+	const invalidEffectArticles = invalidEffectConstitution.active_articles as Record<
+		string,
+		unknown
+	>[];
 	invalidEffectArticles[0].effects = [{ display_name: '奏请', description: '说明', timing: -1 }];
 	assert.deepEqual(
 		decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: invalidEffect })),

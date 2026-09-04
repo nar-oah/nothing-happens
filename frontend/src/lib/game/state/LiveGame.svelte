@@ -108,7 +108,7 @@
 
 	function deriveNewspaperEdition(state: LiveGameState): NewspaperEdition {
 		const report = state.term_report;
-		const front = report ? deriveTermReportFront(report) : state.newspaper_front ?? undefined;
+		const front = report ? deriveTermReportFront(report) : (state.newspaper_front ?? undefined);
 		return {
 			year: state.year,
 			month: state.month,
@@ -357,16 +357,16 @@
 <svelte:head><title>Nothing Happens</title></svelte:head>
 {#if snapshot && frame}
 	{#if snapshot.ui_mode === 'dialogue' && pendingDialogue}
-			<DialogueView
-				{...frame}
-				onNewspaperOpen={openNewspaper}
-				dialogue={pendingDialogue}
-				onResolveVisit={(acceptTrait) =>
-					mutate(
-						'office.visit.resolve',
-						acceptTrait === undefined ? {} : { accept_trait: acceptTrait }
-					)}
-			/>
+		<DialogueView
+			{...frame}
+			onNewspaperOpen={openNewspaper}
+			dialogue={pendingDialogue}
+			onResolveVisit={(acceptTrait) =>
+				mutate(
+					'office.visit.resolve',
+					acceptTrait === undefined ? {} : { accept_trait: acceptTrait }
+				)}
+		/>
 	{:else if snapshot.ui_mode === 'parliament'}
 		<ParliamentView
 			{...frame}
