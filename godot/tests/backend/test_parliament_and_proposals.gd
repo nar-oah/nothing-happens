@@ -1,9 +1,10 @@
 extends RefCounted
 
 const BackendTestContext = preload("res://tests/backend/backend_test_context.gd")
+const RandomSystemScript = preload("res://systems/random_system.gd")
 
 
-class VisitRandomSystem extends RandomSystem:
+class VisitRandomSystem extends RandomSystemScript:
 	var calls: Array[StringName] = []
 	var chance_probabilities: Array[float] = []
 	var int_ranges: Array[Vector2i] = []
