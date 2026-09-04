@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { reconcileSavedBill } from '../rules.ts';
+import { Metric } from '../types.ts';
 import {
 	deriveConstitutionMemorial,
 	deriveDialoguePresentation,
@@ -96,11 +97,33 @@ test('constitution presentation keeps one aligned row grid and turns locked colu
 	assert.equal(constitution['新制'], 1);
 });
 
-test('dialogue presentation retains authoritative values', () => {
+test('interest-group dialogue presentation uses authoritative visit values', () => {
 	const state = makeLiveState();
 	const dialogue = deriveDialoguePresentation(state.pending_dialogue);
-	assert.equal(dialogue?.trait_label, '投資+8');
-	assert.equal(dialogue?.donation_label, '政治献金+5');
+	assert.deepEqual(dialogue, {
+		kind: 'interest_group',
+		raceName: '人类',
+		groupName: '造身公所',
+		positiveEffect: '投資+8',
+		donationOffer: '政治献金+5'
+	});
+});
+
+test('event-intel dialogue presentation maps metric names and keeps event values', () => {
+	const dialogue = deriveDialoguePresentation({
+		kind: 'event_intel',
+		race_name: '南柯',
+		metric: Metric.PRODUCTION,
+		requirement: 112,
+		strength: 73
+	});
+	assert.deepEqual(dialogue, {
+		kind: 'event_intel',
+		raceName: '南柯',
+		metricName: '生産',
+		requirement: 112,
+		strength: 73
+	});
 });
 
 test('Saved Bill optimistic reconciliation still uses gameplay equivalence', () => {

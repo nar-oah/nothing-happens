@@ -25,6 +25,21 @@ test('IPC envelope encodes and decodes discriminated messages', () => {
 	assert.deepEqual(
 		JSON.parse(
 			encodeOutboundMessage({
+				type: 'office.visit.resolve',
+				payload: { state_version: 4, accept_trait: true }
+			})
+		),
+		{ type: 'office.visit.resolve', payload: { state_version: 4, accept_trait: true } }
+	);
+	assert.deepEqual(
+		JSON.parse(
+			encodeOutboundMessage({ type: 'office.visit.resolve', payload: { state_version: 4 } })
+		),
+		{ type: 'office.visit.resolve', payload: { state_version: 4 } }
+	);
+	assert.deepEqual(
+		JSON.parse(
+			encodeOutboundMessage({
 				type: 'constitution.column.unlock',
 				payload: { state_version: 4, column_index: 2 }
 			})
@@ -36,6 +51,8 @@ test('IPC envelope encodes and decodes discriminated messages', () => {
 	);
 	assert.equal(isOutboundType('term.next'), true);
 	assert.equal(isOutboundType('constitution.column.unlock'), true);
+	assert.equal(isOutboundType('office.visit.resolve'), true);
+	assert.equal(isOutboundType('proposal.bonus.resolve'), false);
 
 	const decoded = decodeInboundMessage(
 		JSON.stringify({ type: 'state.full', request_id: 'ui-1', payload: makeLiveState(4) })
@@ -45,6 +62,45 @@ test('IPC envelope encodes and decodes discriminated messages', () => {
 		assert.equal(decoded.value.type, 'state.full');
 		assert.equal(decoded.value.request_id, 'ui-1');
 	}
+});
+
+test('IPC validates both office visit dialogue variants', () => {
+	const interestGroup = makeLiveState(4);
+	assert.equal(
+		decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: interestGroup })).ok,
+		true
+	);
+
+	const eventIntel = makeLiveState(5);
+	eventIntel.pending_dialogue = {
+		kind: 'event_intel',
+		race_name: '南柯',
+		metric: 2,
+		requirement: 112,
+		strength: 73
+	};
+	assert.equal(
+		decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: eventIntel })).ok,
+		true
+	);
+
+	const invalidMetric = {
+		...eventIntel,
+		pending_dialogue: { ...eventIntel.pending_dialogue, metric: 99 }
+	};
+	assert.deepEqual(
+		decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: invalidMetric })),
+		{ ok: false, error: 'Invalid payload for state.full' }
+	);
+
+	const legacyDialogue = {
+		...interestGroup,
+		pending_dialogue: { hand_index: 0, proposal: interestGroup.proposal_hand[0] }
+	};
+	assert.deepEqual(
+		decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: legacyDialogue })),
+		{ ok: false, error: 'Invalid payload for state.full' }
+	);
 });
 
 test('IPC validates authoritative term lifecycle and integer collapse status', () => {
