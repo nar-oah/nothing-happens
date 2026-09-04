@@ -31,7 +31,7 @@ func get_seat_anchors() -> Array[Dictionary]:
 
 func _refresh_seats() -> void:
 	while seats.size() > seat_races.size():
-		var removed := seats.pop_back()
+		var removed: ParliamentSeat = seats.pop_back()
 		seats_root.remove_child(removed)
 		removed.queue_free()
 	while seats.size() < seat_races.size():
