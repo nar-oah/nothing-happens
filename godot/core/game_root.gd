@@ -48,11 +48,16 @@ func _create_cef_texture() -> Control:
 func _on_world_changed(scene_name: String, world: Node) -> void:
 	if scene_name == "office":
 		world.parliament_requested.connect(_on_parliament_requested)
+		world.visitor_requested.connect(_on_visitor_requested)
 		_sync_office_visitors(world)
 
 
 func _on_parliament_requested() -> void:
 	ui_bridge.set_ui_mode("parliament")
+
+
+func _on_visitor_requested() -> void:
+	ui_bridge.open_current_office_visit()
 
 
 func _on_ui_message(message: Dictionary) -> void:
