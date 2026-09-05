@@ -180,6 +180,17 @@ test('simple dialogue presentation preserves Godot-provided strings', () => {
 	});
 });
 
+test('simple dialogue presentation allows choices to be omitted', () => {
+	const dialogue = deriveDialoguePresentation({ kind: 'simple', initial_text: '只说这一句。' });
+	assert.equal(dialogue?.kind, 'simple');
+	if (dialogue?.kind !== 'simple') return;
+	assert.equal(dialogue.initialText, '只说这一句。');
+	assert.equal(dialogue.leftOption, undefined);
+	assert.equal(dialogue.rightOption, undefined);
+	assert.equal(dialogue.leftContent, undefined);
+	assert.equal(dialogue.rightContent, undefined);
+});
+
 test('Saved Bill optimistic reconciliation still uses gameplay equivalence', () => {
 	const handProposal = {
 		...testProposal,
