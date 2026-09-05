@@ -1,6 +1,7 @@
 extends RefCounted
 
 const BackendTestContext = preload("res://tests/backend/backend_test_context.gd")
+const YinYangRuleDefinitionScript = preload("res://definitions/yin_yang_rule_definition.gd")
 
 
 func run(t: BackendTestContext) -> void:
@@ -9,7 +10,8 @@ func run(t: BackendTestContext) -> void:
 	_test_donation_pool_spending_and_detection(t)
 	_test_nanke_variant_absence_is_submit_only(t)
 	_test_strike_effect_locks_absent(t)
-	_test_biyi_variant_relation_switch(t)
+	_test_global_yin_yang_rule(t)
+	_test_biyi_portrait_switch(t)
 
 
 func _test_fixed_proposal_source_support(t: BackendTestContext) -> void:
@@ -37,7 +39,6 @@ func _test_zhushui_support_is_always_99(t: BackendTestContext) -> void:
 	var session := t.make_session([race], [group], [t.make_seat("zhushui", race)], [article])
 	var seat := session.state.seats[0]
 	seat.actual_group = group
-	seat.personal_relation = -25.0
 	var result := session.vote_system.preview_vote(session.state.draft_bill, session.context)
 	var vote := t.vote_for_race(result, race)
 	t.check(vote.breakdown.has(&"constitution_group_modifier"), "Zhushui keeps prior vote effects")
@@ -123,25 +124,45 @@ func _test_strike_effect_locks_absent(t: BackendTestContext) -> void:
 	session.free()
 
 
-func _test_biyi_variant_relation_switch(t: BackendTestContext) -> void:
-	var canonical := BiyiRaceDefinition.new()
-	canonical.display_name = "biyi"
-	var yin_yang := BiyiRaceDefinition.new()
-	yin_yang.display_name = "biyi yin-yang"
-	yin_yang.yin_yang_enabled = true
-	var article := t.make_article(canonical)
-	var modify := ModifyRaceEffect.new()
-	modify.target_races = [canonical]
-	modify.source_races = [yin_yang]
-	article.effects.append(modify)
-	var session := t.make_session([canonical], [t.make_group("group")], t.make_seats(1, "biyi"), [article])
-	var seat := session.state.seats[0]
-	seat.odd_month_relation = 2.0
-	seat.even_month_relation = -2.0
+func _test_global_yin_yang_rule(t: BackendTestContext) -> void:
+	var race := RaceDefinition.new()
+	race.display_name = "yin-yang"
+	race.yin_yang_enabled = true
+	race.increase_tax = true
+	race.increase_production = true
+	var balance := GameBalanceDefinition.new()
+	balance.automatic_draw_count = 0
+	balance.event_spawn_count_min = 0
+	balance.event_spawn_count_max = 0
+	var rule := YinYangRuleDefinitionScript.new()
+	rule.yin_tax = true
+	rule.yin_consumption = true
+	rule.yin_production = false
+	rule.yin_employment = false
+	rule.yin_investment = false
+	balance.yin_yang_rule = rule
+	balance.yin_yang_adjustment_rate = 0.10
+	var session := t.make_session([race], [t.make_group("group")], t.make_seats(1, "yin-yang"), [], balance)
 	session.state.month = 1
-	var odd := session.vote_system.preview_vote(DraftBillState.new(), session.context)
-	t.check_equal(t.vote_for_race(odd, canonical).position, SeatVoteState.Position.SUPPORT, "active Biyi variant uses odd relation")
+	t.check(race.is_vote_metric_active(Metric.Id.TAX, session.context), "yin month activates yin metrics")
+	t.check(not race.is_vote_metric_active(Metric.Id.PRODUCTION, session.context), "yin month deactivates yang metrics")
+	t.check_equal(race.get_effective_expectation(100, Metric.Id.TAX, session.context, null), 110, "yin metric tightens in yin month")
+	t.check_equal(race.get_effective_expectation(100, Metric.Id.PRODUCTION, session.context, null), 90, "yang metric relaxes in yin month")
 	session.state.month = 2
-	var even := session.vote_system.preview_vote(DraftBillState.new(), session.context)
-	t.check_equal(t.vote_for_race(even, canonical).position, SeatVoteState.Position.OPPOSE, "active Biyi variant uses even relation")
+	t.check(not race.is_vote_metric_active(Metric.Id.TAX, session.context), "yang month deactivates yin metrics")
+	t.check(race.is_vote_metric_active(Metric.Id.PRODUCTION, session.context), "yang month activates yang metrics")
+	t.check_equal(race.get_effective_expectation(100, Metric.Id.TAX, session.context, null), 90, "yin metric relaxes in yang month")
+	t.check_equal(race.get_effective_expectation(100, Metric.Id.PRODUCTION, session.context, null), 110, "yang metric tightens in yang month")
 	session.free()
+
+
+func _test_biyi_portrait_switch(t: BackendTestContext) -> void:
+	var race := BiyiRaceDefinition.new()
+	var yin := ImageTexture.new()
+	var yang := ImageTexture.new()
+	race.portrait = yin
+	race.yang_portrait = yang
+	t.check(race.get_portrait(1) == yin, "Biyi uses yin portrait in odd months")
+	t.check(race.get_portrait(2) == yang, "Biyi uses yang portrait in even months")
+	race.yang_portrait = null
+	t.check(race.get_portrait(2) == yin, "Biyi falls back to base portrait when yang portrait is missing")

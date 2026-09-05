@@ -14,6 +14,13 @@ func try_generate_month(context: RunContext) -> Array[EventState]:
 		if races.is_empty():
 			break
 		var race := races[context.random_system.random_int(0, races.size() - 1)]
+		var race_state := context.state.get_race(race)
+		if race_state != null and _get_fixed_interest_group(race_state) != null:
+			var group_event := spawn_interest_group_event(context, race)
+			if group_event == null:
+				break
+			generated.append(group_event)
+			continue
 		var metrics := _get_eligible_metrics(context, race)
 		if metrics.is_empty():
 			break
@@ -28,10 +35,10 @@ func try_generate_month(context: RunContext) -> Array[EventState]:
 func spawn_event(context: RunContext, race: RaceDefinition, metric: Metric.Id) -> EventState:
 	if context == null or context.state == null or race == null or _get_race_seat_count(context.state, race) == 0:
 		return null
-	if has_active_event(context.state, race, metric):
-		return null
 	var race_state := context.state.get_race(race)
-	if race_state == null:
+	if race_state == null or _get_fixed_interest_group(race_state) != null:
+		return null
+	if has_active_event(context.state, race, metric):
 		return null
 	var active := race_state.active_definition
 	if active == null or active.get_stance(metric) == Metric.Direction.NONE:
@@ -41,6 +48,31 @@ func spawn_event(context: RunContext, race: RaceDefinition, metric: Metric.Id) -
 	if baseline >= target:
 		return null
 	var event := EventState.new(race, metric, baseline, target)
+	context.state.events.append(event)
+	return event
+
+
+func spawn_interest_group_event(context: RunContext, race: RaceDefinition) -> EventState:
+	if context == null or context.state == null or race == null or _get_race_seat_count(context.state, race) == 0:
+		return null
+	var race_state := context.state.get_race(race)
+	if race_state == null:
+		return null
+	var group := _get_fixed_interest_group(race_state)
+	if group == null or has_active_interest_group_event(context.state, race):
+		return null
+	var target := context.race_system.get_interest_group_proposal_expectation(race_state, context)
+	var baseline := _get_interest_group_proposal_count(context, group)
+	if baseline >= target:
+		return null
+	var event := EventState.new(
+		race,
+		Metric.Id.TAX,
+		baseline,
+		target,
+		EventState.RequirementKind.INTEREST_GROUP_PROPOSALS,
+		group
+	)
 	context.state.events.append(event)
 	return event
 
@@ -65,7 +97,7 @@ func update_information(context: RunContext) -> void:
 	if context == null or context.state == null or context.balance == null:
 		return
 	for event in context.state.events:
-		if event == null or not event.is_active() or event.known:
+		if event == null or not event.is_active() or event.published or event.known:
 			continue
 		if _force_public_window(event, context.balance):
 			_update_known_event(event, context)
@@ -85,6 +117,28 @@ func update_information(context: RunContext) -> void:
 			_update_known_event(event, context)
 
 
+func publish_known_events(context: RunContext) -> void:
+	if context == null or context.state == null:
+		return
+	for event in context.state.events:
+		if event != null and event.known and not event.published:
+			event.published = true
+
+
+func cleanup_published_event_visits(state: RunState) -> void:
+	if state == null:
+		return
+	for index in range(state.office_visits.size() - 1, -1, -1):
+		var visit := state.office_visits[index]
+		if (
+			visit != null
+			and visit.kind == OfficeVisitState.Kind.EVENT_INTEL
+			and visit.event != null
+			and visit.event.published
+		):
+			state.office_visits.remove_at(index)
+
+
 func get_current_requirement(event: EventState) -> int:
 	if event == null:
 		return 0
@@ -95,7 +149,27 @@ func has_active_event(state: RunState, race: RaceDefinition, metric: Metric.Id) 
 	if state == null or race == null:
 		return false
 	for event in state.events:
-		if event != null and event.is_active() and event.race == race and event.metric == metric:
+		if (
+			event != null
+			and event.is_active()
+			and event.requirement_kind == EventState.RequirementKind.METRIC
+			and event.race == race
+			and event.metric == metric
+		):
+			return true
+	return false
+
+
+func has_active_interest_group_event(state: RunState, race: RaceDefinition) -> bool:
+	if state == null or race == null:
+		return false
+	for event in state.events:
+		if (
+			event != null
+			and event.is_active()
+			and event.requirement_kind == EventState.RequirementKind.INTEREST_GROUP_PROPOSALS
+			and event.race == race
+		):
 			return true
 	return false
 
@@ -106,7 +180,13 @@ func _get_eligible_races(context: RunContext) -> Array[RaceDefinition]:
 		if race_state == null or race_state.definition == null:
 			continue
 		var race := race_state.definition
-		if _get_race_seat_count(context.state, race) > 0 and not _get_eligible_metrics(context, race).is_empty():
+		if _get_race_seat_count(context.state, race) == 0:
+			continue
+		if _get_fixed_interest_group(race_state) != null:
+			if _has_eligible_interest_group_event(context, race_state):
+				result.append(race)
+			continue
+		if not _get_eligible_metrics(context, race).is_empty():
 			result.append(race)
 	return result
 
@@ -114,7 +194,7 @@ func _get_eligible_races(context: RunContext) -> Array[RaceDefinition]:
 func _get_eligible_metrics(context: RunContext, race: RaceDefinition) -> Array[Metric.Id]:
 	var result: Array[Metric.Id] = []
 	var race_state := context.state.get_race(race)
-	if race_state == null or race_state.active_definition == null:
+	if race_state == null or race_state.active_definition == null or _get_fixed_interest_group(race_state) != null:
 		return result
 	for metric in race_state.active_definition.get_stance_metrics():
 		if has_active_event(context.state, race, metric):
@@ -122,6 +202,38 @@ func _get_eligible_metrics(context: RunContext, race: RaceDefinition) -> Array[M
 		var target := context.race_system.get_effective_expectation(race_state, metric, context)
 		if context.state.metrics.get_value(metric) < target:
 			result.append(metric)
+	return result
+
+
+func _has_eligible_interest_group_event(context: RunContext, race_state: RaceState) -> bool:
+	var group := _get_fixed_interest_group(race_state)
+	if group == null or has_active_interest_group_event(context.state, race_state.definition):
+		return false
+	var target := context.race_system.get_interest_group_proposal_expectation(race_state, context)
+	return _get_interest_group_proposal_count(context, group) < target
+
+
+func _get_fixed_interest_group(race_state: RaceState) -> InterestGroupDefinition:
+	if race_state == null or race_state.definition == null:
+		return null
+	return race_state.definition.fixed_interest_group
+
+
+func _get_interest_group_proposal_count(
+	context: RunContext, group: InterestGroupDefinition
+) -> int:
+	if context == null or context.state == null or group == null:
+		return 0
+	var target_identity := context.constitution_system.resolve_group_identity(context, group)
+	if target_identity == null:
+		return 0
+	var result := 0
+	for source in context.state.annual_proposal_slot_counts:
+		var source_group := source as InterestGroupDefinition
+		if source_group == null:
+			continue
+		if context.constitution_system.resolve_group_identity(context, source_group) == target_identity:
+			result += maxi(int(context.state.annual_proposal_slot_counts[source_group]), 0)
 	return result
 
 
@@ -140,6 +252,7 @@ func _force_public_window(event: EventState, balance: GameBalanceDefinition) -> 
 	if remaining <= public_remaining and not event.public_window_entered:
 		event.growth_progress = 1.0
 		event.known = true
+		event.published = true
 		event.public_window_entered = true
 		event.phase = EventState.Phase.WORSENING
 		return true
@@ -154,7 +267,7 @@ func _advance_growth(event: EventState, balance: GameBalanceDefinition) -> void:
 
 
 func _update_known_event(event: EventState, context: RunContext) -> void:
-	event.satisfaction_rate = _calculate_satisfaction(event, context.state)
+	event.satisfaction_rate = _calculate_satisfaction(event, context)
 	if event.satisfaction_rate < context.balance.event_pause_satisfaction_threshold:
 		event.phase = EventState.Phase.WORSENING
 		_advance_growth(event, context.balance)
@@ -171,16 +284,24 @@ func _update_known_event(event: EventState, context: RunContext) -> void:
 		_resolve(event, context.state)
 
 
-func _calculate_satisfaction(event: EventState, state: RunState) -> float:
+func _calculate_satisfaction(event: EventState, context: RunContext) -> float:
 	var requirement := get_current_requirement(event)
 	var required_change := float(requirement - event.baseline_value)
 	if is_zero_approx(required_change):
 		required_change = float(event.full_target - event.baseline_value)
 	if is_zero_approx(required_change):
 		return 0.0
-	var current := state.metrics.get_value(event.metric)
+	var current := _get_current_value(event, context)
 	var achieved_change := maxf(float(current - event.baseline_value), 0.0)
 	return achieved_change / required_change
+
+
+func _get_current_value(event: EventState, context: RunContext) -> int:
+	if event == null or context == null or context.state == null:
+		return 0
+	if event.requirement_kind == EventState.RequirementKind.INTEREST_GROUP_PROPOSALS:
+		return _get_interest_group_proposal_count(context, event.interest_group)
+	return context.state.metrics.get_value(event.metric)
 
 
 func _resolve(event: EventState, state: RunState) -> void:
@@ -197,4 +318,5 @@ func _fail(event: EventState, context: RunContext) -> void:
 		return
 	event.phase = EventState.Phase.FAILED
 	event.known = true
+	event.published = true
 	context.collapse_system.increase(context)

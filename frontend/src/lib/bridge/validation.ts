@@ -412,8 +412,7 @@ function isSeatSummary(value: unknown): value is SeatSummaryDto {
 		isNonnegativeInteger(value.seat_index) &&
 		typeof value.display_name === 'string' &&
 		typeof value.race_display_name === 'string' &&
-		typeof value.interest_group_display_name === 'string' &&
-		isNumber(value.personal_relation)
+		typeof value.interest_group_display_name === 'string'
 	);
 }
 

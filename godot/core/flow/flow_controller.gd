@@ -20,6 +20,7 @@ func advance_month() -> bool:
 	var report_year := context.state.year
 	var report_month := context.state.month
 	var report_previous_metrics := context.state.metrics.copy()
+	context.event_system.publish_known_events(context)
 	for race_state in context.state.races:
 		if race_state == null:
 			continue
@@ -32,6 +33,7 @@ func advance_month() -> bool:
 	context.event_system.try_generate_month(context)
 	context.event_system.settle_month(context)
 	context.event_system.update_information(context)
+	context.event_system.cleanup_published_event_visits(context.state)
 	context.state.governing_months += 1
 	_record_month_report(report_year, report_month, report_previous_metrics)
 	if context.state.run_phase == RunState.RunPhase.TERM_ENDED:
@@ -87,10 +89,10 @@ func _record_month_report(report_year: int, report_month: int, previous_metrics:
 	state.month_report_current_metrics = state.metrics.copy()
 	state.month_report_events.clear()
 	for event in state.events:
-		if event == null or not event.is_active() or not event.known:
+		if event == null or not event.is_active() or not event.published:
 			continue
 		var active_race := context.constitution_system.get_active_race_definition(context, event.race)
-		state.month_report_events.append({
+		var event_report := {
 			"race_display_name": "" if active_race == null else active_race.display_name,
 			"event_description": "" if active_race == null else active_race.event_description,
 			"metric": int(event.metric),
@@ -98,7 +100,12 @@ func _record_month_report(report_year: int, report_month: int, previous_metrics:
 			"countdown": maxi(context.balance.event_lifetime_months - event.months_alive, 0),
 			"strength": roundi(clampf(event.growth_progress, 0.0, 1.0) * 100.0),
 			"phase": int(event.phase),
-		})
+		}
+		if event.requirement_kind == EventState.RequirementKind.INTEREST_GROUP_PROPOSALS:
+			var active_group := context.constitution_system.get_active_group_definition(context, event.interest_group)
+			event_report["requirement_kind"] = int(event.requirement_kind)
+			event_report["interest_group_name"] = "" if active_group == null else active_group.display_name
+		state.month_report_events.append(event_report)
 
 
 func _build_active_bill(draft: DraftBillState) -> ActiveBillState:

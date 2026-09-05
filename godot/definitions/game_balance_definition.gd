@@ -1,8 +1,14 @@
 extends Resource
 class_name GameBalanceDefinition
 
+const YinYangRuleDefinitionScript = preload("res://definitions/yin_yang_rule_definition.gd")
+
 @export_group("基础")
 @export_range(1, 999999, 1) var initial_metric_value: int = 100
+
+@export_group("阴阳月")
+@export var yin_yang_rule: YinYangRuleDefinitionScript = YinYangRuleDefinitionScript.new()
+@export_range(0.0, 1.0, 0.01) var yin_yang_adjustment_rate: float = 0.10
 
 @export_group("提案")
 @export_range(0, 999, 1) var automatic_draw_count: int = 3
@@ -33,6 +39,7 @@ class_name GameBalanceDefinition
 @export_range(0.0, 1.0, 0.01) var normal_absence_probability: float = 0.15
 
 @export_group("事件")
+@export_range(1, 999, 1) var initial_interest_group_proposal_requirement: int = 5
 @export_range(0, 999, 1) var event_spawn_count_min: int = 1
 @export_range(0, 999, 1) var event_spawn_count_max: int = 3
 @export_range(1, 999, 1) var event_lifetime_months: int = 12

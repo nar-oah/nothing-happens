@@ -518,6 +518,16 @@ func _handle_office_visit_resolve(
 				message["request_id"]
 			)
 			return
+	elif visit.kind == OfficeVisitState.Kind.EVENT_INTEL:
+		if visit.event == null:
+			_append_mutation_error(
+				messages,
+				{"code": "office_visit_rejected", "message": "Event-intel visit has no event."},
+				message["request_id"]
+			)
+			return
+		visit.event.known = true
+		visit.event.published = true
 	state.office_visits.pop_front()
 	state_version += 1
 	set_ui_mode("office", false)

@@ -7,6 +7,7 @@ signal visitor_requested
 @onready var visitor: OfficeVisitor = $CenterAnchor/Visitor
 
 var visitor_races: Array[RaceDefinition] = []
+var current_month: int = 1
 
 
 func _ready() -> void:
@@ -41,6 +42,11 @@ func set_assistant_race(value: RaceDefinition) -> void:
 	_refresh_visitor()
 
 
+func set_month(value: int) -> void:
+	current_month = value
+	_refresh_visitor()
+
+
 func has_visitors() -> bool:
 	return not visitor_races.is_empty()
 
@@ -51,4 +57,6 @@ func get_current_visitor() -> RaceDefinition:
 
 func _refresh_visitor() -> void:
 	var race := get_current_visitor() if has_visitors() else assistant_race
-	visitor.set_portrait(race.portrait)
+	if race == null:
+		return
+	visitor.set_portrait(race.get_portrait(current_month))

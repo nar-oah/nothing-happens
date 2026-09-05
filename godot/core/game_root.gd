@@ -74,6 +74,8 @@ func _on_ui_message(message: Dictionary) -> void:
 func _sync_office_visitors(world: Node) -> void:
 	if world == null or not world.has_method("set_visitor_races"):
 		return
+	if world.has_method("set_month"):
+		world.call("set_month", run_session.state.month)
 	var visitor_races: Array[RaceDefinition] = []
 	for visit in run_session.state.office_visits:
 		if visit == null or visit.race == null:
@@ -89,6 +91,8 @@ func _sync_office_visitors(world: Node) -> void:
 func _sync_parliament_seats(world: Node) -> void:
 	if world == null or not world.has_method("set_seat_races"):
 		return
+	if world.has_method("set_month"):
+		world.call("set_month", run_session.state.month)
 	var seat_races: Array[RaceDefinition] = []
 	for seat in run_session.state.seats:
 		var active: RaceDefinition
