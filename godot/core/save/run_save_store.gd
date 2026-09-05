@@ -108,7 +108,7 @@ static func _valid_slot_id(slot_id: String) -> bool:
 	if slot_id == AUTO_SLOT:
 		return true
 	var number := slot_id.trim_prefix("manual_")
-	return slot_id.begins_with("manual_") and not number.is_empty() and number.is_valid_int() and number.to_int() > 0 and number == number.to_int().to_string().pad_zeros(number.length())
+	return slot_id.begins_with("manual_") and not number.is_empty() and number.is_valid_int() and number.to_int() > 0 and number == str(number.to_int()).pad_zeros(number.length())
 
 
 static func _failure(code: String, message: String) -> Dictionary:

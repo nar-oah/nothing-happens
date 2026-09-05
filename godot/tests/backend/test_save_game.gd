@@ -50,6 +50,17 @@ func _test_round_trip_and_continuation(t: BackendTestContext) -> void:
 	t.check(control.state.year >= 3, "continuation crosses an annual seat-allocation boundary")
 	t.check(control.state.active_bill.proposals[0].is_fully_digested(), "continuation actually completes proposal digestion")
 	t.check(control.state.active_bill.policies[0].triggered, "continuation actually triggers an untriggered saved policy")
+	control.state.run_phase = RunState.RunPhase.TERM_ENDED
+	control.state.term_outcome = RunState.TermOutcome.COLLAPSE
+	var earned := (control.state.year - 1) * 12 + control.state.month
+	var previous_available := control.meta_progression.available_governing_months
+	t.check(control.overwrite_manual_save(saved["slot_id"])["ok"], "ended term snapshot saves before reward settlement")
+	t.check(restored.load_save(saved["slot_id"])["ok"], "ended term snapshot restores before reward settlement")
+	t.check(control.advance_month() and restored.advance_month(), "both continuations settle into the next term")
+	t.check_equal(restored.state.term, 4, "loaded term boundary increments the term once")
+	t.check_equal(restored.meta_progression.available_governing_months, previous_available + earned, "term reward is granted exactly once after load")
+	t.check_equal(restored.random_system.rng.state, control.random_system.rng.state, "next-term seat allocation continues the same RNG stream")
+	t.check(_snapshot(restored) == _snapshot(control), "next-term seats, constitution, reports and meta progression match")
 	control.free()
 	restored.free()
 	Fixture.clean(directory)
@@ -100,6 +111,7 @@ func _test_manual_and_automatic_slots(t: BackendTestContext) -> void:
 	t.check(session.advance_month(), "second stable month advances")
 	t.check_equal(session.list_saves().back()["month"], session.state.month, "automatic metadata reflects the completed stable month")
 	var auto_json := FileAccess.get_file_as_string(directory.path_join("auto.json"))
+	var automatic_snapshot := _snapshot(session)
 	t.check(session.overwrite_manual_save(first["slot_id"])["ok"], "existing manual save is overwritten")
 	t.check_equal(session.list_saves().size(), 3, "manual overwrite does not append another slot")
 	t.check(not session.overwrite_manual_save(automatic_id)["ok"], "manual overwrite rejects the automatic slot")
@@ -110,6 +122,7 @@ func _test_manual_and_automatic_slots(t: BackendTestContext) -> void:
 	t.check_equal(FileAccess.get_file_as_string(directory.path_join("auto.json")), auto_json, "application startup preserves an existing automatic save")
 	t.check(session.load_save(automatic_id)["ok"], "latest automatic save loads")
 	t.check_equal(session.state.month, 2, "automatic save contains the fully advanced month")
+	t.check(_snapshot(session) == automatic_snapshot, "automatic snapshot includes all final settlement state and RNG")
 	t.check_equal(DirAccess.get_files_at(directory).size(), 3, "monthly autosaves always replace a single file")
 	t.check(not session.load_save("../outside")["ok"], "save loading rejects paths outside the slot directory")
 	startup.free()
@@ -123,6 +136,9 @@ func _test_invalid_snapshot_does_not_replace_state(t: BackendTestContext) -> voi
 	var snapshot := RunSnapshot.capture(session)
 	snapshot["version"] = 999
 	t.check(not RunSnapshot.decode(snapshot)["ok"], "unsupported save versions are rejected")
+	snapshot = RunSnapshot.capture(session)
+	snapshot["objects"][snapshot["state"]["ref"]]["properties"]["metrics"] = null
+	t.check(not RunSnapshot.decode(snapshot)["ok"], "a missing required metric object is rejected")
 	var before := session.state
 	var rng_state := session.random_system.rng.state
 	var file := FileAccess.open(directory.path_join("auto.json"), FileAccess.WRITE)

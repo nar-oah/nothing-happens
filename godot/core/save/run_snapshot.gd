@@ -57,8 +57,11 @@ static func decode(snapshot: Dictionary) -> Dictionary:
 
 func _encode(value: Variant) -> Variant:
 	match typeof(value):
-		TYPE_NIL, TYPE_BOOL, TYPE_FLOAT, TYPE_STRING:
+		TYPE_NIL, TYPE_BOOL, TYPE_STRING:
 			return value
+		TYPE_FLOAT:
+			if is_finite(value):
+				return value
 		TYPE_INT:
 			return {"integer": str(value)}
 		TYPE_STRING_NAME:
@@ -155,6 +158,9 @@ func _restore_properties(instance: Object, encoded: Variant) -> void:
 			_error = "Invalid snapshot property type: %s" % property.name
 			return
 		var current: Variant = instance.get(property.name)
+		if current is Object and value == null:
+			_error = "Missing required snapshot object: %s" % property.name
+			return
 		if current is Array:
 			value = _typed_array(current, value)
 		elif current is Dictionary:
@@ -165,7 +171,9 @@ func _restore_properties(instance: Object, encoded: Variant) -> void:
 
 
 func _decode_value(encoded: Variant) -> Variant:
-	if encoded == null or encoded is bool or encoded is float or encoded is String:
+	if encoded == null or encoded is bool or encoded is String:
+		return encoded
+	if encoded is float and is_finite(encoded):
 		return encoded
 	if encoded is Array:
 		var result: Array = []
@@ -181,7 +189,7 @@ func _decode_value(encoded: Variant) -> Variant:
 		return StringName(encoded.string_name)
 	if encoded.has("ref"):
 		var index: Variant = encoded.ref
-		if (index is int or index is float) and index == int(index) and index >= 0 and index < _objects.size():
+		if (index is int or index is float) and is_finite(index) and index == int(index) and index >= 0 and index < _objects.size():
 			return _objects[int(index)]
 	elif encoded.has("uid") and encoded.uid is String:
 		var uid := ResourceUID.text_to_id(encoded.uid)

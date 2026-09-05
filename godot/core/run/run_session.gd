@@ -77,7 +77,10 @@ func _start_term(term_number: int) -> bool:
 		constitution_articles = constitution_board.get_articles()
 	state = RunState.new()
 	state.term = maxi(term_number, 1)
+	var previous_rng: Variant = random_system.rng.state if term_number > 1 and random_system != null else null
 	_build_runtime()
+	if previous_rng != null:
+		random_system.rng.state = previous_rng
 	inflation_system.initialize_metrics(state.metrics, balance)
 	state.year_start_metrics = state.metrics.copy()
 	if not race_system.initialize_races(state, race_definitions, balance):
