@@ -449,11 +449,10 @@ func _test_parliament_world_seats(t: BackendTestContext) -> void:
 
 	var world_scene: PackedScene = load("res://worlds/parliament_world.tscn")
 	var world: ParliamentWorld = world_scene.instantiate()
-	var authored: ParliamentSeat = seat_scene.instantiate()
-	authored.seat_index = 0
-	authored.position = Vector2(120.0, 240.0)
-	world.get_node("Seats").add_child(authored)
 	Engine.get_main_loop().root.add_child(world)
+	var authored: ParliamentSeat = world.seats[0]
+	var authored_position := authored.position
+	t.check(authored.get_parent() != world.seats_root, "ParliamentWorld finds nested editor-authored seats")
 	var second := t.make_race("second parliament portrait")
 	second.portrait = ImageTexture.new()
 	var third := t.make_race("third parliament portrait")
@@ -467,16 +466,55 @@ func _test_parliament_world_seats(t: BackendTestContext) -> void:
 		t.check(world.seats[index].race == races[index], "ParliamentWorld assigns each active race")
 		t.check(world.seats[index].visual.texture == races[index].portrait, "ParliamentWorld updates each portrait")
 	world.set_seat_races([second, first, third])
-	t.check_equal(world.seats[0].position, Vector2(120.0, 240.0), "race updates preserve editor-authored seat positions")
+	t.check_equal(world.seats[0].position, authored_position, "race updates preserve editor-authored seat positions")
 	world.set_seat_races([second])
 	t.check_equal(world.seats.size(), 1, "ParliamentWorld removes seats beyond RunState size")
-	t.check_equal(world.seats_root.get_child_count(), 1, "removed seats leave the active scene tree")
+	t.check_equal(authored.get_parent().get_child_count(), 1, "removed seats leave their authored floor")
+	t.check_equal(world.seats_root.get_child_count(), 3, "seat removal preserves authored floor containers")
 	var anchors := world.get_seat_anchors()
 	t.check_equal(anchors.size(), 1, "ParliamentWorld returns one anchor per current seat")
 	t.check_equal(anchors[0].keys().size(), 3, "seat anchors contain no duplicated support data")
 	t.check_equal(anchors[0]["seat_index"], 0, "seat anchor keeps its seat index")
 	t.check(anchors[0]["x"] >= 0.0 and anchors[0]["x"] <= 1.0, "seat anchor x stays normalized")
 	t.check(anchors[0]["y"] >= 0.0 and anchors[0]["y"] <= 1.0, "seat anchor y stays normalized")
+	t.check(world.camera is Camera2D, "ParliamentWorld owns a Camera2D")
+	t.check(
+		world.get_viewport().size_changed.is_connected(
+			Callable(world, "_on_viewport_size_changed")
+		),
+		"ParliamentWorld listens for viewport resize"
+	)
+	var layouts: Array = []
+	world.layout_changed.connect(
+		func(value: Array[Dictionary]) -> void:
+			layouts.append(value)
+	)
+	var camera_start_x := world.camera.position.x
+	var anchor_start_x: float = anchors[0]["x"]
+	world.camera_move_speed = 100.0
+	world.camera_left_boundary = camera_start_x - 25.0
+	world.camera_right_boundary = camera_start_x + 25.0
+	Input.action_press("parliament_right")
+	world._process(0.5)
+	Input.action_release("parliament_right")
+	t.check_approx(
+		world.camera.position.x,
+		camera_start_x + 25.0,
+		"held right input moves and clamps Camera2D"
+	)
+	t.check_equal(layouts.size(), 1, "camera movement emits one layout update")
+	t.check(
+		not is_equal_approx(layouts[0][0]["x"], anchor_start_x),
+		"camera movement recomputes normalized anchors in the same frame"
+	)
+	world._process(0.5)
+	t.check_equal(layouts.size(), 1, "idle Camera2D does not emit layout updates")
+	Input.action_press("parliament_right")
+	world._process(0.5)
+	Input.action_release("parliament_right")
+	t.check_equal(layouts.size(), 1, "Camera2D held at its boundary does not emit updates")
+	world._on_viewport_size_changed()
+	t.check_equal(layouts.size(), 2, "viewport resize recomputes and emits seat anchors")
 	world.free()
 
 
