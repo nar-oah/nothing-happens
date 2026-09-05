@@ -289,7 +289,13 @@ func races(session: RunSession) -> Array:
 		var expectations: Array = []
 		for metric in active.get_stance_metrics():
 			expectations.append({"metric": int(metric), "target": session.race_system.get_effective_expectation(current, metric, session.context), "direction": int(active.get_stance(metric))})
-		result.append({"race_index": index, "display_name": active.display_name, "description": active.description, "seat_count": seat_count, "expectations": expectations, "resolved_events_this_year": current.resolved_events_this_year, "last_year_resolved_events": current.last_year_resolved_events})
+		var data := {"race_index": index, "display_name": active.display_name, "description": active.description, "seat_count": seat_count, "expectations": expectations, "resolved_events_this_year": current.resolved_events_this_year, "last_year_resolved_events": current.last_year_resolved_events}
+		if current.definition.fixed_interest_group != null:
+			data["proposal_expectation"] = {
+				"interest_group_name": _active_group_name(session, current.definition.fixed_interest_group),
+				"target": session.race_system.get_interest_group_proposal_expectation(current, session.context),
+			}
+		result.append(data)
 	return result
 
 
