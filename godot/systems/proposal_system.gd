@@ -126,6 +126,7 @@ func resolve_bonus_choice(state: RunState, proposal: ProposalInstance, accept_tr
 	if not accept_trait:
 		proposal.positive_effect = MetricVector.new()
 		state.political_donation_pool += proposal.donation_offer
+		state.proposal_hand.erase(proposal)
 	return true
 
 
