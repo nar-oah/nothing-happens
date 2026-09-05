@@ -7,6 +7,7 @@
 		createInterestGroupDialogueContent
 	} from '$lib/components/dialog/content';
 	import NewspaperEntry from '$lib/components/newspaper/NewspaperEntry.svelte';
+	import SimpleDialogueView from './SimpleDialogueView.svelte';
 	import type { DialoguePresentation, ViewFrameProps } from './types';
 
 	type Props = Pick<ViewFrameProps, 'term' | 'year' | 'month' | 'onNewspaperOpen'> & {
@@ -23,39 +24,56 @@
 					dialogue.positiveEffect,
 					dialogue.donationOffer
 				)
-			: createEventIntelDialogueContent({
-					raceName: dialogue.raceName,
-					metricName: dialogue.metricName,
-					requirement: dialogue.requirement,
-					strength: dialogue.strength
-				})
+			: dialogue.kind === 'event_intel'
+				? createEventIntelDialogueContent({
+						raceName: dialogue.raceName,
+						metricName: dialogue.metricName,
+						requirement: dialogue.requirement,
+						strength: dialogue.strength
+					})
+				: null
 	);
 
 	function advanceDialogue() {
+		if (dialogue.kind === 'simple') {
+			onResolveVisit?.();
+			return;
+		}
 		onResolveVisit?.(dialogue.kind === 'interest_group' ? !donationChoice : undefined);
 	}
 </script>
 
-<main class="game-view" aria-label="对话界面">
-	<NewspaperEntry {term} {year} {month} onOpen={onNewspaperOpen} />
+{#if dialogue.kind === 'simple'}
+	<SimpleDialogueView
+		{term}
+		{year}
+		{month}
+		{onNewspaperOpen}
+		{dialogue}
+		onResolve={advanceDialogue}
+	/>
+{:else}
+	<main class="game-view" aria-label="对话界面">
+		<NewspaperEntry {term} {year} {month} onOpen={onNewspaperOpen} />
 
-	<div class="top-dialog">
-		<TopDialog text={content.visitor} />
-	</div>
+		<div class="top-dialog">
+			<TopDialog text={content?.visitor ?? ''} />
+		</div>
 
-	<div class="dialog-area">
-		{#if dialogue.kind === 'interest_group'}
-			<div class="choice-switch">
-				<ChoreSwitch
-					left={dialogue.positiveEffect}
-					right={dialogue.donationOffer}
-					bind:isSwitch={donationChoice}
-				/>
-			</div>
-		{/if}
-		<Dialog text={content.body} onclick={advanceDialogue} />
-	</div>
-</main>
+		<div class="dialog-area">
+			{#if dialogue.kind === 'interest_group'}
+				<div class="choice-switch">
+					<ChoreSwitch
+						left={dialogue.positiveEffect}
+						right={dialogue.donationOffer}
+						bind:isSwitch={donationChoice}
+					/>
+				</div>
+			{/if}
+			<Dialog text={content?.body ?? ''} onclick={advanceDialogue} />
+		</div>
+	</main>
+{/if}
 
 <style>
 	.game-view {
