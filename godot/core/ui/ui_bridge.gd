@@ -12,11 +12,12 @@ var world_scene: String = "office"
 
 var _protocol := UiProtocol.new()
 var _serializer := UiSerializer.new()
+var _layout_world: Node
 
 
 func setup(session: RunSession, manager: Node = null, texture: Control = null) -> void:
 	run_session = session
-	scene_manager = manager
+	_set_scene_manager(manager)
 	set_cef_texture(texture)
 	if (
 		run_session != null
@@ -88,6 +89,14 @@ func send_full_state(request_id: Variant = null) -> void:
 	_send_message(_full_state(request_id))
 
 
+func send_parliament_layout(parliament_seat_anchors: Array) -> void:
+	_send_message(
+		_envelope(
+			"parliament.layout", {"parliament_seat_anchors": parliament_seat_anchors}
+		)
+	)
+
+
 func set_ui_mode(mode: String, send_sync: bool = true) -> bool:
 	if mode not in UiProtocol.UI_MODES:
 		return false
@@ -118,6 +127,48 @@ func handle_world_interaction(action: StringName, payload: Dictionary) -> void:
 
 func _on_ipc_message(raw_message: String) -> void:
 	receive_ipc_message(raw_message)
+
+
+func _set_scene_manager(manager: Node) -> void:
+	var callback := Callable(self, "_on_world_changed")
+	if (
+		scene_manager != null
+		and scene_manager.has_signal("world_changed")
+		and scene_manager.is_connected("world_changed", callback)
+	):
+		scene_manager.disconnect("world_changed", callback)
+	_watch_layout_world(null)
+	scene_manager = manager
+	if scene_manager == null or not scene_manager.has_signal("world_changed"):
+		return
+	scene_manager.connect("world_changed", callback)
+	var current_world: Variant = scene_manager.get("current_world")
+	if current_world is Node:
+		_watch_layout_world(current_world)
+
+
+func _on_world_changed(_scene_name: String, world: Node) -> void:
+	_watch_layout_world(world)
+
+
+func _watch_layout_world(world: Node) -> void:
+	var callback := Callable(self, "_on_parliament_layout_changed")
+	if (
+		is_instance_valid(_layout_world)
+		and _layout_world.has_signal("layout_changed")
+		and _layout_world.is_connected("layout_changed", callback)
+	):
+		_layout_world.disconnect("layout_changed", callback)
+	_layout_world = null
+	if world == null or not world.has_signal("layout_changed"):
+		return
+	_layout_world = world
+	if not _layout_world.is_connected("layout_changed", callback):
+		_layout_world.connect("layout_changed", callback)
+
+
+func _on_parliament_layout_changed(parliament_seat_anchors: Array[Dictionary]) -> void:
+	send_parliament_layout(parliament_seat_anchors)
 
 
 func _dispatch(message: Dictionary, messages: Array[Dictionary]) -> void:
