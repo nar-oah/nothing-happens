@@ -18,6 +18,7 @@ const STATE_TYPES: Dictionary = {
 	"SeatState": SeatState,
 	"RaceState": RaceState,
 	"ConstitutionState": ConstitutionState,
+	"InterestGroupDefinition": InterestGroupDefinition,
 }
 const SESSION_FIELDS: Array[String] = [
 	"term_report", "_last_awarded_term", "_previous_newspaper_collapse",
@@ -79,7 +80,8 @@ func _encode(value: Variant) -> Variant:
 
 
 func _encode_object(value: Object) -> Variant:
-	if value is Resource:
+	# Seat-local groups are generated state; file-backed definitions remain UID references.
+	if value is Resource and not (value is InterestGroupDefinition and value.resource_path.is_empty()):
 		var uid := ResourceLoader.get_resource_uid(value.resource_path)
 		if uid == ResourceUID.INVALID_ID:
 			_error = "Snapshot resource requires a ResourceUID: %s" % value.resource_path
