@@ -105,10 +105,14 @@ export function deriveDialoguePresentation(
 ): DialoguePresentation | null {
 	if (!pending) return null;
 	if (pending.kind === 'event_intel') {
+		const metricName =
+			pending.requirement_kind === 1 && pending.interest_group_name
+				? `${pending.interest_group_name}提案数`
+				: METRIC_DISPLAY_NAMES[pending.metric];
 		return {
 			kind: pending.kind,
 			raceName: pending.race_name,
-			metricName: METRIC_DISPLAY_NAMES[pending.metric],
+			metricName,
 			requirement: pending.requirement,
 			strength: pending.strength
 		};
