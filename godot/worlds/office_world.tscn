@@ -81,5 +81,9 @@ z_index = 1
 position = Vector2(-145, -108)
 texture = ExtResource("8_nl8yu")
 
+[connection signal="clicked" from="Painting" to="." method="_on_painting_clicked"]
+[connection signal="clicked" from="LeftAnchor/Lamp" to="." method="_on_lamp_clicked"]
+[connection signal="clicked" from="LeftAnchor/High Lamp" to="." method="_on_high_lamp_clicked"]
 [connection signal="clicked" from="CenterAnchor/Visitor" to="." method="_on_visitor_clicked"]
+[connection signal="clicked" from="RightAnchor/Ornament" to="." method="_on_ornament_clicked"]
 [connection signal="clicked" from="RightAnchor/Door" to="." method="_on_door_clicked"]

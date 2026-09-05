@@ -11,6 +11,7 @@ signal simple_dialogue_requested(
 )
 
 @export var assistant_race: RaceDefinition
+@export var assistant_dialogue: SimpleDialogueDefinition
 @onready var visitor: OfficeVisitor = $CenterAnchor/Visitor
 @onready var assistant_door: Sprite2D = $RightAnchor/Assistant
 
@@ -39,6 +40,8 @@ func _on_visitor_clicked() -> void:
 	if has_visitors():
 		visitor_requested.emit()
 		assistant_door.visible = true
+	else:
+		request_simple_dialogue(assistant_dialogue)
 
 
 func request_simple_dialogue(dialogue: SimpleDialogueDefinition) -> void:
@@ -82,3 +85,19 @@ func _refresh_visitor() -> void:
 	if race == null:
 		return
 	visitor.set_portrait(race.get_portrait(current_month))
+
+
+func _on_painting_clicked(dialogue: SimpleDialogueDefinition) -> void:
+	request_simple_dialogue(dialogue)
+
+
+func _on_lamp_clicked(dialogue: SimpleDialogueDefinition) -> void:
+	request_simple_dialogue(dialogue)
+
+
+func _on_high_lamp_clicked(dialogue: SimpleDialogueDefinition) -> void:
+	request_simple_dialogue(dialogue)
+
+
+func _on_ornament_clicked(dialogue: SimpleDialogueDefinition) -> void:
+	request_simple_dialogue(dialogue)
