@@ -6,6 +6,10 @@ const COMMAND_TYPES: Array[String] = [
 	"ui.input_regions",
 	"ui.mode.set",
 	"ui.newspaper.close",
+	"saves.list",
+	"saves.create",
+	"saves.overwrite",
+	"saves.load",
 	"draft.proposal.add",
 	"draft.proposal.remove",
 	"draft.policy.add",
@@ -24,6 +28,9 @@ const COMMAND_TYPES: Array[String] = [
 ]
 
 const GAMEPLAY_MUTATIONS: Array[String] = [
+	"saves.create",
+	"saves.overwrite",
+	"saves.load",
 	"draft.proposal.add",
 	"draft.proposal.remove",
 	"draft.policy.add",
