@@ -13,7 +13,10 @@ import {
 import { makeLiveState, testPolicy, testProposal } from './test-fixtures.ts';
 
 test('live state derives Left refs from authoritative array indices', () => {
-	const items = deriveLeftItems(makeLiveState());
+	const state = makeLiveState();
+	state.proposal_hand[0].bonus_choice_resolved = true;
+	state.proposal_hand[0].positive_trait_accepted = true;
+	const items = deriveLeftItems(state);
 	assert.deepEqual(
 		items.map((item) => [item.kind, item.ref.collection, item.ref.index]),
 		[
