@@ -77,9 +77,13 @@
 [ext_resource type="PackedScene" uid="uid://dqmb5k6l2ysti" path="res://worlds/parliament_world.tscn" id="75_parliament_world"]
 [ext_resource type="Script" uid="uid://bptnyjm08yiev" path="res://core/ui/ui_bridge.gd" id="76_ui_bridge"]
 [ext_resource type="Script" uid="uid://csskkp1dektw0" path="res://core/world/world_input_router.gd" id="77_input_router"]
+[ext_resource type="Script" path="res://core/settings_manager.gd" id="78_settings_manager"]
 
 [node name="GameRoot" type="Node" unique_id=1300880904]
 script = ExtResource("1_x0thd")
+
+[node name="SettingsManager" type="Node" parent="."]
+script = ExtResource("78_settings_manager")
 
 [node name="RunSession" parent="." unique_id=1121832609 instance=ExtResource("2_5gaxf")]
 balance = ExtResource("3_d342j")

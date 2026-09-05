@@ -3,6 +3,7 @@ extends Node
 const CefTextureInputScript = preload("res://core/ui/cef_texture_input.gd")
 
 @onready var run_session: RunSession = $RunSession
+@onready var settings_manager: SettingsManager = $SettingsManager
 @onready var scene_manager: SceneManager = $SceneManager
 @onready var ui_bridge: UiBridge = $UiBridge
 @onready var world_input_router: WorldInputRouter = $WorldInputRouter
@@ -15,7 +16,7 @@ func _ready() -> void:
 	ui_bridge.outgoing_message.connect(_on_ui_message)
 	scene_manager.show_office()
 	var cef_texture := _create_cef_texture()
-	ui_bridge.setup(run_session, scene_manager, cef_texture)
+	ui_bridge.setup(run_session, scene_manager, cef_texture, settings_manager)
 	ui_layer.add_child(cef_texture)
 	cef_texture.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	world_input_router.setup(scene_manager)
