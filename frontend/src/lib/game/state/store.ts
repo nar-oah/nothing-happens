@@ -25,6 +25,10 @@ export function createGameStore(initial: LiveGameState | null = null): GameStore
 
 export function applyGameMessage(value: GameStoreValue, message: InboundMessage): GameStoreValue {
 	if (message.type === 'state.full') return { snapshot: message.payload, error: null };
+	if (message.type === 'saves.list')
+		return value.snapshot
+			? { snapshot: { ...value.snapshot, saves: message.payload.saves }, error: null }
+			: value;
 	if (message.type === 'command.error') return { ...value, error: message.payload };
 	if (message.type === 'parliament.layout')
 		return value.snapshot
