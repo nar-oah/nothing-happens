@@ -5,7 +5,7 @@ signal layout_changed(parliament_seat_anchors: Array[Dictionary])
 
 @export var seat_scene: PackedScene
 @export var camera_move_speed: float = 1600.0
-@export var camera_left_boundary: float = 2400.0
+@export var camera_left_boundary: float = -2800.0
 @export var camera_right_boundary: float = 7600.0
 @onready var camera: Camera2D = $Camera2D
 @onready var seats_root: Node2D = $Seats

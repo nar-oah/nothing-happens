@@ -525,6 +525,13 @@ func _test_parliament_world_seats(t: BackendTestContext) -> void:
 	)
 	var camera_start_x := world.camera.position.x
 	var anchor_start_x: float = anchors[0]["x"]
+	t.check(world.camera_left_boundary < camera_start_x, "Camera2D starts right of its left boundary")
+	t.check(world.camera_right_boundary > camera_start_x, "Camera2D starts left of its right boundary")
+	t.check_approx(
+		camera_start_x - world.camera_left_boundary,
+		world.camera_right_boundary - camera_start_x,
+		"Camera2D starts in the middle of its horizontal movement range"
+	)
 	world.camera_move_speed = 100.0
 	world.camera_left_boundary = camera_start_x - 25.0
 	world.camera_right_boundary = camera_start_x + 25.0
@@ -547,8 +554,17 @@ func _test_parliament_world_seats(t: BackendTestContext) -> void:
 	world._process(0.5)
 	Input.action_release("parliament_right")
 	t.check_equal(layouts.size(), 1, "Camera2D held at its boundary does not emit updates")
+	Input.action_press("parliament_left")
+	world._process(0.5)
+	Input.action_release("parliament_left")
+	t.check_approx(
+		world.camera.position.x,
+		camera_start_x - 25.0,
+		"held left input moves and clamps Camera2D"
+	)
+	t.check_equal(layouts.size(), 2, "left camera movement emits one layout update")
 	world._on_viewport_size_changed()
-	t.check_equal(layouts.size(), 2, "viewport resize recomputes and emits seat anchors")
+	t.check_equal(layouts.size(), 3, "viewport resize recomputes and emits seat anchors")
 	world.free()
 
 
