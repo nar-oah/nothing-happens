@@ -91,6 +91,7 @@ export function makeLiveState(stateVersion = 1): LiveGameState {
 	};
 	return {
 		state_version: stateVersion,
+		saves: [],
 		ui_mode: 'office',
 		world_scene: 'office',
 		parliament_seat_anchors: [{ seat_index: 0, x: 0.5, y: 0.5 }],

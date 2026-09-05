@@ -34,7 +34,8 @@
 		deriveTopItems
 	} from './selectors';
 	import { createGameStore, EMPTY_GAME_STORE, type GameStoreValue } from './store';
-	import type { LiveGameState, MonthReportEventPhase } from './types';
+	import { getSaveAction } from './saves';
+	import type { LiveGameState, MonthReportEventPhase, SaveSlotDto } from './types';
 
 	type MutationPayload<T extends GameplayCommandType> = Omit<OutboundPayloads[T], 'state_version'>;
 	type NewspaperTransitionAction = () => Promise<void>;
@@ -127,6 +128,8 @@
 	let client: CefIpcClient | null = null;
 	let mutationQueue = Promise.resolve();
 	let selectedConstitutionArticle = $state<number>();
+	let loadRevision = $state(0);
+	let saveError = $state('');
 	let newspaperOpen = $state(true);
 	let newspaperBusy = $state(false);
 	let newspaperFolded = $state(false);
@@ -141,9 +144,7 @@
 		snapshot ? deriveTopItems(snapshot) : { raceItems: [], interestGroupItems: [] }
 	);
 	let gameState = $derived(snapshot ? deriveGameStateDisplayProps(snapshot) : undefined);
-	let preview = $derived(
-		snapshot ? deriveDraftPreviewMetrics(snapshot.draft_preview) : []
-	);
+	let preview = $derived(snapshot ? deriveDraftPreviewMetrics(snapshot.draft_preview) : []);
 	let constitution = $derived(snapshot ? deriveConstitutionMemorial(snapshot) : {});
 	let pendingDialogue = $derived(
 		snapshot ? deriveDialoguePresentation(snapshot.pending_dialogue) : null
@@ -225,6 +226,32 @@
 		newspaperFolded = false;
 		newspaperLeaving = false;
 		newspaperOpen = true;
+		client?.send('saves.list', {});
+	}
+
+	async function selectSave(slot: SaveSlotDto, loading: boolean): Promise<void> {
+		if (newspaperBusy || newspaperLeaving) return;
+		newspaperBusy = true;
+		saveError = '';
+		const action = getSaveAction(slot, loading);
+		try {
+			await requestMutation(action.type, action.payload);
+			if (loading) {
+				selectedConstitutionArticle = undefined;
+				pendingNewspaperAction = null;
+				newspaperFoldResolver = null;
+				newspaperFolded = false;
+				newspaperLeaving = false;
+				newspaperOpen = true;
+				const state = storeValue.snapshot;
+				newspaperEdition = state ? deriveNewspaperEdition(state) : null;
+				loadRevision += 1;
+			}
+		} catch (error: unknown) {
+			saveError = error instanceof Error ? error.message : '存档操作失败';
+		} finally {
+			newspaperBusy = false;
+		}
 	}
 
 	function transitionThroughNewspaper(action: NewspaperTransitionAction): void {
@@ -364,80 +391,86 @@
 
 <svelte:head><title>Nothing Happens</title></svelte:head>
 {#if snapshot && frame}
-	{#if snapshot.ui_mode === 'dialogue' && pendingDialogue}
-		<DialogueView
-			{...frame}
-			onNewspaperOpen={openNewspaper}
-			dialogue={pendingDialogue}
-			onResolveVisit={(acceptTrait) =>
-				pendingDialogue.kind === 'simple'
-					? mutate('ui.mode.set', { mode: 'office' })
-					: mutate(
-							'office.visit.resolve',
-							acceptTrait === undefined ? {} : { accept_trait: acceptTrait }
-						)}
-		/>
-	{:else if snapshot.ui_mode === 'parliament'}
-		<ParliamentView
-			{...frame}
-			onNewspaperOpen={openNewspaper}
-			stateVersion={snapshot.state_version}
-			draft={snapshot.draft_bill}
-			proposalHand={snapshot.proposal_hand}
-			availablePolicies={snapshot.available_policies}
-			editingSavedBillIndex={snapshot.editing_saved_bill_index ?? undefined}
-			seats={snapshot.seats}
-			seatAnchors={snapshot.parliament_seat_anchors}
-			seatVotes={snapshot.draft_preview.vote.seat_votes}
-			{preview}
-			voteCanPass={snapshot.draft_preview.vote.passed}
-			supportCount={snapshot.draft_preview.vote.support_count}
-			onAddProposal={(handIndex) => mutate('draft.proposal.add', { hand_index: handIndex })}
-			onRemoveProposal={(draftIndex) =>
-				mutate('draft.proposal.remove', { draft_index: draftIndex })}
-			onAddPolicy={(displayName) => mutate('draft.policy.add', { display_name: displayName })}
-			onRemovePolicy={(draftIndex) => mutate('draft.policy.remove', { draft_index: draftIndex })}
-			onTitleChange={(title) => mutate('draft.title.set', { title })}
-			onEditSavedBill={(savedBillIndex) =>
-				mutate('bill.edit', { saved_bill_index: savedBillIndex })}
-			onBribeSeat={bribeSeat}
-			onSubmit={submitBill}
-		/>
-	{:else if snapshot.ui_mode === 'constitution'}
-		<ConstitutionView
-			raceItems={topItems.raceItems}
-			interestGroupItems={topItems.interestGroupItems}
-			governingMonths={snapshot.constitution.available_governing_months}
-			term={frame.term}
-			year={frame.year}
-			month={frame.month}
-			onNewspaperOpen={openNewspaper}
-			title={snapshot.constitution.title}
-			{constitution}
-			columns={snapshot.constitution.columns}
-			onArticleSelectionChange={selectConstitutionArticle}
-			onColumnUnlock={unlockConstitutionColumn}
-			onSubmit={submitConstitution}
-		/>
-	{:else}
-		<OfficeView {...frame} onNewspaperOpen={openNewspaper} onSynthesisConfirm={mergeProposals} />
-	{/if}
+	{#key loadRevision}
+		{#if snapshot.ui_mode === 'dialogue' && pendingDialogue}
+			<DialogueView
+				{...frame}
+				onNewspaperOpen={openNewspaper}
+				dialogue={pendingDialogue}
+				onResolveVisit={(acceptTrait) =>
+					pendingDialogue.kind === 'simple'
+						? mutate('ui.mode.set', { mode: 'office' })
+						: mutate(
+								'office.visit.resolve',
+								acceptTrait === undefined ? {} : { accept_trait: acceptTrait }
+							)}
+			/>
+		{:else if snapshot.ui_mode === 'parliament'}
+			<ParliamentView
+				{...frame}
+				onNewspaperOpen={openNewspaper}
+				stateVersion={snapshot.state_version}
+				draft={snapshot.draft_bill}
+				proposalHand={snapshot.proposal_hand}
+				availablePolicies={snapshot.available_policies}
+				editingSavedBillIndex={snapshot.editing_saved_bill_index ?? undefined}
+				seats={snapshot.seats}
+				seatAnchors={snapshot.parliament_seat_anchors}
+				seatVotes={snapshot.draft_preview.vote.seat_votes}
+				{preview}
+				voteCanPass={snapshot.draft_preview.vote.passed}
+				supportCount={snapshot.draft_preview.vote.support_count}
+				onAddProposal={(handIndex) => mutate('draft.proposal.add', { hand_index: handIndex })}
+				onRemoveProposal={(draftIndex) =>
+					mutate('draft.proposal.remove', { draft_index: draftIndex })}
+				onAddPolicy={(displayName) => mutate('draft.policy.add', { display_name: displayName })}
+				onRemovePolicy={(draftIndex) => mutate('draft.policy.remove', { draft_index: draftIndex })}
+				onTitleChange={(title) => mutate('draft.title.set', { title })}
+				onEditSavedBill={(savedBillIndex) =>
+					mutate('bill.edit', { saved_bill_index: savedBillIndex })}
+				onBribeSeat={bribeSeat}
+				onSubmit={submitBill}
+			/>
+		{:else if snapshot.ui_mode === 'constitution'}
+			<ConstitutionView
+				raceItems={topItems.raceItems}
+				interestGroupItems={topItems.interestGroupItems}
+				governingMonths={snapshot.constitution.available_governing_months}
+				term={frame.term}
+				year={frame.year}
+				month={frame.month}
+				onNewspaperOpen={openNewspaper}
+				title={snapshot.constitution.title}
+				{constitution}
+				columns={snapshot.constitution.columns}
+				onArticleSelectionChange={selectConstitutionArticle}
+				onColumnUnlock={unlockConstitutionColumn}
+				onSubmit={submitConstitution}
+			/>
+		{:else}
+			<OfficeView {...frame} onNewspaperOpen={openNewspaper} onSynthesisConfirm={mergeProposals} />
+		{/if}
 
-	{#if newspaperOpen && newspaperEdition}
-		<NewspaperView
-			year={newspaperEdition.year}
-			month={newspaperEdition.month}
-			metrics={newspaperEdition.metrics}
-			front={newspaperEdition.front}
-			events={newspaperEdition.events}
-			busy={newspaperBusy}
-			folded={newspaperFolded}
-			leaving={newspaperLeaving}
-			onCovered={handleNewspaperCovered}
-			onAdvance={snapshot.term_report ? undefined : advanceFromNewspaper}
-			onRequestClose={requestNewspaperClose}
-			onFolded={finishNewspaperFold}
-			onClosed={finishNewspaperClose}
-		/>
-	{/if}
+		{#if newspaperOpen && newspaperEdition}
+			<NewspaperView
+				term={snapshot.term}
+				year={newspaperEdition.year}
+				month={newspaperEdition.month}
+				saves={snapshot.saves}
+				{saveError}
+				onSaveSelect={selectSave}
+				metrics={newspaperEdition.metrics}
+				front={newspaperEdition.front}
+				events={newspaperEdition.events}
+				busy={newspaperBusy}
+				folded={newspaperFolded}
+				leaving={newspaperLeaving}
+				onCovered={handleNewspaperCovered}
+				onAdvance={snapshot.term_report ? undefined : advanceFromNewspaper}
+				onRequestClose={requestNewspaperClose}
+				onFolded={finishNewspaperFold}
+				onClosed={finishNewspaperClose}
+			/>
+		{/if}
+	{/key}
 {/if}

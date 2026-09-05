@@ -197,6 +197,7 @@ func full_state(
 	var state := session.state
 	return {
 		"state_version": state_version,
+		"saves": session.list_saves(),
 		"ui_mode": ui_mode,
 		"world_scene": world_scene,
 		"parliament_seat_anchors": parliament_seat_anchors,

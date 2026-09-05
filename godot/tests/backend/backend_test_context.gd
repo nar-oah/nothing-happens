@@ -31,6 +31,7 @@ func make_session(
 	supplied_balance: GameBalanceDefinition = null
 ) -> RunSession:
 	var session := RunSession.new()
+	session.autosave_enabled = false
 	var configured_balance: GameBalanceDefinition = supplied_balance
 	if configured_balance == null:
 		configured_balance = GameBalanceDefinition.new()

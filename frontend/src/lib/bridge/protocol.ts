@@ -4,6 +4,7 @@ import type {
 	LiveGameState,
 	ParliamentLayoutDto,
 	ProposalSyncDto,
+	SaveSlotDto,
 	UiMode
 } from '../game/state/types.ts';
 
@@ -28,6 +29,10 @@ export type OutboundPayloads = {
 	'ui.input_regions': { regions: NormalizedRect[] };
 	'ui.mode.set': { state_version: number; mode: UiMode };
 	'ui.newspaper.close': Record<string, never>;
+	'saves.list': Record<string, never>;
+	'saves.create': { state_version: number };
+	'saves.overwrite': { state_version: number; slot_id: string };
+	'saves.load': { state_version: number; slot_id: string };
 	'draft.proposal.add': { state_version: number; hand_index: number };
 	'draft.proposal.remove': { state_version: number; draft_index: number };
 	'draft.policy.add': { state_version: number; display_name: string };
@@ -53,7 +58,7 @@ export type OutboundPayloads = {
 export type OutboundType = keyof OutboundPayloads;
 export type GameplayCommandType = Exclude<
 	OutboundType,
-	'ui.ready' | 'ui.input_regions' | 'ui.newspaper.close'
+	'ui.ready' | 'ui.input_regions' | 'ui.newspaper.close' | 'saves.list'
 >;
 
 export type OutboundMessage<T extends OutboundType = OutboundType> = T extends OutboundType
@@ -66,6 +71,7 @@ export type OutboundMessage<T extends OutboundType = OutboundType> = T extends O
 
 export type InboundPayloads = {
 	'state.full': LiveGameState;
+	'saves.list': { saves: SaveSlotDto[] };
 	'draft.sync': DraftSyncDto;
 	'parliament.layout': ParliamentLayoutDto;
 	'proposal.sync': ProposalSyncDto;

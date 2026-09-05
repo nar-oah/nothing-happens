@@ -93,6 +93,7 @@ func _make_board_session(races: Array[RaceDefinition], groups: Array[InterestGro
 	balance.event_spawn_count_max = 0
 	balance.event_early_reveal_probability_per_seat = 0.0
 	var session := RunSession.new()
+	session.autosave_enabled = false
 	session.balance = balance
 	var articles: Array[ConstitutionArticleDefinition] = []
 	session.configure_content(races, groups, seats, articles, board)

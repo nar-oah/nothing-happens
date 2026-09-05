@@ -1,4 +1,4 @@
-[gd_resource type="Resource" format=3]
+[gd_resource type="Resource" format=3 uid="uid://bdy8d7uq2rfvb"]
 
 [ext_resource type="Script" path="res://definitions/yin_yang_rule_definition.gd" id="1_rule"]
 

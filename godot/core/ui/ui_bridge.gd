@@ -201,6 +201,10 @@ func _dispatch(message: Dictionary, messages: Array[Dictionary]) -> void:
 	match message_type:
 		"ui.ready":
 			messages.append(_full_state(message["request_id"]))
+		"saves.list":
+			messages.append(_envelope("saves.list", {"saves": run_session.list_saves()}, message["request_id"]))
+		"saves.create", "saves.overwrite", "saves.load":
+			_handle_save_command(message, messages)
 		"ui.input_regions":
 			_handle_input_regions(message, messages)
 		"ui.mode.set":
@@ -261,6 +265,31 @@ func _handle_input_regions(message: Dictionary, messages: Array[Dictionary]) -> 
 		regions.append(raw_region)
 	if cef_texture != null and cef_texture.has_method("set_blocker_regions"):
 		cef_texture.call("set_blocker_regions", regions)
+
+
+func _handle_save_command(message: Dictionary, messages: Array[Dictionary]) -> void:
+	var result: Dictionary
+	var command: String = message["type"]
+	if command == "saves.create":
+		result = run_session.create_manual_save()
+	else:
+		var slot_id: Variant = message["payload"].get("slot_id")
+		if not slot_id is String:
+			_append_mutation_error(messages, {"code": "invalid_save_slot", "message": "存档编号必须是字符串。"}, message["request_id"])
+			return
+		result = run_session.load_save(slot_id) if command == "saves.load" else run_session.overwrite_manual_save(slot_id)
+	if not result["ok"]:
+		_append_mutation_error(messages, result["error"], message["request_id"])
+		return
+	if command == "saves.load":
+		state_version += 1
+		var mode := "constitution" if run_session.state.month == 0 else "office"
+		set_ui_mode(mode, false)
+		if scene_manager != null and scene_manager.has_method("reload_current_world"):
+			scene_manager.call("reload_current_world")
+		messages.append(_full_state(message["request_id"]))
+		return
+	messages.append(_envelope("saves.list", {"saves": run_session.list_saves()}, message["request_id"]))
 
 
 func _handle_mode_set(message: Dictionary, messages: Array[Dictionary]) -> void:

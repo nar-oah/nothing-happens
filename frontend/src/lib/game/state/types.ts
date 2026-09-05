@@ -197,8 +197,18 @@ export type GameStatusDto = {
 	max_collapse: number;
 };
 
+export type SaveSlotDto = {
+	slot_id: string;
+	automatic: boolean;
+	term: number;
+	year: number;
+	month: number;
+	saved_at: string;
+};
+
 export type LiveGameState = GameStatusDto & {
 	state_version: number;
+	saves: SaveSlotDto[];
 	ui_mode: UiMode;
 	world_scene: WorldScene;
 	parliament_seat_anchors: ParliamentSeatAnchorDto[];

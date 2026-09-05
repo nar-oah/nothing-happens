@@ -11,6 +11,10 @@ class_name RunSession
 @export var seat_definitions: Array[SeatDefinition] = []
 @export var constitution_articles: Array[ConstitutionArticleDefinition] = []
 
+var save_directory: String = "user://saves"
+var autosave_enabled: bool = true
+var last_save_error: Dictionary = {}
+
 var state: RunState
 var meta_progression := MetaProgressionState.new()
 var context: RunContext
@@ -52,7 +56,8 @@ func configure_content(
 func start_new_run() -> void:
 	term_report.clear()
 	_last_awarded_term = 0
-	_start_term(1)
+	if _start_term(1) and autosave_enabled and not FileAccess.file_exists(save_directory.path_join("auto.json")):
+		save_automatically()
 
 
 func _start_term(term_number: int) -> bool:
@@ -72,14 +77,44 @@ func _start_term(term_number: int) -> bool:
 		constitution_articles = constitution_board.get_articles()
 	state = RunState.new()
 	state.term = maxi(term_number, 1)
+	var previous_rng: Variant = random_system.rng.state if term_number > 1 and random_system != null else null
+	_build_runtime()
+	if previous_rng != null:
+		random_system.rng.state = previous_rng
+	inflation_system.initialize_metrics(state.metrics, balance)
+	state.year_start_metrics = state.metrics.copy()
+	if not race_system.initialize_races(state, race_definitions, balance):
+		return false
+	if not parliament_system.initialize_seats(state, seat_definitions, race_definitions):
+		return false
+	if not constitution_system.initialize(context):
+		return false
+	constitution_system.run_effects(context, ConstitutionEffect.Timing.BEFORE_SEAT_ALLOCATION)
+	var allocated := (
+		race_system.allocate_opening_seats(context)
+		if constitution_board != null
+		else race_system.allocate_annual_seats(context)
+	)
+	if not allocated:
+		push_error("Failed to allocate opening race seats.")
+		return false
+	constitution_system.run_effects(context, ConstitutionEffect.Timing.AFTER_SEAT_ALLOCATION)
+	if not parliament_system.initialize_base_groups(context, interest_groups):
+		return false
+	constitution_system.run_effects(context, ConstitutionEffect.Timing.AFTER_GROUP_ALLOCATION)
+	constitution_system.run_effects(context, ConstitutionEffect.Timing.ON_ACTIVATE)
+	race_system.rebuild_annual_expectations(context)
+	_previous_newspaper_collapse = state.collapse_level
+	return true
+
+
+func _build_runtime() -> void:
 	time_system = TimeSystem.new()
 	random_system = RandomSystem.new()
 	proposal_system = ProposalSystem.new()
 	market_system = MarketSystem.new()
 	policy_system = PolicySystem.new()
 	inflation_system = InflationSystem.new()
-	inflation_system.initialize_metrics(state.metrics, balance)
-	state.year_start_metrics = state.metrics.copy()
 	parliament_system = ParliamentSystem.new()
 	race_system = RaceSystem.new()
 	draft_bill_system = DraftBillSystem.new()
@@ -113,32 +148,9 @@ func _start_term(term_number: int) -> bool:
 	context.constitution_board = constitution_board
 	context.constitution_articles = constitution_articles
 	context.meta_progression = meta_progression
-	if not race_system.initialize_races(state, race_definitions, balance):
-		return false
-	if not parliament_system.initialize_seats(state, seat_definitions, race_definitions):
-		return false
-	if not constitution_system.initialize(context):
-		return false
-	constitution_system.run_effects(context, ConstitutionEffect.Timing.BEFORE_SEAT_ALLOCATION)
-	var allocated := (
-		race_system.allocate_opening_seats(context)
-		if constitution_board != null
-		else race_system.allocate_annual_seats(context)
-	)
-	if not allocated:
-		push_error("Failed to allocate opening race seats.")
-		return false
-	constitution_system.run_effects(context, ConstitutionEffect.Timing.AFTER_SEAT_ALLOCATION)
-	if not parliament_system.initialize_base_groups(context, interest_groups):
-		return false
-	constitution_system.run_effects(context, ConstitutionEffect.Timing.AFTER_GROUP_ALLOCATION)
-	constitution_system.run_effects(context, ConstitutionEffect.Timing.ON_ACTIVATE)
-	race_system.rebuild_annual_expectations(context)
 	flow_controller = FlowController.new()
 	flow_controller.setup(context)
-	_previous_newspaper_collapse = state.collapse_level
 	_configure_newspaper_front_resolvers()
-	return true
 
 
 func advance_month() -> bool:
@@ -147,17 +159,65 @@ func advance_month() -> bool:
 		return false
 	if state.run_phase != RunState.RunPhase.TERM_ENDED:
 		_resolve_newspaper_front(state)
-	return _settle_and_start_next_term() if state.run_phase == RunState.RunPhase.TERM_ENDED else true
+	if state.run_phase == RunState.RunPhase.TERM_ENDED and not _settle_and_start_next_term():
+		return false
+	if autosave_enabled:
+		save_automatically()
+	return true
 
 
 func start_next_term() -> bool:
 	if state == null or state.run_phase != RunState.RunPhase.TERM_ENDED:
 		return false
-	return _settle_and_start_next_term()
+	if not _settle_and_start_next_term():
+		return false
+	if autosave_enabled:
+		save_automatically()
+	return true
 
 
 func clear_term_report() -> void:
 	term_report.clear()
+
+
+func list_saves() -> Array[Dictionary]:
+	return RunSaveStore.list_saves(save_directory)
+
+
+func create_manual_save() -> Dictionary:
+	return _save_result(RunSaveStore.create_manual(self))
+
+
+func overwrite_manual_save(slot_id: String) -> Dictionary:
+	return _save_result(RunSaveStore.overwrite_manual(self, slot_id))
+
+
+func save_automatically() -> Dictionary:
+	return _save_result(RunSaveStore.write_save(self, RunSaveStore.AUTO_SLOT))
+
+
+func load_save(slot_id: String) -> Dictionary:
+	var saved := RunSaveStore.read_save(save_directory, slot_id)
+	if not saved["ok"]:
+		return saved
+	var restored := RunSnapshot.decode(saved["snapshot"])
+	if not restored["ok"]:
+		return {"ok": false, "error": {"code": "invalid_snapshot", "message": "无法恢复存档状态或资源引用。"}}
+	state = restored["state"]
+	meta_progression = restored["meta_progression"]
+	var session_data: Dictionary = restored["session"]
+	term_report = session_data["term_report"]
+	_last_awarded_term = session_data["_last_awarded_term"]
+	_previous_newspaper_collapse = session_data["_previous_newspaper_collapse"]
+	_build_runtime()
+	random_system.rng.state = restored["rng_state"]
+	last_save_error.clear()
+	return {"ok": true, "slot_id": slot_id}
+
+
+func _save_result(result: Dictionary) -> Dictionary:
+	last_save_error = {} if result["ok"] else result["error"]
+	return result
 
 
 func _settle_and_start_next_term() -> bool:

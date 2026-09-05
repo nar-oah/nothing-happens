@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="ConstitutionColumnDefinition" format=3]
+[gd_resource type="Resource" script_class="ConstitutionColumnDefinition" format=3 uid="uid://dq0w6m43s5cii"]
 
 [ext_resource type="Script" path="res://definitions/constitution_column_definition.gd" id="1"]
 [ext_resource type="Resource" path="res://data/constitutions/自由贸易.tres" id="2"]

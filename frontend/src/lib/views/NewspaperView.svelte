@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { tick } from 'svelte';
+	import ChoreItem from '$lib/components/chore/ChoreItem.svelte';
 	import ChoreSwitch from '$lib/components/chore/ChoreSwitch.svelte';
+	import { deriveSaveItems } from '$lib/game/state/saves';
+	import type { SaveSlotDto } from '$lib/game/state/types';
 	import { VERTICAL_FOLD_HEIGHT, VERTICAL_FOLD_WIDTH } from '$lib/components/memorial/constants';
 	import Newspaper from '$lib/components/newspaper/Newspaper.svelte';
 	import GameStateDisplay from '$lib/components/state/GameStateDisplay.svelte';
@@ -13,8 +16,12 @@
 
 	type NewspaperMotionPhase = 'entering' | 'active' | 'leaving';
 	type Props = {
+		term?: number;
 		year: number;
 		month: number;
+		saves?: SaveSlotDto[];
+		saveError?: string;
+		onSaveSelect?: (slot: SaveSlotDto, loading: boolean) => void;
 		metrics: NewspaperMetricData[];
 		front?: NewspaperFrontData;
 		events: NewspaperEventData[];
@@ -33,8 +40,12 @@
 	const ROTATION_COS = Math.cos(ROTATION_RADIANS);
 
 	let {
+		term = 1,
 		year,
 		month,
+		saves = [],
+		saveError = '',
+		onSaveSelect,
 		metrics,
 		front,
 		events,
@@ -52,7 +63,10 @@
 	let scrollPosition = $state(0);
 	let motionPhase = $state<NewspaperMotionPhase>('entering');
 	let backgroundCovered = $state(false);
+	let loadingSaves = $state(false);
+	let saveScrollElement = $state<HTMLDivElement>();
 	let scrollElement: HTMLDivElement;
+	const saveItems = $derived(deriveSaveItems(saves, { term, year, month }, loadingSaves));
 	const pageCount = $derived(4 + events.length + (front ? 1 : 0));
 	const baseHeight = $derived(pageCount * VERTICAL_FOLD_WIDTH);
 	const scale = $derived(viewportWidth / VERTICAL_FOLD_HEIGHT);
@@ -90,6 +104,14 @@
 		if (!leaving || motionPhase === 'leaving') return;
 		backgroundCovered = false;
 		motionPhase = 'leaving';
+	});
+
+	$effect(() => {
+		const element = saveScrollElement;
+		if (!element || saveItems.length === 0) return;
+		void tick().then(() => {
+			if (saveScrollElement === element) element.scrollLeft = element.scrollWidth;
+		});
 	});
 
 	$effect(() => {
@@ -168,8 +190,32 @@
 	</div>
 	{#if backgroundCovered}
 		<div class="top-controls">
-			<div class="top-items" aria-hidden="true"></div>
-			<ChoreSwitch left="保存" right="读取" />
+			<div class="top-items" bind:this={saveScrollElement}>
+				<div class="ml-auto flex w-max items-start gap-12" aria-label="存档列表">
+					{#each saveItems as item (item.slot.slot_id)}
+						<button
+							type="button"
+							class="shrink-0 cursor-pointer border-0 bg-transparent p-0 disabled:cursor-default"
+							aria-label={`${loadingSaves ? '读取' : item.slot.automatic ? '新建手动存档' : '覆盖手动存档'}：${item.item.text}，${item.item.value}${item.slot.automatic ? '，自动存档' : ''}`}
+							disabled={interactionDisabled || !onSaveSelect}
+							onclick={() => onSaveSelect?.(item.slot, loadingSaves)}
+						>
+							<ChoreItem {...item.item} isRow />
+						</button>
+					{/each}
+				</div>
+			</div>
+			<div class="shrink-0">
+				<ChoreSwitch
+					left="保存"
+					right="读取"
+					bind:isSwitch={loadingSaves}
+					disabled={interactionDisabled}
+				/>
+			</div>
+			{#if saveError}
+				<p class="save-error" role="alert">{saveError}</p>
+			{/if}
 		</div>
 		<div class="state-slot"><GameStateDisplay {primary} {secondary} /></div>
 	{/if}
@@ -281,7 +327,18 @@
 	.top-items {
 		min-width: 0;
 		flex: 1;
-		pointer-events: none;
+		overflow-x: auto;
+		overscroll-behavior: contain;
+		scrollbar-width: none;
+	}
+	.top-items::-webkit-scrollbar {
+		display: none;
+	}
+	.save-error {
+		position: absolute;
+		top: 100%;
+		left: 0;
+		margin: 8px 0;
 	}
 	.state-slot {
 		position: absolute;

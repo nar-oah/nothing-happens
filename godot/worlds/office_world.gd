@@ -32,7 +32,7 @@ func _update_layout() -> void:
 	$RightAnchor.position = size
 
 
-func _on_door_clicked() -> void:
+func _on_door_clicked(_dialogue: SimpleDialogueDefinition) -> void:
 	parliament_requested.emit()
 
 

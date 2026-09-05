@@ -20,6 +20,12 @@ func show_parliament() -> void:
 	_show(parliament_scene, "parliament")
 
 
+func reload_current_world() -> void:
+	var scene_name := current_scene_name
+	current_scene_name = ""
+	_show(parliament_scene if scene_name == "parliament" else office_scene, scene_name)
+
+
 func _show(scene: PackedScene, scene_name: String) -> void:
 	if scene == null or current_scene_name == scene_name:
 		return

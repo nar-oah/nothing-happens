@@ -26,6 +26,7 @@ import type {
 	PendingDialogueDto,
 	ProposalSyncDto,
 	RaceSummaryDto,
+	SaveSlotDto,
 	SeatSummaryDto,
 	VoteResultDto
 } from '../game/state/types.ts';
@@ -40,6 +41,7 @@ import type {
 
 const inboundTypes = new Set<InboundType>([
 	'state.full',
+	'saves.list',
 	'draft.sync',
 	'parliament.layout',
 	'proposal.sync',
@@ -52,6 +54,10 @@ const outboundTypes = new Set<OutboundType>([
 	'ui.input_regions',
 	'ui.mode.set',
 	'ui.newspaper.close',
+	'saves.list',
+	'saves.create',
+	'saves.overwrite',
+	'saves.load',
 	'draft.proposal.add',
 	'draft.proposal.remove',
 	'draft.policy.add',
@@ -101,6 +107,7 @@ export function isLiveGameState(value: unknown): value is LiveGameState {
 	const state = value as Record<string, unknown>;
 	return (
 		isVersion(state.state_version) &&
+		isArrayOf(state.saves, isSaveSlot) &&
 		isUiMode(state.ui_mode) &&
 		isWorldScene(state.world_scene) &&
 		isArrayOf(state.parliament_seat_anchors, isParliamentSeatAnchor) &&
@@ -142,6 +149,8 @@ function isInboundPayload(type: InboundType, payload: unknown): boolean {
 	switch (type) {
 		case 'state.full':
 			return isLiveGameState(payload);
+		case 'saves.list':
+			return isRecord(payload) && isArrayOf(payload.saves, isSaveSlot);
 		case 'draft.sync':
 			return isDraftSync(payload);
 		case 'parliament.layout':
@@ -153,6 +162,20 @@ function isInboundPayload(type: InboundType, payload: unknown): boolean {
 		case 'command.error':
 			return isCommandError(payload);
 	}
+}
+
+function isSaveSlot(value: unknown): value is SaveSlotDto {
+	return (
+		isRecord(value) &&
+		typeof value.slot_id === 'string' &&
+		value.slot_id.length > 0 &&
+		typeof value.automatic === 'boolean' &&
+		isNonnegativeInteger(value.term) &&
+		isNonnegativeInteger(value.year) &&
+		isNonnegativeInteger(value.month) &&
+		value.month <= 12 &&
+		typeof value.saved_at === 'string'
+	);
 }
 
 function isParliamentLayout(value: unknown): value is ParliamentLayoutDto {
@@ -357,7 +380,11 @@ function isConstitutionArticleState(value: unknown): value is ConstitutionArticl
 		typeof state.eligible === 'boolean' &&
 		typeof state.is_terminal === 'boolean' &&
 		(state.requirement_percent === null || isNumber(state.requirement_percent)) &&
-		isArrayOf(state.contents, (content) => isRecord(content) && typeof content.title === 'string' && typeof content.body === 'string')
+		isArrayOf(
+			state.contents,
+			(content) =>
+				isRecord(content) && typeof content.title === 'string' && typeof content.body === 'string'
+		)
 	);
 }
 
