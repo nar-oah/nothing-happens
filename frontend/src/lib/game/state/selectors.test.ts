@@ -49,15 +49,17 @@ test('live status derives political donation and collapse values', () => {
 	});
 });
 
-test('authoritative draft preview becomes existing Memorial metric props', () => {
+test('draft preview displays every projected metric including unchanged values', () => {
 	const state = makeLiveState();
-	const preview = deriveDraftPreviewMetrics(state.draft_preview, state.draft_bill);
+	const preview = deriveDraftPreviewMetrics(state.draft_preview);
 	assert.deepEqual(
 		preview.map(({ text, symbol, value }) => [text, symbol, value]),
 		[
-			['税課', undefined, 0],
-			['消費', '-', 8],
-			['投資', undefined, 0]
+			['税課', undefined, 100],
+			['消費', undefined, 92],
+			['生産', undefined, 100],
+			['就業', undefined, 100],
+			['投資', undefined, 100]
 		]
 	);
 });

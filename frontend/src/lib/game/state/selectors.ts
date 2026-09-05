@@ -1,7 +1,6 @@
 import type { LeftItem } from '../../components/left/types.ts';
 import { policyToMemorialContent } from '../../components/memorial/presentation.ts';
 import {
-	MetricSymbol,
 	type MemorialConstitutionData,
 	type MemorialConstitutionRowContentData,
 	type MemorialMetricData
@@ -11,9 +10,7 @@ import {
 	METRICS,
 	METRIC_DISPLAY_NAMES,
 	Metric,
-	getBillMetrics,
 	getMetricValue,
-	type Bill,
 	type Constitution,
 	type InterestGroupDefinition
 } from '../index.ts';
@@ -73,12 +70,11 @@ export function deriveGameStateDisplayProps(state: LiveGameState): GameStateDisp
 	return { primary: { text: '政治献金', value: state.political_donation_pool, isRow: false }, secondary: { text: '崩溃度', value: state.collapse_level, limit: state.max_collapse, isRow: false } };
 }
 
-export function deriveDraftPreviewMetrics(preview: DraftPreviewDto, draft?: Bill): MemorialMetricData[] {
-	const metrics = draft ? getBillMetrics(draft.proposals, draft.policies) : METRICS.filter((metric) => getMetricValue(preview.current_metrics, metric) !== getMetricValue(preview.projected_metrics, metric));
-	return metrics.map((metric) => {
-		const change = getMetricValue(preview.projected_metrics, metric) - getMetricValue(preview.current_metrics, metric);
-		return { text: METRIC_DISPLAY_NAMES[metric], symbol: change === 0 ? undefined : change > 0 ? MetricSymbol.Increase : MetricSymbol.Decrease, value: Math.abs(change) };
-	});
+export function deriveDraftPreviewMetrics(preview: DraftPreviewDto): MemorialMetricData[] {
+	return METRICS.map((metric) => ({
+		text: METRIC_DISPLAY_NAMES[metric],
+		value: getMetricValue(preview.projected_metrics, metric)
+	}));
 }
 
 export function deriveConstitutionMemorial(state: LiveGameState): LiveConstitutionMemorialData {
