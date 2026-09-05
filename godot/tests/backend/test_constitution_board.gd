@@ -20,6 +20,7 @@ func _test_board_navigation_and_effect_serialization(t: BackendTestContext) -> v
 	var center_article := _add_article(center, row, "常制")
 	_add_article(center, companion_row, "陪测常制")
 	var right_article := _add_article(right, row, "新制")
+	right_article.description = "约法描述"
 	_add_article(right, companion_row, "陪测新制")
 	var effect := EventIntelProbabilityEffect.new()
 	effect.races = [race]
@@ -37,6 +38,11 @@ func _test_board_navigation_and_effect_serialization(t: BackendTestContext) -> v
 	var article_index := session.constitution_articles.find(right_article)
 	t.check_equal(dto["articles"][article_index]["effects"].size(), 1, "article DTO serializes effects")
 	t.check_equal(dto["articles"][article_index]["effects"][0]["display_name"], "事件情报", "effect DTO exposes display name")
+	t.check_equal(dto["articles"][article_index]["contents"], [
+		{"title": "", "body": "约法描述"},
+		{"title": "要求", "body": "无"},
+		{"title": effect.display_name, "body": effect.get_description()},
+	], "article details serialize an untitled description, requirements and named effect descriptions")
 	session.free()
 
 

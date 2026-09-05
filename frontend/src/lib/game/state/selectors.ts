@@ -125,10 +125,7 @@ function articleToMemorialRow(article: ConstitutionArticleStateDto): MemorialCon
 		number: article.requirement_percent ?? '',
 		selected: article.selected,
 		selectable: article.eligible,
-		contents: [
-			{ title: article.row_display_name, body: article.content },
-			...article.effects.map((effect) => ({ title: effect.display_name, body: effect.description }))
-		],
+		contents: article.contents,
 		policies: article.policies.map(policyToMemorialContent)
 	};
 }

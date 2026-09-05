@@ -151,7 +151,11 @@ export function makeLiveState(stateVersion = 1): LiveGameState {
 					selected: true,
 					eligible: false,
 					is_terminal: false,
-					requirement_percent: 50
+					requirement_percent: 50,
+					contents: [
+						{ title: '', body: '外藩约法描述' },
+						{ title: '要求', body: '种族：人类\n席位占比：不低于50%' }
+					]
 				}
 			]
 		},

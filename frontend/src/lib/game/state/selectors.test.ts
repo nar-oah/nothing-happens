@@ -101,6 +101,18 @@ test('constitution presentation keeps one aligned row grid and turns locked colu
 	assert.equal(constitution['新制'], 1);
 });
 
+test('constitution details preserve the authoritative description, requirements and effect sections', () => {
+	const state = makeLiveState();
+	state.constitution.articles[0].contents.push({ title: '事件情报', body: '人类事件情报概率增加25%' });
+	const constitution = deriveConstitutionMemorial(state);
+	const rows = Array.isArray(constitution['常制']) ? constitution['常制'] : [];
+	assert.deepEqual(rows[0]?.contents, [
+		{ title: '', body: '外藩约法描述' },
+		{ title: '要求', body: '种族：人类\n席位占比：不低于50%' },
+		{ title: '事件情报', body: '人类事件情报概率增加25%' }
+	]);
+});
+
 test('interest-group dialogue presentation uses authoritative visit values', () => {
 	const state = makeLiveState();
 	const dialogue = deriveDialoguePresentation(state.pending_dialogue);

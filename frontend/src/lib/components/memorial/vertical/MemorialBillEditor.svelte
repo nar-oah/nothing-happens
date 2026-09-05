@@ -64,9 +64,14 @@
 	}
 
 	function handleTitleKeydown(event: KeyboardEvent) {
-		if (event.key !== 'Enter') return;
+		if (event.key !== 'Enter' || event.isComposing) return;
 		event.preventDefault();
-		(event.currentTarget as HTMLInputElement).blur();
+		commitTitle();
+	}
+
+	function handleTitleBlur(event: FocusEvent) {
+		// CEF briefly blurs the browser while handing keyboard focus to its IME proxy.
+		if (document.activeElement !== event.currentTarget) commitTitle();
 	}
 
 	function removePage(index: number) {
@@ -114,7 +119,7 @@
 							value={titleDraft}
 							oninput={(event) => (titleDraft = event.currentTarget.value)}
 							onkeydown={handleTitleKeydown}
-							onblur={commitTitle}
+							onblur={handleTitleBlur}
 							onclick={(event) => event.stopPropagation()}
 						/>
 					{:else}
