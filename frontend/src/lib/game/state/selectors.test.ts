@@ -161,6 +161,25 @@ test('event-intel dialogue presentation maps metric names and keeps event values
 	});
 });
 
+test('simple dialogue presentation preserves Godot-provided strings', () => {
+	const dialogue = deriveDialoguePresentation({
+		kind: 'simple',
+		initial_text: '先听我说。',
+		left_option: '留下',
+		right_option: '离开',
+		left_content: '那就留下。',
+		right_content: '那便告辞。'
+	});
+	assert.deepEqual(dialogue, {
+		kind: 'simple',
+		initialText: '先听我说。',
+		leftOption: '留下',
+		rightOption: '离开',
+		leftContent: '那就留下。',
+		rightContent: '那便告辞。'
+	});
+});
+
 test('Saved Bill optimistic reconciliation still uses gameplay equivalence', () => {
 	const handProposal = {
 		...testProposal,
