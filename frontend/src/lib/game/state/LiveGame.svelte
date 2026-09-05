@@ -92,11 +92,15 @@
 		return (state.month_report?.events ?? []).flatMap((event) => {
 			const race = NEWSPAPER_RACE_BY_DISPLAY_NAME[event.race_display_name];
 			if (!race) return [];
+			const metric =
+				event.requirement_kind === 1 && event.interest_group_name
+					? `${event.interest_group_name}提案数`
+					: event.metric;
 			return [
 				{
 					race,
 					description: event.event_description,
-					metric: event.metric,
+					metric,
 					value: event.value,
 					countdown: event.countdown,
 					strength: event.strength,

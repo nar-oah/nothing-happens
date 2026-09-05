@@ -32,11 +32,42 @@ func rebuild_annual_expectations(context: RunContext) -> void:
 		if active == null:
 			active = race_state.definition
 		race_state.expectation_targets.clear()
-		var growth_rate := active.expectation_growth_rate * context.constitution_system.get_expectation_growth_multiplier(context, race_state.definition)
-		growth_rate = clampf(growth_rate, -1.0, 10.0)
+		var growth_rate := get_expectation_growth_rate(race_state, context)
 		for metric in active.get_stance_metrics():
 			var base := baseline.get_value(metric)
 			race_state.expectation_targets[metric] = roundi(float(base) * (1.0 + growth_rate))
+
+
+func get_expectation_growth_rate(race: RaceState, context: RunContext) -> float:
+	if race == null or race.definition == null or context == null:
+		return 0.0
+	var active := race.active_definition
+	if active == null:
+		active = race.definition
+	var growth_rate := active.expectation_growth_rate
+	if context.constitution_system != null:
+		growth_rate *= context.constitution_system.get_expectation_growth_multiplier(
+			context, race.definition
+		)
+	return clampf(growth_rate, -1.0, 10.0)
+
+
+func get_interest_group_proposal_expectation(
+	race: RaceState, context: RunContext
+) -> int:
+	if context == null or context.balance == null:
+		return 0
+	var initial := context.balance.initial_interest_group_proposal_requirement
+	if race == null or race.definition == null:
+		return initial
+	var years_elapsed := 0
+	if context.state != null:
+		years_elapsed = maxi(context.state.year - 1, 0)
+	var growth_rate := get_expectation_growth_rate(race, context)
+	return maxi(
+		roundi(float(initial) * pow(1.0 + growth_rate, float(years_elapsed))),
+		0
+	)
 
 
 func allocate_opening_seats(context: RunContext) -> bool:
