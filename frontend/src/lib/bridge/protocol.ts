@@ -2,6 +2,7 @@ import type {
 	BillResultDto,
 	DraftSyncDto,
 	LiveGameState,
+	ParliamentLayoutDto,
 	ProposalSyncDto,
 	UiMode
 } from '../game/state/types.ts';
@@ -65,6 +66,7 @@ export type OutboundMessage<T extends OutboundType = OutboundType> = T extends O
 export type InboundPayloads = {
 	'state.full': LiveGameState;
 	'draft.sync': DraftSyncDto;
+	'parliament.layout': ParliamentLayoutDto;
 	'proposal.sync': ProposalSyncDto;
 	'bill.result': BillResultDto;
 	'command.error': CommandErrorDto;

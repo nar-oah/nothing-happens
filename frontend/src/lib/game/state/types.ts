@@ -212,6 +212,9 @@ export type DraftSyncDto = {
 	draft_preview: DraftPreviewDto;
 	saved_bills?: Bill[];
 };
+export type ParliamentLayoutDto = {
+	parliament_seat_anchors: ParliamentSeatAnchorDto[];
+};
 export type ProposalSyncDto = {
 	state_version: number;
 	proposal_hand: Proposal[];

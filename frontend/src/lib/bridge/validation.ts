@@ -20,6 +20,7 @@ import type {
 	GameStatusDto,
 	InterestGroupSummaryDto,
 	LiveGameState,
+	ParliamentLayoutDto,
 	ParliamentSeatAnchorDto,
 	ParliamentSummaryDto,
 	PendingDialogueDto,
@@ -40,6 +41,7 @@ import type {
 const inboundTypes = new Set<InboundType>([
 	'state.full',
 	'draft.sync',
+	'parliament.layout',
 	'proposal.sync',
 	'bill.result',
 	'command.error'
@@ -141,6 +143,8 @@ function isInboundPayload(type: InboundType, payload: unknown): boolean {
 			return isLiveGameState(payload);
 		case 'draft.sync':
 			return isDraftSync(payload);
+		case 'parliament.layout':
+			return isParliamentLayout(payload);
 		case 'proposal.sync':
 			return isProposalSync(payload);
 		case 'bill.result':
@@ -148,6 +152,13 @@ function isInboundPayload(type: InboundType, payload: unknown): boolean {
 		case 'command.error':
 			return isCommandError(payload);
 	}
+}
+
+function isParliamentLayout(value: unknown): value is ParliamentLayoutDto {
+	return (
+		isRecord(value) &&
+		isArrayOf(value.parliament_seat_anchors, isParliamentSeatAnchor)
+	);
 }
 
 function isDraftSync(value: unknown): value is DraftSyncDto {
