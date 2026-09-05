@@ -51,15 +51,17 @@ test('live status derives political donation and collapse values', () => {
 
 test('draft preview displays every projected metric including unchanged values', () => {
 	const state = makeLiveState();
+	state.draft_preview.projected_metrics.tax = 107;
+	state.draft_preview.projected_metrics.investment = -5;
 	const preview = deriveDraftPreviewMetrics(state.draft_preview);
 	assert.deepEqual(
 		preview.map(({ text, symbol, value }) => [text, symbol, value]),
 		[
-			['税課', undefined, 100],
+			['税課', undefined, 107],
 			['消費', undefined, 92],
 			['生産', undefined, 100],
 			['就業', undefined, 100],
-			['投資', undefined, 100]
+			['投資', undefined, -5]
 		]
 	);
 });
