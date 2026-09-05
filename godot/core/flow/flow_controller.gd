@@ -90,10 +90,13 @@ func _record_month_report(report_year: int, report_month: int, previous_metrics:
 		if event == null or not event.is_active() or not event.known:
 			continue
 		var active_race := context.constitution_system.get_active_race_definition(context, event.race)
+		var active_group := context.constitution_system.get_active_group_definition(context, event.interest_group)
 		state.month_report_events.append({
 			"race_display_name": "" if active_race == null else active_race.display_name,
 			"event_description": "" if active_race == null else active_race.event_description,
-			"metric": int(event.metric),
+			"requirement_kind": int(event.requirement_kind),
+			"metric": null if event.requirement_kind == EventState.RequirementKind.INTEREST_GROUP_PROPOSALS else int(event.metric),
+			"interest_group_display_name": "" if active_group == null else active_group.display_name,
 			"value": context.event_system.get_current_requirement(event),
 			"countdown": maxi(context.balance.event_lifetime_months - event.months_alive, 0),
 			"strength": roundi(clampf(event.growth_progress, 0.0, 1.0) * 100.0),
