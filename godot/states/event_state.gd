@@ -16,6 +16,7 @@ var full_target: int = 0
 var growth_progress: float = 0.0
 var satisfaction_rate: float = 0.0
 var known: bool = false
+var published: bool = false
 var public_window_entered: bool = false
 var phase: Phase = Phase.WORSENING
 var months_alive: int = 0
