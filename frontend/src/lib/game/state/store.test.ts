@@ -39,11 +39,17 @@ test('save list synchronization preserves gameplay and clears command errors', (
 test('saving keeps manual slots first and current progress last without altering stored auto', () => {
 	const current = { term: 4, year: 1, month: 0 };
 	const items = deriveSaveItems([automaticSave, manualSave], current, false);
-	assert.deepEqual(items.map(({ slot }) => slot.slot_id), ['manual-1', 'auto']);
-	assert.deepEqual(items.map(({ item }) => item), [
-		{ text: '第 1 任', value: '1 年 2 月' },
-		{ text: '第 4 任', value: '1 年 0 月' }
-	]);
+	assert.deepEqual(
+		items.map(({ slot }) => slot.slot_id),
+		['manual-1', 'auto']
+	);
+	assert.deepEqual(
+		items.map(({ item }) => item),
+		[
+			{ text: '第 1 任', value: '1 年 2 月' },
+			{ text: '第 4 任', value: '1 年 0 月' }
+		]
+	);
 	assert.deepEqual(getSaveAction(items[0].slot, false), {
 		type: 'saves.overwrite',
 		payload: { slot_id: 'manual-1' }
@@ -56,7 +62,10 @@ test('saving keeps manual slots first and current progress last without altering
 test('loading shows actual saved dates and reads any slot including the last automatic slot', () => {
 	const current = { term: 1, year: 1, month: 2 };
 	const items = deriveSaveItems([automaticSave, manualSave], current, true);
-	assert.deepEqual(items.map(({ slot }) => slot), [manualSave, automaticSave]);
+	assert.deepEqual(
+		items.map(({ slot }) => slot),
+		[manualSave, automaticSave]
+	);
 	assert.equal(items[1].item.value, '3 年 4 月');
 	for (const { slot } of items) {
 		assert.deepEqual(getSaveAction(slot, true), {

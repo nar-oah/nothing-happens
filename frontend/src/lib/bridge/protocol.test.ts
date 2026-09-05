@@ -9,30 +9,43 @@ import { decodeInboundMessage, encodeOutboundMessage, isOutboundType } from './v
 
 test('IPC supports all save commands and validates the save list in full and list responses', () => {
 	const saves = [
-		{ slot_id: 'auto', automatic: true, term: 1, year: 2, month: 0, saved_at: '2026-09-05T10:00:00' }
+		{
+			slot_id: 'auto',
+			automatic: true,
+			term: 1,
+			year: 2,
+			month: 0,
+			saved_at: '2026-09-05T10:00:00'
+		}
 	];
 	for (const type of ['saves.list', 'saves.create', 'saves.overwrite', 'saves.load'])
 		assert.equal(isOutboundType(type), true);
-	assert.deepEqual(
-		JSON.parse(encodeOutboundMessage({ type: 'saves.list', payload: {} })),
-		{ type: 'saves.list', payload: {} }
-	);
+	assert.deepEqual(JSON.parse(encodeOutboundMessage({ type: 'saves.list', payload: {} })), {
+		type: 'saves.list',
+		payload: {}
+	});
 	assert.deepEqual(
 		JSON.parse(encodeOutboundMessage({ type: 'saves.create', payload: { state_version: 5 } })),
 		{ type: 'saves.create', payload: { state_version: 5 } }
 	);
 	for (const type of ['saves.overwrite', 'saves.load'] as const) {
 		assert.deepEqual(
-			JSON.parse(encodeOutboundMessage({ type, payload: { slot_id: 'manual-1', state_version: 5 } })),
+			JSON.parse(
+				encodeOutboundMessage({ type, payload: { slot_id: 'manual-1', state_version: 5 } })
+			),
 			{ type, payload: { slot_id: 'manual-1', state_version: 5 } }
 		);
 	}
 	assert.deepEqual(
-		decodeInboundMessage(JSON.stringify({ type: 'saves.list', request_id: 'ui-save', payload: { saves } })),
+		decodeInboundMessage(
+			JSON.stringify({ type: 'saves.list', request_id: 'ui-save', payload: { saves } })
+		),
 		{ ok: true, value: { type: 'saves.list', request_id: 'ui-save', payload: { saves } } }
 	);
 	assert.equal(
-		decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: { ...makeLiveState(), saves } })).ok,
+		decodeInboundMessage(
+			JSON.stringify({ type: 'state.full', payload: { ...makeLiveState(), saves } })
+		).ok,
 		true
 	);
 	for (const invalid of [
@@ -44,11 +57,14 @@ test('IPC supports all save commands and validates the save list in full and lis
 		{ ...saves[0], saved_at: null }
 	]) {
 		assert.equal(
-			decodeInboundMessage(JSON.stringify({ type: 'saves.list', payload: { saves: [invalid] } })).ok,
+			decodeInboundMessage(JSON.stringify({ type: 'saves.list', payload: { saves: [invalid] } }))
+				.ok,
 			false
 		);
 		assert.equal(
-			decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: { ...makeLiveState(), saves: [invalid] } })).ok,
+			decodeInboundMessage(
+				JSON.stringify({ type: 'state.full', payload: { ...makeLiveState(), saves: [invalid] } })
+			).ok,
 			false
 		);
 	}
