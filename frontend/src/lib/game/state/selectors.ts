@@ -52,7 +52,11 @@ export function deriveLeftItems(state: LiveGameState): LeftItem[] {
 	return [
 		{ kind: 'constitution', ref: { collection: 'constitution', index: 0 }, constitution },
 		...state.saved_bills.map((bill, index): LeftItem => ({ kind: 'bill', ref: { collection: 'bills', index }, bill })),
-		...state.proposal_hand.map((proposal, index): LeftItem => ({ kind: 'proposal', ref: { collection: 'proposals', index }, proposal })),
+		...state.proposal_hand.flatMap((proposal, index): LeftItem[] =>
+			proposal.bonus_choice_resolved && proposal.positive_trait_accepted
+				? [{ kind: 'proposal', ref: { collection: 'proposals', index }, proposal }]
+				: []
+		),
 		...state.available_policies.map((policy, index): LeftItem => ({ kind: 'policy', ref: { collection: 'policies', index }, policy }))
 	];
 }
