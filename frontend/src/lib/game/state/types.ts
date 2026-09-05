@@ -104,8 +104,6 @@ export type VoteResultDto = {
 	passed: boolean;
 	submitted: boolean;
 	support_count: number;
-	opppose_count?: never;
-	opppose_count_legacy?: never;
 	oppose_count: number;
 	abstain_count: number;
 	absent_count: number;
