@@ -58,7 +58,7 @@ export function deriveLeftItems(state: LiveGameState): LeftItem[] {
 }
 
 export function deriveRaceTopItems(races: RaceSummaryDto[]): TopItemData[] {
-	return races.map((race) => ({ key: `race-${race.race_index}`, item: { text: race.display_name, value: race.seat_count }, detail: { leftLabel: '年度期望', rightLabel: '种族简介', leftBody: race.expectations.map(formatRaceExpectation).join('\n'), rightBody: race.description }, payload: race }));
+	return races.map((race) => ({ key: `race-${race.race_index}`, item: { text: race.display_name, value: race.seat_count }, detail: { leftLabel: '年度期望', rightLabel: '种族简介', leftBody: formatRaceExpectations(race), rightBody: race.description }, payload: race }));
 }
 
 export function deriveInterestGroupTopItems(groups: InterestGroupSummaryDto[]): TopItemData[] {
@@ -143,6 +143,14 @@ function articleToMemorialRow(article: ConstitutionArticleStateDto): MemorialCon
 
 function emptyConstitutionCell(): MemorialConstitutionRowContentData {
 	return { text: '', number: '', selected: false, selectable: false, contents: [], policies: [] };
+}
+
+function formatRaceExpectations(race: RaceSummaryDto): string {
+	const lines = race.expectations.map(formatRaceExpectation);
+	if (race.proposal_expectation) {
+		lines.push(`${race.proposal_expectation.interest_group_name}提案数≥${formatNumber(race.proposal_expectation.target)}`);
+	}
+	return lines.join('\n');
 }
 
 function formatRaceExpectation(expectation: RaceSummaryDto['expectations'][number]): string {
