@@ -1,6 +1,8 @@
 [gd_resource type="Resource" script_class="GameBalanceDefinition" format=3 uid="uid://61kkkntclnv"]
 
 [ext_resource type="Script" uid="uid://c2xh5m2ibfgwx" path="res://definitions/game_balance_definition.gd" id="1_14gic"]
+[ext_resource type="Resource" path="res://data/config/yin_yang_rule.tres" id="2_yin_yang"]
 
 [resource]
 script = ExtResource("1_14gic")
+yin_yang_rule = ExtResource("2_yin_yang")

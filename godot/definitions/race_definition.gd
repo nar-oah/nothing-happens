@@ -10,7 +10,6 @@ class_name RaceDefinition
 @export_group("制度参数")
 @export_range(-1.0, 1.0, 0.01) var expectation_growth_rate: float = 0.10
 @export var yin_yang_enabled: bool = false
-@export_range(0.0, 1.0, 0.01) var yin_yang_adjustment_rate: float = 0.10
 
 @export_group("希望提高")
 @export var increase_tax: bool = false
@@ -32,6 +31,10 @@ func get_stance_metrics() -> Array[Metric.Id]:
 	return result
 
 
+func get_portrait(_month: int) -> Texture2D:
+	return portrait
+
+
 func on_month_start(_context, _race_state) -> void:
 	pass
 
@@ -40,8 +43,13 @@ func modify_vote(_vote_context) -> void:
 	pass
 
 
-func is_vote_metric_active(_metric: Metric.Id, _context) -> bool:
-	return true
+func is_vote_metric_active(metric: Metric.Id, context) -> bool:
+	if not yin_yang_enabled:
+		return true
+	var rule := _get_yin_yang_rule(context)
+	if rule == null or context.state == null:
+		return true
+	return rule.is_yin_metric(metric) == _is_yin_month(context)
 
 
 func get_effective_expectation(base_target: int, metric: Metric.Id, context, _race_state) -> int:
@@ -49,11 +57,26 @@ func get_effective_expectation(base_target: int, metric: Metric.Id, context, _ra
 		not yin_yang_enabled
 		or context == null
 		or context.state == null
+		or context.balance == null
 		or get_stance(metric) == Metric.Direction.NONE
 	):
 		return base_target
-	var sign := 1.0 if context.state.month % 2 == 1 else -1.0
-	return roundi(float(base_target) * (1.0 + sign * yin_yang_adjustment_rate))
+	var rule := _get_yin_yang_rule(context)
+	if rule == null:
+		return base_target
+	var strengthened := rule.is_yin_metric(metric) == _is_yin_month(context)
+	var sign := 1.0 if strengthened else -1.0
+	return roundi(float(base_target) * (1.0 + sign * context.balance.yin_yang_adjustment_rate))
+
+
+func _get_yin_yang_rule(context) -> YinYangRuleDefinition:
+	if context == null or context.balance == null:
+		return null
+	return context.balance.yin_yang_rule
+
+
+func _is_yin_month(context) -> bool:
+	return context != null and context.state != null and context.state.month % 2 == 1
 
 
 func _increases_metric(metric: Metric.Id) -> bool:

@@ -101,7 +101,6 @@ func _calculate_seat_vote(
 		active_race = race_state.definition
 	vote.add_reason(&"race_expectation", _race_expectation_score(race_state, projected, context))
 	vote.add_reason(&"proposal_source", _group_support_score(seat.actual_group, draft, projected, context))
-	vote.add_reason(&"personal_relation", seat.personal_relation)
 	vote.add_reason(&"political_donation", context.state.vote_donations.get(seat.definition, 0.0))
 	var vote_context := VoteContext.new(context, seat, race_state, draft, pure_target, projected, vote, resolve_randomness)
 	context.constitution_system.apply_vote_effects(vote_context)

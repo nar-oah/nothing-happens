@@ -8,9 +8,9 @@ class_name ParliamentSeat
 var race: RaceDefinition
 
 
-func set_race(value: RaceDefinition) -> void:
+func set_race(value: RaceDefinition, month: int = 1) -> void:
 	race = value
-	visual.texture = null if value == null else value.portrait
+	visual.texture = null if value == null else value.get_portrait(month)
 
 
 func get_normalized_ui_anchor() -> Vector2:

@@ -12,6 +12,7 @@ signal layout_changed(parliament_seat_anchors: Array[Dictionary])
 
 var seat_races: Array[RaceDefinition] = []
 var seats: Array[ParliamentSeat] = []
+var current_month: int = 1
 
 
 func _ready() -> void:
@@ -46,6 +47,12 @@ func set_seat_races(value: Array[RaceDefinition]) -> void:
 		_refresh_seats()
 
 
+func set_month(value: int) -> void:
+	current_month = value
+	if is_node_ready() and not seat_races.is_empty():
+		_refresh_seats()
+
+
 func get_seat_anchors() -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	for seat in seats:
@@ -65,7 +72,7 @@ func _refresh_seats() -> void:
 		seats.append(seat)
 	for index in range(seat_races.size()):
 		seats[index].seat_index = index
-		seats[index].set_race(seat_races[index])
+		seats[index].set_race(seat_races[index], current_month)
 	_emit_layout_changed()
 
 

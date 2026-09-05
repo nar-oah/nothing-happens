@@ -4,6 +4,10 @@ class_name GameBalanceDefinition
 @export_group("基础")
 @export_range(1, 999999, 1) var initial_metric_value: int = 100
 
+@export_group("阴阳月")
+@export var yin_yang_rule: YinYangRuleDefinition = YinYangRuleDefinition.new()
+@export_range(0.0, 1.0, 0.01) var yin_yang_adjustment_rate: float = 0.10
+
 @export_group("提案")
 @export_range(0, 999, 1) var automatic_draw_count: int = 3
 @export_range(0, 999999, 1) var proposal_negative_magnitude_min: int = 8
