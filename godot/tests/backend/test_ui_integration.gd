@@ -564,6 +564,23 @@ func _test_game_root_shell(t: BackendTestContext) -> void:
 		session.state.seats.size(),
 		"parliament full state includes every world seat anchor"
 	)
+	var outgoing: Array[Dictionary] = []
+	bridge.outgoing_message.connect(
+		func(message: Dictionary) -> void:
+			outgoing.append(message)
+	)
+	var expected_anchors: Array[Dictionary] = [
+		{"seat_index": 3, "x": 0.25, "y": 0.75}
+	]
+	parliament.layout_changed.emit(expected_anchors)
+	t.check_equal(outgoing.size(), 1, "ParliamentWorld layout emits one lightweight message")
+	t.check_equal(outgoing[0]["type"], "parliament.layout", "layout uses its domain message type")
+	t.check_equal(
+		outgoing[0]["payload"],
+		{"parliament_seat_anchors": expected_anchors},
+		"layout payload only contains normalized seat anchors"
+	)
+	t.check(not outgoing[0]["payload"].has("state_version"), "layout payload does not duplicate state")
 	root.free()
 
 
