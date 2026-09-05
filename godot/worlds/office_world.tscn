@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" uid="uid://dtdircy18pgt8" path="res://worlds/interactables/office_visitor.tscn" id="6_nl8yu"]
 [ext_resource type="Texture2D" uid="uid://ba2d1es4a6wlh" path="res://assets/office/big_rock.png" id="7_ltqoq"]
 [ext_resource type="Texture2D" uid="uid://dppuom4ypgok" path="res://assets/office/small_rock.png" id="8_nl8yu"]
+[ext_resource type="Texture2D" uid="uid://qepnk3088j1y" path="res://assets/office/assistant_door.png" id="9_j3xwu"]
 
 [node name="OfficeWorld" type="Node2D" unique_id=1059762548]
 script = ExtResource("1_5h8hf")
@@ -65,6 +66,12 @@ position = Vector2(1920, 1080)
 
 [node name="Ornament" parent="RightAnchor" unique_id=2123455950 instance=ExtResource("3_odwa7")]
 position = Vector2(-471, -430)
+
+[node name="Assistant" type="Sprite2D" parent="RightAnchor" unique_id=72909963]
+visible = false
+position = Vector2(-372, -394)
+scale = Vector2(0.4, 0.4)
+texture = ExtResource("9_j3xwu")
 
 [node name="Door" parent="RightAnchor" unique_id=2114060250 instance=ExtResource("1_ox7iv")]
 position = Vector2(-135, -819)

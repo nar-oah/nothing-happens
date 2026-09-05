@@ -12,6 +12,7 @@ signal simple_dialogue_requested(
 
 @export var assistant_race: RaceDefinition
 @onready var visitor: OfficeVisitor = $CenterAnchor/Visitor
+@onready var assistant_door: Sprite2D = $RightAnchor/Assistant
 
 var visitor_races: Array[RaceDefinition] = []
 var current_month: int = 1
@@ -37,6 +38,7 @@ func _on_door_clicked() -> void:
 func _on_visitor_clicked() -> void:
 	if has_visitors():
 		visitor_requested.emit()
+		assistant_door.visible = true
 
 
 func request_simple_dialogue(dialogue: SimpleDialogueDefinition) -> void:
@@ -75,6 +77,7 @@ func get_current_visitor() -> RaceDefinition:
 
 
 func _refresh_visitor() -> void:
+	assistant_door.visible = false
 	var race := get_current_visitor() if has_visitors() else assistant_race
 	if race == null:
 		return
