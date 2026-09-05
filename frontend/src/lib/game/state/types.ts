@@ -119,6 +119,14 @@ export type DraftPreviewDto = {
 };
 export type PendingDialogueDto =
 	| {
+			kind: 'simple';
+			initial_text: string;
+			left_option?: string;
+			right_option?: string;
+			left_content?: string;
+			right_content?: string;
+	  }
+	| {
 			kind: 'interest_group';
 			race_name: string;
 			group_name: string;

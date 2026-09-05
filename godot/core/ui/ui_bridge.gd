@@ -13,10 +13,12 @@ var world_scene: String = "office"
 var _protocol := UiProtocol.new()
 var _serializer := UiSerializer.new()
 var _layout_world: Node
+var _simple_dialogue: Dictionary = {}
 
 
 func setup(session: RunSession, manager: Node = null, texture: Control = null) -> void:
 	run_session = session
+	_simple_dialogue.clear()
 	_set_scene_manager(manager)
 	set_cef_texture(texture)
 	if (
@@ -100,6 +102,8 @@ func send_parliament_layout(parliament_seat_anchors: Array) -> void:
 func set_ui_mode(mode: String, send_sync: bool = true) -> bool:
 	if mode not in UiProtocol.UI_MODES:
 		return false
+	if mode != "dialogue":
+		_simple_dialogue.clear()
 	ui_mode = mode
 	world_scene = "parliament" if mode in ["parliament", "constitution"] else "office"
 	if scene_manager != null:
@@ -114,6 +118,27 @@ func set_ui_mode(mode: String, send_sync: bool = true) -> bool:
 func open_current_office_visit() -> bool:
 	if run_session == null or run_session.state == null or run_session.state.office_visits.is_empty():
 		return false
+	_simple_dialogue.clear()
+	return set_ui_mode("dialogue")
+
+
+func open_simple_dialogue(
+	initial_text: String,
+	left_option: String,
+	right_option: String,
+	left_content: String,
+	right_content: String
+) -> bool:
+	if run_session == null or run_session.state == null:
+		return false
+	_simple_dialogue = {
+		"kind": "simple",
+		"initial_text": initial_text,
+		"left_option": left_option,
+		"right_option": right_option,
+		"left_content": left_content,
+		"right_content": right_content,
+	}
 	return set_ui_mode("dialogue")
 
 
@@ -478,6 +503,19 @@ func _handle_proposal_merge(message: Dictionary, messages: Array[Dictionary]) ->
 func _handle_office_visit_resolve(
 	message: Dictionary, messages: Array[Dictionary]
 ) -> void:
+	if not _simple_dialogue.is_empty():
+		if ui_mode != "dialogue":
+			_append_mutation_error(
+				messages,
+				{"code": "simple_dialogue_not_open", "message": "The simple dialogue is not open."},
+				message["request_id"]
+			)
+			return
+		_simple_dialogue.clear()
+		state_version += 1
+		set_ui_mode("office", false)
+		messages.append(_full_state(message["request_id"]))
+		return
 	var state := run_session.state
 	if state.office_visits.is_empty():
 		_append_mutation_error(
@@ -650,17 +688,16 @@ func _append_mutation_error(
 
 
 func _full_state(request_id: Variant = null) -> Dictionary:
-	return _envelope(
-		"state.full",
-		_serializer.full_state(
-			run_session,
-			ui_mode,
-			world_scene,
-			state_version,
-			_parliament_seat_anchors()
-		),
-		request_id
+	var payload := _serializer.full_state(
+		run_session,
+		ui_mode,
+		world_scene,
+		state_version,
+		_parliament_seat_anchors()
 	)
+	if not _simple_dialogue.is_empty():
+		payload["pending_dialogue"] = _simple_dialogue.duplicate(true)
+	return _envelope("state.full", payload, request_id)
 
 
 func _parliament_seat_anchors() -> Array:

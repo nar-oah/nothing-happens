@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="SimpleDialogueDefinition" format=3 uid="uid://dwt4y2bryibw5"]
+
+[ext_resource type="Script" uid="uid://bivdgpb0mfliy" path="res://definitions/simple_dialogue_definition.gd" id="1_d5015"]
+
+[resource]
+script = ExtResource("1_d5015")
+initial_text = "一位驻岁画家留下的旧画。画的是他亲眼所见——大明宝船第一次驶入蓬莱，船影几乎遮住了整片海湾。"
+left_option = "画这幅画的人呢？"
+right_option = "那天后来怎样了？"
+left_content = "驻岁不会老死，却不是死不了。他后来总怕自己落在时代后面，什么都要赶，最后死在一场本不必发生的赶工事故里。"
+right_content = "起初是惊讶、畏惧，也有人欢喜。后来是争地、停市和战争。再后来谁也赢不了谁，只好坐到一张桌前——于是有了今天的议会。"
+metadata/_custom_type_script = "uid://bivdgpb0mfliy"

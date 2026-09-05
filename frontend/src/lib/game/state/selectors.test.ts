@@ -161,6 +161,36 @@ test('event-intel dialogue presentation maps metric names and keeps event values
 	});
 });
 
+test('simple dialogue presentation preserves Godot-provided strings', () => {
+	const dialogue = deriveDialoguePresentation({
+		kind: 'simple',
+		initial_text: '先听我说。',
+		left_option: '留下',
+		right_option: '离开',
+		left_content: '那就留下。',
+		right_content: '那便告辞。'
+	});
+	assert.deepEqual(dialogue, {
+		kind: 'simple',
+		initialText: '先听我说。',
+		leftOption: '留下',
+		rightOption: '离开',
+		leftContent: '那就留下。',
+		rightContent: '那便告辞。'
+	});
+});
+
+test('simple dialogue presentation allows choices to be omitted', () => {
+	const dialogue = deriveDialoguePresentation({ kind: 'simple', initial_text: '只说这一句。' });
+	assert.equal(dialogue?.kind, 'simple');
+	if (dialogue?.kind !== 'simple') return;
+	assert.equal(dialogue.initialText, '只说这一句。');
+	assert.equal(dialogue.leftOption, undefined);
+	assert.equal(dialogue.rightOption, undefined);
+	assert.equal(dialogue.leftContent, undefined);
+	assert.equal(dialogue.rightContent, undefined);
+});
+
 test('Saved Bill optimistic reconciliation still uses gameplay equivalence', () => {
 	const handProposal = {
 		...testProposal,

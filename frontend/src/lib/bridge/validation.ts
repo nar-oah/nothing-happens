@@ -489,7 +489,17 @@ function isDraftPreview(value: unknown): value is DraftPreviewDto {
 }
 
 function isPendingDialogue(value: unknown): value is PendingDialogueDto {
-	if (!isRecord(value) || typeof value.race_name !== 'string') return false;
+	if (!isRecord(value)) return false;
+	if (value.kind === 'simple') {
+		return (
+			typeof value.initial_text === 'string' &&
+			isOptionalString(value.left_option) &&
+			isOptionalString(value.right_option) &&
+			isOptionalString(value.left_content) &&
+			isOptionalString(value.right_content)
+		);
+	}
+	if (typeof value.race_name !== 'string') return false;
 	if (value.kind === 'interest_group') {
 		return (
 			typeof value.group_name === 'string' &&
