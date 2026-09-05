@@ -1,6 +1,8 @@
 extends Resource
 class_name RaceDefinition
 
+const YinYangRuleDefinitionScript = preload("res://definitions/yin_yang_rule_definition.gd")
+
 @export var display_name: String
 @export_multiline var description: String
 @export_multiline var event_description: String
@@ -46,7 +48,7 @@ func modify_vote(_vote_context) -> void:
 func is_vote_metric_active(metric: Metric.Id, context) -> bool:
 	if not yin_yang_enabled:
 		return true
-	var rule := _get_yin_yang_rule(context)
+	var rule: YinYangRuleDefinitionScript = _get_yin_yang_rule(context)
 	if rule == null or context.state == null:
 		return true
 	return rule.is_yin_metric(metric) == _is_yin_month(context)
@@ -61,15 +63,15 @@ func get_effective_expectation(base_target: int, metric: Metric.Id, context, _ra
 		or get_stance(metric) == Metric.Direction.NONE
 	):
 		return base_target
-	var rule := _get_yin_yang_rule(context)
+	var rule: YinYangRuleDefinitionScript = _get_yin_yang_rule(context)
 	if rule == null:
 		return base_target
-	var strengthened := rule.is_yin_metric(metric) == _is_yin_month(context)
+	var strengthened: bool = rule.is_yin_metric(metric) == _is_yin_month(context)
 	var sign := 1.0 if strengthened else -1.0
 	return roundi(float(base_target) * (1.0 + sign * context.balance.yin_yang_adjustment_rate))
 
 
-func _get_yin_yang_rule(context) -> YinYangRuleDefinition:
+func _get_yin_yang_rule(context) -> YinYangRuleDefinitionScript:
 	if context == null or context.balance == null:
 		return null
 	return context.balance.yin_yang_rule
