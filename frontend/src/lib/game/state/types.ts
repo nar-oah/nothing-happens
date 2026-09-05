@@ -54,12 +54,14 @@ export type ConstitutionDto = {
 };
 
 export type RaceExpectationDto = { metric: Metric; target: number; direction: MetricDirection };
+export type RaceProposalExpectationDto = { interest_group_name: string; target: number };
 export type RaceSummaryDto = {
 	race_index: number;
 	display_name: string;
 	description: string;
 	seat_count: number;
 	expectations: RaceExpectationDto[];
+	proposal_expectation?: RaceProposalExpectationDto;
 	resolved_events_this_year: number;
 	last_year_resolved_events: number;
 };
