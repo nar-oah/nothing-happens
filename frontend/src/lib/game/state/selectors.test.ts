@@ -13,7 +13,10 @@ import {
 import { makeLiveState, testPolicy, testProposal } from './test-fixtures.ts';
 
 test('live state derives Left refs from authoritative array indices', () => {
-	const items = deriveLeftItems(makeLiveState());
+	const state = makeLiveState();
+	state.proposal_hand[0].bonus_choice_resolved = true;
+	state.proposal_hand[0].positive_trait_accepted = true;
+	const items = deriveLeftItems(state);
 	assert.deepEqual(
 		items.map((item) => [item.kind, item.ref.collection, item.ref.index]),
 		[
@@ -24,6 +27,22 @@ test('live state derives Left refs from authoritative array indices', () => {
 		]
 	);
 	assert.equal(items[0].kind === 'constitution' && items[0].constitution.title, '蓬莱约法');
+});
+
+test('Left hides unresolved visit proposals until the positive trait is accepted', () => {
+	const state = makeLiveState();
+	const pending = state.proposal_hand[0];
+	pending.bonus_choice_resolved = false;
+	pending.positive_trait_accepted = false;
+	assert.equal(
+		deriveLeftItems(state).some((item) => item.kind === 'proposal'),
+		false
+	);
+	pending.bonus_choice_resolved = true;
+	pending.positive_trait_accepted = true;
+	const accepted = deriveLeftItems(state).filter((item) => item.kind === 'proposal');
+	assert.equal(accepted.length, 1);
+	assert.equal(accepted[0].ref.index, 0);
 });
 
 test('live race/group summaries derive Top without mock lore', () => {

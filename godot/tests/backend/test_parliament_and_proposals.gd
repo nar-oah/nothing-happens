@@ -206,6 +206,12 @@ func _test_positive_trait_and_donation_choice(t: BackendTestContext) -> void:
 		"the bonus choice cannot be resolved twice"
 	)
 
+	var detached := ProposalInstance.new()
+	system.add_positive_trait(detached, 2, inflation, balance, random)
+	var detached_state := RunState.new()
+	t.check(system.resolve_bonus_choice(detached_state, detached, true), "detached visit trait can be accepted")
+	t.check(detached_state.proposal_hand.has(detached), "accepting a detached visit adds its proposal to hand")
+
 	var converted := ProposalInstance.new()
 	system.add_positive_trait(converted, 2, inflation, balance, random)
 	var converted_state := RunState.new()
@@ -213,6 +219,7 @@ func _test_positive_trait_and_donation_choice(t: BackendTestContext) -> void:
 	t.check(system.resolve_bonus_choice(converted_state, converted, false), "trait can be converted")
 	t.check(not converted.has_positive_trait(), "conversion clears the trait")
 	t.check_approx(converted_state.political_donation_pool, 22.0, "conversion funds the pool")
+	t.check(converted_state.proposal_hand.is_empty(), "conversion removes the proposal from hand")
 
 
 func _test_merge_uses_group_resource_identity(t: BackendTestContext) -> void:
@@ -363,11 +370,14 @@ func _test_active_visits_follow_automatic_sources(t: BackendTestContext) -> void
 		var proposal := session.state.proposal_hand[index]
 		var visit := session.state.office_visits[index]
 		t.check(proposal.source_group == visiting_group, "automatic draw determines the visiting group first")
-		t.check(proposal.has_positive_trait(), "a successful group visit adds the existing positive trait")
-		t.check_approx(proposal.donation_offer, 6.0, "visit donation derives from the positive magnitude")
+		t.check(not proposal.has_positive_trait(), "automatic draw remains an ordinary proposal")
 		t.check_equal(visit.kind, OfficeVisitState.Kind.INTEREST_GROUP, "automatic proposal queues an interest-group visit")
 		t.check(visit.race == visitor_b, "office visit stores the race selected from the matching seats")
-		t.check(visit.proposal == proposal, "office visit keeps the authoritative proposal-hand instance")
+		t.check(visit.proposal != proposal, "office visit owns a separate bonus proposal")
+		t.check(visit.proposal.source_group == visiting_group, "visit bonus keeps the drawn group source")
+		t.check(visit.proposal.has_positive_trait(), "visit proposal carries the positive trait")
+		t.check_approx(visit.proposal.donation_offer, 6.0, "visit donation derives from the positive magnitude")
+		t.check(not session.state.proposal_hand.has(visit.proposal), "pending visit proposal stays outside the hand")
 	t.check_equal(random.chance_probabilities, [1.0, 1.0], "each automatic proposal receives one global visit roll")
 	t.check_equal(
 		random.int_ranges.count(Vector2i(0, 1)), 2,

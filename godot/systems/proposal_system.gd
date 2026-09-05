@@ -119,13 +119,19 @@ func add_positive_trait(proposal: ProposalInstance, year: int, inflation_system:
 
 
 func resolve_bonus_choice(state: RunState, proposal: ProposalInstance, accept_trait: bool) -> bool:
-	if proposal == null or proposal not in state.proposal_hand or proposal.bonus_choice_resolved or not proposal.has_positive_trait():
+	if proposal == null or proposal.bonus_choice_resolved or not proposal.has_positive_trait():
 		return false
+	var already_in_hand := proposal in state.proposal_hand
 	proposal.bonus_choice_resolved = true
 	proposal.positive_trait_accepted = accept_trait
-	if not accept_trait:
+	if accept_trait:
+		if not already_in_hand:
+			state.add_proposal_to_hand(proposal)
+	else:
 		proposal.positive_effect = MetricVector.new()
 		state.political_donation_pool += proposal.donation_offer
+		if already_in_hand:
+			state.proposal_hand.erase(proposal)
 	return true
 
 
@@ -192,14 +198,17 @@ func resolve_active_visits(
 		var visitor_race := seats[context.random_system.random_int(0, seats.size() - 1)].race
 		if visitor_race == null:
 			continue
-		add_positive_trait(proposal, context.state.year, context.inflation_system, context.balance, context.random_system)
+		var visit_proposal := _generate_proposal_for_context(source, context)
+		if visit_proposal == null:
+			continue
+		add_positive_trait(visit_proposal, context.state.year, context.inflation_system, context.balance, context.random_system)
 		var visit := OfficeVisitState.new()
 		visit.kind = OfficeVisitState.Kind.INTEREST_GROUP
 		visit.race = visitor_race
-		visit.proposal = proposal
+		visit.proposal = visit_proposal
 		context.state.office_visits.append(visit)
 		proposal.office_visit_created = true
-		result.append(proposal)
+		result.append(visit_proposal)
 	return result
 
 
