@@ -1,5 +1,4 @@
 extends Resource
-class_name YinYangRuleDefinition
 
 @export_group("阴项（未勾选即为阳项）")
 @export var yin_tax: bool = true
