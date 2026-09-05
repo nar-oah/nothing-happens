@@ -65,7 +65,7 @@ func update_information(context: RunContext) -> void:
 	if context == null or context.state == null or context.balance == null:
 		return
 	for event in context.state.events:
-		if event == null or not event.is_active() or event.known:
+		if event == null or not event.is_active() or event.published or event.known:
 			continue
 		if _force_public_window(event, context.balance):
 			_update_known_event(event, context)
@@ -83,6 +83,28 @@ func update_information(context: RunContext) -> void:
 			visit.event = event
 			context.state.office_visits.append(visit)
 			_update_known_event(event, context)
+
+
+func publish_known_events(context: RunContext) -> void:
+	if context == null or context.state == null:
+		return
+	for event in context.state.events:
+		if event != null and event.known and not event.published:
+			event.published = true
+
+
+func cleanup_published_event_visits(state: RunState) -> void:
+	if state == null:
+		return
+	for index in range(state.office_visits.size() - 1, -1, -1):
+		var visit := state.office_visits[index]
+		if (
+			visit != null
+			and visit.kind == OfficeVisitState.Kind.EVENT_INTEL
+			and visit.event != null
+			and visit.event.published
+		):
+			state.office_visits.remove_at(index)
 
 
 func get_current_requirement(event: EventState) -> int:
@@ -140,6 +162,7 @@ func _force_public_window(event: EventState, balance: GameBalanceDefinition) -> 
 	if remaining <= public_remaining and not event.public_window_entered:
 		event.growth_progress = 1.0
 		event.known = true
+		event.published = true
 		event.public_window_entered = true
 		event.phase = EventState.Phase.WORSENING
 		return true
@@ -197,4 +220,5 @@ func _fail(event: EventState, context: RunContext) -> void:
 		return
 	event.phase = EventState.Phase.FAILED
 	event.known = true
+	event.published = true
 	context.collapse_system.increase(context)
