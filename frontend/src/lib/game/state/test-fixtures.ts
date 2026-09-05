@@ -91,6 +91,8 @@ export function makeLiveState(stateVersion = 1): LiveGameState {
 	};
 	return {
 		state_version: stateVersion,
+		language: 'zh_CN',
+		display_mode: 'windowed',
 		saves: [],
 		ui_mode: 'office',
 		world_scene: 'office',

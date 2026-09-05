@@ -54,6 +54,9 @@ const outboundTypes = new Set<OutboundType>([
 	'ui.input_regions',
 	'ui.mode.set',
 	'ui.newspaper.close',
+	'settings.language.set',
+	'settings.display.set',
+	'app.quit',
 	'saves.list',
 	'saves.create',
 	'saves.overwrite',
@@ -76,7 +79,27 @@ const outboundTypes = new Set<OutboundType>([
 ]);
 
 export function encodeOutboundMessage(message: OutboundMessage): string {
+	if (!isSettingsPayload(message.type, message.payload)) {
+		throw new TypeError(`Invalid payload for ${message.type}`);
+	}
 	return JSON.stringify(message);
+}
+
+function isSettingsPayload(type: OutboundType, payload: unknown): boolean {
+	if (type === 'settings.language.set')
+		return isRecord(payload) && isLanguage(payload.language) && Object.keys(payload).length === 1;
+	if (type === 'settings.display.set')
+		return isRecord(payload) && isDisplayMode(payload.mode) && Object.keys(payload).length === 1;
+	if (type === 'app.quit') return isRecord(payload) && Object.keys(payload).length === 0;
+	return true;
+}
+
+function isLanguage(value: unknown): boolean {
+	return value === 'zh_CN' || value === 'en';
+}
+
+function isDisplayMode(value: unknown): boolean {
+	return value === 'windowed' || value === 'fullscreen';
 }
 
 export function decodeInboundMessage(raw: string): DecodeResult<InboundMessage> {
@@ -107,6 +130,8 @@ export function isLiveGameState(value: unknown): value is LiveGameState {
 	const state = value as Record<string, unknown>;
 	return (
 		isVersion(state.state_version) &&
+		isLanguage(state.language) &&
+		isDisplayMode(state.display_mode) &&
 		isArrayOf(state.saves, isSaveSlot) &&
 		isUiMode(state.ui_mode) &&
 		isWorldScene(state.world_scene) &&
