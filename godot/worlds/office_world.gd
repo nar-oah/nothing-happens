@@ -2,9 +2,18 @@ extends Node2D
 
 signal parliament_requested
 signal visitor_requested
+signal simple_dialogue_requested(
+	initial_text: String,
+	left_option: String,
+	right_option: String,
+	left_content: String,
+	right_content: String
+)
 
 @export var assistant_race: RaceDefinition
+@export var assistant_dialogue: SimpleDialogueDefinition
 @onready var visitor: OfficeVisitor = $CenterAnchor/Visitor
+@onready var assistant_door: Sprite2D = $RightAnchor/Assistant
 
 var visitor_races: Array[RaceDefinition] = []
 var current_month: int = 1
@@ -30,6 +39,21 @@ func _on_door_clicked() -> void:
 func _on_visitor_clicked() -> void:
 	if has_visitors():
 		visitor_requested.emit()
+		assistant_door.visible = true
+	else:
+		request_simple_dialogue(assistant_dialogue)
+
+
+func request_simple_dialogue(dialogue: SimpleDialogueDefinition) -> void:
+	if dialogue == null:
+		return
+	simple_dialogue_requested.emit(
+		dialogue.initial_text,
+		dialogue.left_option,
+		dialogue.right_option,
+		dialogue.left_content,
+		dialogue.right_content
+	)
 
 
 func set_visitor_races(value: Array[RaceDefinition]) -> void:
@@ -56,7 +80,24 @@ func get_current_visitor() -> RaceDefinition:
 
 
 func _refresh_visitor() -> void:
+	assistant_door.visible = false
 	var race := get_current_visitor() if has_visitors() else assistant_race
 	if race == null:
 		return
 	visitor.set_portrait(race.get_portrait(current_month))
+
+
+func _on_painting_clicked(dialogue: SimpleDialogueDefinition) -> void:
+	request_simple_dialogue(dialogue)
+
+
+func _on_lamp_clicked(dialogue: SimpleDialogueDefinition) -> void:
+	request_simple_dialogue(dialogue)
+
+
+func _on_high_lamp_clicked(dialogue: SimpleDialogueDefinition) -> void:
+	request_simple_dialogue(dialogue)
+
+
+func _on_ornament_clicked(dialogue: SimpleDialogueDefinition) -> void:
+	request_simple_dialogue(dialogue)

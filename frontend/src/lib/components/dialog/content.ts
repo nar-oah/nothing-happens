@@ -16,13 +16,13 @@ export function createInterestGroupDialogueContent(
 	donationOffer: string
 ): InterestGroupDialogueContent {
 	return {
-		visitor: `不愿意透露姓名的说客\n代表\n${groupName}\n而来`,
+		visitor: `不愿意透露姓名的说客\n代表\n${groupName}而来`,
 		body: `${groupName}愿意在手上这份提案里让一点利。\n您可以收下“${positiveEffect}”这项优惠，也可以把同样的好意折成${donationOffer}。`
 	};
 }
 
 export function createEventIntelDialogueContent(data: EventIntelDialogueData): InterestGroupDialogueContent {
-	const visitor = `不愿意透露姓名的消息人士\n代表\n${data.raceName}\n而来`;
+	const visitor = `不愿意透露姓名的消息人士\n代表\n${data.raceName}而来`;
 	const body = formatEventIntelBody(data);
 	return { visitor, body };
 }

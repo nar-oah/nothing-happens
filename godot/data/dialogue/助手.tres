@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="SimpleDialogueDefinition" format=3 uid="uid://btdgyv4bom3i3"]
+
+[ext_resource type="Script" uid="uid://bivdgpb0mfliy" path="res://definitions/simple_dialogue_definition.gd" id="1_1u88k"]
+
+[resource]
+script = ExtResource("1_1u88k")
+initial_text = "老板。"
+left_option = "你能不能有点坐相？"
+right_option = "驻岁真的只剩我们两个了？"
+left_content = "咱俩都认识多少年了，这屋里又没别人。我坐那么端正，给谁看？"
+right_content = "嗯。你一个，我一个。驻岁只是不会老，又不是不会死；死一个少一个，偏偏还生不回来。"
+metadata/_custom_type_script = "uid://bivdgpb0mfliy"
