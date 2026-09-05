@@ -81,12 +81,12 @@ func _test_fixed_interest_group_events_use_proposal_counts(t: BackendTestContext
 	var group := t.make_group("fixed group")
 	var race := t.make_race("fixed group race")
 	race.fixed_interest_group = group
-	race.expectation_growth_rate = 0.10
+	var article := t.make_article(race, true, 0.10)
 	var balance := _event_balance()
 	balance.initial_interest_group_proposal_requirement = 5
 	balance.event_spawn_count_min = 1
 	balance.event_spawn_count_max = 1
-	var session := t.make_session([race], [group], t.make_seats(1, "fixed group event"), [], balance)
+	var session := t.make_session([race], [group], t.make_seats(1, "fixed group event"), [article], balance)
 	var race_state := session.state.get_race(race)
 	t.check(race_state.expectation_targets.is_empty(), "fixed-group race needs no metric expectation targets")
 	session.state.annual_proposal_slot_counts[group] = 2
@@ -99,6 +99,15 @@ func _test_fixed_interest_group_events_use_proposal_counts(t: BackendTestContext
 	t.check_equal(event.full_target, 5, "first-year proposal requirement uses configured initial target")
 	t.check(session.event_system.spawn_event(session.context, race, Metric.Id.TAX) == null, "fixed-group race does not generate metric events")
 	event.known = true
+	var visit := OfficeVisitState.new()
+	visit.kind = OfficeVisitState.Kind.EVENT_INTEL
+	visit.race = race
+	visit.event = event
+	session.state.office_visits.append(visit)
+	var dialogue: Dictionary = UiSerializer.new().pending_dialogue(session)
+	t.check_equal(dialogue["requirement_kind"], EventState.RequirementKind.INTEREST_GROUP_PROPOSALS, "fixed-group event dialogue exposes its requirement kind")
+	t.check_equal(dialogue["interest_group_name"], "fixed group", "fixed-group event dialogue exposes the group name")
+	session.state.office_visits.clear()
 	session.state.annual_proposal_slot_counts[group] = 5
 	session.event_system.settle_month(session.context)
 	t.check_equal(event.phase, EventState.Phase.RESOLVED, "meeting the group proposal target resolves the shared event lifecycle")
