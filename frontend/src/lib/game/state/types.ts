@@ -11,6 +11,7 @@ import type {
 export type UiMode = 'office' | 'dialogue' | 'parliament' | 'constitution';
 export type WorldScene = 'office' | 'parliament';
 export type MetricDirection = -1 | 0 | 1;
+export type EventRequirementKind = 0 | 1;
 
 export type ConstitutionArticleDto = ConstitutionArticle & { article_index: number };
 export type ConstitutionColumnDto = {
@@ -126,7 +127,9 @@ export type PendingDialogueDto =
 	| {
 			kind: 'event_intel';
 			race_name: string;
+			requirement_kind?: EventRequirementKind;
 			metric: Metric;
+			interest_group_name?: string;
 			requirement: number;
 			strength: number;
 	  };
@@ -149,7 +152,9 @@ export type MonthReportEventPhase = 0 | 1 | 2;
 export type MonthReportEventDto = {
 	race_display_name: string;
 	event_description: string;
+	requirement_kind?: EventRequirementKind;
 	metric: Metric;
+	interest_group_name?: string;
 	value: number;
 	countdown: number;
 	strength: number;
