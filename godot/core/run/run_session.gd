@@ -160,6 +160,46 @@ func clear_term_report() -> void:
 	term_report.clear()
 
 
+func list_saves() -> Array[Dictionary]:
+	return RunSaveStore.list_saves(save_directory)
+
+
+func create_manual_save() -> Dictionary:
+	return _save_result(RunSaveStore.create_manual(self))
+
+
+func overwrite_manual_save(slot_id: String) -> Dictionary:
+	return _save_result(RunSaveStore.overwrite_manual(self, slot_id))
+
+
+func save_automatically() -> Dictionary:
+	return _save_result(RunSaveStore.write_save(self, RunSaveStore.AUTO_SLOT))
+
+
+func load_save(slot_id: String) -> Dictionary:
+	var saved := RunSaveStore.read_save(save_directory, slot_id)
+	if not saved["ok"]:
+		return saved
+	var restored := RunSnapshot.decode(saved["snapshot"])
+	if not restored["ok"]:
+		return {"ok": false, "error": {"code": "invalid_snapshot", "message": "无法恢复存档状态或资源引用。"}}
+	state = restored["state"]
+	meta_progression = restored["meta_progression"]
+	var session_data: Dictionary = restored["session"]
+	term_report = session_data["term_report"]
+	_last_awarded_term = session_data["_last_awarded_term"]
+	_previous_newspaper_collapse = session_data["_previous_newspaper_collapse"]
+	_build_runtime()
+	random_system.rng.state = restored["rng_state"]
+	last_save_error.clear()
+	return {"ok": true, "slot_id": slot_id}
+
+
+func _save_result(result: Dictionary) -> Dictionary:
+	last_save_error = {} if result["ok"] else result["error"]
+	return result
+
+
 func _settle_and_start_next_term() -> bool:
 	var ended_state := state
 	var previous_governing_months := meta_progression.available_governing_months
