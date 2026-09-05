@@ -64,7 +64,7 @@
 	let motionPhase = $state<NewspaperMotionPhase>('entering');
 	let backgroundCovered = $state(false);
 	let loadingSaves = $state(false);
-	let saveScrollElement: HTMLDivElement;
+	let saveScrollElement = $state<HTMLDivElement>();
 	let scrollElement: HTMLDivElement;
 	const saveItems = $derived(deriveSaveItems(saves, { term, year, month }, loadingSaves));
 	const pageCount = $derived(4 + events.length + (front ? 1 : 0));
@@ -108,8 +108,7 @@
 
 	$effect(() => {
 		const element = saveScrollElement;
-		saveItems.length;
-		if (!element) return;
+		if (!element || saveItems.length === 0) return;
 		void tick().then(() => {
 			if (saveScrollElement === element) element.scrollLeft = element.scrollWidth;
 		});
