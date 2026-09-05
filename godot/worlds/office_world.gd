@@ -2,6 +2,13 @@ extends Node2D
 
 signal parliament_requested
 signal visitor_requested
+signal simple_dialogue_requested(
+	initial_text: String,
+	left_option: String,
+	right_option: String,
+	left_content: String,
+	right_content: String
+)
 
 @export var assistant_race: RaceDefinition
 @onready var visitor: OfficeVisitor = $CenterAnchor/Visitor
@@ -30,6 +37,18 @@ func _on_door_clicked() -> void:
 func _on_visitor_clicked() -> void:
 	if has_visitors():
 		visitor_requested.emit()
+
+
+func request_simple_dialogue(dialogue: SimpleDialogueDefinition) -> void:
+	if dialogue == null:
+		return
+	simple_dialogue_requested.emit(
+		dialogue.initial_text,
+		dialogue.left_option,
+		dialogue.right_option,
+		dialogue.left_content,
+		dialogue.right_content
+	)
 
 
 func set_visitor_races(value: Array[RaceDefinition]) -> void:
