@@ -155,10 +155,7 @@ function isInboundPayload(type: InboundType, payload: unknown): boolean {
 }
 
 function isParliamentLayout(value: unknown): value is ParliamentLayoutDto {
-	return (
-		isRecord(value) &&
-		isArrayOf(value.parliament_seat_anchors, isParliamentSeatAnchor)
-	);
+	return isRecord(value) && isArrayOf(value.parliament_seat_anchors, isParliamentSeatAnchor);
 }
 
 function isDraftSync(value: unknown): value is DraftSyncDto {

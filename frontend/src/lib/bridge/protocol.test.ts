@@ -1,10 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {
-	makeDraftSync,
-	makeLiveState,
-	makeParliamentLayout
-} from '../game/state/test-fixtures.ts';
+import { makeDraftSync, makeLiveState, makeParliamentLayout } from '../game/state/test-fixtures.ts';
 import { deriveTermReportMetrics } from '../components/newspaper/term-report.ts';
 import { CefIpcClient, type CefBridgeWindow } from './client.ts';
 import { normalizeInputRegions } from './input-regions.ts';
@@ -270,9 +266,7 @@ test('IPC validates normalized parliament seat anchors', () => {
 
 test('IPC decodes lightweight parliament layout updates', () => {
 	const payload = makeParliamentLayout();
-	const decoded = decodeInboundMessage(
-		JSON.stringify({ type: 'parliament.layout', payload })
-	);
+	const decoded = decodeInboundMessage(JSON.stringify({ type: 'parliament.layout', payload }));
 	assert.deepEqual(decoded, {
 		ok: true,
 		value: { type: 'parliament.layout', payload }
