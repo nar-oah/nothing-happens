@@ -493,10 +493,10 @@ function isPendingDialogue(value: unknown): value is PendingDialogueDto {
 	if (value.kind === 'simple') {
 		return (
 			typeof value.initial_text === 'string' &&
-			typeof value.left_option === 'string' &&
-			typeof value.right_option === 'string' &&
-			typeof value.left_content === 'string' &&
-			typeof value.right_content === 'string'
+			isOptionalString(value.left_option) &&
+			isOptionalString(value.right_option) &&
+			isOptionalString(value.left_content) &&
+			isOptionalString(value.right_content)
 		);
 	}
 	if (typeof value.race_name !== 'string') return false;
