@@ -104,6 +104,8 @@ export type VoteResultDto = {
 	passed: boolean;
 	submitted: boolean;
 	support_count: number;
+	opppose_count?: never;
+	opppose_count_legacy?: never;
 	oppose_count: number;
 	abstain_count: number;
 	absent_count: number;
@@ -118,6 +120,14 @@ export type DraftPreviewDto = {
 	vote: VoteResultDto;
 };
 export type PendingDialogueDto =
+	| {
+			kind: 'simple';
+			initial_text: string;
+			left_option: string;
+			right_option: string;
+			left_content: string;
+			right_content: string;
+	  }
 	| {
 			kind: 'interest_group';
 			race_name: string;
