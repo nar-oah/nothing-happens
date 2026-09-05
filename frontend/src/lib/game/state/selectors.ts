@@ -27,6 +27,14 @@ export type GameStateDisplayProps = { primary: { text: string; value: number; is
 export type LiveConstitutionMemorialData = MemorialConstitutionData;
 export type DialoguePresentation =
 	| {
+			kind: 'simple';
+			initialText: string;
+			leftOption: string;
+			rightOption: string;
+			leftContent: string;
+			rightContent: string;
+	  }
+	| {
 			kind: 'interest_group';
 			raceName: string;
 			groupName: string;
@@ -104,6 +112,16 @@ export function deriveDialoguePresentation(
 	pending: PendingDialogueDto | null
 ): DialoguePresentation | null {
 	if (!pending) return null;
+	if (pending.kind === 'simple') {
+		return {
+			kind: pending.kind,
+			initialText: pending.initial_text,
+			leftOption: pending.left_option,
+			rightOption: pending.right_option,
+			leftContent: pending.left_content,
+			rightContent: pending.right_content
+		};
+	}
 	if (pending.kind === 'event_intel') {
 		const metricName =
 			pending.requirement_kind === 1 && pending.interest_group_name
