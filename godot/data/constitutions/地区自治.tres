@@ -19,7 +19,7 @@
 [ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="race_type_5"]
 [ext_resource type="Resource" uid="uid://cq8xj0frv0cdf" path="res://data/constitution_rows/桃源.tres" id="row_7"]
 [ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="seat_condition_script_11"]
-[ext_resource type="Resource" path="res://data/races/variants/桃源/桃花妖（地区自治）.tres" id="variant_14"]
+[ext_resource type="Resource" uid="uid://dqce0diw2s7ss" path="res://data/races/variants/桃源/桃花妖（地区自治）.tres" id="variant_14"]
 
 [sub_resource type="Resource" id="Effect_1"]
 script = ExtResource("effscript_modify_race_13")

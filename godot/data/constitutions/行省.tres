@@ -21,12 +21,12 @@
 [ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="race_type_5"]
 [ext_resource type="Resource" uid="uid://bjubbxjboutnj" path="res://data/constitution_rows/外交.tres" id="row_7"]
 [ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="seat_condition_script_11"]
-[ext_resource type="Resource" path="res://data/races/variants/官员/人类（官员）.tres" id="variant_20"]
-[ext_resource type="Resource" path="res://data/races/variants/官员/比翼（官员）.tres" id="variant_21"]
-[ext_resource type="Resource" path="res://data/races/variants/官员/偃偶（官员）.tres" id="variant_22"]
-[ext_resource type="Resource" path="res://data/races/variants/官员/桃花妖（官员）.tres" id="variant_23"]
-[ext_resource type="Resource" path="res://data/races/variants/官员/南柯（官员）.tres" id="variant_24"]
-[ext_resource type="Resource" path="res://data/races/variants/官员/驻岁（官员）.tres" id="variant_25"]
+[ext_resource type="Resource" uid="uid://i10fw7kkpo3r" path="res://data/races/variants/官员/人类（官员）.tres" id="variant_20"]
+[ext_resource type="Resource" uid="uid://ch8wkurltf0bs" path="res://data/races/variants/官员/比翼（官员）.tres" id="variant_21"]
+[ext_resource type="Resource" uid="uid://2jspjsoxvi4e" path="res://data/races/variants/官员/偃偶（官员）.tres" id="variant_22"]
+[ext_resource type="Resource" uid="uid://dmr5sv8mxceqs" path="res://data/races/variants/官员/桃花妖（官员）.tres" id="variant_23"]
+[ext_resource type="Resource" uid="uid://cs04nmppnwsb8" path="res://data/races/variants/官员/南柯（官员）.tres" id="variant_24"]
+[ext_resource type="Resource" uid="uid://bm37eoxyratl2" path="res://data/races/variants/官员/驻岁（官员）.tres" id="variant_25"]
 
 [sub_resource type="Resource" id="Effect_1"]
 script = ExtResource("effscript_race_seat_13")

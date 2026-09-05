@@ -18,12 +18,12 @@
 [ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="race_type_5"]
 [ext_resource type="Resource" uid="uid://b5clravmnjms4" path="res://data/constitution_rows/文化.tres" id="row_7"]
 [ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="seat_condition_script_11"]
-[ext_resource type="Resource" path="res://data/races/variants/文化/人类（阴阳）.tres" id="variant_19"]
-[ext_resource type="Resource" path="res://data/races/variants/文化/比翼（阴阳）.tres" id="variant_20"]
-[ext_resource type="Resource" path="res://data/races/variants/文化/偃偶（阴阳）.tres" id="variant_21"]
-[ext_resource type="Resource" path="res://data/races/variants/文化/桃花妖（阴阳）.tres" id="variant_22"]
-[ext_resource type="Resource" path="res://data/races/variants/文化/南柯（阴阳）.tres" id="variant_23"]
-[ext_resource type="Resource" path="res://data/races/variants/文化/驻岁（阴阳）.tres" id="variant_24"]
+[ext_resource type="Resource" uid="uid://fo4fq4olg5j4" path="res://data/races/variants/文化/人类（阴阳）.tres" id="variant_19"]
+[ext_resource type="Resource" uid="uid://de5t4twdtw8lc" path="res://data/races/variants/文化/比翼（阴阳）.tres" id="variant_20"]
+[ext_resource type="Resource" uid="uid://xo5w1qedtoie" path="res://data/races/variants/文化/偃偶（阴阳）.tres" id="variant_21"]
+[ext_resource type="Resource" uid="uid://bfcp0mhtaslx3" path="res://data/races/variants/文化/桃花妖（阴阳）.tres" id="variant_22"]
+[ext_resource type="Resource" uid="uid://dgf7c2skh02ct" path="res://data/races/variants/文化/南柯（阴阳）.tres" id="variant_23"]
+[ext_resource type="Resource" uid="uid://cvg3yaqc0o4jv" path="res://data/races/variants/文化/驻岁（阴阳）.tres" id="variant_24"]
 
 [sub_resource type="Resource" id="Effect_1"]
 script = ExtResource("effscript_modify_race_13")
