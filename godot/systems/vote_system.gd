@@ -78,8 +78,8 @@ func _calculate_seat_vote(
 	vote.add_reason(&"personal_relation", seat.personal_relation)
 	vote.add_reason(&"political_donation", context.state.vote_donations.get(seat.definition, 0.0))
 	var vote_context := VoteContext.new(context, seat, race_state, draft, pure_target, projected, vote, resolve_randomness)
-	active_race.modify_vote(vote_context)
 	context.constitution_system.apply_vote_effects(vote_context)
+	active_race.modify_vote(vote_context)
 	if vote_context.locked_position >= 0:
 		vote.position = vote_context.locked_position as SeatVoteState.Position
 	elif vote_context.position_override >= 0:
