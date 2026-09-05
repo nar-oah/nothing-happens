@@ -1,6 +1,7 @@
 extends RefCounted
 
 const BackendTestContext = preload("res://tests/backend/backend_test_context.gd")
+const YinYangRuleDefinitionScript = preload("res://definitions/yin_yang_rule_definition.gd")
 
 
 func run(t: BackendTestContext) -> void:
@@ -133,7 +134,7 @@ func _test_global_yin_yang_rule(t: BackendTestContext) -> void:
 	balance.automatic_draw_count = 0
 	balance.event_spawn_count_min = 0
 	balance.event_spawn_count_max = 0
-	var rule := YinYangRuleDefinition.new()
+	var rule := YinYangRuleDefinitionScript.new()
 	rule.yin_tax = true
 	rule.yin_consumption = true
 	rule.yin_production = false
