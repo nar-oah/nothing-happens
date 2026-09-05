@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="SimpleDialogueDefinition" format=3 uid="uid://b0t22lfjl8pqw"]
+
+[ext_resource type="Script" uid="uid://bivdgpb0mfliy" path="res://definitions/simple_dialogue_definition.gd" id="1_l6fur"]
+
+[resource]
+script = ExtResource("1_l6fur")
+initial_text = "一只素瓷瓶，最早是人类商船带来的舶货。几百年买卖往来以后，各族的器物、衣食和习惯早已你中有我——如今反倒很难说什么还只属于谁。"
+metadata/_custom_type_script = "uid://bivdgpb0mfliy"

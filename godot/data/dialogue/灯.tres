@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="SimpleDialogueDefinition" format=3 uid="uid://dh61w82vg4d2l"]
+
+[ext_resource type="Script" uid="uid://bivdgpb0mfliy" path="res://definitions/simple_dialogue_definition.gd" id="1_2q2qc"]
+
+[resource]
+script = ExtResource("1_2q2qc")
+initial_text = "会同常见的灯。形制还是旧式的，材料、玻璃和做工却早已混进了几百年海贸带来的洋式手艺。"
+left_option = "这算什么风格？"
+right_option = "它怎么亮的？"
+left_content = "没人特意给它起过名字。明制的骨架没变，洋布、玻璃、皮革和新工艺却早成了日用品。用久了，也就没人觉得它们是两回事了。"
+right_content = "不烧油，也不用电。未然胆里的未然经引弦管路转成光，安静得像电灯，只是燃料来自蓬莱人的焦虑。"
+metadata/_custom_type_script = "uid://bivdgpb0mfliy"
