@@ -316,7 +316,7 @@ func _test_vote_donation_command(t: BackendTestContext) -> void:
 	var bridge := UiBridge.new()
 	bridge.setup(session)
 	session.state.political_donation_pool = 2.0
-	var unavailable := UiSerializer.new().draft_preview(session)["vote"]["seat_votes"][0]
+	var unavailable: Dictionary = UiSerializer.new().draft_preview(session)["vote"]["seat_votes"][0]
 	t.check(not unavailable["can_bribe"], "preview disables a bribe when donations are insufficient")
 	var rejected := bridge.receive_ipc_message(
 		_message("vote.donation.add", {"state_version": 0, "seat_index": 0})
@@ -325,7 +325,7 @@ func _test_vote_donation_command(t: BackendTestContext) -> void:
 	t.check_equal(bridge.state_version, 0, "rejected bribe preserves state version")
 	t.check_approx(session.state.political_donation_pool, 2.0, "rejected bribe spends no donation")
 	session.state.political_donation_pool = 3.0
-	var available := UiSerializer.new().draft_preview(session)["vote"]["seat_votes"][0]
+	var available: Dictionary = UiSerializer.new().draft_preview(session)["vote"]["seat_votes"][0]
 	t.check(available["can_bribe"], "preview enables an affordable bribe")
 	var messages := bridge.receive_ipc_message(
 		_message("vote.donation.add", {"state_version": 0, "seat_index": 0})
