@@ -185,7 +185,10 @@ export function proposalToMemorialMetrics(
 	return [...ordinary, ...reverse];
 }
 
-export function createProposalSynthesisPreview(selected: ProposalLeftItem[]): ProposalPreview {
+export function createProposalSynthesisPreview(
+	selected: ProposalLeftItem[],
+	preferredPositiveSource?: ProposalLeftItem
+): ProposalPreview {
 	const ordinary = METRICS.flatMap((metric): MemorialMetricData[] => {
 		const values = selected.map((item) => getMetricValue(item.proposal.base_effect, metric));
 		if (values.every((value) => value === 0)) return [];
@@ -203,7 +206,12 @@ export function createProposalSynthesisPreview(selected: ProposalLeftItem[]): Pr
 		(first, second) =>
 			Math.abs(second.raw) - Math.abs(first.raw) || first.selectionIndex - second.selectionIndex
 	);
-	const reverse = reverseCandidates[0];
+	const preferredReverse = preferredPositiveSource
+		? reverseCandidates.find((candidate) =>
+				isSameLeftRef(candidate.item.ref, preferredPositiveSource.ref)
+			)
+		: undefined;
+	const reverse = preferredReverse ?? reverseCandidates[0];
 	return {
 		metrics: [...ordinary, ...(reverse ? makeMetric(reverse.metric, reverse.raw, true) : [])],
 		reverseSource: reverse?.item
@@ -218,7 +226,7 @@ export function createSynthesisConfirmation(
 		proposals: selected,
 		refs: selected.map((item) => item.ref),
 		negativeBaseRef: negativeBase.ref,
-		reverseSource: createProposalSynthesisPreview(selected).reverseSource
+		reverseSource: createProposalSynthesisPreview(selected, negativeBase).reverseSource
 	};
 }
 
