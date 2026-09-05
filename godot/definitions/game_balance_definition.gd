@@ -37,6 +37,7 @@ class_name GameBalanceDefinition
 @export_range(0.0, 1.0, 0.01) var normal_absence_probability: float = 0.15
 
 @export_group("事件")
+@export_range(1, 999, 1) var initial_interest_group_proposal_requirement: int = 5
 @export_range(0, 999, 1) var event_spawn_count_min: int = 1
 @export_range(0, 999, 1) var event_spawn_count_max: int = 3
 @export_range(1, 999, 1) var event_lifetime_months: int = 12

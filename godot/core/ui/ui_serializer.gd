@@ -154,13 +154,17 @@ func pending_dialogue(session: RunSession) -> Variant:
 			var event := visit.event
 			if event == null:
 				return null
-			return {
+			var data := {
 				"kind": "event_intel",
 				"race_name": _active_race_name(session, visit.race),
 				"metric": int(event.metric),
 				"requirement": session.event_system.get_current_requirement(event),
 				"strength": roundi(clampf(event.growth_progress, 0.0, 1.0) * 100.0),
 			}
+			if event.requirement_kind == EventState.RequirementKind.INTEREST_GROUP_PROPOSALS:
+				data["requirement_kind"] = int(event.requirement_kind)
+				data["interest_group_name"] = _active_group_name(session, event.interest_group)
+			return data
 	return null
 
 
@@ -285,7 +289,13 @@ func races(session: RunSession) -> Array:
 		var expectations: Array = []
 		for metric in active.get_stance_metrics():
 			expectations.append({"metric": int(metric), "target": session.race_system.get_effective_expectation(current, metric, session.context), "direction": int(active.get_stance(metric))})
-		result.append({"race_index": index, "display_name": active.display_name, "description": active.description, "seat_count": seat_count, "expectations": expectations, "resolved_events_this_year": current.resolved_events_this_year, "last_year_resolved_events": current.last_year_resolved_events})
+		var data := {"race_index": index, "display_name": active.display_name, "description": active.description, "seat_count": seat_count, "expectations": expectations, "resolved_events_this_year": current.resolved_events_this_year, "last_year_resolved_events": current.last_year_resolved_events}
+		if current.definition.fixed_interest_group != null:
+			data["proposal_expectation"] = {
+				"interest_group_name": _active_group_name(session, current.definition.fixed_interest_group),
+				"target": session.race_system.get_interest_group_proposal_expectation(current, session.context),
+			}
+		result.append(data)
 	return result
 
 

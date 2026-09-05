@@ -6,6 +6,7 @@ const BackendTestContext = preload("res://tests/backend/backend_test_context.gd"
 func run(t: BackendTestContext) -> void:
 	_test_generation_count_and_pair_identity(t)
 	_test_zero_seat_race_is_ineligible(t)
+	_test_fixed_interest_group_events_use_proposal_counts(t)
 	_test_hidden_growth_public_window_and_resolution(t)
 	_test_forced_public_information_does_not_queue_visit(t)
 	_test_pause_relief_and_effect_early_reveal(t)
@@ -76,6 +77,46 @@ func _test_zero_seat_race_is_ineligible(t: BackendTestContext) -> void:
 	session.free()
 
 
+func _test_fixed_interest_group_events_use_proposal_counts(t: BackendTestContext) -> void:
+	var group := t.make_group("fixed group")
+	var race := t.make_race("fixed group race")
+	race.fixed_interest_group = group
+	var article := t.make_article(race, true, 0.10)
+	var balance := _event_balance()
+	balance.initial_interest_group_proposal_requirement = 5
+	balance.event_spawn_count_min = 1
+	balance.event_spawn_count_max = 1
+	var session := t.make_session([race], [group], t.make_seats(1, "fixed group event"), [article], balance)
+	var race_state := session.state.get_race(race)
+	t.check(race_state.expectation_targets.is_empty(), "fixed-group race needs no metric expectation targets")
+	session.state.annual_proposal_slot_counts[group] = 2
+	var generated := session.event_system.try_generate_month(session.context)
+	t.check_equal(generated.size(), 1, "insufficient fixed-group proposal count creates an event")
+	var event := generated[0]
+	t.check_equal(event.requirement_kind, EventState.RequirementKind.INTEREST_GROUP_PROPOSALS, "event records proposal-count requirement kind")
+	t.check(event.interest_group == group, "event keeps the fixed interest group Resource")
+	t.check_equal(event.baseline_value, 2, "event baseline uses current annual authorized proposal count")
+	t.check_equal(event.full_target, 5, "first-year proposal requirement uses configured initial target")
+	t.check(session.event_system.spawn_event(session.context, race, Metric.Id.TAX) == null, "fixed-group race does not generate metric events")
+	event.known = true
+	var visit := OfficeVisitState.new()
+	visit.kind = OfficeVisitState.Kind.EVENT_INTEL
+	visit.race = race
+	visit.event = event
+	session.state.office_visits.append(visit)
+	var dialogue: Dictionary = UiSerializer.new().pending_dialogue(session)
+	t.check_equal(dialogue["requirement_kind"], EventState.RequirementKind.INTEREST_GROUP_PROPOSALS, "fixed-group event dialogue exposes its requirement kind")
+	t.check_equal(dialogue["interest_group_name"], "fixed group", "fixed-group event dialogue exposes the group name")
+	session.state.office_visits.clear()
+	session.state.annual_proposal_slot_counts[group] = 5
+	session.event_system.settle_month(session.context)
+	t.check_equal(event.phase, EventState.Phase.RESOLVED, "meeting the group proposal target resolves the shared event lifecycle")
+	t.check_equal(session.event_system.try_generate_month(session.context).size(), 0, "meeting the annual group proposal target prevents replacement events")
+	session.state.year = 2
+	t.check_equal(session.race_system.get_interest_group_proposal_expectation(race_state, session.context), 6, "proposal requirement inflates with the race expectation growth rate")
+	session.free()
+
+
 func _test_hidden_growth_public_window_and_resolution(t: BackendTestContext) -> void:
 	var race := t.make_race("deadline")
 	race.increase_production = true
@@ -88,10 +129,12 @@ func _test_hidden_growth_public_window_and_resolution(t: BackendTestContext) -> 
 	t.check_equal(event.months_alive, 1, "hidden event advances deadline")
 	t.check(event.growth_progress > 0.0, "hidden event grows")
 	t.check(not event.known, "satisfying hidden event does not reveal it")
+	t.check(not event.published, "hidden event is not published")
 	for index in range(8):
 		session.event_system.settle_month(session.context)
 	t.check_equal(event.months_alive, 9, "public window begins with three months remaining")
 	t.check(event.known, "public window forces disclosure")
+	t.check(event.published, "public window publishes the event")
 	t.check(session.state.office_visits.is_empty(), "forced disclosure does not queue an event-intel visit")
 	session.event_system.settle_month(session.context)
 	t.check_equal(event.phase, EventState.Phase.RESOLVED, "satisfied known event resolves")
@@ -113,6 +156,7 @@ func _test_forced_public_information_does_not_queue_visit(t: BackendTestContext)
 	event.months_alive = balance.event_lifetime_months - balance.event_public_remaining_months
 	session.event_system.update_information(session.context)
 	t.check(event.known, "information update forces disclosure in the public window")
+	t.check(event.published, "forced-public information is published immediately")
 	t.check(session.state.office_visits.is_empty(), "forced-public information update queues no event-intel visit")
 	session.free()
 
@@ -131,6 +175,7 @@ func _test_pause_relief_and_effect_early_reveal(t: BackendTestContext) -> void:
 	var event := session.event_system.spawn_event(session.context, race, Metric.Id.INVESTMENT)
 	session.event_system.update_information(session.context)
 	t.check(event.known, "EventIntelProbabilityEffect reveals event early")
+	t.check(not event.published, "early information remains unpublished until acknowledged or the next settlement")
 	t.check_equal(session.state.office_visits.size(), 1, "probability-based early information queues one office visit")
 	var visit := session.state.office_visits[0]
 	t.check_equal(visit.kind, OfficeVisitState.Kind.EVENT_INTEL, "early information queues an event-intel visit")
@@ -138,6 +183,15 @@ func _test_pause_relief_and_effect_early_reveal(t: BackendTestContext) -> void:
 	t.check(visit.event == event, "event-intel visit keeps the authoritative event instance")
 	session.event_system.update_information(session.context)
 	t.check_equal(session.state.office_visits.size(), 1, "an already known event is not queued twice")
+	var interest_visit := OfficeVisitState.new()
+	interest_visit.kind = OfficeVisitState.Kind.INTEREST_GROUP
+	interest_visit.race = race
+	session.state.office_visits.append(interest_visit)
+	session.event_system.publish_known_events(session.context)
+	t.check(event.published, "monthly publication promotes known events")
+	session.event_system.cleanup_published_event_visits(session.state)
+	t.check_equal(session.state.office_visits.size(), 1, "publication cleanup removes only published event-intel visits")
+	t.check(session.state.office_visits[0] == interest_visit, "publication cleanup preserves interest-group visits")
 	event.growth_progress = 1.0
 	balance.event_pause_satisfaction_threshold = 0.4
 	balance.event_relief_satisfaction_threshold = 0.8
@@ -163,5 +217,6 @@ func _test_deadline_failure(t: BackendTestContext) -> void:
 	t.check_equal(event.months_alive, 12, "event fails at deadline")
 	t.check_equal(event.phase, EventState.Phase.FAILED, "unresolved event fails")
 	t.check(event.known, "failed event is known")
+	t.check(event.published, "failed event is published")
 	t.check_equal(session.state.collapse_level, 1, "failure adds one collapse step")
 	session.free()
