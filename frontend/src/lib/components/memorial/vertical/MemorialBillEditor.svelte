@@ -101,7 +101,7 @@
 				>
 					<div class="absolute inset-0 flex flex-col gap-2 overflow-hidden">
 						{#each coverMetrics as metric (`${metric.text}-${metric.value}`)}
-							<div class="flex h-58 w-116 items-center justify-center">
+							<div class="flex min-h-0 w-116 flex-1 items-center justify-center">
 								<div class="-rotate-90">
 									<MemorialMetric {metric} isBottom isColumn showValue={!isTitle} />
 								</div>
