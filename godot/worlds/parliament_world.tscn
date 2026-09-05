@@ -13,7 +13,6 @@ position = Vector2(2400, 1350)
 
 [node name="Background" type="CanvasLayer" parent="." unique_id=1575129882]
 layer = -10
-visible = false
 
 [node name="BaseColor" type="ColorRect" parent="Background" unique_id=908584524]
 anchors_preset = 15
@@ -88,42 +87,42 @@ scale = Vector2(0.99999994, 0.99999994)
 seat_index = 13
 
 [node name="ParliamentSeat9" parent="Seats/Second floor" unique_id=1166366848 instance=ExtResource("2_seat")]
-position = Vector2(-1000, 22)
+position = Vector2(-1200, 22)
 scale = Vector2(0.99999994, 0.99999994)
 seat_index = 12
 
 [node name="ParliamentSeat11" parent="Seats/Second floor" unique_id=1122032144 instance=ExtResource("2_seat")]
-position = Vector2(1000, 22)
+position = Vector2(1200, 22)
 scale = Vector2(0.99999994, 0.99999994)
 seat_index = 14
 
 [node name="ParliamentSeat8" parent="Seats/Second floor" unique_id=890518189 instance=ExtResource("2_seat")]
-position = Vector2(-2000, 88)
+position = Vector2(-2200, 88)
 scale = Vector2(0.99999994, 0.99999994)
 seat_index = 11
 
 [node name="ParliamentSeat12" parent="Seats/Second floor" unique_id=426964330 instance=ExtResource("2_seat")]
-position = Vector2(2000, 88)
+position = Vector2(2200, 88)
 scale = Vector2(0.99999994, 0.99999994)
 seat_index = 15
 
 [node name="ParliamentSeat16" parent="Seats/Second floor" unique_id=1294135117 instance=ExtResource("2_seat")]
-position = Vector2(-3000, 197)
+position = Vector2(-3200, 197)
 scale = Vector2(0.99999976, 0.99999976)
 seat_index = 10
 
 [node name="ParliamentSeat13" parent="Seats/Second floor" unique_id=943682527 instance=ExtResource("2_seat")]
-position = Vector2(3000, 197)
+position = Vector2(3200, 197)
 scale = Vector2(0.99999994, 0.99999994)
 seat_index = 16
 
 [node name="ParliamentSeat15" parent="Seats/Second floor" unique_id=554419024 instance=ExtResource("2_seat")]
-position = Vector2(-4000, 350)
+position = Vector2(-4200, 350)
 scale = Vector2(0.9999998, 0.9999998)
 seat_index = 9
 
 [node name="ParliamentSeat14" parent="Seats/Second floor" unique_id=1773254404 instance=ExtResource("2_seat")]
-position = Vector2(4000, 350)
+position = Vector2(4200, 350)
 seat_index = 17
 
 [node name="First floor" type="Node2D" parent="Seats" unique_id=1986140908]
@@ -134,39 +133,39 @@ scale = Vector2(0.99999994, 0.99999994)
 seat_index = 0
 
 [node name="ParliamentSeat6" parent="Seats/First floor" unique_id=1306561613 instance=ExtResource("2_seat")]
-position = Vector2(-1000, 22)
+position = Vector2(-1400, 22)
 scale = Vector2(0.99999994, 0.99999994)
 seat_index = 1
 
 [node name="ParliamentSeat3" parent="Seats/First floor" unique_id=2071560883 instance=ExtResource("2_seat")]
-position = Vector2(1000, 22)
+position = Vector2(1400, 22)
 scale = Vector2(0.99999994, 0.99999994)
 seat_index = 2
 
 [node name="ParliamentSeat5" parent="Seats/First floor" unique_id=1098019539 instance=ExtResource("2_seat")]
-position = Vector2(-2000, 88)
+position = Vector2(-2400, 88)
 scale = Vector2(0.99999994, 0.99999994)
 seat_index = 3
 
 [node name="ParliamentSeat4" parent="Seats/First floor" unique_id=83804956 instance=ExtResource("2_seat")]
-position = Vector2(2000, 88)
+position = Vector2(2400, 88)
 scale = Vector2(0.99999994, 0.99999994)
 seat_index = 4
 
 [node name="ParliamentSeat9" parent="Seats/First floor" unique_id=888405464 instance=ExtResource("2_seat")]
-position = Vector2(-3000, 197)
+position = Vector2(-3400, 197)
 scale = Vector2(0.99999994, 0.99999994)
 seat_index = 5
 
 [node name="ParliamentSeat2" parent="Seats/First floor" unique_id=377598760 instance=ExtResource("2_seat")]
-position = Vector2(3000, 197)
+position = Vector2(3400, 197)
 scale = Vector2(0.99999994, 0.99999994)
 seat_index = 6
 
 [node name="ParliamentSeat8" parent="Seats/First floor" unique_id=1604560098 instance=ExtResource("2_seat")]
-position = Vector2(-4000, 350)
+position = Vector2(-4400, 350)
 seat_index = 7
 
 [node name="ParliamentSeat" parent="Seats/First floor" unique_id=1081682751 instance=ExtResource("2_seat")]
-position = Vector2(4000, 350)
+position = Vector2(4400, 350)
 seat_index = 8
