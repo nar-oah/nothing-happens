@@ -310,9 +310,16 @@ func _test_draft_preview(t: BackendTestContext) -> void:
 func _test_vote_donation_command(t: BackendTestContext) -> void:
 	var race := t.make_race("donation command race")
 	var group := t.make_group("donation command group")
-	var session := t.make_session([race], [group], t.make_seats(1, "donation command"))
+	var article := t.make_article(race)
+	var modifier := InterestGroupVoteModifierEffect.new()
+	modifier.interest_groups = [group]
+	modifier.support_modifier = -2.0
+	article.effects.append(modifier)
+	var session := t.make_session(
+		[race], [group], t.make_seats(1, "donation command"), [article]
+	)
 	var seat: SeatState = session.state.seats[0]
-	seat.personal_relation = -2.0
+	seat.actual_group = group
 	var bridge := UiBridge.new()
 	bridge.setup(session)
 	session.state.political_donation_pool = 2.0

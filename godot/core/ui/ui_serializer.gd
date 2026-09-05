@@ -314,7 +314,7 @@ func seats(session: RunSession) -> Array:
 	var result: Array = []
 	for index in range(session.state.seats.size()):
 		var current := session.state.seats[index]
-		result.append({"seat_index": index, "display_name": _seat_name(current), "race_display_name": _active_race_name(session, current.race), "interest_group_display_name": _active_group_name(session, current.actual_group), "personal_relation": current.personal_relation})
+		result.append({"seat_index": index, "display_name": _seat_name(current), "race_display_name": _active_race_name(session, current.race), "interest_group_display_name": _active_group_name(session, current.actual_group)})
 	return result
 
 

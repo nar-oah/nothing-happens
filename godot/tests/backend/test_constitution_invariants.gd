@@ -19,8 +19,6 @@ func _test_permanent_seats_survive_annual_allocation(t: BackendTestContext) -> v
 		[race_a, race_b], [t.make_group("group")], definitions
 	)
 	var before: Array[SeatState] = session.state.seats.duplicate()
-	for index in range(before.size()):
-		before[index].personal_relation = float(index + 1)
 	session.state.get_race(race_a).resolved_events_this_year = 4
 	session.annual_settlement_system.settle_year(session.context)
 
@@ -30,11 +28,6 @@ func _test_permanent_seats_survive_annual_allocation(t: BackendTestContext) -> v
 		t.check(
 			session.state.seats[index].definition == definitions[index],
 			"annual settlement keeps SeatDefinition identity"
-		)
-		t.check_approx(
-			session.state.seats[index].personal_relation,
-			float(index + 1),
-			"annual settlement preserves seat runtime relation"
 		)
 	session.free()
 

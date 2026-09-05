@@ -74,7 +74,6 @@ export type SeatSummaryDto = {
 	display_name: string;
 	race_display_name: string;
 	interest_group_display_name: string;
-	personal_relation: number;
 };
 export type ParliamentSeatAnchorDto = { seat_index: number; x: number; y: number };
 export type ParliamentCountDto = { display_name: string; seat_count: number };

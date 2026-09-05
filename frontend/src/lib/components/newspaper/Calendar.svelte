@@ -10,9 +10,13 @@
 	const isYinMonth = $derived(month % 2 === 1);
 	const currentLabel = $derived(isYinMonth ? '阴' : '阳');
 	const preferredName = $derived(isYinMonth ? '阴项' : '阳项');
-	const preferredMetrics = $derived(isYinMonth ? '税课 ↓  ·  消费 ↓' : '生产 ↑  ·  投资 ↓');
+	const preferredMetrics = $derived(
+		isYinMonth ? '税课 ↓  ·  消费 ↓' : '生产 ↑  ·  就业 ↑  ·  投资 ↓'
+	);
 	const avoidedName = $derived(isYinMonth ? '阳项' : '阴项');
-	const avoidedMetrics = $derived(isYinMonth ? '生产 ↑  ·  投资 ↓' : '税课 ↓  ·  消费 ↓');
+	const avoidedMetrics = $derived(
+		isYinMonth ? '生产 ↑  ·  就业 ↑  ·  投资 ↓' : '税课 ↓  ·  消费 ↓'
+	);
 </script>
 
 <div class="flex h-full w-full items-center gap-8 overflow-hidden px-8">

@@ -9,9 +9,6 @@ var race: RaceDefinition
 var base_group: InterestGroupDefinition
 var annual_group: InterestGroupDefinition
 var actual_group: InterestGroupDefinition
-var personal_relation: float = 0.0
-var odd_month_relation: float = 0.0
-var even_month_relation: float = 0.0
 
 
 func _init(

@@ -172,8 +172,7 @@ export function makeLiveState(stateVersion = 1): LiveGameState {
 				seat_index: 0,
 				display_name: '问津',
 				race_display_name: '人类',
-				interest_group_display_name: testGroup.display_name,
-				personal_relation: 2
+				interest_group_display_name: testGroup.display_name
 			}
 		],
 		parliament: {
