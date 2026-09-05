@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="ConstitutionColumnDefinition" format=3]
+[gd_resource type="Resource" script_class="ConstitutionColumnDefinition" format=3 uid="uid://cw7rdha1ir0we"]
 
 [ext_resource type="Script" path="res://definitions/constitution_column_definition.gd" id="1"]
 [ext_resource type="Resource" path="res://data/constitutions/国有化.tres" id="2"]
