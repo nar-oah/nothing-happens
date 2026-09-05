@@ -594,6 +594,7 @@ func _test_parliament_world_seats(t: BackendTestContext) -> void:
 func _test_game_root_shell(t: BackendTestContext) -> void:
 	var scene: PackedScene = load("res://core/game_root.tscn")
 	var root: Node = scene.instantiate()
+	root.get_node("RunSession").autosave_enabled = false
 	Engine.get_main_loop().root.add_child(root)
 	t.check(root.has_node("RunSession"), "GameRoot owns RunSession")
 	t.check(root.has_node("SceneManager/World"), "GameRoot owns SceneManager World")
