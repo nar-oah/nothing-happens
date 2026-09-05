@@ -121,7 +121,6 @@
 		)
 	);
 	let confirming = $derived(selectedProposals.length === 3);
-	let synthesisPreview = $derived(createProposalSynthesisPreview(selectedProposals));
 
 	$effect(() => {
 		if (secondaryMode || activeMode === 'archive') return;
@@ -166,6 +165,10 @@
 			return;
 		}
 		selectedProposals = toggleProposalSelection(selectedProposals, item);
+	}
+
+	function synthesisPreviewFor(item: ProposalLeftItem) {
+		return createProposalSynthesisPreview(selectedProposals, item);
 	}
 
 	function confirmSynthesis(negativeBase: ProposalLeftItem) {
@@ -278,7 +281,7 @@
 								option={optionFor(item)}
 								lag={item.proposal.lag_months}
 								metrics={confirming
-									? synthesisPreview.metrics
+									? synthesisPreviewFor(item).metrics
 									: proposalToMemorialMetrics(item.proposal)}
 							/>
 						{:else}
@@ -287,7 +290,7 @@
 								lag={item.proposal.lag_months}
 								metrics={proposalToMemorialMetrics(item.proposal)}
 							/>
-						{/if}
+					{/if}
 					</button>
 				{/each}
 			{:else if activeMode === 'selection'}
