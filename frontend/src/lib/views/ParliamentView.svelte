@@ -154,7 +154,12 @@
 	<div class="seat-layer">
 		{#each anchoredSeats as seat (seat.seat_index)}
 			<div class="seat-anchor" style:left={`${seat.x * 100}%`} style:top={`${seat.y * 100}%`}>
-				<ChoreItem text={seat.interestGroupDisplayName} value={seat.score} isRow />
+				<ChoreItem
+					text={String(seat.score)}
+					value={seat.interestGroupDisplayName}
+					isRow
+					isCenter={false}
+				/>
 			</div>
 		{/each}
 	</div>
