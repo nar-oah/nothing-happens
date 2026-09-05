@@ -154,15 +154,17 @@ func pending_dialogue(session: RunSession) -> Variant:
 			var event := visit.event
 			if event == null:
 				return null
-			return {
+			var data := {
 				"kind": "event_intel",
 				"race_name": _active_race_name(session, visit.race),
-				"requirement_kind": int(event.requirement_kind),
 				"metric": int(event.metric),
-				"interest_group_name": _active_group_name(session, event.interest_group),
 				"requirement": session.event_system.get_current_requirement(event),
 				"strength": roundi(clampf(event.growth_progress, 0.0, 1.0) * 100.0),
 			}
+			if event.requirement_kind == EventState.RequirementKind.INTEREST_GROUP_PROPOSALS:
+				data["requirement_kind"] = int(event.requirement_kind)
+				data["interest_group_name"] = _active_group_name(session, event.interest_group)
+			return data
 	return null
 
 
