@@ -6,6 +6,7 @@ const BackendTestContext = preload("res://tests/backend/backend_test_context.gd"
 func run(t: BackendTestContext) -> void:
 	_test_generation_count_and_pair_identity(t)
 	_test_zero_seat_race_is_ineligible(t)
+	_test_fixed_interest_group_events_use_proposal_counts(t)
 	_test_hidden_growth_public_window_and_resolution(t)
 	_test_forced_public_information_does_not_queue_visit(t)
 	_test_pause_relief_and_effect_early_reveal(t)
@@ -73,6 +74,37 @@ func _test_zero_seat_race_is_ineligible(t: BackendTestContext) -> void:
 	t.check_equal(generated.size(), 1, "only seated race has a legal event pair")
 	t.check(generated[0].race == seated, "zero-seat race is never selected")
 	t.check(session.event_system.spawn_event(session.context, absent, Metric.Id.PRODUCTION) == null, "direct spawn also enforces seat requirement")
+	session.free()
+
+
+func _test_fixed_interest_group_events_use_proposal_counts(t: BackendTestContext) -> void:
+	var group := t.make_group("fixed group")
+	var race := t.make_race("fixed group race")
+	race.fixed_interest_group = group
+	race.expectation_growth_rate = 0.10
+	var balance := _event_balance()
+	balance.initial_interest_group_proposal_requirement = 5
+	balance.event_spawn_count_min = 1
+	balance.event_spawn_count_max = 1
+	var session := t.make_session([race], [group], t.make_seats(1, "fixed group event"), [], balance)
+	var race_state := session.state.get_race(race)
+	t.check(race_state.expectation_targets.is_empty(), "fixed-group race needs no metric expectation targets")
+	session.state.annual_proposal_slot_counts[group] = 2
+	var generated := session.event_system.try_generate_month(session.context)
+	t.check_equal(generated.size(), 1, "insufficient fixed-group proposal count creates an event")
+	var event := generated[0]
+	t.check_equal(event.requirement_kind, EventState.RequirementKind.INTEREST_GROUP_PROPOSALS, "event records proposal-count requirement kind")
+	t.check(event.interest_group == group, "event keeps the fixed interest group Resource")
+	t.check_equal(event.baseline_value, 2, "event baseline uses current annual authorized proposal count")
+	t.check_equal(event.full_target, 5, "first-year proposal requirement uses configured initial target")
+	t.check(session.event_system.spawn_event(session.context, race, Metric.Id.TAX) == null, "fixed-group race does not generate metric events")
+	event.known = true
+	session.state.annual_proposal_slot_counts[group] = 5
+	session.event_system.settle_month(session.context)
+	t.check_equal(event.phase, EventState.Phase.RESOLVED, "meeting the group proposal target resolves the shared event lifecycle")
+	t.check_equal(session.event_system.try_generate_month(session.context).size(), 0, "meeting the annual group proposal target prevents replacement events")
+	session.state.year = 2
+	t.check_equal(session.race_system.get_interest_group_proposal_expectation(race_state, session.context), 6, "proposal requirement inflates with the race expectation growth rate")
 	session.free()
 
 
