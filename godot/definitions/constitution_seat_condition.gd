@@ -43,7 +43,7 @@ func is_met(context: RunContext) -> bool:
 
 func get_description() -> String:
 	var comparison_text: String = ["不低于", "不高于", "高于", "低于"][comparison]
-	var threshold := "%s%s%%" % [comparison_text, String.num(required_rate * 100.0, 2)]
+	var threshold := "%s%s%%" % [comparison_text, String.num(required_rate * 100.0, 2).trim_suffix(".0")]
 	var groups := _get_groups()
 	if groups.is_empty():
 		if race == null:
