@@ -13,16 +13,21 @@
 	let { term, year, month, onNewspaperOpen, dialogue, onResolve }: Props = $props();
 	let optionChoice = $state(false);
 	let answered = $state(false);
+	let hasOptions = $derived(
+		Boolean(dialogue.leftOption && dialogue.rightOption) &&
+			dialogue.leftContent !== undefined &&
+			dialogue.rightContent !== undefined
+	);
 	let text = $derived(
-		answered
+		answered && hasOptions
 			? optionChoice
-				? dialogue.rightContent
-				: dialogue.leftContent
+				? (dialogue.rightContent ?? '')
+				: (dialogue.leftContent ?? '')
 			: dialogue.initialText
 	);
 
 	function advanceDialogue() {
-		if (!answered) {
+		if (hasOptions && !answered) {
 			answered = true;
 			return;
 		}
@@ -34,11 +39,11 @@
 	<NewspaperEntry {term} {year} {month} onOpen={onNewspaperOpen} />
 
 	<div class="dialog-area">
-		{#if !answered}
+		{#if hasOptions && !answered}
 			<div class="choice-switch">
 				<ChoreSwitch
-					left={dialogue.leftOption}
-					right={dialogue.rightOption}
+					left={dialogue.leftOption ?? ''}
+					right={dialogue.rightOption ?? ''}
 					bind:isSwitch={optionChoice}
 				/>
 			</div>
