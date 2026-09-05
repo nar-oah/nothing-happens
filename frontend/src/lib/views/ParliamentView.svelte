@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { onMount, untrack } from 'svelte';
-	import ChoreItem from '$lib/components/chore/ChoreItem.svelte';
 	import ChoreSwitch from '$lib/components/chore/ChoreSwitch.svelte';
 	import Left from '$lib/components/left/Left.svelte';
 	import type { BillLeftItem, LeftItem, LeftMode } from '$lib/components/left/types';
@@ -14,8 +13,8 @@
 	import type { ViewFrameProps } from './types';
 
 	type AnchoredSeat = ParliamentSeatAnchorDto & {
-		interestGroupDisplayName: string;
 		score: number;
+		canBribe: boolean;
 	};
 
 	type Props = ViewFrameProps & {
@@ -35,6 +34,7 @@
 		onRemovePolicy?: (draftIndex: number) => void;
 		onTitleChange?: (title: string) => void;
 		onEditSavedBill?: (savedBillIndex: number) => void;
+		onBribeSeat?: (seatIndex: number) => void;
 		onSubmit?: () => void;
 	};
 
@@ -65,6 +65,7 @@
 		onRemovePolicy,
 		onTitleChange,
 		onEditSavedBill,
+		onBribeSeat,
 		onSubmit
 	}: Props = $props();
 	let activeLeftMode = $state<LeftMode>('archive');
@@ -127,6 +128,11 @@
 		queueMicrotask(() => (voteMode = false));
 	}
 
+	function bribeSeat(seatIndex: number, isSwitch: boolean) {
+		if (!isSwitch) return;
+		onBribeSeat?.(seatIndex);
+	}
+
 	function mergeSeats(
 		currentSeats: SeatSummaryDto[],
 		currentAnchors: ParliamentSeatAnchorDto[],
@@ -141,8 +147,8 @@
 				? [
 						{
 							...anchor,
-							interestGroupDisplayName: seat.interest_group_display_name,
-							score: vote.score
+							score: vote.score,
+							canBribe: vote.can_bribe
 						}
 					]
 				: [];
@@ -154,11 +160,12 @@
 	<div class="seat-layer">
 		{#each anchoredSeats as seat (seat.seat_index)}
 			<div class="seat-anchor" style:left={`${seat.x * 100}%`} style:top={`${seat.y * 100}%`}>
-				<ChoreItem
-					text={String(seat.score)}
-					value={seat.interestGroupDisplayName}
-					isRow
-					isCenter={false}
+				<ChoreSwitch
+					left={String(seat.score)}
+					right={seat.score > 0 ? '支持' : '贿赂'}
+					isSwitch={seat.score > 0}
+					disabled={seat.score > 0 || !seat.canBribe}
+					onSwitchChange={(isSwitch) => bribeSeat(seat.seat_index, isSwitch)}
 				/>
 			</div>
 		{/each}
@@ -219,6 +226,7 @@
 	.seat-anchor {
 		position: absolute;
 		transform: translate(-50%, -50%);
+		pointer-events: auto;
 	}
 
 	.top-slot {

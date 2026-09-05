@@ -112,6 +112,7 @@ func vote_result(result: VoteResultState, source: Variant) -> Dictionary:
 			"interest_group_display_name": _active_group_name_from_source(session, state, null if seat == null else seat.actual_group),
 			"position": int(current.position),
 			"score": current.score,
+			"can_bribe": session != null and session.vote_system.can_bribe(session.context, current),
 			"breakdown": breakdown,
 		})
 	return {"passed": result.passed, "submitted": result.submitted, "support_count": result.support_count, "oppose_count": result.oppose_count, "abstain_count": result.abstain_count, "absent_count": result.absent_count, "present_count": result.present_count(), "seat_votes": seat_votes}

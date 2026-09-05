@@ -50,6 +50,7 @@ test('IPC envelope encodes and decodes discriminated messages', () => {
 		}
 	);
 	assert.equal(isOutboundType('term.next'), true);
+	assert.equal(isOutboundType('vote.donation.add'), true);
 	assert.equal(isOutboundType('constitution.column.unlock'), true);
 	assert.equal(isOutboundType('office.visit.resolve'), true);
 	assert.equal(isOutboundType('proposal.bonus.resolve'), false);

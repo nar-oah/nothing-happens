@@ -34,6 +34,32 @@ func set_donation(context: RunContext, seat: SeatState, support_amount: float) -
 	return true
 
 
+func get_bribe_cost(context: RunContext, vote: SeatVoteState) -> float:
+	if context == null or context.balance == null or vote == null or vote.seat == null or vote.score > 0.0:
+		return 0.0
+	return maxf(context.balance.support_threshold - vote.score, 0.0)
+
+
+func can_bribe(context: RunContext, vote: SeatVoteState) -> bool:
+	var cost := get_bribe_cost(context, vote)
+	return cost > 0.0 and cost <= context.state.political_donation_pool
+
+
+func bribe_for_support(context: RunContext, draft: DraftBillState, seat: SeatState) -> bool:
+	if context == null or context.state == null or seat == null or seat not in context.state.seats:
+		return false
+	var preview := preview_vote(draft, context)
+	for vote in preview.seat_votes:
+		if vote.seat != seat:
+			continue
+		var cost := get_bribe_cost(context, vote)
+		if cost <= 0.0:
+			return false
+		var previous: float = context.state.vote_donations.get(seat.definition, 0.0)
+		return set_donation(context, seat, previous + cost)
+	return false
+
+
 func resolve_donation_detection(context: RunContext) -> int:
 	var detected := 0
 	var probability := context.constitution_system.get_donation_detection_probability(context)

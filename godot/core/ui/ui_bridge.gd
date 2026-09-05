@@ -199,6 +199,8 @@ func _dispatch(message: Dictionary, messages: Array[Dictionary]) -> void:
 			_handle_bill_edit(message, messages)
 		"bill.submit":
 			_handle_bill_submit(message, messages)
+		"vote.donation.add":
+			_handle_vote_donation_add(message, messages)
 		"proposal.merge":
 			_handle_proposal_merge(message, messages)
 		"office.visit.resolve":
@@ -376,6 +378,32 @@ func _handle_bill_submit(message: Dictionary, messages: Array[Dictionary]) -> vo
 		"world_scene": world_scene,
 	}
 	messages.append(_envelope("bill.result", payload))
+	messages.append(_full_state(message["request_id"]))
+
+
+func _handle_vote_donation_add(message: Dictionary, messages: Array[Dictionary]) -> void:
+	var index := _protocol.read_int(message["payload"], "seat_index")
+	if not index["ok"]:
+		_append_mutation_error(messages, index["error"], message["request_id"])
+		return
+	if index["value"] < 0 or index["value"] >= run_session.state.seats.size():
+		_append_mutation_error(
+			messages,
+			{"code": "invalid_seat_index", "message": "Parliament seat index is invalid."},
+			message["request_id"]
+		)
+		return
+	var seat: SeatState = run_session.state.seats[index["value"]]
+	if not run_session.vote_system.bribe_for_support(
+		run_session.context, run_session.state.draft_bill, seat
+	):
+		_append_mutation_error(
+			messages,
+			{"code": "donation_rejected", "message": "Political donation cannot secure this seat."},
+			message["request_id"]
+		)
+		return
+	state_version += 1
 	messages.append(_full_state(message["request_id"]))
 
 

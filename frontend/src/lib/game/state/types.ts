@@ -94,6 +94,7 @@ export type SeatVoteDto = {
 	interest_group_display_name: string;
 	position: 0 | 1 | 2 | 3;
 	score: number;
+	can_bribe: boolean;
 	breakdown: Record<string, number>;
 };
 export type VoteResultDto = {

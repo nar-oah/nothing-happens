@@ -60,6 +60,7 @@ const outboundTypes = new Set<OutboundType>([
 	'bill.new',
 	'bill.edit',
 	'bill.submit',
+	'vote.donation.add',
 	'proposal.merge',
 	'office.visit.resolve',
 	'constitution.revise',
@@ -470,6 +471,7 @@ function isVoteResult(value: unknown): value is VoteResultDto {
 					vote.position === 2 ||
 					vote.position === 3) &&
 				isNumber(vote.score) &&
+				typeof vote.can_bribe === 'boolean' &&
 				isNumberRecord(vote.breakdown)
 		)
 	);
