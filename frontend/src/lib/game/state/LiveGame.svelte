@@ -34,7 +34,8 @@
 		deriveTopItems
 	} from './selectors';
 	import { createGameStore, EMPTY_GAME_STORE, type GameStoreValue } from './store';
-	import type { LiveGameState, MonthReportEventPhase } from './types';
+	import { getSaveAction } from './saves';
+	import type { LiveGameState, MonthReportEventPhase, SaveSlotDto } from './types';
 
 	type MutationPayload<T extends GameplayCommandType> = Omit<OutboundPayloads[T], 'state_version'>;
 	type NewspaperTransitionAction = () => Promise<void>;
@@ -127,6 +128,8 @@
 	let client: CefIpcClient | null = null;
 	let mutationQueue = Promise.resolve();
 	let selectedConstitutionArticle = $state<number>();
+	let loadRevision = $state(0);
+	let saveError = $state('');
 	let newspaperOpen = $state(true);
 	let newspaperBusy = $state(false);
 	let newspaperFolded = $state(false);
@@ -225,6 +228,32 @@
 		newspaperFolded = false;
 		newspaperLeaving = false;
 		newspaperOpen = true;
+		client?.send('saves.list', {});
+	}
+
+	async function selectSave(slot: SaveSlotDto, loading: boolean): Promise<void> {
+		if (newspaperBusy || newspaperLeaving) return;
+		newspaperBusy = true;
+		saveError = '';
+		const action = getSaveAction(slot, loading);
+		try {
+			await requestMutation(action.type, action.payload);
+			if (loading) {
+				selectedConstitutionArticle = undefined;
+				pendingNewspaperAction = null;
+				newspaperFoldResolver = null;
+				newspaperFolded = false;
+				newspaperLeaving = false;
+				newspaperOpen = true;
+				const state = storeValue.snapshot;
+				newspaperEdition = state ? deriveNewspaperEdition(state) : null;
+				loadRevision += 1;
+			}
+		} catch (error: unknown) {
+			saveError = error instanceof Error ? error.message : '存档操作失败';
+		} finally {
+			newspaperBusy = false;
+		}
 	}
 
 	function transitionThroughNewspaper(action: NewspaperTransitionAction): void {
@@ -364,6 +393,7 @@
 
 <svelte:head><title>Nothing Happens</title></svelte:head>
 {#if snapshot && frame}
+	{#key loadRevision}
 	{#if snapshot.ui_mode === 'dialogue' && pendingDialogue}
 		<DialogueView
 			{...frame}
@@ -423,8 +453,12 @@
 
 	{#if newspaperOpen && newspaperEdition}
 		<NewspaperView
+			term={snapshot.term}
 			year={newspaperEdition.year}
 			month={newspaperEdition.month}
+			saves={snapshot.saves}
+			{saveError}
+			onSaveSelect={selectSave}
 			metrics={newspaperEdition.metrics}
 			front={newspaperEdition.front}
 			events={newspaperEdition.events}
@@ -438,4 +472,5 @@
 			onClosed={finishNewspaperClose}
 		/>
 	{/if}
+	{/key}
 {/if}
