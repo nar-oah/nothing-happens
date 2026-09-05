@@ -43,7 +43,8 @@ test('domain sync immutably overwrites only its authoritative fields', () => {
 test('parliament.layout updates only seat anchors without changing gameplay version', () => {
 	const original = makeLiveState(5);
 	const layout = makeParliamentLayout();
-	const value = { snapshot: original, error: null };
+	const error = { code: 'existing', message: 'Existing command error' };
+	const value = { snapshot: original, error };
 	const updated = applyGameMessage(value, { type: 'parliament.layout', payload: layout });
 
 	assert.notEqual(updated.snapshot, original);
@@ -53,7 +54,7 @@ test('parliament.layout updates only seat anchors without changing gameplay vers
 		{ seat_index: 0, x: 0.25, y: 0.75 },
 		{ seat_index: 3, x: 0.8, y: 0.2 }
 	]);
-	assert.equal(updated.error, null);
+	assert.equal(updated.error, error);
 });
 
 test('parliament.layout is ignored until a full snapshot is available', () => {

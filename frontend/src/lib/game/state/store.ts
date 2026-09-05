@@ -29,11 +29,11 @@ export function applyGameMessage(value: GameStoreValue, message: InboundMessage)
 	if (message.type === 'parliament.layout')
 		return value.snapshot
 			? {
+					...value,
 					snapshot: {
 						...value.snapshot,
 						parliament_seat_anchors: message.payload.parliament_seat_anchors
-					},
-					error: null
+					}
 				}
 			: value;
 	if (!value.snapshot || message.payload.state_version < value.snapshot.state_version) return value;
