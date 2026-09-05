@@ -14,7 +14,7 @@
 [ext_resource type="Resource" uid="uid://bto7mkhf8cqca" path="res://data/races/南柯.tres" id="race_12"]
 [ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="race_type_5"]
 [ext_resource type="Resource" uid="uid://dl4flgxtqjpim" path="res://data/constitution_rows/团体.tres" id="row_7"]
-[ext_resource type="Resource" path="res://data/races/variants/团体/南柯（工会）.tres" id="variant_13"]
+[ext_resource type="Resource" uid="uid://byxfuk87ts7bj" path="res://data/races/variants/团体/南柯（工会）.tres" id="variant_13"]
 
 [sub_resource type="Resource" id="Effect_1"]
 script = ExtResource("effscript_modify_race_11")

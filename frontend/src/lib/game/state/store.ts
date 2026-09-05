@@ -26,6 +26,16 @@ export function createGameStore(initial: LiveGameState | null = null): GameStore
 export function applyGameMessage(value: GameStoreValue, message: InboundMessage): GameStoreValue {
 	if (message.type === 'state.full') return { snapshot: message.payload, error: null };
 	if (message.type === 'command.error') return { ...value, error: message.payload };
+	if (message.type === 'parliament.layout')
+		return value.snapshot
+			? {
+					...value,
+					snapshot: {
+						...value.snapshot,
+						parliament_seat_anchors: message.payload.parliament_seat_anchors
+					}
+				}
+			: value;
 	if (!value.snapshot || message.payload.state_version < value.snapshot.state_version) return value;
 
 	const snapshot = value.snapshot;

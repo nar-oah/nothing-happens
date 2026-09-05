@@ -12,10 +12,12 @@ func run(t: BackendTestContext) -> void:
 	_test_saved_bill_reconciliation(t)
 	_test_merge_refs(t)
 	_test_draft_preview(t)
+	_test_vote_donation_command(t)
 	_test_office_visit_dialogue_queue(t)
 	_test_office_visit_donation_choice(t)
 	_test_explicit_next_term_command(t)
 	_test_normalized_input_regions(t)
+	_test_parliament_world_seats(t)
 	_test_game_root_shell(t)
 
 
@@ -131,6 +133,7 @@ func _test_full_state_and_saved_bill_indices(t: BackendTestContext) -> void:
 	)
 	t.check_equal(full["races"][0]["seat_count"], 2, "race summary uses actual seats")
 	t.check_equal(full["parliament"]["total_seats"], 2, "parliament summary uses actual pool")
+	t.check_equal(full["parliament_seat_anchors"], [], "serializer defaults to no world anchors")
 	t.check_equal(full["max_collapse"], session.balance.max_collapse, "status uses balance collapse limit")
 	var bridge := UiBridge.new()
 	bridge.setup(session)
@@ -304,6 +307,39 @@ func _test_draft_preview(t: BackendTestContext) -> void:
 	session.free()
 
 
+func _test_vote_donation_command(t: BackendTestContext) -> void:
+	var race := t.make_race("donation command race")
+	var group := t.make_group("donation command group")
+	var session := t.make_session([race], [group], t.make_seats(1, "donation command"))
+	var seat: SeatState = session.state.seats[0]
+	seat.personal_relation = -2.0
+	var bridge := UiBridge.new()
+	bridge.setup(session)
+	session.state.political_donation_pool = 2.0
+	var unavailable: Dictionary = UiSerializer.new().draft_preview(session)["vote"]["seat_votes"][0]
+	t.check(not unavailable["can_bribe"], "preview disables a bribe when donations are insufficient")
+	var rejected := bridge.receive_ipc_message(
+		_message("vote.donation.add", {"state_version": 0, "seat_index": 0})
+	)
+	t.check_equal(rejected[0]["payload"]["code"], "donation_rejected", "insufficient bribe is rejected")
+	t.check_equal(bridge.state_version, 0, "rejected bribe preserves state version")
+	t.check_approx(session.state.political_donation_pool, 2.0, "rejected bribe spends no donation")
+	session.state.political_donation_pool = 3.0
+	var available: Dictionary = UiSerializer.new().draft_preview(session)["vote"]["seat_votes"][0]
+	t.check(available["can_bribe"], "preview enables an affordable bribe")
+	var messages := bridge.receive_ipc_message(
+		_message("vote.donation.add", {"state_version": 0, "seat_index": 0})
+	)
+	t.check_equal(messages[0]["type"], "state.full", "successful bribe returns full state")
+	t.check_equal(messages[0]["payload"]["state_version"], 1, "successful bribe advances state version")
+	t.check_approx(messages[0]["payload"]["political_donation_pool"], 0.0, "bribe spends the required donation")
+	var bribed_vote: Dictionary = messages[0]["payload"]["draft_preview"]["vote"]["seat_votes"][0]
+	t.check_approx(bribed_vote["score"], 1.0, "bribe raises the seat to support")
+	t.check(not bribed_vote["can_bribe"], "supporting seat cannot be bribed again")
+	bridge.free()
+	session.free()
+
+
 func _test_office_visit_dialogue_queue(t: BackendTestContext) -> void:
 	var race := t.make_race("canonical dialogue race")
 	var active_race := t.make_race("active dialogue race")
@@ -426,6 +462,112 @@ func _test_normalized_input_regions(t: BackendTestContext) -> void:
 	texture.free()
 
 
+func _test_parliament_world_seats(t: BackendTestContext) -> void:
+	var seat_scene: PackedScene = load("res://worlds/parliament_seat.tscn")
+	var standalone: ParliamentSeat = seat_scene.instantiate()
+	Engine.get_main_loop().root.add_child(standalone)
+	t.check(standalone.get_node("Visual") is Sprite2D, "ParliamentSeat owns a Sprite2D Visual")
+	t.check(standalone.get_node("UIAnchor") is Marker2D, "ParliamentSeat owns a Marker2D UIAnchor")
+	var first := t.make_race("first parliament portrait")
+	first.portrait = ImageTexture.new()
+	standalone.seat_index = 4
+	standalone.set_race(first)
+	t.check_equal(standalone.seat_index, 4, "ParliamentSeat retains its RunState index")
+	t.check(standalone.visual.texture == first.portrait, "ParliamentSeat displays RaceDefinition portrait")
+	var viewport_size := standalone.get_viewport_rect().size
+	standalone.position = viewport_size * 0.5 - standalone.ui_anchor.position
+	var normalized := standalone.get_normalized_ui_anchor()
+	t.check_approx(normalized.x, 0.5, "ParliamentSeat normalizes anchor x in the viewport")
+	t.check_approx(normalized.y, 0.5, "ParliamentSeat normalizes anchor y in the viewport")
+	standalone.free()
+
+	var world_scene: PackedScene = load("res://worlds/parliament_world.tscn")
+	var world: ParliamentWorld = world_scene.instantiate()
+	Engine.get_main_loop().root.add_child(world)
+	var authored: ParliamentSeat = world.seats[0]
+	var authored_position := authored.position
+	t.check(authored.get_parent() != world.seats_root, "ParliamentWorld finds nested editor-authored seats")
+	var second := t.make_race("second parliament portrait")
+	second.portrait = ImageTexture.new()
+	var third := t.make_race("third parliament portrait")
+	third.portrait = ImageTexture.new()
+	var races: Array[RaceDefinition] = [first, second, third]
+	world.set_seat_races(races)
+	t.check_equal(world.seats.size(), races.size(), "ParliamentWorld follows the dynamic seat count")
+	t.check(world.seats[0] == authored, "ParliamentWorld reuses editor-authored seats")
+	for index in range(races.size()):
+		t.check_equal(world.seats[index].seat_index, index, "ParliamentWorld assigns stable seat indices")
+		t.check(world.seats[index].race == races[index], "ParliamentWorld assigns each active race")
+		t.check(world.seats[index].visual.texture == races[index].portrait, "ParliamentWorld updates each portrait")
+	world.set_seat_races([second, first, third])
+	t.check_equal(world.seats[0].position, authored_position, "race updates preserve editor-authored seat positions")
+	world.set_seat_races([second])
+	t.check_equal(world.seats.size(), 1, "ParliamentWorld removes seats beyond RunState size")
+	t.check_equal(authored.get_parent().get_child_count(), 1, "removed seats leave their authored floor")
+	t.check_equal(world.seats_root.get_child_count(), 3, "seat removal preserves authored floor containers")
+	var anchors := world.get_seat_anchors()
+	t.check_equal(anchors.size(), 1, "ParliamentWorld returns one anchor per current seat")
+	t.check_equal(anchors[0].keys().size(), 3, "seat anchors contain no duplicated support data")
+	t.check_equal(anchors[0]["seat_index"], 0, "seat anchor keeps its seat index")
+	t.check(anchors[0]["x"] >= 0.0 and anchors[0]["x"] <= 1.0, "seat anchor x stays normalized")
+	t.check(anchors[0]["y"] >= 0.0 and anchors[0]["y"] <= 1.0, "seat anchor y stays normalized")
+	t.check(world.camera is Camera2D, "ParliamentWorld owns a Camera2D")
+	t.check(
+		world.get_viewport().size_changed.is_connected(
+			Callable(world, "_on_viewport_size_changed")
+		),
+		"ParliamentWorld listens for viewport resize"
+	)
+	var layouts: Array = []
+	world.layout_changed.connect(
+		func(value: Array[Dictionary]) -> void:
+			layouts.append(value)
+	)
+	var camera_start_x := world.camera.position.x
+	var anchor_start_x: float = anchors[0]["x"]
+	t.check(world.camera_left_boundary < camera_start_x, "Camera2D starts right of its left boundary")
+	t.check(world.camera_right_boundary > camera_start_x, "Camera2D starts left of its right boundary")
+	t.check_approx(
+		camera_start_x - world.camera_left_boundary,
+		world.camera_right_boundary - camera_start_x,
+		"Camera2D starts in the middle of its horizontal movement range"
+	)
+	world.camera_move_speed = 100.0
+	world.camera_left_boundary = camera_start_x - 25.0
+	world.camera_right_boundary = camera_start_x + 25.0
+	Input.action_press("parliament_right")
+	world._process(0.5)
+	Input.action_release("parliament_right")
+	t.check_approx(
+		world.camera.position.x,
+		camera_start_x + 25.0,
+		"held right input moves and clamps Camera2D"
+	)
+	t.check_equal(layouts.size(), 1, "camera movement emits one layout update")
+	t.check(
+		not is_equal_approx(layouts[0][0]["x"], anchor_start_x),
+		"camera movement recomputes normalized anchors in the same frame"
+	)
+	world._process(0.5)
+	t.check_equal(layouts.size(), 1, "idle Camera2D does not emit layout updates")
+	Input.action_press("parliament_right")
+	world._process(0.5)
+	Input.action_release("parliament_right")
+	t.check_equal(layouts.size(), 1, "Camera2D held at its boundary does not emit updates")
+	Input.action_press("parliament_left")
+	world._process(0.5)
+	Input.action_release("parliament_left")
+	t.check_approx(
+		world.camera.position.x,
+		camera_start_x - 25.0,
+		"held left input moves and clamps Camera2D"
+	)
+	t.check_equal(layouts.size(), 2, "left camera movement emits one layout update")
+	world._on_viewport_size_changed()
+	t.check_equal(layouts.size(), 3, "viewport resize recomputes and emits seat anchors")
+	world.free()
+
+
 func _test_game_root_shell(t: BackendTestContext) -> void:
 	var scene: PackedScene = load("res://core/game_root.tscn")
 	var root: Node = scene.instantiate()
@@ -443,6 +585,7 @@ func _test_game_root_shell(t: BackendTestContext) -> void:
 	var session: RunSession = root.get_node("RunSession")
 	var race_state := session.state.races[0]
 	var active_race := t.make_race("active office visitor")
+	active_race.portrait = ImageTexture.new()
 	race_state.active_definition = active_race
 	var event := EventState.new(race_state.definition, Metric.Id.TAX, 0, 100)
 	event.known = true
@@ -455,6 +598,39 @@ func _test_game_root_shell(t: BackendTestContext) -> void:
 	bridge.open_current_office_visit()
 	bridge.receive_ipc_message(_message("office.visit.resolve", {"state_version": 0}))
 	t.check(not office.call("has_visitors"), "resolved visit resyncs the current OfficeWorld")
+	var seat_state: SeatState = session.state.seats[0]
+	var seat_race_state: RaceState = session.state.get_race(seat_state.race)
+	var parliament_race := t.make_race("active parliament race")
+	parliament_race.portrait = ImageTexture.new()
+	seat_race_state.active_definition = parliament_race
+	bridge.set_ui_mode("parliament")
+	var parliament: ParliamentWorld = manager.current_world
+	t.check_equal(parliament.seats.size(), session.state.seats.size(), "loaded ParliamentWorld follows RunState seats")
+	t.check(parliament.seats[0].race == parliament_race, "ParliamentWorld receives active race definition")
+	t.check(parliament.seats[0].visual.texture == parliament_race.portrait, "active race portrait reaches ParliamentWorld")
+	var parliament_ready := bridge.receive_ipc_message(_message("ui.ready", {}))
+	t.check_equal(
+		parliament_ready[0]["payload"]["parliament_seat_anchors"].size(),
+		session.state.seats.size(),
+		"parliament full state includes every world seat anchor"
+	)
+	var outgoing: Array[Dictionary] = []
+	bridge.outgoing_message.connect(
+		func(message: Dictionary) -> void:
+			outgoing.append(message)
+	)
+	var expected_anchors: Array[Dictionary] = [
+		{"seat_index": 3, "x": 0.25, "y": 0.75}
+	]
+	parliament.layout_changed.emit(expected_anchors)
+	t.check_equal(outgoing.size(), 1, "ParliamentWorld layout emits one lightweight message")
+	t.check_equal(outgoing[0]["type"], "parliament.layout", "layout uses its domain message type")
+	t.check_equal(
+		outgoing[0]["payload"],
+		{"parliament_seat_anchors": expected_anchors},
+		"layout payload only contains normalized seat anchors"
+	)
+	t.check(not outgoing[0]["payload"].has("state_version"), "layout payload does not duplicate state")
 	root.free()
 
 

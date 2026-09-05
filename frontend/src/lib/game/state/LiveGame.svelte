@@ -348,6 +348,10 @@
 		});
 	}
 
+	function bribeSeat(seatIndex: number): void {
+		mutate('vote.donation.add', { seat_index: seatIndex });
+	}
+
 	function selectConstitutionArticle(articleRef: number, selected: boolean): void {
 		if (selected) selectedConstitutionArticle = articleRef;
 		else if (selectedConstitutionArticle === articleRef) selectedConstitutionArticle = undefined;
@@ -376,6 +380,9 @@
 			proposalHand={snapshot.proposal_hand}
 			availablePolicies={snapshot.available_policies}
 			editingSavedBillIndex={snapshot.editing_saved_bill_index ?? undefined}
+			seats={snapshot.seats}
+			seatAnchors={snapshot.parliament_seat_anchors}
+			seatVotes={snapshot.draft_preview.vote.seat_votes}
 			{preview}
 			voteCanPass={snapshot.draft_preview.vote.passed}
 			onAddProposal={(handIndex) => mutate('draft.proposal.add', { hand_index: handIndex })}
@@ -386,6 +393,7 @@
 			onTitleChange={(title) => mutate('draft.title.set', { title })}
 			onEditSavedBill={(savedBillIndex) =>
 				mutate('bill.edit', { saved_bill_index: savedBillIndex })}
+			onBribeSeat={bribeSeat}
 			onSubmit={submitBill}
 		/>
 	{:else if snapshot.ui_mode === 'constitution'}

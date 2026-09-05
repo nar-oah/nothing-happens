@@ -12,11 +12,12 @@ var world_scene: String = "office"
 
 var _protocol := UiProtocol.new()
 var _serializer := UiSerializer.new()
+var _layout_world: Node
 
 
 func setup(session: RunSession, manager: Node = null, texture: Control = null) -> void:
 	run_session = session
-	scene_manager = manager
+	_set_scene_manager(manager)
 	set_cef_texture(texture)
 	if (
 		run_session != null
@@ -88,6 +89,14 @@ func send_full_state(request_id: Variant = null) -> void:
 	_send_message(_full_state(request_id))
 
 
+func send_parliament_layout(parliament_seat_anchors: Array) -> void:
+	_send_message(
+		_envelope(
+			"parliament.layout", {"parliament_seat_anchors": parliament_seat_anchors}
+		)
+	)
+
+
 func set_ui_mode(mode: String, send_sync: bool = true) -> bool:
 	if mode not in UiProtocol.UI_MODES:
 		return false
@@ -120,6 +129,48 @@ func _on_ipc_message(raw_message: String) -> void:
 	receive_ipc_message(raw_message)
 
 
+func _set_scene_manager(manager: Node) -> void:
+	var callback := Callable(self, "_on_world_changed")
+	if (
+		scene_manager != null
+		and scene_manager.has_signal("world_changed")
+		and scene_manager.is_connected("world_changed", callback)
+	):
+		scene_manager.disconnect("world_changed", callback)
+	_watch_layout_world(null)
+	scene_manager = manager
+	if scene_manager == null or not scene_manager.has_signal("world_changed"):
+		return
+	scene_manager.connect("world_changed", callback)
+	var current_world: Variant = scene_manager.get("current_world")
+	if current_world is Node:
+		_watch_layout_world(current_world)
+
+
+func _on_world_changed(_scene_name: String, world: Node) -> void:
+	_watch_layout_world(world)
+
+
+func _watch_layout_world(world: Node) -> void:
+	var callback := Callable(self, "_on_parliament_layout_changed")
+	if (
+		is_instance_valid(_layout_world)
+		and _layout_world.has_signal("layout_changed")
+		and _layout_world.is_connected("layout_changed", callback)
+	):
+		_layout_world.disconnect("layout_changed", callback)
+	_layout_world = null
+	if world == null or not world.has_signal("layout_changed"):
+		return
+	_layout_world = world
+	if not _layout_world.is_connected("layout_changed", callback):
+		_layout_world.connect("layout_changed", callback)
+
+
+func _on_parliament_layout_changed(parliament_seat_anchors: Array[Dictionary]) -> void:
+	send_parliament_layout(parliament_seat_anchors)
+
+
 func _dispatch(message: Dictionary, messages: Array[Dictionary]) -> void:
 	var message_type: String = message["type"]
 	match message_type:
@@ -148,6 +199,8 @@ func _dispatch(message: Dictionary, messages: Array[Dictionary]) -> void:
 			_handle_bill_edit(message, messages)
 		"bill.submit":
 			_handle_bill_submit(message, messages)
+		"vote.donation.add":
+			_handle_vote_donation_add(message, messages)
 		"proposal.merge":
 			_handle_proposal_merge(message, messages)
 		"office.visit.resolve":
@@ -325,6 +378,32 @@ func _handle_bill_submit(message: Dictionary, messages: Array[Dictionary]) -> vo
 		"world_scene": world_scene,
 	}
 	messages.append(_envelope("bill.result", payload))
+	messages.append(_full_state(message["request_id"]))
+
+
+func _handle_vote_donation_add(message: Dictionary, messages: Array[Dictionary]) -> void:
+	var index := _protocol.read_int(message["payload"], "seat_index")
+	if not index["ok"]:
+		_append_mutation_error(messages, index["error"], message["request_id"])
+		return
+	if index["value"] < 0 or index["value"] >= run_session.state.seats.size():
+		_append_mutation_error(
+			messages,
+			{"code": "invalid_seat_index", "message": "Parliament seat index is invalid."},
+			message["request_id"]
+		)
+		return
+	var seat: SeatState = run_session.state.seats[index["value"]]
+	if not run_session.vote_system.bribe_for_support(
+		run_session.context, run_session.state.draft_bill, seat
+	):
+		_append_mutation_error(
+			messages,
+			{"code": "donation_rejected", "message": "Political donation cannot secure this seat."},
+			message["request_id"]
+		)
+		return
+	state_version += 1
 	messages.append(_full_state(message["request_id"]))
 
 
@@ -563,9 +642,25 @@ func _append_mutation_error(
 func _full_state(request_id: Variant = null) -> Dictionary:
 	return _envelope(
 		"state.full",
-		_serializer.full_state(run_session, ui_mode, world_scene, state_version),
+		_serializer.full_state(
+			run_session,
+			ui_mode,
+			world_scene,
+			state_version,
+			_parliament_seat_anchors()
+		),
 		request_id
 	)
+
+
+func _parliament_seat_anchors() -> Array:
+	if scene_manager == null or scene_manager.current_world == null:
+		return []
+	var world: Node = scene_manager.current_world
+	if not world.has_method("get_seat_anchors"):
+		return []
+	var anchors: Variant = world.call("get_seat_anchors")
+	return anchors if anchors is Array else []
 
 
 func _error(

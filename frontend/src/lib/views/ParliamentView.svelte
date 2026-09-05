@@ -9,7 +9,13 @@
 	import GameStateDisplay from '$lib/components/state/GameStateDisplay.svelte';
 	import Top from '$lib/components/top/Top.svelte';
 	import { reconcileSavedBill, type Bill, type PolicyDefinition, type Proposal } from '$lib/game';
+	import type { ParliamentSeatAnchorDto, SeatSummaryDto, SeatVoteDto } from '$lib/game/state/types';
 	import type { ViewFrameProps } from './types';
+
+	type AnchoredSeat = ParliamentSeatAnchorDto & {
+		score: number;
+		canBribe: boolean;
+	};
 
 	type Props = ViewFrameProps & {
 		stateVersion: number;
@@ -17,6 +23,9 @@
 		proposalHand: Proposal[];
 		availablePolicies: PolicyDefinition[];
 		editingSavedBillIndex?: number;
+		seats: SeatSummaryDto[];
+		seatAnchors: ParliamentSeatAnchorDto[];
+		seatVotes: SeatVoteDto[];
 		preview: MemorialMetricData[];
 		voteCanPass: boolean;
 		onAddProposal?: (handIndex: number) => void;
@@ -25,6 +34,7 @@
 		onRemovePolicy?: (draftIndex: number) => void;
 		onTitleChange?: (title: string) => void;
 		onEditSavedBill?: (savedBillIndex: number) => void;
+		onBribeSeat?: (seatIndex: number) => void;
 		onSubmit?: () => void;
 	};
 
@@ -44,6 +54,9 @@
 		proposalHand,
 		availablePolicies,
 		editingSavedBillIndex,
+		seats,
+		seatAnchors,
+		seatVotes,
 		preview,
 		voteCanPass,
 		onAddProposal,
@@ -52,6 +65,7 @@
 		onRemovePolicy,
 		onTitleChange,
 		onEditSavedBill,
+		onBribeSeat,
 		onSubmit
 	}: Props = $props();
 	let activeLeftMode = $state<LeftMode>('archive');
@@ -65,6 +79,7 @@
 		policyDisplayNames: visibleDraft.policies.map((policy) => policy.display_name),
 		editingSavedBillIndex
 	});
+	let anchoredSeats = $derived(mergeSeats(seats, seatAnchors, seatVotes));
 	let editorScroller: HTMLDivElement;
 
 	onMount(() => {
@@ -112,9 +127,49 @@
 		onSubmit?.();
 		queueMicrotask(() => (voteMode = false));
 	}
+
+	function bribeSeat(seatIndex: number, isSwitch: boolean) {
+		if (!isSwitch) return;
+		onBribeSeat?.(seatIndex);
+	}
+
+	function mergeSeats(
+		currentSeats: SeatSummaryDto[],
+		currentAnchors: ParliamentSeatAnchorDto[],
+		currentVotes: SeatVoteDto[]
+	): AnchoredSeat[] {
+		const anchorsByIndex = new Map(currentAnchors.map((anchor) => [anchor.seat_index, anchor]));
+		const votesByIndex = new Map(currentVotes.map((vote) => [vote.seat_index, vote]));
+		return currentSeats.flatMap((seat): AnchoredSeat[] => {
+			const anchor = anchorsByIndex.get(seat.seat_index);
+			const vote = votesByIndex.get(seat.seat_index);
+			return anchor && vote
+				? [
+						{
+							...anchor,
+							score: vote.score,
+							canBribe: vote.can_bribe
+						}
+					]
+				: [];
+		});
+	}
 </script>
 
 <main class="game-view" aria-label="议会界面">
+	<div class="seat-layer">
+		{#each anchoredSeats as seat (seat.seat_index)}
+			<div class="seat-anchor" style:left={`${seat.x * 100}%`} style:top={`${seat.y * 100}%`}>
+				<ChoreSwitch
+					left={String(seat.score)}
+					right={seat.score > 0 ? '支持' : '贿赂'}
+					isSwitch={seat.score > 0}
+					disabled={seat.score > 0 || !seat.canBribe}
+					onSwitchChange={(isSwitch) => bribeSeat(seat.seat_index, isSwitch)}
+				/>
+			</div>
+		{/each}
+	</div>
 	<Left
 		scene="parliament"
 		{items}
@@ -160,6 +215,18 @@
 		position: relative;
 		height: 100vh;
 		overflow: hidden;
+	}
+
+	.seat-layer {
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+	}
+
+	.seat-anchor {
+		position: absolute;
+		transform: translate(-50%, -50%);
+		pointer-events: auto;
 	}
 
 	.top-slot {

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { makeDraftSync, makeLiveState } from '../game/state/test-fixtures.ts';
+import { makeDraftSync, makeLiveState, makeParliamentLayout } from '../game/state/test-fixtures.ts';
 import { deriveTermReportMetrics } from '../components/newspaper/term-report.ts';
 import { CefIpcClient, type CefBridgeWindow } from './client.ts';
 import { normalizeInputRegions } from './input-regions.ts';
@@ -50,6 +50,7 @@ test('IPC envelope encodes and decodes discriminated messages', () => {
 		}
 	);
 	assert.equal(isOutboundType('term.next'), true);
+	assert.equal(isOutboundType('vote.donation.add'), true);
 	assert.equal(isOutboundType('constitution.column.unlock'), true);
 	assert.equal(isOutboundType('office.visit.resolve'), true);
 	assert.equal(isOutboundType('proposal.bonus.resolve'), false);
@@ -226,6 +227,71 @@ test('IPC requires constitution effects and parliament display metadata', () => 
 	assert.deepEqual(
 		decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: missingParliamentName })),
 		{ ok: false, error: 'Invalid payload for state.full' }
+	);
+});
+
+test('IPC validates normalized parliament seat anchors', () => {
+	const valid = makeLiveState(9);
+	valid.parliament_seat_anchors = [
+		{ seat_index: 0, x: 0, y: 1 },
+		{ seat_index: 1, x: 0.25, y: 0.75 }
+	];
+	assert.equal(
+		decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: valid })).ok,
+		true
+	);
+
+	const missing = { ...valid } as Partial<typeof valid>;
+	delete missing.parliament_seat_anchors;
+	assert.deepEqual(decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: missing })), {
+		ok: false,
+		error: 'Invalid payload for state.full'
+	});
+
+	for (const parliament_seat_anchors of [
+		[{ seat_index: 0.5, x: 0.5, y: 0.5 }],
+		[{ seat_index: 0, x: -0.01, y: 0.5 }],
+		[{ seat_index: 0, x: 0.5, y: 1.01 }]
+	]) {
+		assert.deepEqual(
+			decodeInboundMessage(
+				JSON.stringify({
+					type: 'state.full',
+					payload: { ...valid, parliament_seat_anchors }
+				})
+			),
+			{ ok: false, error: 'Invalid payload for state.full' }
+		);
+	}
+});
+
+test('IPC decodes lightweight parliament layout updates', () => {
+	const payload = makeParliamentLayout();
+	const decoded = decodeInboundMessage(JSON.stringify({ type: 'parliament.layout', payload }));
+	assert.deepEqual(decoded, {
+		ok: true,
+		value: { type: 'parliament.layout', payload }
+	});
+
+	for (const parliament_seat_anchors of [
+		[{ seat_index: -1, x: 0.5, y: 0.5 }],
+		[{ seat_index: 0, x: 1.01, y: 0.5 }],
+		[{ seat_index: 0, x: 0.5, y: Number.NaN }]
+	]) {
+		assert.deepEqual(
+			decodeInboundMessage(
+				JSON.stringify({
+					type: 'parliament.layout',
+					payload: { parliament_seat_anchors }
+				})
+			),
+			{ ok: false, error: 'Invalid payload for parliament.layout' }
+		);
+	}
+
+	assert.deepEqual(
+		decodeInboundMessage(JSON.stringify({ type: 'parliament.layout', payload: {} })),
+		{ ok: false, error: 'Invalid payload for parliament.layout' }
 	);
 });
 

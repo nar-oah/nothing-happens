@@ -7,7 +7,7 @@ import {
 	type PolicyDefinition,
 	type Proposal
 } from '../types.ts';
-import type { DraftSyncDto, LiveGameState } from './types.ts';
+import type { DraftSyncDto, LiveGameState, ParliamentLayoutDto } from './types.ts';
 
 export const zeroMetrics = (): MetricValues => ({
 	tax: 0,
@@ -57,6 +57,15 @@ export const testPolicy: PolicyDefinition = {
 	]
 };
 
+export function makeParliamentLayout(): ParliamentLayoutDto {
+	return {
+		parliament_seat_anchors: [
+			{ seat_index: 0, x: 0.25, y: 0.75 },
+			{ seat_index: 3, x: 0.8, y: 0.2 }
+		]
+	};
+}
+
 export function makeLiveState(stateVersion = 1): LiveGameState {
 	const current = { tax: 100, consumption: 100, production: 100, employment: 100, investment: 100 };
 	const vote = {
@@ -75,6 +84,7 @@ export function makeLiveState(stateVersion = 1): LiveGameState {
 				interest_group_display_name: testGroup.display_name,
 				position: 3 as const,
 				score: 2,
+				can_bribe: false,
 				breakdown: { proposal: 2 }
 			}
 		]
@@ -83,6 +93,7 @@ export function makeLiveState(stateVersion = 1): LiveGameState {
 		state_version: stateVersion,
 		ui_mode: 'office',
 		world_scene: 'office',
+		parliament_seat_anchors: [{ seat_index: 0, x: 0.5, y: 0.5 }],
 		term: 1,
 		year: 3,
 		month: 7,

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { applyGameMessage, EMPTY_GAME_STORE } from './store.ts';
-import { makeDraftSync, makeLiveState } from './test-fixtures.ts';
+import { makeDraftSync, makeLiveState, makeParliamentLayout } from './test-fixtures.ts';
 
 test('state.full replaces the complete snapshot', () => {
 	const first = makeLiveState(5);
@@ -26,14 +26,45 @@ test('state.full replaces the complete snapshot', () => {
 test('domain sync immutably overwrites only its authoritative fields', () => {
 	const original = makeLiveState(1);
 	const value = { snapshot: original, error: null };
-	const updated = applyGameMessage(value, { type: 'draft.sync', payload: makeDraftSync(2) });
+	const draftSync = makeDraftSync(2);
+	draftSync.draft_preview.vote.seat_votes[0].score = 9;
+	const updated = applyGameMessage(value, { type: 'draft.sync', payload: draftSync });
 	assert.notEqual(updated.snapshot, original);
 	assert.equal(original.proposal_hand.length, 1);
 	assert.deepEqual(updated.snapshot?.proposal_hand, []);
 	assert.equal(updated.snapshot?.year, original.year);
 	assert.equal(updated.snapshot?.run_phase, original.run_phase);
 	assert.equal(updated.snapshot?.term_outcome, original.term_outcome);
+	assert.equal(updated.snapshot?.parliament_seat_anchors, original.parliament_seat_anchors);
+	assert.equal(updated.snapshot?.draft_preview.vote.seat_votes[0].score, 9);
 	assert.equal(updated.snapshot?.state_version, 2);
+});
+
+test('parliament.layout updates only seat anchors without changing gameplay version', () => {
+	const original = makeLiveState(5);
+	const layout = makeParliamentLayout();
+	const error = { code: 'existing', message: 'Existing command error' };
+	const value = { snapshot: original, error };
+	const updated = applyGameMessage(value, { type: 'parliament.layout', payload: layout });
+
+	assert.notEqual(updated.snapshot, original);
+	assert.equal(updated.snapshot?.state_version, 5);
+	assert.equal(updated.snapshot?.draft_preview, original.draft_preview);
+	assert.deepEqual(updated.snapshot?.parliament_seat_anchors, [
+		{ seat_index: 0, x: 0.25, y: 0.75 },
+		{ seat_index: 3, x: 0.8, y: 0.2 }
+	]);
+	assert.equal(updated.error, error);
+});
+
+test('parliament.layout is ignored until a full snapshot is available', () => {
+	assert.equal(
+		applyGameMessage(EMPTY_GAME_STORE, {
+			type: 'parliament.layout',
+			payload: makeParliamentLayout()
+		}),
+		EMPTY_GAME_STORE
+	);
 });
 
 test('stale domain sync and command errors do not mutate current game state', () => {

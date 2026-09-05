@@ -23,7 +23,7 @@
 [ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="race_type_5"]
 [ext_resource type="Resource" uid="uid://dl4flgxtqjpim" path="res://data/constitution_rows/团体.tres" id="row_7"]
 [ext_resource type="Script" uid="uid://cl7xmkpblq6o3" path="res://definitions/constitution_seat_condition.gd" id="seat_condition_script_11"]
-[ext_resource type="Resource" path="res://data/races/variants/团体/南柯（理想国）.tres" id="variant_15"]
+[ext_resource type="Resource" uid="uid://c2q2fo24ni1ds" path="res://data/races/variants/团体/南柯（理想国）.tres" id="variant_15"]
 
 [sub_resource type="Resource" id="Effect_1"]
 script = ExtResource("effscript_modify_race_13")

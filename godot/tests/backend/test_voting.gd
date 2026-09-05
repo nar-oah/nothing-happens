@@ -5,6 +5,7 @@ const BackendTestContext = preload("res://tests/backend/backend_test_context.gd"
 
 func run(t: BackendTestContext) -> void:
 	_test_fixed_proposal_source_support(t)
+	_test_zhushui_support_is_always_99(t)
 	_test_donation_pool_spending_and_detection(t)
 	_test_nanke_variant_absence_is_submit_only(t)
 	_test_strike_effect_locks_absent(t)
@@ -21,6 +22,33 @@ func _test_fixed_proposal_source_support(t: BackendTestContext) -> void:
 	t.check(vote != null, "vote maps directly to canonical race Resource")
 	t.check_approx(vote.breakdown[&"proposal_source"], 2.0, "each source proposal grants fixed support")
 	t.check_equal(vote.position, SeatVoteState.Position.SUPPORT, "two source cards cross support threshold")
+	session.free()
+
+
+func _test_zhushui_support_is_always_99(t: BackendTestContext) -> void:
+	var race := ZhushuiRaceDefinition.new()
+	race.display_name = "zhushui"
+	var group := t.make_group("opposition")
+	var article := t.make_article(race)
+	var modifier := InterestGroupVoteModifierEffect.new()
+	modifier.interest_groups = [group]
+	modifier.support_modifier = -250.0
+	article.effects.append(modifier)
+	var session := t.make_session([race], [group], [t.make_seat("zhushui", race)], [article])
+	var seat := session.state.seats[0]
+	seat.actual_group = group
+	seat.personal_relation = -25.0
+	var result := session.vote_system.preview_vote(session.state.draft_bill, session.context)
+	var vote := t.vote_for_race(result, race)
+	t.check(vote.breakdown.has(&"constitution_group_modifier"), "Zhushui keeps prior vote effects")
+	t.check_equal(vote.score, 99.0, "Zhushui final support score is exactly 99")
+	t.check_equal(vote.position, SeatVoteState.Position.SUPPORT, "Zhushui remains locked to support")
+	var preview := UiSerializer.new().draft_preview(session)
+	t.check_equal(
+		preview["vote"]["seat_votes"][0]["score"],
+		99.0,
+		"serialized Zhushui preview support stays exactly 99"
+	)
 	session.free()
 
 

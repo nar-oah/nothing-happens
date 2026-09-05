@@ -1,0 +1,11 @@
+[gd_scene format=3 uid="uid://b058m3lwsg3xr"]
+
+[ext_resource type="Script" uid="uid://wau6u6gqx82e" path="res://worlds/parliament_seat.gd" id="1_seat"]
+
+[node name="ParliamentSeat" type="Node2D" unique_id=589143899]
+script = ExtResource("1_seat")
+
+[node name="Visual" type="Sprite2D" parent="." unique_id=562461149]
+
+[node name="UIAnchor" type="Marker2D" parent="." unique_id=757102860]
+position = Vector2(0, -280)

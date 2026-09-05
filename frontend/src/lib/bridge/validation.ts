@@ -20,6 +20,8 @@ import type {
 	GameStatusDto,
 	InterestGroupSummaryDto,
 	LiveGameState,
+	ParliamentLayoutDto,
+	ParliamentSeatAnchorDto,
 	ParliamentSummaryDto,
 	PendingDialogueDto,
 	ProposalSyncDto,
@@ -39,6 +41,7 @@ import type {
 const inboundTypes = new Set<InboundType>([
 	'state.full',
 	'draft.sync',
+	'parliament.layout',
 	'proposal.sync',
 	'bill.result',
 	'command.error'
@@ -57,6 +60,7 @@ const outboundTypes = new Set<OutboundType>([
 	'bill.new',
 	'bill.edit',
 	'bill.submit',
+	'vote.donation.add',
 	'proposal.merge',
 	'office.visit.resolve',
 	'constitution.revise',
@@ -99,6 +103,7 @@ export function isLiveGameState(value: unknown): value is LiveGameState {
 		isVersion(state.state_version) &&
 		isUiMode(state.ui_mode) &&
 		isWorldScene(state.world_scene) &&
+		isArrayOf(state.parliament_seat_anchors, isParliamentSeatAnchor) &&
 		isNonnegativeInteger(state.term) &&
 		isArrayOf(state.proposal_hand, isProposal) &&
 		isArrayOf(state.saved_bills, isBill) &&
@@ -139,6 +144,8 @@ function isInboundPayload(type: InboundType, payload: unknown): boolean {
 			return isLiveGameState(payload);
 		case 'draft.sync':
 			return isDraftSync(payload);
+		case 'parliament.layout':
+			return isParliamentLayout(payload);
 		case 'proposal.sync':
 			return isProposalSync(payload);
 		case 'bill.result':
@@ -146,6 +153,10 @@ function isInboundPayload(type: InboundType, payload: unknown): boolean {
 		case 'command.error':
 			return isCommandError(payload);
 	}
+}
+
+function isParliamentLayout(value: unknown): value is ParliamentLayoutDto {
+	return isRecord(value) && isArrayOf(value.parliament_seat_anchors, isParliamentSeatAnchor);
 }
 
 function isDraftSync(value: unknown): value is DraftSyncDto {
@@ -405,6 +416,15 @@ function isSeatSummary(value: unknown): value is SeatSummaryDto {
 	);
 }
 
+function isParliamentSeatAnchor(value: unknown): value is ParliamentSeatAnchorDto {
+	return (
+		isRecord(value) &&
+		isNonnegativeInteger(value.seat_index) &&
+		isNormalizedCoordinate(value.x) &&
+		isNormalizedCoordinate(value.y)
+	);
+}
+
 function isParliamentSummary(value: unknown): value is ParliamentSummaryDto {
 	return (
 		isRecord(value) &&
@@ -451,6 +471,7 @@ function isVoteResult(value: unknown): value is VoteResultDto {
 					vote.position === 2 ||
 					vote.position === 3) &&
 				isNumber(vote.score) &&
+				typeof vote.can_bribe === 'boolean' &&
 				isNumberRecord(vote.breakdown)
 		)
 	);
@@ -558,6 +579,10 @@ function isNumberRecord(value: unknown): value is Record<string, number> {
 
 function isNumber(value: unknown): value is number {
 	return typeof value === 'number' && Number.isFinite(value);
+}
+
+function isNormalizedCoordinate(value: unknown): value is number {
+	return isNumber(value) && value >= 0 && value <= 1;
 }
 
 function isNonnegativeInteger(value: unknown): value is number {
