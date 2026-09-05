@@ -121,10 +121,10 @@ export type PendingDialogueDto =
 	| {
 			kind: 'simple';
 			initial_text: string;
-			left_option: string;
-			right_option: string;
-			left_content: string;
-			right_content: string;
+			left_option?: string;
+			right_option?: string;
+			left_content?: string;
+			right_content?: string;
 	  }
 	| {
 			kind: 'interest_group';
