@@ -224,6 +224,19 @@ test('preview keeps only the largest reverse metric with stable ties', () => {
 	assert.equal(preview.reverseSource, first);
 });
 
+test('synthesis options inherit the clicked proposal positive trait independently', () => {
+	const first = proposalItem(0, proposal('商会', -1, 0, 8));
+	const second = proposalItem(1, proposal('商会', -2, 0, 0, 6));
+	const third = proposalItem(2, proposal('商会', -3));
+	const selected = [first, second, third];
+	const firstPreview = createProposalSynthesisPreview(selected, first);
+	const secondPreview = createProposalSynthesisPreview(selected, second);
+	assert.equal(firstPreview.metrics.find((metric) => metric.isReverse)?.text, '税課');
+	assert.equal(secondPreview.metrics.find((metric) => metric.isReverse)?.text, '投資');
+	assert.equal(createSynthesisConfirmation(selected, first).reverseSource, first);
+	assert.equal(createSynthesisConfirmation(selected, second).reverseSource, second);
+});
+
 test('synthesis confirmation records the clicked negative base ref', () => {
 	const confirmation = createSynthesisConfirmation(proposals, proposals[1]);
 	assert.equal(confirmation.negativeBaseRef, proposals[1].ref);
