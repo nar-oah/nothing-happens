@@ -6,8 +6,7 @@
 	import type { SaveSlotDto } from '$lib/game/state/types';
 	import { VERTICAL_FOLD_HEIGHT, VERTICAL_FOLD_WIDTH } from '$lib/components/memorial/constants';
 	import Newspaper from '$lib/components/newspaper/Newspaper.svelte';
-	import GameStateDisplay from '$lib/components/state/GameStateDisplay.svelte';
-	import type { StateItem } from '$lib/components/state/GameStateDisplay.svelte';
+	import GameSettingsDisplay from '$lib/components/settings/GameSettingsDisplay.svelte';
 	import type {
 		NewspaperEventData,
 		NewspaperFrontData,
@@ -22,6 +21,11 @@
 		saves?: SaveSlotDto[];
 		saveError?: string;
 		onSaveSelect?: (slot: SaveSlotDto, loading: boolean) => void;
+		language?: string;
+		displayMode?: string;
+		onLanguageClick?: () => void;
+		onDisplayClick?: () => void;
+		onExitClick?: () => void;
 		metrics: NewspaperMetricData[];
 		front?: NewspaperFrontData;
 		events: NewspaperEventData[];
@@ -46,6 +50,11 @@
 		saves = [],
 		saveError = '',
 		onSaveSelect,
+		language = '中文',
+		displayMode = '窗口',
+		onLanguageClick,
+		onDisplayClick,
+		onExitClick,
 		metrics,
 		front,
 		events,
@@ -76,8 +85,6 @@
 	const edgeScrollPadding = $derived(VERTICAL_FOLD_WIDTH * scale);
 	const totalScrollRange = $derived(contentScrollRange + edgeScrollPadding * 2);
 	const newspaperAxisOffset = $derived(totalScrollRange / 2 - scrollPosition);
-	const primary: StateItem = { text: '设置', isRow: false };
-	const secondary: StateItem = { text: '退出', isRow: false };
 	const interactionDisabled = $derived(busy || motionPhase !== 'active');
 
 	function syncScrollPosition() {
@@ -217,7 +224,16 @@
 				<p class="save-error" role="alert">{saveError}</p>
 			{/if}
 		</div>
-		<div class="state-slot"><GameStateDisplay {primary} {secondary} /></div>
+		<div class="state-slot">
+			<GameSettingsDisplay
+				{language}
+				{displayMode}
+				disabled={interactionDisabled}
+				{onLanguageClick}
+				{onDisplayClick}
+				{onExitClick}
+			/>
+		</div>
 	{/if}
 </main>
 
