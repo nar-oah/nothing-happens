@@ -268,6 +268,12 @@ func constitution(session: RunSession) -> Dictionary:
 		data["eligible"] = session.constitution_system.can_revise(session.context, current)
 		data["is_terminal"] = current != null and current.is_terminal
 		data["requirement_percent"] = _article_requirement_percent(current)
+		data["contents"] = [
+			{"title": "", "body": data["content"]},
+			{"title": "要求", "body": "无" if current == null else current.get_requirement_description()},
+		]
+		for effect in data["effects"]:
+			data["contents"].append({"title": effect["display_name"], "body": effect["description"]})
 		articles.append(data)
 	return {"title": "蓬莱约法", "revision_available": session.state.constitution.revision_available, "center_column_index": -1 if board == null else board.get_center_column_index(), "available_governing_months": session.meta_progression.available_governing_months, "lifetime_governing_months": session.meta_progression.lifetime_governing_months, "terminal_article_index": session.constitution_articles.find(session.state.constitution.terminal_article), "columns": columns, "rows": rows, "active_articles": active_articles, "articles": articles}
 
