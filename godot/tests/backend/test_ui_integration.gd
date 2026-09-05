@@ -441,7 +441,7 @@ func _test_parliament_world_seats(t: BackendTestContext) -> void:
 	t.check_equal(standalone.seat_index, 4, "ParliamentSeat retains its RunState index")
 	t.check(standalone.visual.texture == first.portrait, "ParliamentSeat displays RaceDefinition portrait")
 	var viewport_size := standalone.get_viewport_rect().size
-	standalone.position = viewport_size * 0.5
+	standalone.position = viewport_size * 0.5 - standalone.ui_anchor.position
 	var normalized := standalone.get_normalized_ui_anchor()
 	t.check_approx(normalized.x, 0.5, "ParliamentSeat normalizes anchor x in the viewport")
 	t.check_approx(normalized.y, 0.5, "ParliamentSeat normalizes anchor y in the viewport")
