@@ -5,6 +5,7 @@ const BackendTestContext = preload("res://tests/backend/backend_test_context.gd"
 
 func run(t: BackendTestContext) -> void:
 	_test_conditions_and_policy_union(t)
+	_test_requirement_descriptions(t)
 	_test_race_and_group_variants(t)
 	_test_local_interest_groups(t)
 	_test_group_merge_preserves_canonical_identity(t)
@@ -40,6 +41,34 @@ func _test_conditions_and_policy_union(t: BackendTestContext) -> void:
 	group_condition.required_rate = 0.5
 	t.check(group_condition.is_met(session.context), "group condition uses current influence share")
 	session.free()
+
+
+func _test_requirement_descriptions(t: BackendTestContext) -> void:
+	var race := t.make_race("人类")
+	var race_condition := ConstitutionSeatCondition.new()
+	race_condition.race = race
+	race_condition.required_rate = 0.505
+	var operators := ["不低于", "不高于", "高于", "低于"]
+	for comparison in range(operators.size()):
+		race_condition.comparison = comparison
+		t.check_equal(race_condition.get_description(), "种族：人类\n席位占比：%s50.5%%" % operators[comparison], "race requirement describes its comparison and exact percentage")
+	var group_a := t.make_group("甲集团")
+	var group_b := t.make_group("乙集团")
+	var group_condition := ConstitutionSeatCondition.new()
+	group_condition.interest_groups = [group_a, group_b, group_a]
+	group_condition.interest_group = group_a
+	group_condition.required_rate = 0.25
+	t.check_equal(group_condition.get_description(), "范围：全议会\n利益集团：甲集团、乙集团\n各集团影响力占比：不低于25%\n满足方式：全部满足", "group requirements describe separate influence thresholds and deduplicate group references")
+	group_condition.race = race
+	group_condition.match_mode = ConstitutionSeatCondition.MatchMode.ANY
+	t.check_equal(group_condition.get_description(), "范围：人类\n利益集团：甲集团、乙集团\n各集团影响力占比：不低于25%\n满足方式：任一满足", "group requirements describe race scope and any matching")
+	var article := ConstitutionArticleDefinition.new()
+	t.check_equal(article.get_requirement_description(), "无", "articles without activation conditions show no requirements")
+	article.conditions = [race_condition]
+	article.seat_condition = group_condition
+	t.check_equal(article.get_requirement_description(), "须同时满足：\n%s\n\n%s" % [race_condition.get_description(), group_condition.get_description()], "article requirements combine all activation conditions")
+	article.conditions.append(group_condition)
+	t.check_equal(article.get_requirement_description(), "须同时满足：\n%s\n\n%s" % [race_condition.get_description(), group_condition.get_description()], "legacy seat conditions already in the condition array appear once")
 
 
 func _test_race_and_group_variants(t: BackendTestContext) -> void:

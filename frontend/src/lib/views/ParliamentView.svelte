@@ -28,6 +28,7 @@
 		seatVotes: SeatVoteDto[];
 		preview: MemorialMetricData[];
 		voteCanPass: boolean;
+		supportCount: number;
 		onAddProposal?: (handIndex: number) => void;
 		onRemoveProposal?: (draftIndex: number) => void;
 		onAddPolicy?: (displayName: string) => void;
@@ -59,6 +60,7 @@
 		seatVotes,
 		preview,
 		voteCanPass,
+		supportCount,
 		onAddProposal,
 		onRemoveProposal,
 		onAddPolicy,
@@ -80,6 +82,7 @@
 		editingSavedBillIndex
 	});
 	let anchoredSeats = $derived(mergeSeats(seats, seatAnchors, seatVotes));
+	let votesNeeded = $derived(Math.max(0, Math.floor(seats.length / 2) + 1 - supportCount));
 	let editorScroller: HTMLDivElement;
 
 	onMount(() => {
@@ -190,7 +193,7 @@
 					<div class="vote-switch">
 						<ChoreSwitch
 							left="草案"
-							right={voteCanPass ? '投票(可通过)' : '投票(不可通过)'}
+							right={voteCanPass ? '投票(可通过)' : `投票(差${votesNeeded}票)`}
 							bind:isSwitch={voteMode}
 							disabled={!voteCanPass}
 							onSwitchChange={submitDraft}

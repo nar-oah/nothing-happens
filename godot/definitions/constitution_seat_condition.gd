@@ -41,6 +41,25 @@ func is_met(context: RunContext) -> bool:
 	return matched == groups.size()
 
 
+func get_description() -> String:
+	var comparison_text: String = ["不低于", "不高于", "高于", "低于"][comparison]
+	var threshold := "%s%s%%" % [comparison_text, String.num(required_rate * 100.0, 2).trim_suffix(".0")]
+	var groups := _get_groups()
+	if groups.is_empty():
+		if race == null:
+			return "未指定种族或利益集团，无法满足"
+		return "种族：%s\n席位占比：%s" % [race.display_name, threshold]
+	var names := PackedStringArray()
+	for group in groups:
+		names.append(group.display_name)
+	return "范围：%s\n利益集团：%s\n各集团影响力占比：%s\n满足方式：%s" % [
+		"全议会" if race == null else race.display_name,
+		"、".join(names),
+		threshold,
+		"任一满足" if match_mode == MatchMode.ANY else "全部满足",
+	]
+
+
 func _get_groups() -> Array[InterestGroupDefinition]:
 	var result: Array[InterestGroupDefinition] = []
 	for group in interest_groups:

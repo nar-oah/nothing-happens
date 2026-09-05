@@ -105,6 +105,13 @@ func _test_full_state_and_saved_bill_indices(t: BackendTestContext) -> void:
 	group.description = "full group description"
 	var session := t.make_session([race], [group], t.make_seats(2, "full"))
 	session.constitution_articles[0].description = "full article description"
+	var requirement := ConstitutionSeatCondition.new()
+	requirement.race = race
+	requirement.required_rate = 0.5
+	session.constitution_articles[0].conditions = [requirement]
+	var effect := EventIntelProbabilityEffect.new()
+	effect.probability_modifier = 0.25
+	session.constitution_articles[0].effects = [effect]
 	var saved := SavedBillState.new()
 	saved.title = "saved zero"
 	session.state.saved_bills.append(saved)
@@ -122,6 +129,15 @@ func _test_full_state_and_saved_bill_indices(t: BackendTestContext) -> void:
 		full["constitution"]["articles"][0]["content"],
 		"full article description",
 		"article content uses its description"
+	)
+	t.check_equal(
+		full["constitution"]["articles"][0]["contents"],
+		[
+			{"title": "", "body": "full article description"},
+			{"title": "要求", "body": "种族：full race\n席位占比：不低于50%"},
+			{"title": effect.display_name, "body": effect.get_description()},
+		],
+		"article details serialize untitled description, requirements and generated effects in order"
 	)
 	t.check_equal(
 		full["races"][0]["description"], "full race description", "race description serializes"

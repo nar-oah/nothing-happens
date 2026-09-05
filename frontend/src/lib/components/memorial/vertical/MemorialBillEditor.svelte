@@ -64,9 +64,14 @@
 	}
 
 	function handleTitleKeydown(event: KeyboardEvent) {
-		if (event.key !== 'Enter') return;
+		if (event.key !== 'Enter' || event.isComposing) return;
 		event.preventDefault();
-		(event.currentTarget as HTMLInputElement).blur();
+		commitTitle();
+	}
+
+	function handleTitleBlur(event: FocusEvent) {
+		// CEF briefly blurs the browser while handing keyboard focus to its IME proxy.
+		if (document.activeElement !== event.currentTarget) commitTitle();
 	}
 
 	function removePage(index: number) {
@@ -96,7 +101,7 @@
 				>
 					<div class="absolute inset-0 flex flex-col gap-2 overflow-hidden">
 						{#each coverMetrics as metric (`${metric.text}-${metric.value}`)}
-							<div class="flex h-58 w-116 items-center justify-center">
+							<div class="flex min-h-0 w-116 flex-1 items-center justify-center">
 								<div class="-rotate-90">
 									<MemorialMetric {metric} isBottom isColumn showValue={!isTitle} />
 								</div>
@@ -114,7 +119,7 @@
 							value={titleDraft}
 							oninput={(event) => (titleDraft = event.currentTarget.value)}
 							onkeydown={handleTitleKeydown}
-							onblur={commitTitle}
+							onblur={handleTitleBlur}
 							onclick={(event) => event.stopPropagation()}
 						/>
 					{:else}
