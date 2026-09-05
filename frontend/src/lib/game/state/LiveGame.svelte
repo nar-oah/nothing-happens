@@ -142,7 +142,7 @@
 	);
 	let gameState = $derived(snapshot ? deriveGameStateDisplayProps(snapshot) : undefined);
 	let preview = $derived(
-		snapshot ? deriveDraftPreviewMetrics(snapshot.draft_preview, snapshot.draft_bill) : []
+		snapshot ? deriveDraftPreviewMetrics(snapshot.draft_preview) : []
 	);
 	let constitution = $derived(snapshot ? deriveConstitutionMemorial(snapshot) : {});
 	let pendingDialogue = $derived(
@@ -389,6 +389,7 @@
 			seatVotes={snapshot.draft_preview.vote.seat_votes}
 			{preview}
 			voteCanPass={snapshot.draft_preview.vote.passed}
+			supportCount={snapshot.draft_preview.vote.support_count}
 			onAddProposal={(handIndex) => mutate('draft.proposal.add', { hand_index: handIndex })}
 			onRemoveProposal={(draftIndex) =>
 				mutate('draft.proposal.remove', { draft_index: draftIndex })}

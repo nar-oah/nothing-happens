@@ -30,3 +30,16 @@ func can_activate(context: RunContext) -> bool:
 		if condition != null and not condition.is_met(context):
 			return false
 	return seat_condition == null or seat_condition.is_met(context)
+
+
+func get_requirement_description() -> String:
+	var descriptions := PackedStringArray()
+	for condition in conditions:
+		if condition != null:
+			descriptions.append(condition.get_description())
+	if seat_condition != null and seat_condition not in conditions:
+		descriptions.append(seat_condition.get_description())
+	if descriptions.is_empty():
+		return "无"
+	var description := "\n\n".join(descriptions)
+	return "须同时满足：\n" + description if descriptions.size() > 1 else description

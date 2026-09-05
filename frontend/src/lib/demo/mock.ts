@@ -15,7 +15,6 @@ import {
 	Metric,
 	MetricConditionOperator,
 	PolicyEffectFormula,
-	getBillMetrics,
 	getMetricValue,
 	getProposalTotalEffect,
 	type Bill,
@@ -322,8 +321,8 @@ export function getMockBillPreview(bill: Bill): MemorialMetricData[] {
 			result[key] += getMetricValue(proposalEffect, metric);
 		}
 		return result;
-	}, vector());
-	return getBillMetrics(bill.proposals, bill.policies).map((metric) => ({
+	}, { ...mockBaseline });
+	return METRICS.map((metric) => ({
 		text: METRIC_DISPLAY_NAMES[metric],
 		value: getMetricValue(totals, metric)
 	}));

@@ -356,7 +356,8 @@ function isConstitutionArticleState(value: unknown): value is ConstitutionArticl
 		typeof state.selected === 'boolean' &&
 		typeof state.eligible === 'boolean' &&
 		typeof state.is_terminal === 'boolean' &&
-		(state.requirement_percent === null || isNumber(state.requirement_percent))
+		(state.requirement_percent === null || isNumber(state.requirement_percent)) &&
+		isArrayOf(state.contents, (content) => isRecord(content) && typeof content.title === 'string' && typeof content.body === 'string')
 	);
 }
 

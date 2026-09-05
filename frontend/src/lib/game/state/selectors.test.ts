@@ -65,15 +65,19 @@ test('live status derives political donation and collapse values', () => {
 	});
 });
 
-test('authoritative draft preview becomes existing Memorial metric props', () => {
+test('draft preview displays every projected metric including unchanged values', () => {
 	const state = makeLiveState();
-	const preview = deriveDraftPreviewMetrics(state.draft_preview, state.draft_bill);
+	state.draft_preview.projected_metrics.tax = 107;
+	state.draft_preview.projected_metrics.investment = -5;
+	const preview = deriveDraftPreviewMetrics(state.draft_preview);
 	assert.deepEqual(
 		preview.map(({ text, symbol, value }) => [text, symbol, value]),
 		[
-			['税課', undefined, 0],
-			['消費', '-', 8],
-			['投資', undefined, 0]
+			['税課', undefined, 107],
+			['消費', undefined, 92],
+			['生産', undefined, 100],
+			['就業', undefined, 100],
+			['投資', undefined, -5]
 		]
 	);
 });
@@ -111,6 +115,18 @@ test('constitution presentation keeps one aligned row grid and turns locked colu
 	assert.equal(normalRows[0]?.selectable, false);
 	assert.equal(normalRows[1]?.articleRef, undefined);
 	assert.equal(constitution['新制'], 1);
+});
+
+test('constitution details preserve the authoritative description, requirements and effect sections', () => {
+	const state = makeLiveState();
+	state.constitution.articles[0].contents.push({ title: '事件情报', body: '人类事件情报概率增加25%' });
+	const constitution = deriveConstitutionMemorial(state);
+	const rows = Array.isArray(constitution['常制']) ? constitution['常制'] : [];
+	assert.deepEqual(rows[0]?.contents, [
+		{ title: '', body: '外藩约法描述' },
+		{ title: '要求', body: '种族：人类\n席位占比：不低于50%' },
+		{ title: '事件情报', body: '人类事件情报概率增加25%' }
+	]);
 });
 
 test('interest-group dialogue presentation uses authoritative visit values', () => {

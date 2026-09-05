@@ -204,6 +204,7 @@
 			seatVotes={[]}
 			{preview}
 			voteCanPass
+			supportCount={0}
 			onAddProposal={addProposal}
 			onRemoveProposal={removeProposal}
 			onAddPolicy={addPolicy}
