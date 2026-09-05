@@ -29,10 +29,10 @@ export type DialoguePresentation =
 	| {
 			kind: 'simple';
 			initialText: string;
-			leftOption: string;
-			rightOption: string;
-			leftContent: string;
-			rightContent: string;
+			leftOption?: string;
+			rightOption?: string;
+			leftContent?: string;
+			rightContent?: string;
 	  }
 	| {
 			kind: 'interest_group';
