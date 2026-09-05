@@ -1,7 +1,71 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { applyGameMessage, EMPTY_GAME_STORE } from './store.ts';
+import { deriveSaveItems, getSaveAction } from './saves.ts';
+import type { SaveSlotDto } from './types.ts';
 import { makeDraftSync, makeLiveState, makeParliamentLayout } from './test-fixtures.ts';
+
+const automaticSave: SaveSlotDto = {
+	slot_id: 'auto',
+	automatic: true,
+	term: 2,
+	year: 3,
+	month: 4,
+	saved_at: '2026-09-05T10:00:00'
+};
+const manualSave: SaveSlotDto = {
+	...automaticSave,
+	slot_id: 'manual-1',
+	automatic: false,
+	term: 1,
+	year: 1,
+	month: 2
+};
+
+test('save list synchronization preserves gameplay and clears command errors', () => {
+	const original = makeLiveState(12);
+	const saves = [manualSave, automaticSave];
+	const updated = applyGameMessage(
+		{ snapshot: original, error: { code: 'save_failed', message: '写入失败' } },
+		{ type: 'saves.list', payload: { saves } }
+	);
+	assert.deepEqual(updated.snapshot, { ...original, saves });
+	assert.equal(updated.snapshot?.proposal_hand, original.proposal_hand);
+	assert.equal(updated.snapshot?.draft_preview, original.draft_preview);
+	assert.equal(updated.error, null);
+	assert.deepEqual(original.saves, []);
+});
+
+test('saving keeps manual slots first and current progress last without altering stored auto', () => {
+	const current = { term: 4, year: 1, month: 0 };
+	const items = deriveSaveItems([automaticSave, manualSave], current, false);
+	assert.deepEqual(items.map(({ slot }) => slot.slot_id), ['manual-1', 'auto']);
+	assert.deepEqual(items.map(({ item }) => item), [
+		{ text: '第 1 任', value: '1 年 2 月' },
+		{ text: '第 4 任', value: '1 年 0 月' }
+	]);
+	assert.deepEqual(getSaveAction(items[0].slot, false), {
+		type: 'saves.overwrite',
+		payload: { slot_id: 'manual-1' }
+	});
+	assert.deepEqual(getSaveAction(items[1].slot, false), { type: 'saves.create', payload: {} });
+	assert.equal(automaticSave.term, 2);
+	assert.equal(deriveSaveItems([], current, false).length, 1);
+});
+
+test('loading shows actual saved dates and reads any slot including the last automatic slot', () => {
+	const current = { term: 1, year: 1, month: 2 };
+	const items = deriveSaveItems([automaticSave, manualSave], current, true);
+	assert.deepEqual(items.map(({ slot }) => slot), [manualSave, automaticSave]);
+	assert.equal(items[1].item.value, '3 年 4 月');
+	for (const { slot } of items) {
+		assert.deepEqual(getSaveAction(slot, true), {
+			type: 'saves.load',
+			payload: { slot_id: slot.slot_id }
+		});
+	}
+	assert.deepEqual(deriveSaveItems([], current, true), []);
+});
 
 test('state.full replaces the complete snapshot', () => {
 	const first = makeLiveState(5);
@@ -11,7 +75,8 @@ test('state.full replaces the complete snapshot', () => {
 		governing_months: 25,
 		run_phase: 'TERM_ENDED' as const,
 		term_outcome: 'COLLAPSE' as const,
-		proposal_hand: []
+		proposal_hand: [],
+		saves: [manualSave, automaticSave]
 	};
 	const loaded = applyGameMessage(EMPTY_GAME_STORE, { type: 'state.full', payload: first });
 	const replaced = applyGameMessage(loaded, { type: 'state.full', payload: replacement });
@@ -21,6 +86,7 @@ test('state.full replaces the complete snapshot', () => {
 	assert.equal(replaced.snapshot?.run_phase, 'TERM_ENDED');
 	assert.equal(replaced.snapshot?.term_outcome, 'COLLAPSE');
 	assert.deepEqual(replaced.snapshot?.proposal_hand, []);
+	assert.deepEqual(replaced.snapshot?.saves, [manualSave, automaticSave]);
 });
 
 test('domain sync immutably overwrites only its authoritative fields', () => {
