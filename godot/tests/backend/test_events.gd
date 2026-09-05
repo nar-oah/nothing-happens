@@ -129,10 +129,12 @@ func _test_hidden_growth_public_window_and_resolution(t: BackendTestContext) -> 
 	t.check_equal(event.months_alive, 1, "hidden event advances deadline")
 	t.check(event.growth_progress > 0.0, "hidden event grows")
 	t.check(not event.known, "satisfying hidden event does not reveal it")
+	t.check(not event.published, "hidden event is not published")
 	for index in range(8):
 		session.event_system.settle_month(session.context)
 	t.check_equal(event.months_alive, 9, "public window begins with three months remaining")
 	t.check(event.known, "public window forces disclosure")
+	t.check(event.published, "public window publishes the event")
 	t.check(session.state.office_visits.is_empty(), "forced disclosure does not queue an event-intel visit")
 	session.event_system.settle_month(session.context)
 	t.check_equal(event.phase, EventState.Phase.RESOLVED, "satisfied known event resolves")
@@ -154,6 +156,7 @@ func _test_forced_public_information_does_not_queue_visit(t: BackendTestContext)
 	event.months_alive = balance.event_lifetime_months - balance.event_public_remaining_months
 	session.event_system.update_information(session.context)
 	t.check(event.known, "information update forces disclosure in the public window")
+	t.check(event.published, "forced-public information is published immediately")
 	t.check(session.state.office_visits.is_empty(), "forced-public information update queues no event-intel visit")
 	session.free()
 
@@ -172,6 +175,7 @@ func _test_pause_relief_and_effect_early_reveal(t: BackendTestContext) -> void:
 	var event := session.event_system.spawn_event(session.context, race, Metric.Id.INVESTMENT)
 	session.event_system.update_information(session.context)
 	t.check(event.known, "EventIntelProbabilityEffect reveals event early")
+	t.check(not event.published, "early information remains unpublished until acknowledged or the next settlement")
 	t.check_equal(session.state.office_visits.size(), 1, "probability-based early information queues one office visit")
 	var visit := session.state.office_visits[0]
 	t.check_equal(visit.kind, OfficeVisitState.Kind.EVENT_INTEL, "early information queues an event-intel visit")
@@ -179,6 +183,15 @@ func _test_pause_relief_and_effect_early_reveal(t: BackendTestContext) -> void:
 	t.check(visit.event == event, "event-intel visit keeps the authoritative event instance")
 	session.event_system.update_information(session.context)
 	t.check_equal(session.state.office_visits.size(), 1, "an already known event is not queued twice")
+	var interest_visit := OfficeVisitState.new()
+	interest_visit.kind = OfficeVisitState.Kind.INTEREST_GROUP
+	interest_visit.race = race
+	session.state.office_visits.append(interest_visit)
+	session.event_system.publish_known_events(session.context)
+	t.check(event.published, "monthly publication promotes known events")
+	session.event_system.cleanup_published_event_visits(session.state)
+	t.check_equal(session.state.office_visits.size(), 1, "publication cleanup removes only published event-intel visits")
+	t.check(session.state.office_visits[0] == interest_visit, "publication cleanup preserves interest-group visits")
 	event.growth_progress = 1.0
 	balance.event_pause_satisfaction_threshold = 0.4
 	balance.event_relief_satisfaction_threshold = 0.8
@@ -204,5 +217,6 @@ func _test_deadline_failure(t: BackendTestContext) -> void:
 	t.check_equal(event.months_alive, 12, "event fails at deadline")
 	t.check_equal(event.phase, EventState.Phase.FAILED, "unresolved event fails")
 	t.check(event.known, "failed event is known")
+	t.check(event.published, "failed event is published")
 	t.check_equal(session.state.collapse_level, 1, "failure adds one collapse step")
 	session.free()

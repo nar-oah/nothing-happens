@@ -20,6 +20,7 @@ func advance_month() -> bool:
 	var report_year := context.state.year
 	var report_month := context.state.month
 	var report_previous_metrics := context.state.metrics.copy()
+	context.event_system.publish_known_events(context)
 	for race_state in context.state.races:
 		if race_state == null:
 			continue
@@ -32,6 +33,7 @@ func advance_month() -> bool:
 	context.event_system.try_generate_month(context)
 	context.event_system.settle_month(context)
 	context.event_system.update_information(context)
+	context.event_system.cleanup_published_event_visits(context.state)
 	context.state.governing_months += 1
 	_record_month_report(report_year, report_month, report_previous_metrics)
 	if context.state.run_phase == RunState.RunPhase.TERM_ENDED:
@@ -87,7 +89,7 @@ func _record_month_report(report_year: int, report_month: int, previous_metrics:
 	state.month_report_current_metrics = state.metrics.copy()
 	state.month_report_events.clear()
 	for event in state.events:
-		if event == null or not event.is_active() or not event.known:
+		if event == null or not event.is_active() or not event.published:
 			continue
 		var active_race := context.constitution_system.get_active_race_definition(context, event.race)
 		var event_report := {
