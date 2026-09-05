@@ -370,10 +370,12 @@
 			onNewspaperOpen={openNewspaper}
 			dialogue={pendingDialogue}
 			onResolveVisit={(acceptTrait) =>
-				mutate(
-					'office.visit.resolve',
-					acceptTrait === undefined ? {} : { accept_trait: acceptTrait }
-				)}
+				pendingDialogue.kind === 'simple'
+					? mutate('ui.mode.set', { mode: 'office' })
+					: mutate(
+							'office.visit.resolve',
+							acceptTrait === undefined ? {} : { accept_trait: acceptTrait }
+						)}
 		/>
 	{:else if snapshot.ui_mode === 'parliament'}
 		<ParliamentView
