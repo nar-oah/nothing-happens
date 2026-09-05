@@ -12,6 +12,7 @@ func run(t: BackendTestContext) -> void:
 	_test_saved_bill_reconciliation(t)
 	_test_merge_refs(t)
 	_test_draft_preview(t)
+	_test_vote_donation_command(t)
 	_test_office_visit_dialogue_queue(t)
 	_test_office_visit_donation_choice(t)
 	_test_explicit_next_term_command(t)
@@ -303,6 +304,39 @@ func _test_draft_preview(t: BackendTestContext) -> void:
 	t.check_equal(preview["projected_metrics"]["tax"], 107, "projected metrics include proposal")
 	t.check_equal(preview["projected_metrics"]["investment"], 110, "projected metrics include policy")
 	t.check_equal(preview["vote"]["seat_votes"].size(), 1, "preview uses authoritative seat vote")
+	session.free()
+
+
+func _test_vote_donation_command(t: BackendTestContext) -> void:
+	var race := t.make_race("donation command race")
+	var group := t.make_group("donation command group")
+	var session := t.make_session([race], [group], t.make_seats(1, "donation command"))
+	var seat: SeatState = session.state.seats[0]
+	seat.personal_relation = -2.0
+	var bridge := UiBridge.new()
+	bridge.setup(session)
+	session.state.political_donation_pool = 2.0
+	var unavailable := UiSerializer.new().draft_preview(session)["vote"]["seat_votes"][0]
+	t.check(not unavailable["can_bribe"], "preview disables a bribe when donations are insufficient")
+	var rejected := bridge.receive_ipc_message(
+		_message("vote.donation.add", {"state_version": 0, "seat_index": 0})
+	)
+	t.check_equal(rejected[0]["payload"]["code"], "donation_rejected", "insufficient bribe is rejected")
+	t.check_equal(bridge.state_version, 0, "rejected bribe preserves state version")
+	t.check_approx(session.state.political_donation_pool, 2.0, "rejected bribe spends no donation")
+	session.state.political_donation_pool = 3.0
+	var available := UiSerializer.new().draft_preview(session)["vote"]["seat_votes"][0]
+	t.check(available["can_bribe"], "preview enables an affordable bribe")
+	var messages := bridge.receive_ipc_message(
+		_message("vote.donation.add", {"state_version": 0, "seat_index": 0})
+	)
+	t.check_equal(messages[0]["type"], "state.full", "successful bribe returns full state")
+	t.check_equal(messages[0]["payload"]["state_version"], 1, "successful bribe advances state version")
+	t.check_approx(messages[0]["payload"]["political_donation_pool"], 0.0, "bribe spends the required donation")
+	var bribed_vote: Dictionary = messages[0]["payload"]["draft_preview"]["vote"]["seat_votes"][0]
+	t.check_approx(bribed_vote["score"], 1.0, "bribe raises the seat to support")
+	t.check(not bribed_vote["can_bribe"], "supporting seat cannot be bribed again")
+	bridge.free()
 	session.free()
 
 
