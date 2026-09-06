@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dv05euhu0cu5n" path="res://worlds/parliament_world.gd" id="1_world"]
 [ext_resource type="PackedScene" uid="uid://b058m3lwsg3xr" path="res://worlds/parliament_seat.tscn" id="2_seat"]
+[ext_resource type="PackedScene" path="res://worlds/interactables/parliament_door.tscn" id="3_gj75q"]
 
 [node name="ParliamentWorld" type="Node2D" unique_id=1766632788]
 scale = Vector2(0.4, 0.4)
@@ -27,6 +28,7 @@ color = Color(0.9372549, 0.72156864, 0.21176471, 1)
 anchors_preset = -1
 anchor_right = 1.0
 anchor_bottom = 0.7
+offset_bottom = -356.0
 grow_horizontal = 2
 mouse_filter = 2
 color = Color(0.8627451, 0.6627451, 0.19607843, 1)
@@ -169,3 +171,19 @@ seat_index = 7
 [node name="ParliamentSeat" parent="Seats/First floor" unique_id=1081682751 instance=ExtResource("2_seat")]
 position = Vector2(4400, 350)
 seat_index = 8
+
+[node name="RightAnchor" type="Node2D" parent="." unique_id=669252604]
+position = Vector2(2400, 2700)
+
+[node name="Right Door" parent="RightAnchor" unique_id=2114060250 instance=ExtResource("3_gj75q")]
+position = Vector2(5500, -1700)
+scale = Vector2(2.5, 2.5)
+is_left = false
+
+[node name="Left Door" parent="RightAnchor" unique_id=1458697931 instance=ExtResource("3_gj75q")]
+position = Vector2(-5500, -1700)
+scale = Vector2(2.5, 2.5)
+is_left = true
+
+[connection signal="clicked" from="RightAnchor/Right Door" to="." method="_on_door_clicked"]
+[connection signal="clicked" from="RightAnchor/Left Door" to="." method="_on_door_clicked"]

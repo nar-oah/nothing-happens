@@ -83,7 +83,7 @@ scale = Vector2(0.4, 0.4)
 texture = ExtResource("9_j3xwu")
 
 [node name="Door" parent="RightAnchor" unique_id=2114060250 instance=ExtResource("1_ox7iv")]
-position = Vector2(-135, -819)
+position = Vector2(-135, -820)
 
 [node name="Small Rock" type="Sprite2D" parent="RightAnchor" unique_id=1246513176]
 z_index = 1
