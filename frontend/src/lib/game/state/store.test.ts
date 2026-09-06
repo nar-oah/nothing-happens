@@ -25,7 +25,10 @@ const manualSave: SaveSlotDto = {
 test('settings full sync at the same version updates settings without changing gameplay', () => {
 	const original = makeLiveState(7);
 	const payload = { ...original, language: 'en' as const, display_mode: 'fullscreen' as const };
-	const updated = applyGameMessage({ snapshot: original, error: null }, { type: 'state.full', payload });
+	const updated = applyGameMessage(
+		{ snapshot: original, error: null },
+		{ type: 'state.full', payload }
+	);
 	assert.deepEqual(updated.snapshot, payload);
 	assert.equal(updated.snapshot?.state_version, 7);
 	assert.equal(updated.snapshot?.draft_bill, original.draft_bill);

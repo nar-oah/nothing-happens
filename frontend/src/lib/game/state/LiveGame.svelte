@@ -91,7 +91,10 @@
 		];
 	}
 
-	function deriveNewspaperEvents(state: LiveGameState, translator: Translate): NewspaperEventData[] {
+	function deriveNewspaperEvents(
+		state: LiveGameState,
+		translator: Translate
+	): NewspaperEventData[] {
 		return (state.month_report?.events ?? []).flatMap((event) => {
 			const race = NEWSPAPER_RACE_BY_DISPLAY_NAME[event.race_display_name];
 			if (!race) return [];
@@ -115,7 +118,9 @@
 
 	function deriveNewspaperEdition(state: LiveGameState, translator: Translate): NewspaperEdition {
 		const report = state.term_report;
-		const front = report ? deriveTermReportFront(report, translator) : (state.newspaper_front ?? undefined);
+		const front = report
+			? deriveTermReportFront(report, translator)
+			: (state.newspaper_front ?? undefined);
 		return {
 			year: state.year,
 			month: state.month,
@@ -195,10 +200,9 @@
 
 	onDestroy(unsubscribe);
 
-	async function changeSetting<T extends 'settings.language.set' | 'settings.display.set' | 'app.quit'>(
-		type: T,
-		payload: OutboundPayloads[T]
-	): Promise<void> {
+	async function changeSetting<
+		T extends 'settings.language.set' | 'settings.display.set' | 'app.quit'
+	>(type: T, payload: OutboundPayloads[T]): Promise<void> {
 		if (settingsBusy || !client) return;
 		const requestClient = client;
 		settingsBusy = true;
@@ -487,10 +491,20 @@
 				language={snapshot.language}
 				displayMode={snapshot.display_mode}
 				settingsDisabled={settingsBusy}
-				onLanguageClick={() => changeSetting('settings.language.set', { language: snapshot.language === 'zh_CN' ? 'en' : 'zh_CN' })}
-				onDisplayClick={() => changeSetting('settings.display.set', { mode: snapshot.display_mode === 'windowed' ? 'fullscreen' : 'windowed' })}
+				onLanguageClick={() =>
+					changeSetting('settings.language.set', {
+						language: snapshot.language === 'zh_CN' ? 'en' : 'zh_CN'
+					})}
+				onDisplayClick={() =>
+					changeSetting('settings.display.set', {
+						mode: snapshot.display_mode === 'windowed' ? 'fullscreen' : 'windowed'
+					})}
 				onExitClick={() => changeSetting('app.quit', {})}
-				saveError={saveError ? (quitting ? $t('live.quitFailed', { reason: translateCommandError(saveError, $t) }) : translateCommandError(saveError, $t)) : ''}
+				saveError={saveError
+					? quitting
+						? $t('live.quitFailed', { reason: translateCommandError(saveError, $t) })
+						: translateCommandError(saveError, $t)
+					: ''}
 				onSaveSelect={selectSave}
 				metrics={newspaperEdition.metrics}
 				front={newspaperEdition.front}
