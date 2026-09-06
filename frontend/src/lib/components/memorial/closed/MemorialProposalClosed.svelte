@@ -30,7 +30,7 @@
 		</div>
 		<div class="mr-8 flex shrink-0 flex-col items-end gap-8 pt-8">
 			<MemorialTitle text={toJapanese(title)} />
-			<MemorialLag time={lag} />
+			<MemorialLag time={lag} locale="zh_CN" />
 		</div>
 	</div>
 </MemorialClosedFrame>

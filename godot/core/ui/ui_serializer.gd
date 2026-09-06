@@ -19,6 +19,7 @@ func interest_group(definition: InterestGroupDefinition) -> Variant:
 		return null
 	return {
 		"display_name": _t(definition.display_name),
+		"display_name_original": definition.display_name,
 		"description": _translate_multiline(definition.description),
 		"base_column_weight": definition.base_column_weight,
 		"decrease_tax": definition.decrease_tax,

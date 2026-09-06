@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { language } from '$lib/i18n';
+
 	type Props = {
 		text: string;
 		value?: string | number;
@@ -95,12 +97,22 @@
 			</div>
 		{/if}
 
-		<div class="z-1 flex w-40 flex-col items-center bg-shadow-deep text-center">
-			<p
-				class="m-0 w-full font-policy text-48 font-medium leading-[40px] text-surface-amber [word-break:break-word]"
-			>
-				{text}
-			</p>
-		</div>
+		{#if $language === 'en'}
+			<div class="z-1 inline-flex items-center bg-shadow-deep text-center">
+				<p
+					class="m-0 whitespace-nowrap font-policy text-48 font-medium leading-[40px] text-surface-amber [text-orientation:sideways] [writing-mode:vertical-rl]"
+				>
+					{text}
+				</p>
+			</div>
+		{:else}
+			<div class="z-1 flex w-40 flex-col items-center bg-shadow-deep text-center">
+				<p
+					class="m-0 w-full font-policy text-48 font-medium leading-[40px] text-surface-amber [word-break:break-word]"
+				>
+					{text}
+				</p>
+			</div>
+		{/if}
 	{/if}
 </div>

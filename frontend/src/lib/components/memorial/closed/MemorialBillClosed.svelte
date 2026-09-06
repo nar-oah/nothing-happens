@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { t } from '$lib/i18n';
+	import { t, translate, type Translate } from '$lib/i18n';
 	import MemorialClosedFrame from './MemorialClosedFrame.svelte';
 	import MemorialMetric from '../shared/MemorialMetric.svelte';
 	import MemorialTitleStrip from '../shared/MemorialTitleStrip.svelte';
@@ -18,16 +18,17 @@
 		policies: PolicyDefinition[];
 	};
 
+	const zh: Translate = (key, params) => translate(key, params, 'zh_CN');
 	let { title, proposals, policies }: Props = $props();
 	let lag = $derived(getBillLagMonths(proposals));
 	let metrics: MemorialMetricData[] = $derived(
 		getBillMetrics(proposals, policies).map((metric) => ({
-			text: getMetricDisplayName(metric, $t),
+			text: getMetricDisplayName(metric, zh),
 			value: 0
 		}))
 	);
 	let lagMetric: MemorialMetricData = $derived({
-		text: $t('memorial.lag'),
+		text: zh('memorial.lag'),
 		value: lag,
 		isReverse: true
 	});

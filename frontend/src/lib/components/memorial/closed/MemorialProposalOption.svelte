@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { t } from '$lib/i18n';
+	import { translate } from '$lib/i18n';
 	import MemorialClosedFrame from './MemorialClosedFrame.svelte';
 	import MemorialMetric from '../shared/MemorialMetric.svelte';
 	import type { MemorialMetricData } from '../types';
@@ -15,7 +15,7 @@
 	let leadingMetrics = $derived(metrics.filter((metric) => !metric.isReverse));
 	let trailingMetrics = $derived(metrics.filter((metric) => metric.isReverse));
 	let lagMetric: MemorialMetricData = $derived({
-		text: $t('memorial.lag'),
+		text: translate('memorial.lag', {}, 'zh_CN'),
 		value: lag
 	});
 </script>

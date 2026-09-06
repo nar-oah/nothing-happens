@@ -248,7 +248,7 @@ export const componentsEn: Record<keyof typeof componentsZhCN, string> = {
 	'newspaper.month': 'mo.',
 	'newspaper.aria': 'Xianwai Times, year {year}, month {month}',
 	'newspaper.nextAria': 'Advance to the next month',
-	'newspaper.next': 'Next month',
+	'newspaper.next': 'Next mo',
 	'newspaper.name': 'Xianwai',
 	'newspaper.date': '{kind} · Year {year}',
 	'newspaper.publisher': 'Type Foundry Press',
