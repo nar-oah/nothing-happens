@@ -9,11 +9,7 @@
 	import Front from './Front.svelte';
 	import PublicMetrics from './PublicMetrics.svelte';
 	import Top from './Top.svelte';
-	import type {
-		NewspaperEventData,
-		NewspaperFrontData,
-		NewspaperMetricData
-	} from './types';
+	import type { NewspaperEventData, NewspaperFrontData, NewspaperMetricData } from './types';
 
 	const NEWSPAPER_FOLD_WIDTH = VERTICAL_FOLD_HEIGHT;
 	const NEWSPAPER_FOLD_HEIGHT = VERTICAL_FOLD_WIDTH;

@@ -58,7 +58,8 @@
 	<div
 		class="typo-newspaper-caption flex w-full shrink-0 items-start gap-4 overflow-hidden bg-surface-indigo px-[6px] py-2 text-surface-amber whitespace-nowrap"
 	>
-		<span>{$t('newspaper.publisher')}</span><span>·</span><span>VOL.<MorphText text={String(displayYear)} /></span
+		<span>{$t('newspaper.publisher')}</span><span>·</span><span
+			>VOL.<MorphText text={String(displayYear)} /></span
 		><span>NO.<MorphText text={monthText} /></span>
 	</div>
 </button>

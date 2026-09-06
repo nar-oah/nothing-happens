@@ -33,9 +33,9 @@
 				<div class="flex shrink-0 items-start gap-8 whitespace-nowrap">
 					<p class="typo-newspaper-headline shrink-0">{getNewspaperRaceLabel(props.race, $t)}</p>
 					<div class="typo-newspaper-caption flex shrink-0 items-center gap-[3px]">
-						<span>{$t('newspaper.requirement')}</span><span>/</span><span>{getNewspaperMetricLabel(props.metric, $t)}</span><span
-							>{props.value}</span
-						>
+						<span>{$t('newspaper.requirement')}</span><span>/</span><span
+							>{getNewspaperMetricLabel(props.metric, $t)}</span
+						><span>{props.value}</span>
 					</div>
 				</div>
 				<p class="typo-newspaper-body min-w-full w-min">{props.description}</p>

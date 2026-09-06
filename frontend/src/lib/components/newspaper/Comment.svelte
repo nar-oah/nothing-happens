@@ -5,7 +5,9 @@
 	import MorphText from '../text/MorphText.svelte';
 
 	const comments = $derived(getNewspaperComments($t));
-	let index = $state(untrack(() => comments.length > 0 ? Math.floor(Math.random() * comments.length) : 0));
+	let index = $state(
+		untrack(() => (comments.length > 0 ? Math.floor(Math.random() * comments.length) : 0))
+	);
 	let hovering = $state(false);
 	const count = $derived(comments.length);
 	const nextIndex = $derived(count > 0 ? (index + 1) % count : 0);

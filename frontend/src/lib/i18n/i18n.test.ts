@@ -115,6 +115,9 @@ test('an existing command error updates when the current translator changes', ()
 	assert.equal(messages[0], '无法写入存档，原存档已保留。');
 	language.set('en');
 	assert.equal(messages[1], 'Unable to write the save. The previous save has been kept.');
-	assert.equal(translateCommandError(new Error('Internal details'), en), 'The operation failed. Please try again.');
+	assert.equal(
+		translateCommandError(new Error('Internal details'), en),
+		'The operation failed. Please try again.'
+	);
 	unsubscribe();
 });

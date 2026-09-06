@@ -36,7 +36,9 @@
 		<div class="flex w-full shrink-0 items-center gap-12 overflow-hidden">
 			<p class="typo-newspaper-body shrink-0 whitespace-pre">{preferredMetrics}</p>
 			<div class="flex w-[12px] shrink-0 flex-col items-center justify-center bg-ink-primary">
-				<p class="typo-newspaper-caption shrink-0 text-surface-amber whitespace-nowrap">{$t('newspaper.favorable')}</p>
+				<p class="typo-newspaper-caption shrink-0 text-surface-amber whitespace-nowrap">
+					{$t('newspaper.favorable')}
+				</p>
 			</div>
 		</div>
 		<div class="h-px w-full shrink-0 bg-ink-primary"></div>
@@ -44,7 +46,9 @@
 		<div class="flex w-full shrink-0 items-center gap-12 overflow-hidden">
 			<p class="typo-newspaper-body shrink-0 whitespace-pre">{avoidedMetrics}</p>
 			<div class="flex w-[12px] shrink-0 flex-col items-center justify-center bg-ink-primary">
-				<p class="typo-newspaper-caption shrink-0 text-surface-amber whitespace-nowrap">{$t('newspaper.avoid')}</p>
+				<p class="typo-newspaper-caption shrink-0 text-surface-amber whitespace-nowrap">
+					{$t('newspaper.avoid')}
+				</p>
 			</div>
 		</div>
 	</div>

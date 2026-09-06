@@ -21,7 +21,15 @@ export function deriveTermReportMetrics(
 	const previousMonths = report.previous_governing_months % 12;
 	const currentMonths = report.current_governing_months % 12;
 	return [
-		{ metric: translator('report.years'), value: previousYears, change: currentYears - previousYears },
-		{ metric: translator('report.months'), value: previousMonths, change: currentMonths - previousMonths }
+		{
+			metric: translator('report.years'),
+			value: previousYears,
+			change: currentYears - previousYears
+		},
+		{
+			metric: translator('report.months'),
+			value: previousMonths,
+			change: currentMonths - previousMonths
+		}
 	];
 }
