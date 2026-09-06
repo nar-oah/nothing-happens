@@ -9,7 +9,13 @@
 	import NewspaperEntry from '$lib/components/newspaper/NewspaperEntry.svelte';
 	import GameStateDisplay from '$lib/components/state/GameStateDisplay.svelte';
 	import Top from '$lib/components/top/Top.svelte';
-	import { reconcileSavedBill, type Bill, type PolicyDefinition, type Proposal } from '$lib/game';
+	import {
+		calculatePureProposalTarget,
+		reconcileSavedBill,
+		type Bill,
+		type PolicyDefinition,
+		type Proposal
+	} from '$lib/game';
 	import type { ParliamentSeatAnchorDto, SeatSummaryDto, SeatVoteDto } from '$lib/game/state/types';
 	import type { ViewFrameProps } from './types';
 
@@ -77,6 +83,7 @@
 	let appliedVersion = untrack(() => stateVersion);
 	let appliedDraft = untrack(() => draft);
 	let visibleDraft = $derived(optimisticDraft ?? draft);
+	let policyBaseline = $derived(calculatePureProposalTarget(baseline, visibleDraft.proposals));
 	let selection = $derived({
 		proposalRefs: [],
 		policyDisplayNames: visibleDraft.policies.map((policy) => policy.display_name),
@@ -99,8 +106,20 @@
 
 	function selectLeft(item: LeftItem, mode: LeftMode) {
 		if (mode !== 'selection') return;
-		if (item.kind === 'proposal') return onAddProposal?.(item.ref.index);
-		if (item.kind === 'policy') return onAddPolicy?.(item.policy.display_name);
+		if (item.kind === 'proposal') {
+			optimisticDraft = {
+				...visibleDraft,
+				proposals: [...visibleDraft.proposals, item.proposal]
+			};
+			return onAddProposal?.(item.ref.index);
+		}
+		if (item.kind === 'policy') {
+			optimisticDraft = {
+				...visibleDraft,
+				policies: [...visibleDraft.policies, item.policy]
+			};
+			return onAddPolicy?.(item.policy.display_name);
+		}
 		if (item.kind === 'bill') loadBill(item);
 	}
 
@@ -114,10 +133,18 @@
 	}
 
 	function removeProposal(_proposal: Proposal, index: number) {
+		optimisticDraft = {
+			...visibleDraft,
+			proposals: visibleDraft.proposals.filter((_, currentIndex) => currentIndex !== index)
+		};
 		onRemoveProposal?.(index);
 	}
 
 	function removePolicy(_policy: PolicyDefinition, index: number) {
+		optimisticDraft = {
+			...visibleDraft,
+			policies: visibleDraft.policies.filter((_, currentIndex) => currentIndex !== index)
+		};
 		onRemovePolicy?.(index);
 	}
 
@@ -177,7 +204,7 @@
 	<Left
 		scene="parliament"
 		{items}
-		{baseline}
+		baseline={policyBaseline}
 		bind:activeMode={activeLeftMode}
 		{selection}
 		onItemSelect={selectLeft}

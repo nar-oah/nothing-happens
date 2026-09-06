@@ -122,12 +122,9 @@ func draft_preview(session: RunSession) -> Dictionary:
 	var state := session.state
 	var draft := state.draft_bill
 	var pure_target := session.proposal_system.calculate_pure_target(state.metrics, draft.proposals)
-	var immediate := session.policy_system.calculate_immediate_result(state.metrics, draft.policies)
-	var projected := pure_target.copy()
-	for metric in Metric.all_ids():
-		projected.set_value(metric, pure_target.get_value(metric) + immediate.get_value(metric) - state.metrics.get_value(metric))
+	var projected := session.vote_system.calculate_projected_metrics(draft, pure_target, session.context)
 	var vote := session.vote_system.preview_vote(draft, session.context)
-	return {"current_metrics": metric_values(state.metrics), "pure_proposal_target": metric_values(pure_target), "immediate_policy_result": metric_values(immediate), "projected_metrics": metric_values(projected), "vote": vote_result(vote, session)}
+	return {"current_metrics": metric_values(state.metrics), "pure_proposal_target": metric_values(pure_target), "immediate_policy_result": metric_values(projected), "projected_metrics": metric_values(projected), "vote": vote_result(vote, session)}
 
 
 func pending_dialogue(session: RunSession) -> Variant:

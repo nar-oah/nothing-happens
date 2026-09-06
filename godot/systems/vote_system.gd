@@ -13,7 +13,7 @@ func calculate_vote(
 	if draft == null:
 		return result
 	var pure_target := context.proposal_system.calculate_pure_target(context.state.metrics, draft.proposals)
-	var projected := _calculate_projected_metrics(draft, pure_target, context)
+	var projected := calculate_projected_metrics(draft, pure_target, context)
 	for seat in context.state.seats:
 		var vote := _calculate_seat_vote(seat, draft, pure_target, projected, context, resolve_randomness)
 		result.seat_votes.append(vote)
@@ -76,14 +76,14 @@ func clear_donations(state: RunState) -> void:
 	state.vote_donations.clear()
 
 
-func _calculate_projected_metrics(
+func calculate_projected_metrics(
 	draft: DraftBillState, pure_target: MetricValues, context: RunContext
 ) -> MetricValues:
-	var projected := pure_target.copy()
-	var immediate := context.policy_system.calculate_immediate_result(context.state.metrics, draft.policies)
-	for metric in Metric.all_ids():
-		projected.set_value(metric, pure_target.get_value(metric) + immediate.get_value(metric) - context.state.metrics.get_value(metric))
-	return projected
+	return context.policy_system.calculate_draft_result(
+		context.state.metrics,
+		pure_target,
+		draft.policies
+	)
 
 
 func _calculate_seat_vote(
