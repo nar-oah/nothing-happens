@@ -14,7 +14,7 @@ func _ready() -> void:
 	if visual.texture == null:
 		return
 	var direction := -1.0 if is_left else 1.0
-	var spacing := float(visual.texture.get_width())
+	var spacing := float(visual.texture.get_width()) - 5.0
 	for index in range(1, 4):
 		var visual_copy := visual.duplicate() as Sprite2D
 		visual_copy.name = "Visual%d" % (index + 1)
