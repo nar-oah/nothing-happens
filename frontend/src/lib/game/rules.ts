@@ -153,6 +153,22 @@ export function calculatePureProposalTarget(
 	return result;
 }
 
+export function calculateDraftProjectedMetrics(
+	current: MetricValues,
+	proposals: Proposal[],
+	policies: PolicyDefinition[]
+): MetricValues {
+	const pureTarget = calculatePureProposalTarget(current, proposals);
+	const triggered = new Set<number>();
+	const immediate = resolvePolicyChain(current, policies, triggered);
+	const projected: MetricValues = { ...pureTarget };
+	for (const metric of METRICS) {
+		const key = METRIC_KEYS[metric];
+		projected[key] += getMetricValue(immediate, metric) - getMetricValue(current, metric);
+	}
+	return resolvePolicyChain(projected, policies, triggered);
+}
+
 export function getBillLagMonths(proposals: Proposal[]): number {
 	return proposals.reduce((maximum, proposal) => Math.max(maximum, proposal.lag_months), 0);
 }
@@ -175,6 +191,41 @@ export function getPolicyMetrics(policy: PolicyDefinition): Metric[] {
 		if (effect.formula === PolicyEffectFormula.METRIC_GAP) involved.add(effect.source_b);
 	}
 	return METRICS.filter((metric) => involved.has(metric));
+}
+
+function resolvePolicyChain(
+	start: MetricValues,
+	policies: PolicyDefinition[],
+	triggered: Set<number>
+): MetricValues {
+	const result: MetricValues = { ...start };
+	while (true) {
+		const batch = policies.flatMap((policy, index) =>
+			!triggered.has(index) && isMetricConditionMet(policy.condition, result)
+				? [{ policy, index }]
+				: []
+		);
+		if (batch.length === 0) return result;
+		const snapshot: MetricValues = { ...result };
+		const delta: MetricVector = {
+			tax: 0,
+			consumption: 0,
+			production: 0,
+			employment: 0,
+			investment: 0
+		};
+		for (const { policy, index } of batch) {
+			triggered.add(index);
+			for (const effect of policy.effects) {
+				const key = METRIC_KEYS[effect.target_metric];
+				delta[key] += calculatePolicyEffectAmount(effect, snapshot);
+			}
+		}
+		for (const metric of METRICS) {
+			const key = METRIC_KEYS[metric];
+			result[key] += getMetricValue(delta, metric);
+		}
+	}
 }
 
 function addVectorMetrics(involved: Set<Metric>, values: MetricValues): void {
