@@ -26,13 +26,14 @@ const CONDITION_SYMBOLS: Record<MetricConditionOperator, string> = {
 
 export function proposalToMemorialContent(
 	proposal: Proposal,
-	translator: Translate = translate
+	translator: Translate = translate,
+	metricTranslator: Translate = translator
 ): MemorialProposalContentData {
 	return {
 		proposalTitle: proposal.source_group.display_name,
 		content: {
 			title: translator('memorial.metrics'),
-			body: formatVector(getProposalTotalEffect(proposal), translator)
+			body: formatVector(getProposalTotalEffect(proposal), metricTranslator)
 		}
 	};
 }
@@ -86,18 +87,19 @@ export function constitutionToHorizontalContents(
 
 export function policyToMemorialContent(
 	policy: PolicyDefinition,
-	translator: Translate = translate
+	translator: Translate = translate,
+	metricTranslator: Translate = translator
 ): MemorialPolicyContentData {
 	const condition = policy.condition;
 	const multiplier = condition.right_multiplier === 1 ? '' : `×${condition.right_multiplier}`;
-	const requirement = `${getMetricDisplayName(condition.left_metric, translator)}${CONDITION_SYMBOLS[condition.operator]}${getMetricDisplayName(condition.right_metric, translator)}${multiplier}`;
+	const requirement = `${getMetricDisplayName(condition.left_metric, metricTranslator)}${CONDITION_SYMBOLS[condition.operator]}${getMetricDisplayName(condition.right_metric, metricTranslator)}${multiplier}`;
 	const effects = policy.effects.map((effect) => {
 		const source =
 			effect.formula === PolicyEffectFormula.METRIC_VALUE
-				? getMetricDisplayName(effect.source_a, translator)
-				: `${getMetricDisplayName(effect.source_a, translator)}－${getMetricDisplayName(effect.source_b, translator)}`;
+				? getMetricDisplayName(effect.source_a, metricTranslator)
+				: `${getMetricDisplayName(effect.source_a, metricTranslator)}－${getMetricDisplayName(effect.source_b, metricTranslator)}`;
 		return translator('memorial.effect', {
-			target: getMetricDisplayName(effect.target_metric, translator),
+			target: getMetricDisplayName(effect.target_metric, metricTranslator),
 			source,
 			multiplier: effect.multiplier
 		});

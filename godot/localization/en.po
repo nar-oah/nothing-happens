@@ -104,7 +104,7 @@ msgstr "Nearly all of Penglai's newspapers, notices, statistics, and public bull
 
 # Constitution display strings
 msgid "蓬莱约法"
-msgstr "Penglai Constitution"
+msgstr "PL Const."
 
 msgid "要求"
 msgstr "Requirements"
