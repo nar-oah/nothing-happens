@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="PeachRaceDefinition" format=3 uid="uid://dq2n0bhiqw7ag"]
 
 [ext_resource type="Texture2D" uid="uid://bj84yocvtenty" path="res://assets/races/桃花妖.png" id="1_q1kv0"]
+[ext_resource type="Texture2D" uid="uid://bboxdx0ti2o46" path="res://assets/races/桃花妖悬停.png" id="1_vmvfq"]
 [ext_resource type="Script" uid="uid://47x6how686q0" path="res://definitions/peach_race_definition.gd" id="script"]
 
 [resource]
@@ -11,5 +12,6 @@ description = "桃花妖曾生活在会主动遮蔽道路的桃源里，土地�
 自治制度保留长幼秩序，但地方之间仍共同参与联合政府。"
 event_description = "桃源关心的不是账面扩张，而是土地与生命资料是否仍然丰足，并真正进入日常生活。生产或消费落后时，他们会把原因归咎于外界征敛、贸易和现代化对地方生活的侵入。"
 portrait = ExtResource("1_q1kv0")
+hover_portrait = ExtResource("1_vmvfq")
 increase_consumption = true
 increase_production = true

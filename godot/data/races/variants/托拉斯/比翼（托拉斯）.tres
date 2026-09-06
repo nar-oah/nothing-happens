@@ -1,16 +1,20 @@
 [gd_resource type="Resource" script_class="BiyiRaceDefinition" format=3 uid="uid://g0f4jxfp8kxw"]
 
 [ext_resource type="Texture2D" uid="uid://58wyv7kk6pfn" path="res://assets/races/比翼-阴.png" id="1_8nr8o"]
+[ext_resource type="Texture2D" uid="uid://xkffvorarby5" path="res://assets/races/比翼-阴悬停.png" id="1_dot3m"]
+[ext_resource type="Texture2D" uid="uid://bntedrecuvrb4" path="res://assets/races/比翼-阳.png" id="2_yang"]
+[ext_resource type="Texture2D" uid="uid://b5pnwubphe7s8" path="res://assets/races/比翼-阳悬停.png" id="4_fo4kf"]
 [ext_resource type="Script" uid="uid://bi5q61h6p7hhf" path="res://definitions/biyi_race_definition.gd" id="script"]
-[ext_resource type="Texture2D" path="res://assets/races/比翼-阳.png" id="2_yang"]
 
 [resource]
 script = ExtResource("script")
+yang_portrait = ExtResource("2_yang")
+yang_hover_portrait = ExtResource("4_fo4kf")
 display_name = "比翼"
 description = "比翼曾替蓬莱保存文字、历法与知识，也因此长期把自己视为本土文化最可靠的解释者。汉语官署、印刷、海贸教育和外来技术让这种地位迅速消失，他们便把失业、传承断裂和机会减少理解成外来者夺走了原本属于自己的位置。于是，比翼越来越希望让本族语言、知识传统乃至政治组织重新成为蓬莱的中心。"
 event_description = "比翼把知识地位的流失首先体验为职位与发展机会减少。就业不足会成为两半共同的焦虑；阴月又担心公共机构缺少税课，阳月则担心新的知识产业缺少投资。"
 portrait = ExtResource("1_8nr8o")
-yang_portrait = ExtResource("2_yang")
+hover_portrait = ExtResource("1_dot3m")
 increase_tax = true
 increase_production = true
 increase_employment = true
