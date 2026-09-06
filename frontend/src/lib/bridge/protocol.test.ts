@@ -8,13 +8,14 @@ import { CommandError, type OutboundMessage } from './protocol.ts';
 import { decodeInboundMessage, encodeOutboundMessage, isOutboundType } from './validation.ts';
 
 test('settings and quit commands encode without gameplay versions and reject invalid payloads', () => {
-	for (const command of [
+	const commands: OutboundMessage[] = [
 		{ type: 'settings.language.set', payload: { language: 'zh_CN' } },
 		{ type: 'settings.language.set', payload: { language: 'en' } },
 		{ type: 'settings.display.set', payload: { mode: 'windowed' } },
 		{ type: 'settings.display.set', payload: { mode: 'fullscreen' } },
 		{ type: 'app.quit', payload: {} }
-	] satisfies OutboundMessage[]) {
+	];
+	for (const command of commands) {
 		assert.equal(isOutboundType(command.type), true);
 		assert.deepEqual(JSON.parse(encodeOutboundMessage(command)), command);
 		assert.equal('state_version' in command.payload, false);
