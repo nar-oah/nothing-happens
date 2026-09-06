@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="ZhushuiRaceDefinition" format=3 uid="uid://be70qiitqiiqp"]
 
 [ext_resource type="Texture2D" uid="uid://dav2drum00ulb" path="res://assets/races/驻岁.png" id="1_18kys"]
+[ext_resource type="Texture2D" uid="uid://bre5fea2k61jf" path="res://assets/races/驻岁悬停.png" id="1_cjela"]
 [ext_resource type="Script" uid="uid://5vl3510p0xx5" path="res://definitions/zhushui_race_definition.gd" id="script"]
 
 [resource]
@@ -9,6 +10,7 @@ display_name = "驻岁"
 description = "驻岁曾替各族见证旧约、调停争端，因为寿命漫长，人们相信他们比谁都懂得等待。但这个几乎无法繁衍的种族，也曾因害怕落后而追逐更快的生产、更早的收益和更激烈的竞争，最终只剩下玩家与助手。如今他们对“危机将至”格外迟疑，并非天生超然，而是因为整个种族已经为这种恐惧付过一次代价。"
 event_description = "驻岁并不追求增长，只把五项公共指标的零点视为共同底线。任何一项跌入负值，都意味着玩家正在把一次极端构筑维持得太久，连助手也开始怀疑是否还值得继续。"
 portrait = ExtResource("1_18kys")
+hover_portrait = ExtResource("1_cjela")
 increase_tax = true
 increase_consumption = true
 increase_production = true

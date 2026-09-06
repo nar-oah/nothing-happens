@@ -8,6 +8,7 @@ const YinYangRuleDefinitionScript = preload("res://definitions/yin_yang_rule_def
 @export_multiline var event_description: String
 @export var fixed_interest_group: InterestGroupDefinition
 @export var portrait: Texture2D
+@export var hover_portrait: Texture2D
 
 @export_group("制度参数")
 @export_range(-1.0, 1.0, 0.01) var expectation_growth_rate: float = 0.10
@@ -35,6 +36,10 @@ func get_stance_metrics() -> Array[Metric.Id]:
 
 func get_portrait(_month: int) -> Texture2D:
 	return portrait
+
+
+func get_hover_portrait(_month: int) -> Texture2D:
+	return hover_portrait
 
 
 func on_month_start(_context, _race_state) -> void:

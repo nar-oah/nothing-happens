@@ -16,7 +16,7 @@
 [ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/人类.tres" id="race_12"]
 [ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="race_type_5"]
 [ext_resource type="Resource" uid="uid://bjubbxjboutnj" path="res://data/constitution_rows/外交.tres" id="row_7"]
-[ext_resource type="Resource" path="res://data/interest_groups/variants/永乐局（自由贸易）.tres" id="variant_group_15"]
+[ext_resource type="Resource" uid="uid://cj8sgpbs1ja8r" path="res://data/interest_groups/variants/永乐局（自由贸易）.tres" id="variant_group_15"]
 
 [sub_resource type="Resource" id="Effect_1"]
 script = ExtResource("effscript_race_seat_11")
