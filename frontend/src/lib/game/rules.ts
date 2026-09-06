@@ -1,3 +1,4 @@
+import { translate, type Translate } from '../i18n/index.ts';
 import {
 	Metric,
 	MetricConditionOperator,
@@ -28,12 +29,16 @@ const METRIC_KEYS: Record<Metric, keyof MetricValues> = {
 };
 
 export const METRIC_DISPLAY_NAMES: Record<Metric, string> = {
-	[Metric.TAX]: '税課',
-	[Metric.CONSUMPTION]: '消費',
-	[Metric.PRODUCTION]: '生産',
-	[Metric.EMPLOYMENT]: '就業',
-	[Metric.INVESTMENT]: '投資'
+	[Metric.TAX]: translate('game.metric.tax', undefined, 'zh_CN'),
+	[Metric.CONSUMPTION]: translate('game.metric.consumption', undefined, 'zh_CN'),
+	[Metric.PRODUCTION]: translate('game.metric.production', undefined, 'zh_CN'),
+	[Metric.EMPLOYMENT]: translate('game.metric.employment', undefined, 'zh_CN'),
+	[Metric.INVESTMENT]: translate('game.metric.investment', undefined, 'zh_CN')
 };
+
+export function getMetricDisplayName(metric: Metric, translator: Translate = translate): string {
+	return translator(`game.metric.${METRIC_KEYS[metric]}`);
+}
 
 export function getMetricValue(values: MetricValues, metric: Metric): number {
 	return values[METRIC_KEYS[metric]];

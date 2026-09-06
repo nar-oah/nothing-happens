@@ -262,6 +262,9 @@ func _handle_settings_command(message: Dictionary, messages: Array[Dictionary]) 
 			"message": "Unsupported language." if is_language else "Unsupported display mode.",
 		}, message["request_id"])
 		return
+	if message["payload"].size() != 1:
+		_append_mutation_error(messages, {"code": "invalid_payload", "message": "Settings commands require exactly one settings field."}, message["request_id"])
+		return
 	if settings_manager == null:
 		_append_mutation_error(messages, {"code": "settings_not_ready", "message": "SettingsManager is not ready."}, message["request_id"])
 		return

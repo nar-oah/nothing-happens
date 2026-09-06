@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import ChoreSwitch from '$lib/components/chore/ChoreSwitch.svelte';
 	import { MemorialVerticalConstitution } from '$lib/components/memorial';
 	import type { MemorialConstitutionData } from '$lib/components/memorial/types';
@@ -38,8 +39,8 @@
 	}: Props = $props();
 	let confirmMode = $state(false);
 	let gameState = $derived({
-		primary: { text: '执政年数', value: Math.floor(governingMonths / 12), isRow: false },
-		secondary: { text: '执政月数', value: governingMonths % 12, limit: 12, isRow: false }
+		primary: { text: $t('game.governingYears'), value: Math.floor(governingMonths / 12), isRow: false },
+		secondary: { text: $t('game.governingMonths'), value: governingMonths % 12, limit: 12, isRow: false }
 	});
 	let unlockableSections = $derived(
 		columns
@@ -60,7 +61,7 @@
 	}
 </script>
 
-<main class="game-view" aria-label="约法界面">
+<main class="game-view" aria-label={$t('view.constitution')}>
 	<NewspaperEntry {term} {year} {month} onOpen={onNewspaperOpen} />
 	<div class="top-slot">
 		<Top {raceItems} {interestGroupItems} />
@@ -71,8 +72,8 @@
 			<div class="constitution-content">
 				<div class="confirm-switch">
 					<ChoreSwitch
-						left="约法"
-						right="确认"
+						left={$t('view.constitutionAction')}
+						right={$t('view.confirm')}
 						bind:isSwitch={confirmMode}
 						onSwitchChange={submitRevision}
 					/>

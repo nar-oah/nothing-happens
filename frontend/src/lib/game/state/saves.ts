@@ -1,3 +1,4 @@
+import { translate, type Translate } from '../../i18n/index.ts';
 import type { GameStatusDto, SaveSlotDto } from './types.ts';
 
 export type SaveItem = {
@@ -8,7 +9,8 @@ export type SaveItem = {
 export function deriveSaveItems(
 	saves: SaveSlotDto[],
 	current: Pick<GameStatusDto, 'term' | 'year' | 'month'>,
-	loading: boolean
+	loading: boolean,
+	translator: Translate = translate
 ): SaveItem[] {
 	const manual = saves.filter((slot) => !slot.automatic);
 	const automatic = saves.find((slot) => slot.automatic);
@@ -17,7 +19,7 @@ export function deriveSaveItems(
 		: { ...automatic, slot_id: 'auto', automatic: true, saved_at: '', ...current };
 	return [...manual, ...(last ? [last] : [])].map((slot) => ({
 		slot,
-		item: { text: `第 ${slot.term} 任`, value: `${slot.year} 年 ${slot.month} 月` }
+		item: { text: translator('saves.term', { term: slot.term }), value: translator('saves.date', { year: slot.year, month: slot.month }) }
 	}));
 }
 

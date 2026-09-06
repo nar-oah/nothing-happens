@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import Left from '$lib/components/left/Left.svelte';
 	import NewspaperEntry from '$lib/components/newspaper/NewspaperEntry.svelte';
 	import GameStateDisplay from '$lib/components/state/GameStateDisplay.svelte';
@@ -24,7 +25,7 @@
 	}: Props = $props();
 </script>
 
-<main class="game-view" aria-label="办公室界面">
+<main class="game-view" aria-label={$t('view.office')}>
 	<Left scene="office" {items} {baseline} {onSynthesisConfirm} />
 	<NewspaperEntry {term} {year} {month} onOpen={onNewspaperOpen} />
 	<div class="top-slot">

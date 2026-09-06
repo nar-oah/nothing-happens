@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { onMount, untrack } from 'svelte';
 	import ChoreSwitch from '$lib/components/chore/ChoreSwitch.svelte';
 	import Left from '$lib/components/left/Left.svelte';
@@ -159,13 +160,13 @@
 	}
 </script>
 
-<main class="game-view" aria-label="议会界面">
+<main class="game-view" aria-label={$t('view.parliament')}>
 	<div class="seat-layer">
 		{#each anchoredSeats as seat (seat.seat_index)}
 			<div class="seat-anchor" style:left={`${seat.x * 100}%`} style:top={`${seat.y * 100}%`}>
 				<ChoreSwitch
 					left={String(seat.score)}
-					right={seat.score > 0 ? '支持' : '贿赂'}
+					right={seat.score > 0 ? $t('view.support') : $t('view.bribe')}
 					isSwitch={seat.score > 0}
 					disabled={seat.score > 0 || !seat.canBribe}
 					onSwitchChange={(isSwitch) => bribeSeat(seat.seat_index, isSwitch)}
@@ -192,8 +193,8 @@
 				<div class="editor-content">
 					<div class="vote-switch">
 						<ChoreSwitch
-							left="草案"
-							right={voteCanPass ? '投票(可通过)' : `投票(差${votesNeeded}票)`}
+							left={$t('view.draft')}
+							right={voteCanPass ? $t('view.votePass') : $t('view.voteShort', { count: votesNeeded })}
 							bind:isSwitch={voteMode}
 							disabled={!voteCanPass}
 							onSwitchChange={submitDraft}

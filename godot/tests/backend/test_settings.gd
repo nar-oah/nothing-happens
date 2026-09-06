@@ -92,6 +92,12 @@ func _test_settings_commands(t: BackendTestContext) -> void:
 			t.check_equal(messages[0]["payload"]["code"], "invalid_language" if field == "language" else "invalid_display_mode", "invalid settings enum has a specific error code")
 			t.check_equal(messages.back()["payload"]["language"], "en", "rejected settings preserve authoritative language")
 			t.check_equal(messages.back()["payload"]["display_mode"], "fullscreen", "rejected settings preserve authoritative display mode")
+	for command in ["settings.language.set", "settings.display.set"]:
+		for extra_field in ["state_version", "unexpected"]:
+			var payload := {"language": "zh_CN"} if command == "settings.language.set" else {"mode": "windowed"}
+			payload[extra_field] = 7
+			messages = bridge.receive_ipc_message(_message(command, payload))
+			t.check_equal(messages[0]["payload"]["code"], "invalid_payload", "settings reject state_version and extra payload fields")
 	t.check_equal(bridge.state_version, 7, "accepted and rejected settings commands never increase state_version")
 	t.check(_snapshot(session) == before, "settings do not change the persisted run graph or RNG")
 	t.check_equal(FileAccess.get_file_as_string(directory.path_join("auto.json")), automatic_before, "settings commands leave the automatic game save untouched")
