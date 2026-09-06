@@ -15,7 +15,6 @@
 [ext_resource type="Texture2D" uid="uid://dppuom4ypgok" path="res://assets/office/small_rock.png" id="8_nl8yu"]
 [ext_resource type="Texture2D" uid="uid://qepnk3088j1y" path="res://assets/office/assistant_door.png" id="9_j3xwu"]
 [ext_resource type="Resource" uid="uid://b0t22lfjl8pqw" path="res://data/dialogue/摆件.tres" id="12_vkajd"]
-[ext_resource type="Texture2D" uid="uid://dq1dlm12st13r" path="res://assets/office/door_hover.png" id="15_xnoqu"]
 
 [node name="OfficeWorld" type="Node2D" unique_id=1059762548]
 script = ExtResource("1_5h8hf")
@@ -84,8 +83,7 @@ scale = Vector2(0.4, 0.4)
 texture = ExtResource("9_j3xwu")
 
 [node name="Door" parent="RightAnchor" unique_id=2114060250 instance=ExtResource("1_ox7iv")]
-position = Vector2(-135, -819)
-hover_texture = ExtResource("15_xnoqu")
+position = Vector2(-135, -820)
 
 [node name="Small Rock" type="Sprite2D" parent="RightAnchor" unique_id=1246513176]
 z_index = 1
