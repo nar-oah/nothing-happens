@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import ChoreSelect from './ChoreSelect.svelte';
 	import ChoreSwitch from './ChoreSwitch.svelte';
 	import type { ChoreFilters, ChoreFilterValue } from './chore';
@@ -7,6 +8,8 @@
 		right: string;
 		leftFilters: ChoreFilters;
 		rightFilters: ChoreFilters;
+		labels?: Record<string, string>;
+		optionLabels?: Record<string, string>;
 		isSwitch?: boolean;
 		onLeftFiltersChange?: (filters: ChoreFilters) => void;
 		onRightFiltersChange?: (filters: ChoreFilters) => void;
@@ -18,6 +21,8 @@
 		right,
 		leftFilters = $bindable<ChoreFilters>(),
 		rightFilters = $bindable<ChoreFilters>(),
+		labels = {},
+		optionLabels = {},
 		isSwitch = $bindable(false),
 		onLeftFiltersChange,
 		onRightFiltersChange,
@@ -76,7 +81,7 @@
 			{#if filter && typeof filter !== 'boolean'}
 				{#each filter.options as option (option)}
 					<ChoreSelect
-						text={option}
+						text={optionLabels[option] ?? option}
 						isSelect={filter.multiple
 							? filter.selected.includes(option)
 							: filter.selected[0] === option}
@@ -92,11 +97,13 @@
 						class="typo-filter-option cursor-pointer border-0 bg-transparent p-0 text-surface-amber"
 						onclick={() => openFilter(name)}
 					>
-						{value.multiple ? `${value.selected.length}${name}` : (value.selected[0] ?? name)}
+						{value.multiple
+							? $t('chore.selectedCount', { count: value.selected.length, name: labels[name] ?? name })
+							: (optionLabels[value.selected[0] ?? ''] ?? value.selected[0] ?? labels[name] ?? name)}
 					</button>
 				{:else}
 					<ChoreSelect
-						text={name}
+						text={labels[name] ?? name}
 						isDirection
 						isSelect={value}
 						onSelectChange={(selected) => setFilter(name, selected)}

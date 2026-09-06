@@ -1,8 +1,9 @@
+import { translate, type Translate } from '../../i18n/index.ts';
 import {
 	METRICS,
-	METRIC_DISPLAY_NAMES,
 	Metric,
 	getBillMetrics,
+	getMetricDisplayName,
 	getMetricValue,
 	getPolicyMetrics,
 	getProposalTotalEffect
@@ -174,26 +175,28 @@ export function moveSelectedProposalsFirst(
 }
 
 export function proposalToMemorialMetrics(
-	proposal: ProposalLeftItem['proposal']
+	proposal: ProposalLeftItem['proposal'],
+	translator: Translate = translate
 ): MemorialMetricData[] {
 	const ordinary = METRICS.flatMap((metric) =>
-		makeMetric(metric, getMetricValue(proposal.base_effect, metric), false)
+		makeMetric(metric, getMetricValue(proposal.base_effect, metric), false, translator)
 	);
 	const reverse = METRICS.flatMap((metric) =>
-		makeMetric(metric, getMetricValue(proposal.positive_effect, metric), true)
+		makeMetric(metric, getMetricValue(proposal.positive_effect, metric), true, translator)
 	);
 	return [...ordinary, ...reverse];
 }
 
 export function createProposalSynthesisPreview(
 	selected: ProposalLeftItem[],
-	preferredPositiveSource?: ProposalLeftItem
+	preferredPositiveSource?: ProposalLeftItem,
+	translator: Translate = translate
 ): ProposalPreview {
 	const ordinary = METRICS.flatMap((metric): MemorialMetricData[] => {
 		const values = selected.map((item) => getMetricValue(item.proposal.base_effect, metric));
 		if (values.every((value) => value === 0)) return [];
 		return [
-			{ text: METRIC_DISPLAY_NAMES[metric], value: `${Math.min(...values)}~${Math.max(...values)}` }
+			{ text: getMetricDisplayName(metric, translator), value: `${Math.min(...values)}~${Math.max(...values)}` }
 		];
 	});
 	const reverseCandidates = selected.flatMap((item, selectionIndex) =>
@@ -213,7 +216,7 @@ export function createProposalSynthesisPreview(
 		: undefined;
 	const reverse = preferredReverse ?? reverseCandidates[0];
 	return {
-		metrics: [...ordinary, ...(reverse ? makeMetric(reverse.metric, reverse.raw, true) : [])],
+		metrics: [...ordinary, ...(reverse ? makeMetric(reverse.metric, reverse.raw, true, translator) : [])],
 		reverseSource: reverse?.item
 	};
 }
@@ -257,12 +260,12 @@ function compareProposalValues(
 	return 0;
 }
 
-function makeMetric(metric: Metric, raw: number, isReverse: boolean): MemorialMetricData[] {
+function makeMetric(metric: Metric, raw: number, isReverse: boolean, translator: Translate): MemorialMetricData[] {
 	return raw === 0
 		? []
 		: [
 				{
-					text: METRIC_DISPLAY_NAMES[metric],
+					text: getMetricDisplayName(metric, translator),
 					symbol: raw > 0 ? MetricSymbol.Increase : MetricSymbol.Decrease,
 					value: Math.abs(raw),
 					isReverse
