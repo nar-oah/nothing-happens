@@ -98,8 +98,14 @@
 						onclick={() => openFilter(name)}
 					>
 						{value.multiple
-							? $t('chore.selectedCount', { count: value.selected.length, name: labels[name] ?? name })
-							: (optionLabels[value.selected[0] ?? ''] ?? value.selected[0] ?? labels[name] ?? name)}
+							? $t('chore.selectedCount', {
+									count: value.selected.length,
+									name: labels[name] ?? name
+								})
+							: (optionLabels[value.selected[0] ?? ''] ??
+								value.selected[0] ??
+								labels[name] ??
+								name)}
 					</button>
 				{:else}
 					<ChoreSelect

@@ -19,6 +19,7 @@
 	type Props = {
 		title: string;
 		constitution: MemorialConstitutionData;
+		stateVersion?: number;
 		unlockableSections?: string[];
 		onArticleSelectionChange?: (articleRef: number, selected: boolean) => void;
 		onSectionUnlock?: (sectionTitle: string) => void;
@@ -31,12 +32,13 @@
 		| {
 				type: 'section';
 				title: string;
+				sectionIndex: number;
 				content: number | MemorialConstitutionRowContentData[];
 		  }
 		| { type: 'detail'; title: string; contents: MemorialHorizontalContentData[] }
 		| { type: 'policy'; content: MemorialPolicyContentData };
 	type PendingArticleSelection = {
-		sectionTitle: string;
+		sectionIndex: number;
 		rowKey: string;
 		articleRef: number;
 	};
@@ -44,24 +46,26 @@
 	let {
 		title,
 		constitution,
+		stateVersion,
 		unlockableSections = [],
 		onArticleSelectionChange,
 		onSectionUnlock
 	}: Props = $props();
-	let expandedRow = $state<{ sectionTitle: string; rowIndex: number }>();
+	let expandedRow = $state<{ sectionIndex: number; rowIndex: number }>();
 	let pendingSelection = $state<PendingArticleSelection>();
-	let appliedConstitution = untrack(() => constitution);
+	let appliedConstitution = untrack(() => stateVersion ?? constitution);
 	let pages: ConstitutionPage[] = $derived.by(() => {
 		const sectionPages = Object.entries(constitution).map(
-			([sectionTitle, content]): ConstitutionPage => ({
+			([sectionTitle, content], sectionIndex): ConstitutionPage => ({
 				type: 'section',
 				title: sectionTitle,
+				sectionIndex,
 				content
 			})
 		);
 		if (!expandedRow) return sectionPages;
 
-		const content = constitution[expandedRow.sectionTitle];
+		const content = Object.values(constitution)[expandedRow.sectionIndex];
 		if (typeof content === 'number') return sectionPages;
 		const row = content?.[expandedRow.rowIndex];
 		if (!row || row.articleRef === undefined) return sectionPages;
@@ -83,51 +87,52 @@
 	});
 
 	$effect(() => {
-		if (constitution === appliedConstitution) return;
-		appliedConstitution = constitution;
+		const currentConstitution = stateVersion ?? constitution;
+		if (currentConstitution === appliedConstitution) return;
+		appliedConstitution = currentConstitution;
 		expandedRow = undefined;
 		pendingSelection = undefined;
 	});
 
 	function openRow(
-		sectionTitle: string,
+		sectionIndex: number,
 		rowIndex: number,
 		row: MemorialConstitutionRowContentData
 	) {
 		if (row.articleRef === undefined) return;
-		expandedRow = { sectionTitle, rowIndex };
+		expandedRow = { sectionIndex, rowIndex };
 	}
 
 	function getRowKey(
-		sectionTitle: string,
+		sectionIndex: number,
 		rowIndex: number,
 		row: MemorialConstitutionRowContentData
 	) {
 		return row.articleRef === undefined
-			? `${sectionTitle}-${rowIndex}`
+			? `${sectionIndex}-${rowIndex}`
 			: `article-${row.articleRef}`;
 	}
 
 	function getRowSelected(
-		sectionTitle: string,
+		sectionIndex: number,
 		rowIndex: number,
 		row: MemorialConstitutionRowContentData
 	) {
-		if (pendingSelection?.sectionTitle !== sectionTitle) return row.selected;
-		return pendingSelection.rowKey === getRowKey(sectionTitle, rowIndex, row);
+		if (pendingSelection?.sectionIndex !== sectionIndex) return row.selected;
+		return pendingSelection.rowKey === getRowKey(sectionIndex, rowIndex, row);
 	}
 
 	function setRowSelected(
-		sectionTitle: string,
+		sectionIndex: number,
 		rowIndex: number,
 		row: MemorialConstitutionRowContentData,
 		selected: boolean
 	) {
 		if (row.articleRef === undefined) return;
-		const rowKey = getRowKey(sectionTitle, rowIndex, row);
+		const rowKey = getRowKey(sectionIndex, rowIndex, row);
 		if (selected) {
 			const previousArticleRef = pendingSelection?.articleRef;
-			pendingSelection = { sectionTitle, rowKey, articleRef: row.articleRef };
+			pendingSelection = { sectionIndex, rowKey, articleRef: row.articleRef };
 			if (previousArticleRef !== undefined && previousArticleRef !== row.articleRef) {
 				onArticleSelectionChange?.(previousArticleRef, false);
 			}
@@ -169,10 +174,10 @@
 								<MemorialConstitutionRow
 									{...row}
 									empty={row.articleRef === undefined && row.text === ''}
-									selected={getRowSelected(currentPage.title, rowIndex, row)}
+									selected={getRowSelected(currentPage.sectionIndex, rowIndex, row)}
 									onSelectedChange={(selected) =>
-										setRowSelected(currentPage.title, rowIndex, row, selected)}
-									onclick={() => openRow(currentPage.title, rowIndex, row)}
+										setRowSelected(currentPage.sectionIndex, rowIndex, row, selected)}
+									onclick={() => openRow(currentPage.sectionIndex, rowIndex, row)}
 								/>
 							{/each}
 						</div>

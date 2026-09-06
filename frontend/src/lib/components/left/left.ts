@@ -196,7 +196,10 @@ export function createProposalSynthesisPreview(
 		const values = selected.map((item) => getMetricValue(item.proposal.base_effect, metric));
 		if (values.every((value) => value === 0)) return [];
 		return [
-			{ text: getMetricDisplayName(metric, translator), value: `${Math.min(...values)}~${Math.max(...values)}` }
+			{
+				text: getMetricDisplayName(metric, translator),
+				value: `${Math.min(...values)}~${Math.max(...values)}`
+			}
 		];
 	});
 	const reverseCandidates = selected.flatMap((item, selectionIndex) =>
@@ -216,7 +219,10 @@ export function createProposalSynthesisPreview(
 		: undefined;
 	const reverse = preferredReverse ?? reverseCandidates[0];
 	return {
-		metrics: [...ordinary, ...(reverse ? makeMetric(reverse.metric, reverse.raw, true, translator) : [])],
+		metrics: [
+			...ordinary,
+			...(reverse ? makeMetric(reverse.metric, reverse.raw, true, translator) : [])
+		],
 		reverseSource: reverse?.item
 	};
 }
@@ -260,7 +266,12 @@ function compareProposalValues(
 	return 0;
 }
 
-function makeMetric(metric: Metric, raw: number, isReverse: boolean, translator: Translate): MemorialMetricData[] {
+function makeMetric(
+	metric: Metric,
+	raw: number,
+	isReverse: boolean,
+	translator: Translate
+): MemorialMetricData[] {
 	return raw === 0
 		? []
 		: [

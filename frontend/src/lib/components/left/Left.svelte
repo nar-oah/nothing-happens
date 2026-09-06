@@ -103,10 +103,12 @@
 		数值: $t('left.filterValue'),
 		利益集团: $t('left.filterGroup')
 	});
-	let optionLabels = $derived(Object.fromEntries([
-		...CHORE_ARCHIVE_OPTIONS.map(({ key, text }) => [text, $t(`archive.${key}`)]),
-		...CHORE_METRIC_OPTIONS.map(({ key, text }) => [text, $t(`filter.${key}`)])
-	]));
+	let optionLabels = $derived(
+		Object.fromEntries([
+			...CHORE_ARCHIVE_OPTIONS.map(({ key, text }) => [text, $t(`archive.${key}`)]),
+			...CHORE_METRIC_OPTIONS.map(({ key, text }) => [text, $t(`filter.${key}`)])
+		])
+	);
 	let proposalItems: ProposalLeftItem[] = $derived(
 		items.filter((item): item is ProposalLeftItem => item.kind === 'proposal')
 	);
@@ -304,7 +306,7 @@
 								lag={item.proposal.lag_months}
 								metrics={proposalToMemorialMetrics(item.proposal, $t)}
 							/>
-					{/if}
+						{/if}
 					</button>
 				{/each}
 			{:else if activeMode === 'selection'}
