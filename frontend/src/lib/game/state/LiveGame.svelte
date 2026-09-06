@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { onDestroy, onMount, tick } from 'svelte';
+	import { language, t, type Translate } from '$lib/i18n';
+	import { translateCommandError } from '$lib/i18n/live';
 	import {
 		createCefIpcClient,
 		createInputRegionReporter,
@@ -89,13 +91,13 @@
 		];
 	}
 
-	function deriveNewspaperEvents(state: LiveGameState): NewspaperEventData[] {
+	function deriveNewspaperEvents(state: LiveGameState, translator: Translate): NewspaperEventData[] {
 		return (state.month_report?.events ?? []).flatMap((event) => {
 			const race = NEWSPAPER_RACE_BY_DISPLAY_NAME[event.race_display_name];
 			if (!race) return [];
 			const metric =
 				event.requirement_kind === 1 && event.interest_group_name
-					? `${event.interest_group_name}提案数`
+					? translator('live.proposalCount', { group: event.interest_group_name })
 					: event.metric;
 			return [
 				{
@@ -111,15 +113,15 @@
 		});
 	}
 
-	function deriveNewspaperEdition(state: LiveGameState): NewspaperEdition {
+	function deriveNewspaperEdition(state: LiveGameState, translator: Translate): NewspaperEdition {
 		const report = state.term_report;
-		const front = report ? deriveTermReportFront(report) : (state.newspaper_front ?? undefined);
+		const front = report ? deriveTermReportFront(report, translator) : (state.newspaper_front ?? undefined);
 		return {
 			year: state.year,
 			month: state.month,
-			metrics: report ? deriveTermReportMetrics(report) : deriveNewspaperMetrics(state),
+			metrics: report ? deriveTermReportMetrics(report, translator) : deriveNewspaperMetrics(state),
 			...(front ? { front } : {}),
-			events: report ? [] : deriveNewspaperEvents(state)
+			events: report ? [] : deriveNewspaperEvents(state, translator)
 		};
 	}
 
@@ -129,7 +131,9 @@
 	let mutationQueue = Promise.resolve();
 	let selectedConstitutionArticle = $state<number>();
 	let loadRevision = $state(0);
-	let saveError = $state('');
+	let saveError = $state<unknown>(null);
+	let quitting = $state(false);
+	let settingsBusy = $state(false);
 	let newspaperOpen = $state(true);
 	let newspaperBusy = $state(false);
 	let newspaperFolded = $state(false);
@@ -137,17 +141,20 @@
 	let newspaperEdition = $state<NewspaperEdition | null>(null);
 	let newspaperFoldResolver: (() => void) | null = null;
 	let pendingNewspaperAction: NewspaperTransitionAction | null = null;
-	const unsubscribe = gameStore.subscribe((value) => (storeValue = value));
+	const unsubscribe = gameStore.subscribe((value) => {
+		storeValue = value;
+		if (value.snapshot) language.set(value.snapshot.language);
+	});
 	let snapshot = $derived(storeValue.snapshot);
 	let leftItems = $derived(snapshot ? deriveLeftItems(snapshot) : []);
 	let topItems = $derived(
-		snapshot ? deriveTopItems(snapshot) : { raceItems: [], interestGroupItems: [] }
+		snapshot ? deriveTopItems(snapshot, $t) : { raceItems: [], interestGroupItems: [] }
 	);
-	let gameState = $derived(snapshot ? deriveGameStateDisplayProps(snapshot) : undefined);
-	let preview = $derived(snapshot ? deriveDraftPreviewMetrics(snapshot.draft_preview) : []);
-	let constitution = $derived(snapshot ? deriveConstitutionMemorial(snapshot) : {});
+	let gameState = $derived(snapshot ? deriveGameStateDisplayProps(snapshot, $t) : undefined);
+	let preview = $derived(snapshot ? deriveDraftPreviewMetrics(snapshot.draft_preview, $t) : []);
+	let constitution = $derived(snapshot ? deriveConstitutionMemorial(snapshot, $t) : {});
 	let pendingDialogue = $derived(
-		snapshot ? deriveDialoguePresentation(snapshot.pending_dialogue) : null
+		snapshot ? deriveDialoguePresentation(snapshot.pending_dialogue, $t) : null
 	);
 	let frame = $derived(
 		snapshot && gameState
@@ -167,7 +174,7 @@
 	$effect(() => {
 		const state = snapshot;
 		if (!state || newspaperBusy) return;
-		newspaperEdition = deriveNewspaperEdition(state);
+		newspaperEdition = deriveNewspaperEdition(state, $t);
 	});
 
 	onMount(() => {
@@ -187,6 +194,25 @@
 	});
 
 	onDestroy(unsubscribe);
+
+	async function changeSetting<T extends 'settings.language.set' | 'settings.display.set' | 'app.quit'>(
+		type: T,
+		payload: OutboundPayloads[T]
+	): Promise<void> {
+		if (settingsBusy || !client) return;
+		const requestClient = client;
+		settingsBusy = true;
+		saveError = null;
+		quitting = type === 'app.quit';
+		try {
+			await mutationQueue;
+			if (client === requestClient) await requestClient.request(type, payload);
+		} catch (error: unknown) {
+			saveError = error;
+		} finally {
+			settingsBusy = false;
+		}
+	}
 
 	function mutate<T extends GameplayCommandType>(type: T, payload: MutationPayload<T>): void {
 		const requestClient = client;
@@ -232,7 +258,8 @@
 	async function selectSave(slot: SaveSlotDto, loading: boolean): Promise<void> {
 		if (newspaperBusy || newspaperLeaving) return;
 		newspaperBusy = true;
-		saveError = '';
+		saveError = null;
+		quitting = false;
 		const action = getSaveAction(slot, loading);
 		try {
 			await requestMutation(action.type, action.payload);
@@ -244,11 +271,11 @@
 				newspaperLeaving = false;
 				newspaperOpen = true;
 				const state = storeValue.snapshot;
-				newspaperEdition = state ? deriveNewspaperEdition(state) : null;
+				newspaperEdition = state ? deriveNewspaperEdition(state, $t) : null;
 				loadRevision += 1;
 			}
 		} catch (error: unknown) {
-			saveError = error instanceof Error ? error.message : '存档操作失败';
+			saveError = error;
 		} finally {
 			newspaperBusy = false;
 		}
@@ -272,7 +299,7 @@
 			await Promise.all([foldComplete, action()]);
 			const state = storeValue.snapshot;
 			if (state?.term_report) {
-				newspaperEdition = deriveNewspaperEdition(state);
+				newspaperEdition = deriveNewspaperEdition(state, $t);
 				await tick();
 				newspaperFolded = false;
 				newspaperBusy = false;
@@ -296,7 +323,7 @@
 			await Promise.all([foldComplete, requestMutation('month.advance', {})]);
 			const state = storeValue.snapshot;
 			if (state?.term_report) {
-				newspaperEdition = deriveNewspaperEdition(state);
+				newspaperEdition = deriveNewspaperEdition(state, $t);
 				await tick();
 				newspaperFolded = false;
 				newspaperBusy = false;
@@ -457,7 +484,14 @@
 				year={newspaperEdition.year}
 				month={newspaperEdition.month}
 				saves={snapshot.saves}
-				{saveError}
+				language={snapshot.language}
+				displayMode={snapshot.display_mode}
+				{settingsBusy}
+				settingsDisabled={settingsBusy}
+				onLanguageClick={() => changeSetting('settings.language.set', { language: snapshot.language === 'zh_CN' ? 'en' : 'zh_CN' })}
+				onDisplayClick={() => changeSetting('settings.display.set', { mode: snapshot.display_mode === 'windowed' ? 'fullscreen' : 'windowed' })}
+				onExitClick={() => changeSetting('app.quit', {})}
+				saveError={saveError ? (quitting ? $t('live.quitFailed', { reason: translateCommandError(saveError, $t) }) : translateCommandError(saveError, $t)) : ''}
 				onSaveSelect={selectSave}
 				metrics={newspaperEdition.metrics}
 				front={newspaperEdition.front}
