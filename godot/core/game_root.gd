@@ -53,11 +53,16 @@ func _on_world_changed(scene_name: String, world: Node) -> void:
 		world.simple_dialogue_requested.connect(_on_simple_dialogue_requested)
 		_sync_office_visitors(world)
 	elif scene_name == "parliament":
+		world.office_requested.connect(_on_office_requested)
 		_sync_parliament_seats(world)
 
 
 func _on_parliament_requested() -> void:
 	ui_bridge.set_ui_mode("parliament")
+
+
+func _on_office_requested() -> void:
+	ui_bridge.set_ui_mode("office")
 
 
 func _on_visitor_requested() -> void:
