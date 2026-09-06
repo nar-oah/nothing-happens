@@ -22,6 +22,8 @@ func _init() -> void:
 
 
 func _run() -> void:
+	var previous_locale := TranslationServer.get_locale()
+	TranslationServer.set_locale("zh_CN")
 	var t := TestContextScript.new()
 	var suites := [
 		ParliamentAndProposalTests.new(),
@@ -41,6 +43,7 @@ func _run() -> void:
 	]
 	for suite in suites:
 		suite.run(t)
+	TranslationServer.set_locale(previous_locale)
 	if t.failures == 0:
 		print("BACKEND TESTS PASSED: %s assertions" % t.assertions)
 	else:
