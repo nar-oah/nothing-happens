@@ -138,6 +138,21 @@ export function getProposalTotalEffect(proposal: Proposal): MetricVector {
 	return result;
 }
 
+export function calculatePureProposalTarget(
+	current: MetricValues,
+	proposals: Proposal[]
+): MetricValues {
+	const result: MetricValues = { ...current };
+	for (const proposal of proposals) {
+		const effect = getProposalTotalEffect(proposal);
+		for (const metric of METRICS) {
+			const key = METRIC_KEYS[metric];
+			result[key] += getMetricValue(effect, metric);
+		}
+	}
+	return result;
+}
+
 export function getBillLagMonths(proposals: Proposal[]): number {
 	return proposals.reduce((maximum, proposal) => Math.max(maximum, proposal.lag_months), 0);
 }
