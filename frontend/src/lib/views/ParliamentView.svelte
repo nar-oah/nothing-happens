@@ -105,8 +105,20 @@
 
 	function selectLeft(item: LeftItem, mode: LeftMode) {
 		if (mode !== 'selection') return;
-		if (item.kind === 'proposal') return onAddProposal?.(item.ref.index);
-		if (item.kind === 'policy') return onAddPolicy?.(item.policy.display_name);
+		if (item.kind === 'proposal') {
+			optimisticDraft = {
+				...visibleDraft,
+				proposals: [...visibleDraft.proposals, item.proposal]
+			};
+			return onAddProposal?.(item.ref.index);
+		}
+		if (item.kind === 'policy') {
+			optimisticDraft = {
+				...visibleDraft,
+				policies: [...visibleDraft.policies, item.policy]
+			};
+			return onAddPolicy?.(item.policy.display_name);
+		}
 		if (item.kind === 'bill') loadBill(item);
 	}
 
@@ -120,10 +132,18 @@
 	}
 
 	function removeProposal(_proposal: Proposal, index: number) {
+		optimisticDraft = {
+			...visibleDraft,
+			proposals: visibleDraft.proposals.filter((_, currentIndex) => currentIndex !== index)
+		};
 		onRemoveProposal?.(index);
 	}
 
 	function removePolicy(_policy: PolicyDefinition, index: number) {
+		optimisticDraft = {
+			...visibleDraft,
+			policies: visibleDraft.policies.filter((_, currentIndex) => currentIndex !== index)
+		};
 		onRemovePolicy?.(index);
 	}
 
