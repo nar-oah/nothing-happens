@@ -292,7 +292,7 @@ export const mockConstitutionMemorial: MemorialConstitutionData = {
 			selected: true,
 			selectable: true,
 			contents: [{ body: mockConstitution.active_articles[0].content }],
-			policies: mockConstitution.active_articles[0].policies.map(policyToMemorialContent)
+			policies: mockConstitution.active_articles[0].policies.map((policy) => policyToMemorialContent(policy))
 		}
 	],
 	南柯: [
@@ -302,7 +302,7 @@ export const mockConstitutionMemorial: MemorialConstitutionData = {
 			selected: true,
 			selectable: true,
 			contents: [{ body: mockConstitution.active_articles[1].content }],
-			policies: mockConstitution.active_articles[1].policies.map(policyToMemorialContent)
+			policies: mockConstitution.active_articles[1].policies.map((policy) => policyToMemorialContent(policy))
 		}
 	]
 };
