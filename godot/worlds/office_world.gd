@@ -84,7 +84,7 @@ func _refresh_visitor() -> void:
 	var race := get_current_visitor() if has_visitors() else assistant_race
 	if race == null:
 		return
-	visitor.set_portrait(race.get_portrait(current_month))
+	visitor.set_portrait(race.get_portrait(current_month), race.get_hover_portrait(current_month))
 
 
 func _on_painting_clicked(dialogue: SimpleDialogueDefinition) -> void:
