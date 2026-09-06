@@ -52,6 +52,9 @@
 		onItemSelect,
 		onSynthesisConfirm
 	}: LeftProps = $props();
+	if (untrack(() => scene) === 'parliament' && untrack(() => activeMode) === 'archive') {
+		activeMode = 'selection';
+	}
 	let selectedProposals = $state<ProposalLeftItem[]>([]);
 	let leftFilters = $state<ChoreFilters>({
 		类型: {
