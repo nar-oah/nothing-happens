@@ -51,7 +51,7 @@
 	);
 	let coverMetrics: MemorialMetricData[] = $derived([
 		...preview.map((metric) => ({ ...metric, text: chineseMetricName(metric.text) })),
-		{ text: $t('memorial.lag'), value: lag, isReverse: true }
+		{ text: zh('memorial.lag'), value: lag, isReverse: true }
 	]);
 
 	function chineseMetricName(text: string): string {
