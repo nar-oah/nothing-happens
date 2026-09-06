@@ -1,6 +1,7 @@
 extends Node2D
 class_name ParliamentWorld
 
+signal office_requested
 signal layout_changed(parliament_seat_anchors: Array[Dictionary])
 
 @export var seat_scene: PackedScene
@@ -39,6 +40,10 @@ func _process(delta: float) -> void:
 		return
 	camera.position.x = next_x
 	_emit_layout_changed()
+
+
+func _on_door_clicked(_dialogue: SimpleDialogueDefinition) -> void:
+	office_requested.emit()
 
 
 func set_seat_races(value: Array[RaceDefinition]) -> void:
