@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { tick } from 'svelte';
 	import { getBillLagMonths, type Bill, type PolicyDefinition, type Proposal } from '$lib/game';
 	import MemorialPolicyContent from '../content/MemorialPolicyContent.svelte';
@@ -6,7 +7,7 @@
 	import { policyToMemorialContent, proposalToMemorialContent } from '../presentation';
 	import MemorialMetric from '../shared/MemorialMetric.svelte';
 	import MemorialTitleStrip from '../shared/MemorialTitleStrip.svelte';
-	import { MetricText, type MemorialMetricData } from '../types';
+	import type { MemorialMetricData } from '../types';
 	import MemorialVertical from './MemorialVertical.svelte';
 	import MemorialVerticalCover from './MemorialVerticalCover.svelte';
 
@@ -32,13 +33,15 @@
 	let editingTitle = $state(false);
 	let titleDraft = $state('');
 	let titleInput = $state<HTMLInputElement>();
-	let displayTitle = $derived(bill.title || '新法案');
+	let displayTitle = $derived(bill.title || $t('memorial.newBill'));
 	let lag = $derived(getBillLagMonths(bill.proposals));
-	let proposalPages = $derived(bill.proposals.map(proposalToMemorialContent));
-	let policyPages = $derived(bill.policies.map(policyToMemorialContent));
+	let proposalPages = $derived(
+		bill.proposals.map((proposal) => proposalToMemorialContent(proposal, $t))
+	);
+	let policyPages = $derived(bill.policies.map((policy) => policyToMemorialContent(policy, $t)));
 	let coverMetrics: MemorialMetricData[] = $derived([
 		...preview,
-		{ text: MetricText.Lag, value: lag, isReverse: true }
+		{ text: $t('memorial.lag'), value: lag, isReverse: true }
 	]);
 
 	function toggleCover() {
@@ -88,7 +91,7 @@
 	});
 </script>
 
-<section class="flex items-start" aria-label="法案编辑器" data-block-world-input>
+<section class="flex items-start" aria-label={$t('memorial.editor')} data-block-world-input>
 	<div class="flex items-start">
 		<MemorialVerticalCover>
 			<div class="relative h-full w-full">
@@ -96,7 +99,7 @@
 					class="relative h-full w-full cursor-pointer border-0 bg-transparent p-0 text-left"
 					type="button"
 					aria-pressed={!isTitle}
-					aria-label={isTitle ? '显示法案预测指标' : '显示法案标题'}
+					aria-label={$t(isTitle ? 'memorial.showMetrics' : 'memorial.showTitle')}
 					onclick={toggleCover}
 				>
 					<div class="absolute inset-0 flex flex-col gap-2 overflow-hidden">
@@ -115,7 +118,7 @@
 							bind:this={titleInput}
 							class="absolute left-[15px] top-[15px] w-45 border-0 bg-accent-amber-deep p-0 font-document text-[60px] font-light leading-[48px] text-ink-secondary outline-none [text-orientation:upright] [writing-mode:vertical-rl]"
 							style:height={`${Math.max(1, Array.from(titleDraft).length) * 48}px`}
-							aria-label="法案名称"
+							aria-label={$t('memorial.billName')}
 							value={titleDraft}
 							oninput={(event) => (titleDraft = event.currentTarget.value)}
 							onkeydown={handleTitleKeydown}
@@ -126,7 +129,7 @@
 						<button
 							type="button"
 							class="absolute left-[15px] top-[15px] cursor-pointer border-0 bg-transparent p-0"
-							aria-label="重命名法案"
+							aria-label={$t('memorial.rename')}
 							onclick={beginTitleEdit}
 						>
 							<MemorialTitleStrip text={displayTitle} vertical />
@@ -140,7 +143,7 @@
 				<button
 					class="h-full w-full cursor-pointer border-0 bg-transparent p-0 text-left"
 					type="button"
-					aria-label={`删除法案第${index + 1}页`}
+					aria-label={$t('memorial.deletePage', { page: index + 1 })}
 					onclick={() => removePage(index)}
 				>
 					{#if proposalPages[index]}

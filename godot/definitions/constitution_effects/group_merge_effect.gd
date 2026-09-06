@@ -16,5 +16,5 @@ func apply(context: RunContext) -> void:
 
 
 func get_description() -> String:
-	var target_name := "" if target_group == null else target_group.display_name
-	return "将影响率低于%s的利益集团并入%s" % [_format_percent(threshold), target_name]
+	var target_name := "" if target_group == null else _t(target_group.display_name)
+	return _t("将影响率低于%s的利益集团并入%s") % [_format_percent(threshold), target_name]

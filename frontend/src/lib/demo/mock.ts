@@ -165,11 +165,17 @@ const unavailablePolicy = policy('公开预算', condition(Metric.TAX, Metric.EM
 ]);
 
 export const mockProposalItems: ProposalLeftItem[] = [
-	makeProposal(mockInterestGroups.造身公所, { consumption: -8, employment: -5 }, 6, { investment: 8 }),
+	makeProposal(mockInterestGroups.造身公所, { consumption: -8, employment: -5 }, 6, {
+		investment: 8
+	}),
 	makeProposal(mockInterestGroups.造身公所, { consumption: -5, employment: -9 }, 3),
 	makeProposal(mockInterestGroups.造身公所, { consumption: -5, employment: -9 }, 3),
-	makeProposal(mockInterestGroups.造身公所, { consumption: -5, employment: -9 }, 3, { employment: 6 }),
-	makeProposal(mockInterestGroups.槐安公所, { production: -6, consumption: -7 }, 4, { employment: 6 }),
+	makeProposal(mockInterestGroups.造身公所, { consumption: -5, employment: -9 }, 3, {
+		employment: 6
+	}),
+	makeProposal(mockInterestGroups.槐安公所, { production: -6, consumption: -7 }, 4, {
+		employment: 6
+	}),
 	makeProposal(mockInterestGroups.槐安公所, { production: -4, consumption: -10 }, 7),
 	makeProposal(mockInterestGroups.永乐轮运局, { consumption: -6, investment: -8 }, 5, { tax: 5 }),
 	makeProposal(mockInterestGroups.官药局, { tax: -7, consumption: -4 }, 2),
@@ -292,7 +298,9 @@ export const mockConstitutionMemorial: MemorialConstitutionData = {
 			selected: true,
 			selectable: true,
 			contents: [{ body: mockConstitution.active_articles[0].content }],
-			policies: mockConstitution.active_articles[0].policies.map(policyToMemorialContent)
+			policies: mockConstitution.active_articles[0].policies.map((policy) =>
+				policyToMemorialContent(policy)
+			)
 		}
 	],
 	南柯: [
@@ -302,26 +310,31 @@ export const mockConstitutionMemorial: MemorialConstitutionData = {
 			selected: true,
 			selectable: true,
 			contents: [{ body: mockConstitution.active_articles[1].content }],
-			policies: mockConstitution.active_articles[1].policies.map(policyToMemorialContent)
+			policies: mockConstitution.active_articles[1].policies.map((policy) =>
+				policyToMemorialContent(policy)
+			)
 		}
 	]
 };
 
 export function getMockBillPreview(bill: Bill): MemorialMetricData[] {
-	const totals = bill.proposals.reduce((result, proposal) => {
-		const proposalEffect = getProposalTotalEffect(proposal);
-		for (const metric of METRICS) {
-			const key = {
-				[Metric.TAX]: 'tax',
-				[Metric.CONSUMPTION]: 'consumption',
-				[Metric.PRODUCTION]: 'production',
-				[Metric.EMPLOYMENT]: 'employment',
-				[Metric.INVESTMENT]: 'investment'
-			}[metric] as keyof MetricValues;
-			result[key] += getMetricValue(proposalEffect, metric);
-		}
-		return result;
-	}, { ...mockBaseline });
+	const totals = bill.proposals.reduce(
+		(result, proposal) => {
+			const proposalEffect = getProposalTotalEffect(proposal);
+			for (const metric of METRICS) {
+				const key = {
+					[Metric.TAX]: 'tax',
+					[Metric.CONSUMPTION]: 'consumption',
+					[Metric.PRODUCTION]: 'production',
+					[Metric.EMPLOYMENT]: 'employment',
+					[Metric.INVESTMENT]: 'investment'
+				}[metric] as keyof MetricValues;
+				result[key] += getMetricValue(proposalEffect, metric);
+			}
+			return result;
+		},
+		{ ...mockBaseline }
+	);
 	return METRICS.map((metric) => ({
 		text: METRIC_DISPLAY_NAMES[metric],
 		value: getMetricValue(totals, metric)

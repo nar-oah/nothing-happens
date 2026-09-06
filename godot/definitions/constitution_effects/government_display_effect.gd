@@ -13,4 +13,4 @@ func override_parliament_name(current: String) -> String:
 
 
 func get_description() -> String:
-	return "议会名称改为%s" % parliament_name
+	return _t("议会名称改为%s") % _t(parliament_name)

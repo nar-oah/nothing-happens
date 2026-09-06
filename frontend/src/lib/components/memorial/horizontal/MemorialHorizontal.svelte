@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { onDestroy, type Snippet } from 'svelte';
 	import { HORIZONTAL_FOLD_HEIGHT, HORIZONTAL_FOLD_WIDTH } from '../constants';
 	import MemorialHorizontalContent from '../content/MemorialHorizontalContent.svelte';
@@ -85,7 +86,7 @@
 	style:--height={`${open ? pages.length * HORIZONTAL_FOLD_HEIGHT : HORIZONTAL_FOLD_HEIGHT}px`}
 	type="button"
 	aria-expanded={open}
-	aria-label={open ? '收起奏折' : '展开奏折'}
+	aria-label={$t(open ? 'memorial.collapse' : 'memorial.expand')}
 	onclick={() => setOpen(!open)}
 >
 	{#each pages as page, index (index)}

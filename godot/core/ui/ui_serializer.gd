@@ -18,8 +18,8 @@ func interest_group(definition: InterestGroupDefinition) -> Variant:
 	if definition == null:
 		return null
 	return {
-		"display_name": definition.display_name,
-		"description": definition.description,
+		"display_name": _t(definition.display_name),
+		"description": _translate_multiline(definition.description),
 		"base_column_weight": definition.base_column_weight,
 		"decrease_tax": definition.decrease_tax,
 		"decrease_consumption": definition.decrease_consumption,
@@ -62,6 +62,8 @@ func policy(definition: PolicyDefinition) -> Variant:
 	for effect in definition.effects:
 		if effect != null:
 			effects.append(policy_effect(effect))
+	# Policy display_name is intentionally left untranslated: it also acts as the backend lookup key
+	# and the Chinese name is part of the seal/stamp presentation in the frontend.
 	return {"display_name": definition.display_name, "condition": metric_condition(definition.condition), "effects": effects}
 
 
@@ -170,7 +172,11 @@ func month_report(state: RunState) -> Variant:
 		return null
 	var report_events: Array = []
 	for current in state.month_report_events:
-		report_events.append(current.duplicate(true))
+		var event_data: Dictionary = current.duplicate(true)
+		for key in ["race_display_name", "race_name", "interest_group_name", "event_description", "description"]:
+			if event_data.get(key) is String:
+				event_data[key] = _translate_multiline(event_data[key])
+		report_events.append(event_data)
 	return {"year": state.month_report_year, "month": state.month_report_month, "previous_metrics": metric_values(state.month_report_previous_metrics), "current_metrics": metric_values(state.month_report_current_metrics), "events": report_events}
 
 
@@ -237,12 +243,12 @@ func constitution(session: RunSession) -> Dictionary:
 	if board != null:
 		for column_index in range(board.columns.size()):
 			var column := board.columns[column_index]
-			columns.append({"column_index": column_index, "display_name": "" if column == null else column.display_name, "unlock_cost_months": 0 if column == null else column.unlock_cost_months, "unlocked": column != null and session.meta_progression.is_column_unlocked(column), "can_unlock": column != null and session.meta_progression.can_unlock_column(board, column)})
+			columns.append({"column_index": column_index, "display_name": "" if column == null else _t(column.display_name), "unlock_cost_months": 0 if column == null else column.unlock_cost_months, "unlocked": column != null and session.meta_progression.is_column_unlocked(column), "can_unlock": column != null and session.meta_progression.can_unlock_column(board, column)})
 		var board_rows := board.get_rows()
 		for row_index in range(board_rows.size()):
 			var row := board_rows[row_index]
 			var active := session.state.constitution.get_active_article_for_row(row)
-			rows.append({"row_index": row_index, "display_name": row.display_name, "race_display_name": _active_race_name(session, row.race), "free_navigation": row.free_navigation, "ignores_column_unlocks": row.ignores_column_unlocks, "active_article_index": session.constitution_articles.find(active)})
+			rows.append({"row_index": row_index, "display_name": _t(row.display_name), "race_display_name": _active_race_name(session, row.race), "free_navigation": row.free_navigation, "ignores_column_unlocks": row.ignores_column_unlocks, "active_article_index": session.constitution_articles.find(active)})
 	var articles: Array = []
 	for index in range(session.constitution_articles.size()):
 		var current := session.constitution_articles[index]
@@ -257,7 +263,7 @@ func constitution(session: RunSession) -> Dictionary:
 				var board_rows := board.get_rows()
 				row_index = board_rows.find(current.row)
 				column_index = board.get_column_index_for_article(current)
-				row_display_name = current.row.display_name
+				row_display_name = _t(current.row.display_name)
 				is_active = session.state.constitution.get_active_article_for_row(current.row) == current
 			else:
 				is_active = session.state.constitution.get_active_article(current.get_race()) == current
@@ -272,12 +278,12 @@ func constitution(session: RunSession) -> Dictionary:
 		data["requirement_percent"] = _article_requirement_percent(current)
 		data["contents"] = [
 			{"title": "", "body": data["content"]},
-			{"title": "要求", "body": "无" if current == null else current.get_requirement_description()},
+			{"title": _t("要求"), "body": _t("无") if current == null else current.get_requirement_description()},
 		]
 		for effect in data["effects"]:
 			data["contents"].append({"title": effect["display_name"], "body": effect["description"]})
 		articles.append(data)
-	return {"title": "蓬莱约法", "revision_available": session.state.constitution.revision_available, "center_column_index": -1 if board == null else board.get_center_column_index(), "available_governing_months": session.meta_progression.available_governing_months, "lifetime_governing_months": session.meta_progression.lifetime_governing_months, "terminal_article_index": session.constitution_articles.find(session.state.constitution.terminal_article), "columns": columns, "rows": rows, "active_articles": active_articles, "articles": articles}
+	return {"title": _t("蓬莱约法"), "revision_available": session.state.constitution.revision_available, "center_column_index": -1 if board == null else board.get_center_column_index(), "available_governing_months": session.meta_progression.available_governing_months, "lifetime_governing_months": session.meta_progression.lifetime_governing_months, "terminal_article_index": session.constitution_articles.find(session.state.constitution.terminal_article), "columns": columns, "rows": rows, "active_articles": active_articles, "articles": articles}
 
 
 func races(session: RunSession) -> Array:
@@ -293,7 +299,7 @@ func races(session: RunSession) -> Array:
 		var expectations: Array = []
 		for metric in active.get_stance_metrics():
 			expectations.append({"metric": int(metric), "target": session.race_system.get_effective_expectation(current, metric, session.context), "direction": int(active.get_stance(metric))})
-		var data := {"race_index": index, "display_name": active.display_name, "description": active.description, "seat_count": seat_count, "expectations": expectations, "resolved_events_this_year": current.resolved_events_this_year, "last_year_resolved_events": current.last_year_resolved_events}
+		var data := {"race_index": index, "display_name": _t(active.display_name), "description": _translate_multiline(active.description), "seat_count": seat_count, "expectations": expectations, "resolved_events_this_year": current.resolved_events_this_year, "last_year_resolved_events": current.last_year_resolved_events}
 		if current.definition.fixed_interest_group != null:
 			data["proposal_expectation"] = {
 				"interest_group_name": _active_group_name(session, current.definition.fixed_interest_group),
@@ -318,6 +324,7 @@ func seats(session: RunSession) -> Array:
 	var result: Array = []
 	for index in range(session.state.seats.size()):
 		var current := session.state.seats[index]
+		# Seat/place names intentionally remain Chinese: they are part of the in-world labels.
 		result.append({"seat_index": index, "display_name": _seat_name(current), "race_display_name": _active_race_name(session, current.race), "interest_group_display_name": _active_group_name(session, current.actual_group)})
 	return result
 
@@ -329,7 +336,7 @@ func parliament(session: RunSession) -> Dictionary:
 	var group_influence: Array = []
 	for group in interest_groups(session):
 		group_influence.append({"display_name": group["display_name"], "influence_count": group["influence_count"], "influence_rate": group["influence_rate"]})
-	return {"display_name": session.constitution_system.get_parliament_name(session.context), "total_seats": session.state.seats.size(), "race_seat_counts": race_counts, "interest_group_influence": group_influence}
+	return {"display_name": _t(session.constitution_system.get_parliament_name(session.context)), "total_seats": session.state.seats.size(), "race_seat_counts": race_counts, "interest_group_influence": group_influence}
 
 
 func game_status(session: RunSession) -> Dictionary:
@@ -356,8 +363,8 @@ func _article(definition: ConstitutionArticleDefinition, article_index: int) -> 
 	var effects: Array = []
 	for effect in definition.effects:
 		if effect != null:
-			effects.append({"display_name": effect.display_name, "description": effect.get_description(), "timing": int(effect.timing)})
-	return {"article_index": article_index, "display_name": definition.display_name, "content": definition.description, "policies": _policies(definition.policies), "effects": effects}
+			effects.append({"display_name": _t(effect.display_name), "description": effect.get_description(), "timing": int(effect.timing)})
+	return {"article_index": article_index, "display_name": _t(definition.display_name), "content": _translate_multiline(definition.description), "policies": _policies(definition.policies), "effects": effects}
 
 
 func _article_requirement_percent(definition: ConstitutionArticleDefinition) -> Variant:
@@ -400,12 +407,12 @@ func _bills(values: Array[SavedBillState]) -> Array:
 
 func _active_race_name(session: RunSession, definition: RaceDefinition) -> String:
 	var active := session.constitution_system.get_active_race_definition(session.context, definition)
-	return "" if active == null else active.display_name
+	return "" if active == null else _t(active.display_name)
 
 
 func _active_group_name(session: RunSession, definition: InterestGroupDefinition) -> String:
 	var active := session.constitution_system.get_active_group_definition(session.context, definition)
-	return "" if active == null else active.display_name
+	return "" if active == null else _t(active.display_name)
 
 
 func _active_race_name_from_source(session: RunSession, state: RunState, definition: RaceDefinition) -> String:
@@ -416,8 +423,8 @@ func _active_race_name_from_source(session: RunSession, state: RunState, definit
 	if state != null:
 		var race_state := state.get_race(definition)
 		if race_state != null and race_state.active_definition != null:
-			return race_state.active_definition.display_name
-	return definition.display_name
+			return _t(race_state.active_definition.display_name)
+	return _t(definition.display_name)
 
 
 func _active_group_name_from_source(session: RunSession, state: RunState, definition: InterestGroupDefinition) -> String:
@@ -432,9 +439,24 @@ func _active_group_name_from_source(session: RunSession, state: RunState, defini
 			visited[canonical] = true
 			canonical = state.constitution.group_mergers[canonical]
 		var active: InterestGroupDefinition = state.constitution.group_variants.get(canonical, canonical)
-		return "" if active == null else active.display_name
-	return definition.display_name
+		return "" if active == null else _t(active.display_name)
+	return _t(definition.display_name)
 
 
 func _seat_name(state: SeatState) -> String:
 	return "" if state == null or state.definition == null else state.definition.display_name
+
+
+func _t(text: String) -> String:
+	if text.is_empty():
+		return text
+	return str(TranslationServer.translate(text))
+
+
+func _translate_multiline(text: String) -> String:
+	if text.is_empty():
+		return text
+	var result: Array[String] = []
+	for line in text.split("\n", true):
+		result.append(_t(line))
+	return "\n".join(result)

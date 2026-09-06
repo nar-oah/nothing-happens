@@ -4,6 +4,7 @@ class_name UiBridge
 signal outgoing_message(message: Dictionary)
 
 var run_session: RunSession
+var settings_manager: SettingsManager
 var scene_manager: Node
 var cef_texture: Control
 var state_version: int = 0
@@ -16,8 +17,9 @@ var _layout_world: Node
 var _simple_dialogue: Dictionary = {}
 
 
-func setup(session: RunSession, manager: Node = null, texture: Control = null) -> void:
+func setup(session: RunSession, manager: Node = null, texture: Control = null, settings: SettingsManager = null) -> void:
 	run_session = session
+	settings_manager = settings
 	_simple_dialogue.clear()
 	_set_scene_manager(manager)
 	set_cef_texture(texture)
@@ -201,6 +203,10 @@ func _dispatch(message: Dictionary, messages: Array[Dictionary]) -> void:
 	match message_type:
 		"ui.ready":
 			messages.append(_full_state(message["request_id"]))
+		"settings.language.set", "settings.display.set":
+			_handle_settings_command(message, messages)
+		"app.quit":
+			_handle_quit(message, messages)
 		"saves.list":
 			messages.append(_envelope("saves.list", {"saves": run_session.list_saves()}, message["request_id"]))
 		"saves.create", "saves.overwrite", "saves.load":
@@ -244,6 +250,44 @@ func _dispatch(message: Dictionary, messages: Array[Dictionary]) -> void:
 			_handle_constitution_revise(message, messages)
 		"constitution.column.unlock":
 			_handle_constitution_column_unlock(message, messages)
+
+
+func _handle_settings_command(message: Dictionary, messages: Array[Dictionary]) -> void:
+	var is_language: bool = message["type"] == "settings.language.set"
+	var value: Variant = message["payload"].get("language" if is_language else "mode")
+	var allowed := SettingsManager.LANGUAGES if is_language else SettingsManager.DISPLAY_MODES
+	if not value is String or value not in allowed:
+		_append_mutation_error(messages, {
+			"code": "invalid_language" if is_language else "invalid_display_mode",
+			"message": "Unsupported language." if is_language else "Unsupported display mode.",
+		}, message["request_id"])
+		return
+	if message["payload"].size() != 1:
+		_append_mutation_error(messages, {"code": "invalid_payload", "message": "Settings commands require exactly one settings field."}, message["request_id"])
+		return
+	if settings_manager == null:
+		_append_mutation_error(messages, {"code": "settings_not_ready", "message": "SettingsManager is not ready."}, message["request_id"])
+		return
+	var result := settings_manager.set_language(value) if is_language else settings_manager.set_display_mode(value)
+	if not result["ok"]:
+		_append_mutation_error(messages, result["error"], message["request_id"])
+		return
+	messages.append(_full_state(message["request_id"]))
+
+
+func _handle_quit(message: Dictionary, messages: Array[Dictionary]) -> void:
+	if not message["payload"].is_empty():
+		_append_mutation_error(messages, {"code": "invalid_payload", "message": "app.quit requires an empty payload."}, message["request_id"])
+		return
+	var result := run_session.save_automatically()
+	if not result["ok"]:
+		_append_mutation_error(messages, result["error"], message["request_id"])
+		return
+	_quit_application()
+
+
+func _quit_application() -> void:
+	get_tree().quit()
 
 
 func _handle_input_regions(message: Dictionary, messages: Array[Dictionary]) -> void:
@@ -724,6 +768,8 @@ func _full_state(request_id: Variant = null) -> Dictionary:
 		state_version,
 		_parliament_seat_anchors()
 	)
+	payload["language"] = "zh_CN" if settings_manager == null else settings_manager.language
+	payload["display_mode"] = "windowed" if settings_manager == null else settings_manager.display_mode
 	if not _simple_dialogue.is_empty():
 		payload["pending_dialogue"] = _simple_dialogue.duplicate(true)
 	return _envelope("state.full", payload, request_id)

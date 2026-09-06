@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import type { Metric } from '$lib/game/types';
 	import MorphText from '../text/MorphText.svelte';
 	import { getNewspaperMetricLabel } from './types';
@@ -9,7 +10,7 @@
 </script>
 
 <div class="flex h-[78px] w-[64px] flex-col items-start overflow-hidden px-5">
-	<p class="typo-newspaper-caption w-full">{getNewspaperMetricLabel(metric)}</p>
+	<p class="typo-newspaper-caption w-full">{getNewspaperMetricLabel(metric, $t)}</p>
 	<p class="typo-document-clause-number w-full"><MorphText text={String(value)} /></p>
 	<div class="typo-newspaper-body flex w-full items-start justify-center whitespace-nowrap">
 		<MorphText text={`${direction}${magnitude}`} />

@@ -14,4 +14,4 @@ func get_event_intel_probability_modifier(race: RaceDefinition) -> float:
 
 
 func get_description() -> String:
-	return "%s事件提前获知概率%s" % [_format_races(races), _format_signed_percent(probability_modifier)]
+	return _t("%s事件提前获知概率%s") % [_format_races(races), _format_signed_percent(probability_modifier)]

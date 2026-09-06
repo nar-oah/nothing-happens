@@ -69,29 +69,29 @@ func _matches_group(
 
 func _format_races(races: Array[RaceDefinition]) -> String:
 	if races.is_empty():
-		return "全部种族"
+		return _t("全部种族")
 	var names := PackedStringArray()
 	for race in races:
 		if race != null:
-			names.append(race.display_name)
-	return "、".join(names)
+			names.append(_t(race.display_name))
+	return _t("、").join(names)
 
 
 func _format_groups(groups: Array[InterestGroupDefinition]) -> String:
 	if groups.is_empty():
-		return "全部利益集团"
+		return _t("全部利益集团")
 	var names := PackedStringArray()
 	for group in groups:
 		if group != null:
-			names.append(group.display_name)
-	return "、".join(names)
+			names.append(_t(group.display_name))
+	return _t("、").join(names)
 
 
 func _format_metrics(metrics: Array[Metric.Id]) -> String:
 	var names := PackedStringArray()
 	for metric in metrics:
-		names.append(Metric.display_name(metric))
-	return "、".join(names)
+		names.append(_t(Metric.display_name(metric)))
+	return _t("、").join(names)
 
 
 func _format_percent(value: float) -> String:
@@ -107,3 +107,9 @@ func _format_signed_number(value: float) -> String:
 	if is_equal_approx(value, roundf(value)):
 		return "%+d" % roundi(value)
 	return "%+.2f" % value
+
+
+func _t(text: String) -> String:
+	if text.is_empty():
+		return text
+	return str(TranslationServer.translate(text))

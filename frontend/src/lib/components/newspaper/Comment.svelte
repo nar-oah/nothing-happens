@@ -1,19 +1,19 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { untrack } from 'svelte';
-	import { NEWSPAPER_COMMENTS } from '$lib/content/newspaper-comments';
+	import { getNewspaperComments } from '$lib/content/newspaper-comments';
 	import MorphText from '../text/MorphText.svelte';
 
+	const comments = $derived(getNewspaperComments($t));
 	let index = $state(
-		untrack(() =>
-			NEWSPAPER_COMMENTS.length > 0 ? Math.floor(Math.random() * NEWSPAPER_COMMENTS.length) : 0
-		)
+		untrack(() => (comments.length > 0 ? Math.floor(Math.random() * comments.length) : 0))
 	);
 	let hovering = $state(false);
-	const count = NEWSPAPER_COMMENTS.length;
+	const count = $derived(comments.length);
 	const nextIndex = $derived(count > 0 ? (index + 1) % count : 0);
 	const displayIndex = $derived(hovering ? nextIndex : index);
-	const displayTitle = $derived(NEWSPAPER_COMMENTS[displayIndex]?.title ?? '');
-	const displayComment = $derived(NEWSPAPER_COMMENTS[displayIndex]?.comment ?? '');
+	const displayTitle = $derived(comments[displayIndex]?.title ?? '');
+	const displayComment = $derived(comments[displayIndex]?.comment ?? '');
 
 	function advance() {
 		index = nextIndex;
@@ -24,7 +24,7 @@
 <button
 	class="flex h-full w-full flex-col items-start gap-[3px] overflow-hidden border-0 bg-transparent px-8 py-5 text-left text-ink-primary"
 	type="button"
-	aria-label="切换报纸评论"
+	aria-label={$t('newspaper.commentAria')}
 	onmouseenter={() => (hovering = true)}
 	onmouseleave={() => (hovering = false)}
 	onfocus={() => (hovering = true)}

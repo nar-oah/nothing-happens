@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { asset } from '$app/paths';
 
 	type Props = {
@@ -11,7 +12,7 @@
 <section
 	class="relative w-full"
 	style="aspect-ratio: 433 / 130"
-	aria-label="来客介绍"
+	aria-label={$t('ui.visitor')}
 	data-block-world-input
 >
 	<img

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import ChoreSwitch from '$lib/components/chore/ChoreSwitch.svelte';
 	import Dialog from '$lib/components/dialog/Dialog.svelte';
 	import NewspaperEntry from '$lib/components/newspaper/NewspaperEntry.svelte';
@@ -35,7 +36,7 @@
 	}
 </script>
 
-<main class="game-view" aria-label="普通对话界面">
+<main class="game-view" aria-label={$t('view.simpleDialogue')}>
 	<NewspaperEntry {term} {year} {month} onOpen={onNewspaperOpen} />
 
 	<div class="dialog-area">

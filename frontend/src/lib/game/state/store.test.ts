@@ -22,6 +22,23 @@ const manualSave: SaveSlotDto = {
 	month: 2
 };
 
+test('settings full sync at the same version updates settings without changing gameplay', () => {
+	const original = makeLiveState(7);
+	const payload = { ...original, language: 'en' as const, display_mode: 'fullscreen' as const };
+	const updated = applyGameMessage(
+		{ snapshot: original, error: null },
+		{ type: 'state.full', payload }
+	);
+	assert.deepEqual(updated.snapshot, payload);
+	assert.equal(updated.snapshot?.state_version, 7);
+	assert.equal(updated.snapshot?.draft_bill, original.draft_bill);
+	assert.equal(updated.snapshot?.metrics, original.metrics);
+	assert.equal(updated.snapshot?.saves, original.saves);
+	const draftUpdated = applyGameMessage(updated, { type: 'draft.sync', payload: makeDraftSync(8) });
+	assert.equal(draftUpdated.snapshot?.language, 'en');
+	assert.equal(draftUpdated.snapshot?.display_mode, 'fullscreen');
+});
+
 test('save list synchronization preserves gameplay and clears command errors', () => {
 	const original = makeLiveState(12);
 	const saves = [manualSave, automaticSave];

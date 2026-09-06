@@ -24,4 +24,4 @@ func apply(context: RunContext) -> void:
 
 
 func get_description() -> String:
-	return "修改种族：%s" % _format_races(target_races)
+	return _t("修改种族：%s") % _format_races(target_races)

@@ -9,6 +9,8 @@ import type {
 } from '../types.ts';
 
 export type UiMode = 'office' | 'dialogue' | 'parliament' | 'constitution';
+export type Language = 'zh_CN' | 'en';
+export type DisplayMode = 'windowed' | 'fullscreen';
 export type WorldScene = 'office' | 'parliament';
 export type MetricDirection = -1 | 0 | 1;
 export type EventRequirementKind = 0 | 1;
@@ -207,6 +209,8 @@ export type SaveSlotDto = {
 };
 
 export type LiveGameState = GameStatusDto & {
+	language: Language;
+	display_mode: DisplayMode;
 	state_version: number;
 	saves: SaveSlotDto[];
 	ui_mode: UiMode;

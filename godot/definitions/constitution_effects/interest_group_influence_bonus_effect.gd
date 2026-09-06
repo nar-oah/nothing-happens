@@ -21,5 +21,5 @@ func applies_to(race: RaceDefinition) -> bool:
 
 
 func get_description() -> String:
-	var group_name := "" if interest_group == null else interest_group.display_name
-	return "%s对%s的额外影响比例%s" % [group_name, _format_races(races), _format_signed_percent(bonus_rate)]
+	var group_name := "" if interest_group == null else _t(interest_group.display_name)
+	return _t("%s对%s的额外影响比例%s") % [group_name, _format_races(races), _format_signed_percent(bonus_rate)]

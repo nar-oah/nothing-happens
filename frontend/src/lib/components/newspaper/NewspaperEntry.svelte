@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import MemorialNewspaper from '../memorial/MemorialNewspaper.svelte';
 
 	type Props = {
@@ -11,7 +12,7 @@
 	let { term, year, month, onOpen }: Props = $props();
 </script>
 
-<aside class="newspaper-hover-area" aria-label="邸报入口" data-block-world-input>
+<aside class="newspaper-hover-area" aria-label={$t('newspaper.entry')} data-block-world-input>
 	<div class="newspaper">
 		<MemorialNewspaper {term} {year} {month} onclick={onOpen} />
 	</div>

@@ -14,6 +14,7 @@ const SavedBillTests = preload("res://tests/backend/test_saved_bills.gd")
 const UiIntegrationTests = preload("res://tests/backend/test_ui_integration.gd")
 const TransitionFlowTests = preload("res://tests/backend/test_transition_flow.gd")
 const SaveGameTests = preload("res://tests/backend/test_save_game.gd")
+const SettingsTests = preload("res://tests/backend/test_settings.gd")
 
 
 func _init() -> void:
@@ -21,7 +22,19 @@ func _init() -> void:
 
 
 func _run() -> void:
+	var previous_locale := TranslationServer.get_locale()
+	TranslationServer.set_locale("zh_CN")
 	var t := TestContextScript.new()
+	t.check_equal(
+		ProjectSettings.get_setting("internationalization/locale/fallback"),
+		"zh_CN",
+		"localization fallback uses the Chinese source language"
+	)
+	t.check_equal(
+		str(TranslationServer.translate("无")),
+		"无",
+		"Chinese locale keeps untranslated source-language text"
+	)
 	var suites := [
 		ParliamentAndProposalTests.new(),
 		EventTests.new(),
@@ -36,9 +49,11 @@ func _run() -> void:
 		UiIntegrationTests.new(),
 		TransitionFlowTests.new(),
 		SaveGameTests.new(),
+		SettingsTests.new(),
 	]
 	for suite in suites:
 		suite.run(t)
+	TranslationServer.set_locale(previous_locale)
 	if t.failures == 0:
 		print("BACKEND TESTS PASSED: %s assertions" % t.assertions)
 	else:

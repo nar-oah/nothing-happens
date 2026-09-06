@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import ChoreItem from '../chore/ChoreItem.svelte';
 	import ChoreSwitch from '../chore/ChoreSwitch.svelte';
 	import type { ContextDetailData } from './detail';
@@ -23,7 +24,7 @@
 
 <section
 	class="flex w-[500px] flex-col items-start"
-	aria-label={`${title}详情`}
+	aria-label={$t('ui.details', { title })}
 	data-block-world-input
 >
 	<ChoreItem

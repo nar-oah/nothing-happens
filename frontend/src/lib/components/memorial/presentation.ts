@@ -1,6 +1,6 @@
 import {
 	METRICS,
-	METRIC_DISPLAY_NAMES,
+	getMetricDisplayName,
 	MetricConditionOperator,
 	PolicyEffectFormula,
 	getMetricValue,
@@ -10,6 +10,7 @@ import {
 	type PolicyDefinition,
 	type Proposal
 } from '../../game/index.ts';
+import { translate, type Translate } from '../../i18n/index.ts';
 import type {
 	MemorialHorizontalContentData,
 	MemorialPolicyContentData,
@@ -23,72 +24,100 @@ const CONDITION_SYMBOLS: Record<MetricConditionOperator, string> = {
 	[MetricConditionOperator.GREATER_THAN_OR_EQUAL]: '≥'
 };
 
-export function proposalToMemorialContent(proposal: Proposal): MemorialProposalContentData {
+export function proposalToMemorialContent(
+	proposal: Proposal,
+	translator: Translate = translate
+): MemorialProposalContentData {
 	return {
 		proposalTitle: proposal.source_group.display_name,
-		content: { title: '指标', body: formatVector(getProposalTotalEffect(proposal)) }
+		content: {
+			title: translator('memorial.metrics'),
+			body: formatVector(getProposalTotalEffect(proposal), translator)
+		}
 	};
 }
 
-export function proposalToHorizontalContents(proposal: Proposal): MemorialHorizontalContentData[] {
+export function proposalToHorizontalContents(
+	proposal: Proposal,
+	translator: Translate = translate
+): MemorialHorizontalContentData[] {
 	return [
 		{ title: proposal.source_group.display_name, body: proposal.source_group.description },
-		{ title: '指标', body: formatVector(getProposalTotalEffect(proposal)) },
 		{
-			body: `如果你把该提案加入到法案中，${proposal.source_group.display_name}会很高兴。`,
+			title: translator('memorial.metrics'),
+			body: formatVector(getProposalTotalEffect(proposal), translator)
+		},
+		{
+			body: translator('memorial.groupHappy', { group: proposal.source_group.display_name }),
 			redacted: true
 		}
 	];
 }
 
-export function billToHorizontalContents(bill: Bill): MemorialHorizontalContentData[] {
+export function billToHorizontalContents(
+	bill: Bill,
+	translator: Translate = translate
+): MemorialHorizontalContentData[] {
 	return [
 		{ title: bill.title, body: '' },
 		{
-			title: '提案',
+			title: translator('archive.proposal'),
 			body: bill.proposals.map((proposal) => proposal.source_group.display_name).join('\n')
 		},
-		{ title: '政策', body: bill.policies.map((policy) => policy.display_name).join('\n') }
+		{
+			title: translator('archive.policy'),
+			body: bill.policies.map((policy) => policy.display_name).join('\n')
+		}
 	];
 }
 
 export function constitutionToHorizontalContents(
-	constitution: Constitution
+	constitution: Constitution,
+	translator: Translate = translate
 ): MemorialHorizontalContentData[] {
 	return [
 		...constitution.active_articles.map((article) => ({
 			title: article.display_name,
 			body: article.content
 		})),
-		{ body: '这是为了保证蓬莱岛的运转，各族妥协出的结果，尽管真正满意的人很少。', redacted: true }
+		{ body: translator('memorial.compromise'), redacted: true }
 	];
 }
 
-export function policyToMemorialContent(policy: PolicyDefinition): MemorialPolicyContentData {
+export function policyToMemorialContent(
+	policy: PolicyDefinition,
+	translator: Translate = translate
+): MemorialPolicyContentData {
 	const condition = policy.condition;
 	const multiplier = condition.right_multiplier === 1 ? '' : `×${condition.right_multiplier}`;
-	const requirement = `${METRIC_DISPLAY_NAMES[condition.left_metric]}${CONDITION_SYMBOLS[condition.operator]}${METRIC_DISPLAY_NAMES[condition.right_metric]}${multiplier}`;
+	const requirement = `${getMetricDisplayName(condition.left_metric, translator)}${CONDITION_SYMBOLS[condition.operator]}${getMetricDisplayName(condition.right_metric, translator)}${multiplier}`;
 	const effects = policy.effects.map((effect) => {
 		const source =
 			effect.formula === PolicyEffectFormula.METRIC_VALUE
-				? METRIC_DISPLAY_NAMES[effect.source_a]
-				: `${METRIC_DISPLAY_NAMES[effect.source_a]}－${METRIC_DISPLAY_NAMES[effect.source_b]}`;
-		return `${METRIC_DISPLAY_NAMES[effect.target_metric]}按${source}×${effect.multiplier}变动`;
+				? getMetricDisplayName(effect.source_a, translator)
+				: `${getMetricDisplayName(effect.source_a, translator)}－${getMetricDisplayName(effect.source_b, translator)}`;
+		return translator('memorial.effect', {
+			target: getMetricDisplayName(effect.target_metric, translator),
+			source,
+			multiplier: effect.multiplier
+		});
 	});
 	return {
 		policyTitle: policy.display_name,
 		content: {
-			title: `条件：${requirement}`,
-			body: effects.length ? effects.join('；') : '无指标效果'
+			title: translator('memorial.condition', { requirement }),
+			body: effects.length
+				? effects.join(translator('memorial.effectSeparator'))
+				: translator('memorial.noEffects')
 		}
 	};
 }
 
-function formatVector(values: Proposal['base_effect']): string {
+function formatVector(values: Proposal['base_effect'], translator: Translate): string {
 	return METRICS.flatMap((metric) => {
 		const value = getMetricValue(values, metric);
 		return value === 0
 			? []
-			: [`${METRIC_DISPLAY_NAMES[metric]} ${value > 0 ? '+' : '-'}${Math.abs(value)}`];
+			: [`${getMetricDisplayName(metric, translator)} ${value > 0 ? '+' : '-'}${Math.abs(value)}`];
 	}).join('\n');
 }

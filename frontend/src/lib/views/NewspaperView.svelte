@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t, type Language } from '$lib/i18n';
 	import { tick } from 'svelte';
 	import ChoreItem from '$lib/components/chore/ChoreItem.svelte';
 	import ChoreSwitch from '$lib/components/chore/ChoreSwitch.svelte';
@@ -6,8 +7,7 @@
 	import type { SaveSlotDto } from '$lib/game/state/types';
 	import { VERTICAL_FOLD_HEIGHT, VERTICAL_FOLD_WIDTH } from '$lib/components/memorial/constants';
 	import Newspaper from '$lib/components/newspaper/Newspaper.svelte';
-	import GameStateDisplay from '$lib/components/state/GameStateDisplay.svelte';
-	import type { StateItem } from '$lib/components/state/GameStateDisplay.svelte';
+	import GameSettingsDisplay from '$lib/components/settings/GameSettingsDisplay.svelte';
 	import type {
 		NewspaperEventData,
 		NewspaperFrontData,
@@ -22,6 +22,12 @@
 		saves?: SaveSlotDto[];
 		saveError?: string;
 		onSaveSelect?: (slot: SaveSlotDto, loading: boolean) => void;
+		language?: Language;
+		displayMode?: 'windowed' | 'fullscreen';
+		settingsDisabled?: boolean;
+		onLanguageClick?: () => void;
+		onDisplayClick?: () => void;
+		onExitClick?: () => void;
 		metrics: NewspaperMetricData[];
 		front?: NewspaperFrontData;
 		events: NewspaperEventData[];
@@ -46,6 +52,12 @@
 		saves = [],
 		saveError = '',
 		onSaveSelect,
+		language = 'zh_CN',
+		displayMode = 'windowed',
+		settingsDisabled = false,
+		onLanguageClick,
+		onDisplayClick,
+		onExitClick,
 		metrics,
 		front,
 		events,
@@ -66,7 +78,7 @@
 	let loadingSaves = $state(false);
 	let saveScrollElement = $state<HTMLDivElement>();
 	let scrollElement: HTMLDivElement;
-	const saveItems = $derived(deriveSaveItems(saves, { term, year, month }, loadingSaves));
+	const saveItems = $derived(deriveSaveItems(saves, { term, year, month }, loadingSaves, $t));
 	const pageCount = $derived(4 + events.length + (front ? 1 : 0));
 	const baseHeight = $derived(pageCount * VERTICAL_FOLD_WIDTH);
 	const scale = $derived(viewportWidth / VERTICAL_FOLD_HEIGHT);
@@ -76,8 +88,6 @@
 	const edgeScrollPadding = $derived(VERTICAL_FOLD_WIDTH * scale);
 	const totalScrollRange = $derived(contentScrollRange + edgeScrollPadding * 2);
 	const newspaperAxisOffset = $derived(totalScrollRange / 2 - scrollPosition);
-	const primary: StateItem = { text: '设置', isRow: false };
-	const secondary: StateItem = { text: '退出', isRow: false };
 	const interactionDisabled = $derived(busy || motionPhase !== 'active');
 
 	function syncScrollPosition() {
@@ -129,7 +139,7 @@
 <main
 	class="newspaper-view"
 	class:bg-surface-amber={backgroundCovered}
-	aria-label="报纸界面"
+	aria-label={$t('view.newspaper')}
 	bind:clientWidth={viewportWidth}
 	bind:clientHeight={viewportHeight}
 	data-block-world-input
@@ -137,7 +147,7 @@
 	<div
 		class="newspaper-scroll"
 		bind:this={scrollElement}
-		aria-label="报纸内容"
+		aria-label={$t('view.newspaperContent')}
 		onscroll={syncScrollPosition}
 	>
 		<div class="newspaper-scroll-space" style:height={`${viewportHeight + totalScrollRange}px`}>
@@ -145,7 +155,7 @@
 				<button
 					class="newspaper-close-layer"
 					type="button"
-					aria-label="关闭报纸"
+					aria-label={$t('view.closeNewspaper')}
 					disabled={interactionDisabled}
 					onclick={requestClose}
 				></button>
@@ -191,12 +201,23 @@
 	{#if backgroundCovered}
 		<div class="top-controls">
 			<div class="top-items" bind:this={saveScrollElement}>
-				<div class="ml-auto flex w-max items-start gap-12" aria-label="存档列表">
+				<div class="ml-auto flex w-max items-start gap-12" aria-label={$t('saves.list')}>
 					{#each saveItems as item (item.slot.slot_id)}
 						<button
 							type="button"
 							class="shrink-0 cursor-pointer border-0 bg-transparent p-0 disabled:cursor-default"
-							aria-label={`${loadingSaves ? '读取' : item.slot.automatic ? '新建手动存档' : '覆盖手动存档'}：${item.item.text}，${item.item.value}${item.slot.automatic ? '，自动存档' : ''}`}
+							aria-label={$t('saves.actionLabel', {
+								action: $t(
+									loadingSaves
+										? 'saves.load'
+										: item.slot.automatic
+											? 'saves.create'
+											: 'saves.overwrite'
+								),
+								term: item.item.text,
+								date: item.item.value,
+								automatic: item.slot.automatic ? $t('saves.automaticSuffix') : ''
+							})}
 							disabled={interactionDisabled || !onSaveSelect}
 							onclick={() => onSaveSelect?.(item.slot, loadingSaves)}
 						>
@@ -207,8 +228,8 @@
 			</div>
 			<div class="shrink-0">
 				<ChoreSwitch
-					left="保存"
-					right="读取"
+					left={$t('saves.save')}
+					right={$t('saves.load')}
 					bind:isSwitch={loadingSaves}
 					disabled={interactionDisabled}
 				/>
@@ -217,7 +238,16 @@
 				<p class="save-error" role="alert">{saveError}</p>
 			{/if}
 		</div>
-		<div class="state-slot"><GameStateDisplay {primary} {secondary} /></div>
+		<div class="state-slot">
+			<GameSettingsDisplay
+				{language}
+				{displayMode}
+				disabled={interactionDisabled || settingsDisabled}
+				{onLanguageClick}
+				{onDisplayClick}
+				{onExitClick}
+			/>
+		</div>
 	{/if}
 </main>
 

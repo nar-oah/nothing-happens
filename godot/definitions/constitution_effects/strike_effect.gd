@@ -30,5 +30,5 @@ func apply_vote(vote_context: VoteContext) -> void:
 
 
 func get_description() -> String:
-	var group_name := "" if interest_group == null else interest_group.display_name
-	return "受%s影响的%s在草案使%s低于年初值时缺席表决" % [group_name, _format_races(races), Metric.display_name(metric)]
+	var group_name := "" if interest_group == null else _t(interest_group.display_name)
+	return _t("受%s影响的%s在草案使%s低于年初值时缺席表决") % [group_name, _format_races(races), _t(Metric.display_name(metric))]

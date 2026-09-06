@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import ChoreSwitch from '$lib/components/chore/ChoreSwitch.svelte';
 	import Dialog from '$lib/components/dialog/Dialog.svelte';
 	import TopDialog from '$lib/components/dialog/TopDialog.svelte';
@@ -22,15 +23,19 @@
 			? createInterestGroupDialogueContent(
 					dialogue.groupName,
 					dialogue.positiveEffect,
-					dialogue.donationOffer
+					dialogue.donationOffer,
+					$t
 				)
 			: dialogue.kind === 'event_intel'
-				? createEventIntelDialogueContent({
-						raceName: dialogue.raceName,
-						metricName: dialogue.metricName,
-						requirement: dialogue.requirement,
-						strength: dialogue.strength
-					})
+				? createEventIntelDialogueContent(
+						{
+							raceName: dialogue.raceName,
+							metricName: dialogue.metricName,
+							requirement: dialogue.requirement,
+							strength: dialogue.strength
+						},
+						$t
+					)
 				: null
 	);
 
@@ -53,7 +58,7 @@
 		onResolve={advanceDialogue}
 	/>
 {:else}
-	<main class="game-view" aria-label="对话界面">
+	<main class="game-view" aria-label={$t('view.dialogue')}>
 		<NewspaperEntry {term} {year} {month} onOpen={onNewspaperOpen} />
 
 		<div class="top-dialog">

@@ -40,6 +40,7 @@ func get_requirement_description() -> String:
 	if seat_condition != null and seat_condition not in conditions:
 		descriptions.append(seat_condition.get_description())
 	if descriptions.is_empty():
-		return "无"
+		return str(TranslationServer.translate("无"))
 	var description := "\n\n".join(descriptions)
-	return "须同时满足：\n" + description if descriptions.size() > 1 else description
+	var prefix := str(TranslationServer.translate("须同时满足：\n"))
+	return prefix + description if descriptions.size() > 1 else description

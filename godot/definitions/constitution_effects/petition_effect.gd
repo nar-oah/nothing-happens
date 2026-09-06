@@ -28,5 +28,5 @@ func can_petition_event(race: RaceDefinition) -> bool:
 func get_description() -> String:
 	var count_text := str(fixed_count)
 	if seat_ratio > 0.0:
-		count_text = "%d + ceil(%s席位数 × %s)" % [fixed_count, _format_races(count_races), _format_percent(seat_ratio)]
-	return "每年可奏请%s次；可处理%s事件" % [count_text, _format_races(event_races)]
+		count_text = _t("%d + ceil(%s席位数 × %s)") % [fixed_count, _format_races(count_races), _format_percent(seat_ratio)]
+	return _t("每年可奏请%s次；可处理%s事件") % [count_text, _format_races(event_races)]

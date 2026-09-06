@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { onDestroy } from 'svelte';
 	import { VERTICAL_FOLD_HEIGHT, VERTICAL_FOLD_WIDTH } from '../memorial/constants';
 	import MemorialHorizontalFold from '../memorial/horizontal/MemorialHorizontalFold.svelte';
@@ -8,11 +9,7 @@
 	import Front from './Front.svelte';
 	import PublicMetrics from './PublicMetrics.svelte';
 	import Top from './Top.svelte';
-	import type {
-		NewspaperEventData,
-		NewspaperFrontData,
-		NewspaperMetricData
-	} from './types';
+	import type { NewspaperEventData, NewspaperFrontData, NewspaperMetricData } from './types';
 
 	const NEWSPAPER_FOLD_WIDTH = VERTICAL_FOLD_HEIGHT;
 	const NEWSPAPER_FOLD_HEIGHT = VERTICAL_FOLD_WIDTH;
@@ -118,7 +115,7 @@
 	class="newspaper relative h-$height w-$width overflow-visible text-ink-primary"
 	style:--width={`${NEWSPAPER_FOLD_WIDTH}px`}
 	style:--height={`${pages.length * NEWSPAPER_FOLD_HEIGHT}px`}
-	aria-label={`第 ${year} 年 ${month} 月弦外报`}
+	aria-label={$t('newspaper.aria', { year, month })}
 >
 	{#each pages as page, index (index)}
 		<MemorialHorizontalFold

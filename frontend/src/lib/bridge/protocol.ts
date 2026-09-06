@@ -2,6 +2,8 @@ import type {
 	BillResultDto,
 	DraftSyncDto,
 	LiveGameState,
+	Language,
+	DisplayMode,
 	ParliamentLayoutDto,
 	ProposalSyncDto,
 	SaveSlotDto,
@@ -29,6 +31,9 @@ export type OutboundPayloads = {
 	'ui.input_regions': { regions: NormalizedRect[] };
 	'ui.mode.set': { state_version: number; mode: UiMode };
 	'ui.newspaper.close': Record<string, never>;
+	'settings.language.set': { language: Language };
+	'settings.display.set': { mode: DisplayMode };
+	'app.quit': Record<string, never>;
 	'saves.list': Record<string, never>;
 	'saves.create': { state_version: number };
 	'saves.overwrite': { state_version: number; slot_id: string };
@@ -58,7 +63,13 @@ export type OutboundPayloads = {
 export type OutboundType = keyof OutboundPayloads;
 export type GameplayCommandType = Exclude<
 	OutboundType,
-	'ui.ready' | 'ui.input_regions' | 'ui.newspaper.close' | 'saves.list'
+	| 'ui.ready'
+	| 'ui.input_regions'
+	| 'ui.newspaper.close'
+	| 'saves.list'
+	| 'settings.language.set'
+	| 'settings.display.set'
+	| 'app.quit'
 >;
 
 export type OutboundMessage<T extends OutboundType = OutboundType> = T extends OutboundType

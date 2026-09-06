@@ -48,11 +48,11 @@ func request_simple_dialogue(dialogue: SimpleDialogueDefinition) -> void:
 	if dialogue == null:
 		return
 	simple_dialogue_requested.emit(
-		dialogue.initial_text,
-		dialogue.left_option,
-		dialogue.right_option,
-		dialogue.left_content,
-		dialogue.right_content
+		_t(dialogue.initial_text),
+		_t(dialogue.left_option),
+		_t(dialogue.right_option),
+		_t(dialogue.left_content),
+		_t(dialogue.right_content)
 	)
 
 
@@ -101,3 +101,7 @@ func _on_high_lamp_clicked(dialogue: SimpleDialogueDefinition) -> void:
 
 func _on_ornament_clicked(dialogue: SimpleDialogueDefinition) -> void:
 	request_simple_dialogue(dialogue)
+
+
+func _t(text: String) -> String:
+	return text if text.is_empty() else str(TranslationServer.translate(text))

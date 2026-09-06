@@ -1,10 +1,11 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import MemorialClosedFrame from './MemorialClosedFrame.svelte';
 	import MemorialMetric from '../shared/MemorialMetric.svelte';
 	import MemorialTitleStrip from '../shared/MemorialTitleStrip.svelte';
-	import { MetricText, type MemorialMetricData } from '../types';
+	import type { MemorialMetricData } from '../types';
 	import {
-		METRIC_DISPLAY_NAMES,
+		getMetricDisplayName,
 		getBillLagMonths,
 		getBillMetrics,
 		type PolicyDefinition,
@@ -21,12 +22,12 @@
 	let lag = $derived(getBillLagMonths(proposals));
 	let metrics: MemorialMetricData[] = $derived(
 		getBillMetrics(proposals, policies).map((metric) => ({
-			text: METRIC_DISPLAY_NAMES[metric],
+			text: getMetricDisplayName(metric, $t),
 			value: 0
 		}))
 	);
 	let lagMetric: MemorialMetricData = $derived({
-		text: MetricText.Lag,
+		text: $t('memorial.lag'),
 		value: lag,
 		isReverse: true
 	});

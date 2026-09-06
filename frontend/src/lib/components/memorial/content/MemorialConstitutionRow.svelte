@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import type { MemorialConstitutionRowData } from '../types';
 
 	type Props = MemorialConstitutionRowData & {
@@ -33,7 +34,7 @@
 	type="button"
 	aria-hidden={empty ? true : undefined}
 	aria-pressed={!empty && selectable ? selected : undefined}
-	aria-label={empty ? undefined : `查看${text}`}
+	aria-label={empty ? undefined : $t('ui.view', { text })}
 	disabled={empty}
 	onclick={handleClick}
 >

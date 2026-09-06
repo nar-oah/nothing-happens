@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import ChoreItem from '../chore/ChoreItem.svelte';
 
 	export type StateItem = {
@@ -16,7 +17,11 @@
 	let { primary, secondary }: Props = $props();
 </script>
 
-<aside class="flex flex-col items-end gap-[20px]" aria-label="游戏状态" data-block-world-input>
+<aside
+	class="flex flex-col items-end gap-[20px]"
+	aria-label={$t('ui.state')}
+	data-block-world-input
+>
 	<ChoreItem {...primary} />
 	<ChoreItem {...secondary} />
 </aside>

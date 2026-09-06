@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onDestroy, untrack } from 'svelte';
+	import { language } from '$lib/i18n';
 
 	type Props = {
 		text: string;
@@ -9,6 +10,7 @@
 
 	let { text, active = true, stepMs = 42 }: Props = $props();
 	let displayed = $state(untrack(() => text));
+	let previousLanguage = untrack(() => $language);
 	let timers: ReturnType<typeof setTimeout>[] = [];
 
 	function clearTimers() {
@@ -52,7 +54,14 @@
 
 	$effect(() => {
 		const next = text;
-		if (next !== displayed) morph(next);
+		const locale = $language;
+		if (locale !== previousLanguage) {
+			previousLanguage = locale;
+			clearTimers();
+			displayed = next;
+		} else if (next !== untrack(() => displayed)) {
+			morph(next);
+		}
 	});
 
 	onDestroy(clearTimers);

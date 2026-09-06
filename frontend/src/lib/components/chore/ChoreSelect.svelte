@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	type Props = {
 		text: string;
 		isDirection?: boolean;
@@ -18,8 +19,8 @@
 	type="button"
 	class="flex cursor-pointer items-center overflow-hidden border-0 bg-transparent p-0 text-surface-amber"
 	aria-label={isDirection
-		? `${text}${isSelect ? '升序' : '降序'}`
-		: `${isSelect ? '取消选择' : '选择'}${text}`}
+		? $t(isSelect ? 'ui.ascending' : 'ui.descending', { text })
+		: $t(isSelect ? 'ui.deselectItem' : 'ui.selectItem', { text })}
 	aria-pressed={isSelect}
 	onclick={toggle}
 >
