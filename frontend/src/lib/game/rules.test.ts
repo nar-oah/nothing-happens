@@ -3,6 +3,7 @@ import test from 'node:test';
 import {
 	arePoliciesGameplayEquivalent,
 	areProposalsGameplayEquivalent,
+	calculatePureProposalTarget,
 	reconcileSavedBill,
 	reconcileSavedBillProposals
 } from './rules.ts';
@@ -90,6 +91,20 @@ test('saved proposal reconciliation consumes each hand object at most once', () 
 	const secondReplacement = makeProposal();
 	const twoMatches = reconcileSavedBillProposals(saved, [replacement, secondReplacement]);
 	assert.deepEqual(twoMatches, [replacement, secondReplacement]);
+});
+
+test('pure proposal target follows the same proposal effects used by the backend', () => {
+	const proposal = makeProposal();
+	proposal.base_effect.tax = -10;
+	proposal.positive_effect.production = 7;
+	proposal.positive_trait_accepted = true;
+	assert.deepEqual(
+		calculatePureProposalTarget(
+			{ tax: 100, consumption: 100, production: 100, employment: 100, investment: 100 },
+			[proposal]
+		),
+		{ tax: 90, consumption: 100, production: 107, employment: 100, investment: 100 }
+	);
 });
 
 test('saved bill reconciliation removes missing proposals and unavailable policies', () => {

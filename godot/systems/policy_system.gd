@@ -38,6 +38,29 @@ func calculate_immediate_result(
 	return simulation.metrics
 
 
+func calculate_draft_result(
+	current: MetricValues,
+	pure_target: MetricValues,
+	definitions: Array[PolicyDefinition]
+) -> MetricValues:
+	var simulation := RunState.new()
+	simulation.metrics = current.copy()
+	var bill := ActiveBillState.new()
+	bill.policies = create_states(definitions)
+	simulation.active_bill = bill
+	resolve_policy_chain(simulation)
+	var immediate_delta := MetricVector.new()
+	for metric in Metric.all_ids():
+		immediate_delta.set_value(
+			metric,
+			simulation.metrics.get_value(metric) - current.get_value(metric)
+		)
+	simulation.metrics = pure_target.copy()
+	simulation.metrics.apply_delta(immediate_delta)
+	resolve_policy_chain(simulation)
+	return simulation.metrics
+
+
 func _find_triggered_batch(bill: ActiveBillState, values: MetricValues) -> Array[PolicyState]:
 	var result: Array[PolicyState] = []
 	for policy_state in bill.policies:
