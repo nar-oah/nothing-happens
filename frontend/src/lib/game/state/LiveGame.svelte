@@ -486,7 +486,6 @@
 				saves={snapshot.saves}
 				language={snapshot.language}
 				displayMode={snapshot.display_mode}
-				{settingsBusy}
 				settingsDisabled={settingsBusy}
 				onLanguageClick={() => changeSetting('settings.language.set', { language: snapshot.language === 'zh_CN' ? 'en' : 'zh_CN' })}
 				onDisplayClick={() => changeSetting('settings.display.set', { mode: snapshot.display_mode === 'windowed' ? 'fullscreen' : 'windowed' })}

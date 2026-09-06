@@ -4,8 +4,51 @@ import { makeDraftSync, makeLiveState, makeParliamentLayout } from '../game/stat
 import { deriveTermReportMetrics } from '../components/newspaper/term-report.ts';
 import { CefIpcClient, type CefBridgeWindow } from './client.ts';
 import { normalizeInputRegions } from './input-regions.ts';
-import { CommandError } from './protocol.ts';
+import { CommandError, type OutboundMessage } from './protocol.ts';
 import { decodeInboundMessage, encodeOutboundMessage, isOutboundType } from './validation.ts';
+
+test('settings and quit commands encode without gameplay versions and reject invalid payloads', () => {
+	for (const command of [
+		{ type: 'settings.language.set', payload: { language: 'zh_CN' } },
+		{ type: 'settings.language.set', payload: { language: 'en' } },
+		{ type: 'settings.display.set', payload: { mode: 'windowed' } },
+		{ type: 'settings.display.set', payload: { mode: 'fullscreen' } },
+		{ type: 'app.quit', payload: {} }
+	] satisfies OutboundMessage[]) {
+		assert.equal(isOutboundType(command.type), true);
+		assert.deepEqual(JSON.parse(encodeOutboundMessage(command)), command);
+		assert.equal('state_version' in command.payload, false);
+	}
+	for (const command of [
+		{ type: 'settings.language.set', payload: { language: 'fr' } },
+		{ type: 'settings.language.set', payload: {} },
+		{ type: 'settings.language.set', payload: { language: 'en', state_version: 1 } },
+		{ type: 'settings.display.set', payload: { mode: 'borderless' } },
+		{ type: 'settings.display.set', payload: { mode: 1 } },
+		{ type: 'settings.display.set', payload: null },
+		{ type: 'app.quit', payload: { state_version: 1 } }
+	]) {
+		assert.throws(() => encodeOutboundMessage(command as OutboundMessage), TypeError);
+	}
+});
+
+test('state.full requires authoritative supported settings', () => {
+	for (const language of ['zh_CN', 'en']) {
+		for (const display_mode of ['windowed', 'fullscreen']) {
+			assert.equal(decodeInboundMessage(JSON.stringify({
+				type: 'state.full', payload: { ...makeLiveState(5), language, display_mode }
+			})).ok, true);
+		}
+	}
+	for (const settings of [
+		{ language: undefined }, { language: 'fr' }, { language: null },
+		{ display_mode: undefined }, { display_mode: 'borderless' }, { display_mode: false }
+	]) {
+		assert.equal(decodeInboundMessage(JSON.stringify({
+			type: 'state.full', payload: { ...makeLiveState(5), ...settings }
+		})).ok, false);
+	}
+});
 
 test('IPC supports all save commands and validates the save list in full and list responses', () => {
 	const saves = [
