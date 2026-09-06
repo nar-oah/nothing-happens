@@ -8,7 +8,13 @@
 	import NewspaperEntry from '$lib/components/newspaper/NewspaperEntry.svelte';
 	import GameStateDisplay from '$lib/components/state/GameStateDisplay.svelte';
 	import Top from '$lib/components/top/Top.svelte';
-	import { reconcileSavedBill, type Bill, type PolicyDefinition, type Proposal } from '$lib/game';
+	import {
+		calculatePureProposalTarget,
+		reconcileSavedBill,
+		type Bill,
+		type PolicyDefinition,
+		type Proposal
+	} from '$lib/game';
 	import type { ParliamentSeatAnchorDto, SeatSummaryDto, SeatVoteDto } from '$lib/game/state/types';
 	import type { ViewFrameProps } from './types';
 
@@ -76,6 +82,7 @@
 	let appliedVersion = untrack(() => stateVersion);
 	let appliedDraft = untrack(() => draft);
 	let visibleDraft = $derived(optimisticDraft ?? draft);
+	let policyBaseline = $derived(calculatePureProposalTarget(baseline, visibleDraft.proposals));
 	let selection = $derived({
 		proposalRefs: [],
 		policyDisplayNames: visibleDraft.policies.map((policy) => policy.display_name),
@@ -176,7 +183,7 @@
 	<Left
 		scene="parliament"
 		{items}
-		{baseline}
+		baseline={policyBaseline}
 		bind:activeMode={activeLeftMode}
 		{selection}
 		onItemSelect={selectLeft}
