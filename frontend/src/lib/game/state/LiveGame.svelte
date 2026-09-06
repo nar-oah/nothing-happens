@@ -51,17 +51,28 @@
 
 	const NEWSPAPER_RACE_BY_DISPLAY_NAME: Record<string, NewspaperRace> = {
 		驻岁: NewspaperRace.ZHUSHUI,
+		Zhushui: NewspaperRace.ZHUSHUI,
 		南柯: NewspaperRace.NANKE,
+		Nanke: NewspaperRace.NANKE,
 		比翼: NewspaperRace.BIYI,
+		Biyi: NewspaperRace.BIYI,
 		偃偶: NewspaperRace.YANOU,
+		"Yan'ou": NewspaperRace.YANOU,
 		桃花妖: NewspaperRace.PEACH_BLOSSOM,
-		人类: NewspaperRace.HUMAN
+		'Peach Blossom Spirits': NewspaperRace.PEACH_BLOSSOM,
+		人类: NewspaperRace.HUMAN,
+		Humans: NewspaperRace.HUMAN
 	};
 	const NEWSPAPER_EVENT_STATE_BY_PHASE: Record<MonthReportEventPhase, NewspaperEventState> = {
 		0: NewspaperEventState.DETERIORATION,
 		1: NewspaperEventState.POSTPONED,
 		2: NewspaperEventState.CALM
 	};
+
+	function newspaperRaceFromDisplayName(displayName: string): NewspaperRace | undefined {
+		const baseName = displayName.split(/[（(]/, 1)[0]?.trim() ?? displayName;
+		return NEWSPAPER_RACE_BY_DISPLAY_NAME[baseName];
+	}
 
 	function deriveNewspaperMetrics(state: LiveGameState): NewspaperMetricData[] {
 		const current = state.month_report?.current_metrics ?? state.metrics;
@@ -96,7 +107,7 @@
 		translator: Translate
 	): NewspaperEventData[] {
 		return (state.month_report?.events ?? []).flatMap((event) => {
-			const race = NEWSPAPER_RACE_BY_DISPLAY_NAME[event.race_display_name];
+			const race = newspaperRaceFromDisplayName(event.race_display_name);
 			if (!race) return [];
 			const metric =
 				event.requirement_kind === 1 && event.interest_group_name
