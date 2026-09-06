@@ -2,8 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dv05euhu0cu5n" path="res://worlds/parliament_world.gd" id="1_world"]
 [ext_resource type="PackedScene" uid="uid://b058m3lwsg3xr" path="res://worlds/parliament_seat.tscn" id="2_seat"]
-[ext_resource type="PackedScene" uid="uid://b8acapc385p8" path="res://worlds/interactables/door.tscn" id="3_gj75q"]
-[ext_resource type="Texture2D" uid="uid://dd4d5um3ldd11" path="res://assets/parliament/parliament_hover.png" id="4_duw00"]
+[ext_resource type="PackedScene" path="res://worlds/interactables/parliament_door.tscn" id="3_gj75q"]
 
 [node name="ParliamentWorld" type="Node2D" unique_id=1766632788]
 scale = Vector2(0.4, 0.4)
@@ -182,4 +181,7 @@ scale = Vector2(2.5, 2.5)
 [node name="Left Door" parent="RightAnchor" unique_id=1458697931 instance=ExtResource("3_gj75q")]
 position = Vector2(-5500, -200)
 scale = Vector2(2.5, 2.5)
-hover_texture = ExtResource("4_duw00")
+is_left = true
+
+[connection signal="clicked" from="RightAnchor/Right Door" to="." method="_on_door_clicked"]
+[connection signal="clicked" from="RightAnchor/Left Door" to="." method="_on_door_clicked"]
