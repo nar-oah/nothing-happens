@@ -1,4 +1,5 @@
-import { Metric } from '$lib/game/types';
+import { Metric } from '../../game/types.ts';
+import { translate, type Translate } from '../../i18n/index.ts';
 
 export const NewspaperRace = {
 	HUMAN: 'human',
@@ -48,41 +49,37 @@ export const NEWSPAPER_METRIC_ORDER: Metric[] = [
 	Metric.INVESTMENT
 ];
 
-const METRIC_LABELS: Record<Metric, string> = {
-	[Metric.TAX]: '税課',
-	[Metric.CONSUMPTION]: '消費',
-	[Metric.PRODUCTION]: '生産',
-	[Metric.EMPLOYMENT]: '就業',
-	[Metric.INVESTMENT]: '投資'
+const METRIC_KEYS: Record<Metric, string> = {
+	[Metric.TAX]: 'tax',
+	[Metric.CONSUMPTION]: 'consumption',
+	[Metric.PRODUCTION]: 'production',
+	[Metric.EMPLOYMENT]: 'employment',
+	[Metric.INVESTMENT]: 'investment'
 };
 
-const RACE_LABELS: Record<NewspaperRace, string> = {
-	[NewspaperRace.HUMAN]: '人类',
-	[NewspaperRace.ZHUSHUI]: '驻岁',
-	[NewspaperRace.PEACH_BLOSSOM]: '桃花妖',
-	[NewspaperRace.NANKE]: '南柯',
-	[NewspaperRace.BIYI]: '比翼',
-	[NewspaperRace.YANOU]: '偃偶'
-};
-
-const EVENT_STATE_LABELS: Record<NewspaperEventState, string> = {
-	[NewspaperEventState.DETERIORATION]: '惡化 ↑',
-	[NewspaperEventState.POSTPONED]: '暫緩 -',
-	[NewspaperEventState.CALM]: '平息 ↓'
-};
-
-export function getNewspaperMetricLabel(metric: Metric | string): string {
-	return typeof metric === 'string' ? metric : METRIC_LABELS[metric];
+export function getNewspaperMetricLabel(
+	metric: Metric | string,
+	translator: Translate = translate
+): string {
+	return typeof metric === 'string' ? metric : translator(`game.metric.${METRIC_KEYS[metric]}`);
 }
 
-export function getNewspaperRaceLabel(race: NewspaperRace): string {
-	return RACE_LABELS[race];
+export function getNewspaperRaceLabel(
+	race: NewspaperRace,
+	translator: Translate = translate
+): string {
+	return translator(`race.${race}`);
 }
 
-export function getNewspaperEventStateLabel(state: NewspaperEventState): string {
-	return EVENT_STATE_LABELS[state];
+export function getNewspaperEventStateLabel(
+	state: NewspaperEventState,
+	translator: Translate = translate
+): string {
+	return translator(`newspaper.${state}`);
 }
 
-export function formatNewspaperNumber(value: number): string {
-	return value === 0 ? '談判' : String(Math.max(0, Math.trunc(value))).padStart(2, '0');
+export function formatNewspaperNumber(value: number, translator: Translate = translate): string {
+	return value === 0
+		? translator('newspaper.negotiation')
+		: String(Math.max(0, Math.trunc(value))).padStart(2, '0');
 }

@@ -7,7 +7,7 @@
 	};
 
 	let { month }: Props = $props();
-	const monthText = $derived(formatNewspaperNumber(month));
+	const monthText = $derived(formatNewspaperNumber(month, $t));
 	const isYinMonth = $derived(month % 2 === 1);
 	const currentLabel = $derived($t(isYinMonth ? 'newspaper.yinShort' : 'newspaper.yangShort'));
 	const preferredName = $derived($t(isYinMonth ? 'newspaper.yinItems' : 'newspaper.yangItems'));

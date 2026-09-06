@@ -31,9 +31,9 @@
 		<div class="flex min-h-0 w-full flex-1 items-start gap-8 overflow-hidden text-ink-primary">
 			<div class="flex w-[215px] shrink-0 flex-col items-start gap-2 overflow-hidden">
 				<div class="flex shrink-0 items-start gap-8 whitespace-nowrap">
-					<p class="typo-newspaper-headline shrink-0">{getNewspaperRaceLabel(props.race)}</p>
+					<p class="typo-newspaper-headline shrink-0">{getNewspaperRaceLabel(props.race, $t)}</p>
 					<div class="typo-newspaper-caption flex shrink-0 items-center gap-[3px]">
-						<span>{$t('newspaper.requirement')}</span><span>/</span><span>{getNewspaperMetricLabel(props.metric)}</span><span
+						<span>{$t('newspaper.requirement')}</span><span>/</span><span>{getNewspaperMetricLabel(props.metric, $t)}</span><span
 							>{props.value}</span
 						>
 					</div>
@@ -44,14 +44,14 @@
 				class="flex h-full min-w-0 flex-1 flex-col items-center gap-px overflow-hidden pl-[6px] whitespace-nowrap"
 			>
 				<p class="typo-newspaper-data-hero shrink-0 text-center">
-					{formatNewspaperNumber(props.countdown)}
+					{formatNewspaperNumber(props.countdown, $t)}
 				</p>
 				<p class="typo-newspaper-caption shrink-0 text-center">{$t('newspaper.months')}</p>
 				<div
 					class="typo-newspaper-caption flex shrink-0 items-start gap-[6px] border-t border-ink-primary"
 				>
 					<span>{$t('newspaper.strength', { strength: props.strength })}</span><span>·</span><span
-						>{getNewspaperEventStateLabel(props.state)}</span
+						>{getNewspaperEventStateLabel(props.state, $t)}</span
 					>
 				</div>
 			</div>

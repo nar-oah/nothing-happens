@@ -17,7 +17,7 @@
 	const nextYear = $derived(month >= 12 ? year + 1 : year);
 	const displayMonth = $derived(hovering && !advanceDisabled ? nextMonth : month);
 	const displayYear = $derived(hovering && !advanceDisabled ? nextYear : year);
-	const monthText = $derived(formatNewspaperNumber(displayMonth));
+	const monthText = $derived(formatNewspaperNumber(displayMonth, $t));
 	const monthKind = $derived($t(displayMonth % 2 === 1 ? 'newspaper.yin' : 'newspaper.yang'));
 
 	function setHovering(value: boolean) {
