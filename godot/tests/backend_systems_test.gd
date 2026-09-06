@@ -25,6 +25,16 @@ func _run() -> void:
 	var previous_locale := TranslationServer.get_locale()
 	TranslationServer.set_locale("zh_CN")
 	var t := TestContextScript.new()
+	t.check_equal(
+		ProjectSettings.get_setting("internationalization/locale/fallback"),
+		"zh_CN",
+		"localization fallback uses the Chinese source language"
+	)
+	t.check_equal(
+		str(TranslationServer.translate("无")),
+		"无",
+		"Chinese locale keeps untranslated source-language text"
+	)
 	var suites := [
 		ParliamentAndProposalTests.new(),
 		EventTests.new(),
