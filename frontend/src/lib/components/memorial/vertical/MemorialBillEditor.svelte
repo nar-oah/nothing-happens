@@ -1,7 +1,14 @@
 <script lang="ts">
-	import { t } from '$lib/i18n';
+	import { t, translate, type Translate } from '$lib/i18n';
 	import { tick } from 'svelte';
-	import { getBillLagMonths, type Bill, type PolicyDefinition, type Proposal } from '$lib/game';
+	import {
+		METRICS,
+		getBillLagMonths,
+		getMetricDisplayName,
+		type Bill,
+		type PolicyDefinition,
+		type Proposal
+	} from '$lib/game';
 	import MemorialPolicyContent from '../content/MemorialPolicyContent.svelte';
 	import MemorialProposalContent from '../content/MemorialProposalContent.svelte';
 	import { policyToMemorialContent, proposalToMemorialContent } from '../presentation';
@@ -21,6 +28,7 @@
 		onCoverChange?: (isTitle: boolean) => void;
 	};
 
+	const zh: Translate = (key, params) => translate(key, params, 'zh_CN');
 	let {
 		bill,
 		preview,
@@ -36,13 +44,24 @@
 	let displayTitle = $derived(bill.title || $t('memorial.newBill'));
 	let lag = $derived(getBillLagMonths(bill.proposals));
 	let proposalPages = $derived(
-		bill.proposals.map((proposal) => proposalToMemorialContent(proposal, $t))
+		bill.proposals.map((proposal) => proposalToMemorialContent(proposal, $t, zh))
 	);
-	let policyPages = $derived(bill.policies.map((policy) => policyToMemorialContent(policy, $t)));
+	let policyPages = $derived(
+		bill.policies.map((policy) => policyToMemorialContent(policy, $t, zh))
+	);
 	let coverMetrics: MemorialMetricData[] = $derived([
-		...preview,
+		...preview.map((metric) => ({ ...metric, text: chineseMetricName(metric.text) })),
 		{ text: $t('memorial.lag'), value: lag, isReverse: true }
 	]);
+
+	function chineseMetricName(text: string): string {
+		for (const metric of METRICS) {
+			if (text === getMetricDisplayName(metric, $t) || text === getMetricDisplayName(metric, zh)) {
+				return getMetricDisplayName(metric, zh);
+			}
+		}
+		return text;
+	}
 
 	function toggleCover() {
 		if (editingTitle) commitTitle();

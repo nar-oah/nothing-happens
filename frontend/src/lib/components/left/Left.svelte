@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { t, type Translate } from '$lib/i18n';
+	import { t, translate, type Translate } from '$lib/i18n';
 	import { untrack } from 'svelte';
 	import { Metric } from '$lib/game';
 	import ChoreFilter from '../chore/ChoreFilter.svelte';
@@ -42,6 +42,7 @@
 		SynthesisFilterState
 	} from './types';
 
+	const zh: Translate = (key, params) => translate(key, params, 'zh_CN');
 	let {
 		scene,
 		items,
@@ -251,9 +252,9 @@
 		/>
 	{:else}
 		<MemorialProposalClosed
-			title={item.proposal.source_group.display_name}
+			title={item.proposal.source_group.display_name_original ?? item.proposal.source_group.display_name}
 			lag={item.proposal.lag_months}
-			metrics={proposalToMemorialMetrics(item.proposal, $t)}
+			metrics={proposalToMemorialMetrics(item.proposal, zh)}
 		/>
 	{/if}
 {/snippet}
@@ -294,17 +295,17 @@
 					>
 						{#if selected}
 							<MemorialProposalOption
-								option={$t(optionFor(item))}
+								option={zh(optionFor(item))}
 								lag={item.proposal.lag_months}
 								metrics={confirming
-									? synthesisPreviewFor(item, $t).metrics
-									: proposalToMemorialMetrics(item.proposal, $t)}
+									? synthesisPreviewFor(item, zh).metrics
+									: proposalToMemorialMetrics(item.proposal, zh)}
 							/>
 						{:else}
 							<MemorialProposalClosed
-								title={item.proposal.source_group.display_name}
+								title={item.proposal.source_group.display_name_original ?? item.proposal.source_group.display_name}
 								lag={item.proposal.lag_months}
-								metrics={proposalToMemorialMetrics(item.proposal, $t)}
+								metrics={proposalToMemorialMetrics(item.proposal, zh)}
 							/>
 						{/if}
 					</button>

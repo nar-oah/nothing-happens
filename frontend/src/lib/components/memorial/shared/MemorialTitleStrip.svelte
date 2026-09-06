@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { language } from '$lib/i18n';
+
 	type Props = {
 		text: string;
 		vertical?: boolean;
@@ -9,7 +11,27 @@
 	const horizontalWidth = $derived(characters.length * 32);
 </script>
 
-{#if vertical}
+{#if $language === 'en'}
+	{#if vertical}
+		<div class="flex w-45 shrink-0 items-center justify-center overflow-hidden bg-accent-amber-deep">
+			<span
+				class="whitespace-nowrap font-document text-[60px] font-light leading-[48px] text-ink-secondary [text-orientation:sideways] [writing-mode:vertical-rl]"
+			>
+				{text}
+			</span>
+		</div>
+	{:else}
+		<div
+			class="flex h-[29px] shrink-0 items-center justify-center overflow-hidden bg-accent-amber-deep"
+		>
+			<span
+				class="whitespace-nowrap font-document text-40 font-light leading-[29px] text-ink-secondary"
+			>
+				{text}
+			</span>
+		</div>
+	{/if}
+{:else if vertical}
 	<div class="flex w-45 shrink-0 flex-col items-center overflow-hidden bg-accent-amber-deep">
 		{#each characters as character, index (`${character}-${index}`)}
 			<span
