@@ -1,0 +1,71 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: nothing-happens\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# Parliament names
+msgid "联合议会"
+msgstr "Joint Parliament"
+
+msgid "衙门"
+msgstr "Yamen"
+
+msgid "理想国议会"
+msgstr "Utopian Parliament"
+
+# Provincial official race variants
+msgid "人类（官员）"
+msgstr "Humans (Officials)"
+
+msgid "偃偶（官员）"
+msgstr "Yan'ou (Officials)"
+
+msgid "南柯（官员）"
+msgstr "Nanke (Officials)"
+
+msgid "桃花妖（官员）"
+msgstr "Peach Blossom Spirits (Officials)"
+
+msgid "比翼（官员）"
+msgstr "Biyi (Officials)"
+
+msgid "驻岁（官员）"
+msgstr "Zhushui (Officials)"
+
+msgid "在行省制度下，该族议员以朝廷官员身份参与政务，并额外服从人类官署所关心的税课与生产要求。"
+msgstr "Under the provincial system, this people's legislators serve as imperial officials and additionally follow the tax and production priorities of the human administration."
+
+# Peach Blossom political variants
+msgid "桃花妖（开放）"
+msgstr "Peach Blossom Spirits (Openness)"
+
+msgid "开放制度把族内政治权重压到最低，所有桃花妖议席在共识计算中等权。"
+msgstr "The open system reduces internal political weighting to its minimum, giving every Peach Blossom Spirit seat equal weight in consensus calculations."
+
+msgid "桃花妖（自治）"
+msgstr "Peach Blossom Spirits (Local Autonomy)"
+
+msgid "自治制度保留长幼秩序，但地方之间仍共同参与联合政府。"
+msgstr "The autonomy system preserves seniority within the people while local communities continue to participate together in the joint government."
+
+msgid "桃花妖（封闭）"
+msgstr "Peach Blossom Spirits (Closure)"
+
+msgid "封闭制度强化长老在族内共识中的权重，并把桃花妖席位重新绑定到具体地方。"
+msgstr "The closed system strengthens elders' weight in internal consensus and binds Peach Blossom Spirit seats back to specific localities."
+
+msgid "桃花妖（地区自治）"
+msgstr "Peach Blossom Spirits (Regional Autonomy)"
+
+msgid "地区自治把长老权重推至最高档，并把全议会的集团关系地方化。"
+msgstr "Regional autonomy raises elder weighting to its maximum and localizes interest-group relationships across the entire parliament."
+
+# Interest-group runtime variants
+msgid "自由贸易切断旧有朝廷贸易特权后，永乐局的官督一面被重新唤醒。它不再以自身负面提案判断政治支持，而直接以人类种族的公共要求作为支持依据，因此也退出普通自动发牌集团池。"
+msgstr "After free trade severs the court's old commercial privileges, the Yongle Bureau's state-supervised character re-emerges. It no longer bases political support on its own negative proposals, instead following the public demands of the human population, and therefore leaves the normal automatic proposal pool."
+
+msgid "造身公所吞并其它利益集团后形成的唯一产业组织。原有集团在运行时保留各自资源身份，但名称、描述与政治模板统一为托拉斯。"
+msgstr "The sole industrial organization formed after the Bodymaking Guild absorbs the other interest groups. The original groups retain their resource identities at runtime, but their names, descriptions, and political templates are unified under the Trust."
