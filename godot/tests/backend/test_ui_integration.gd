@@ -236,7 +236,7 @@ func _test_policy_name_resolution(t: BackendTestContext) -> void:
 	)
 	t.check_equal(messages[0]["type"], "draft.sync", "policy command returns draft domain sync")
 	t.check_equal(session.state.draft_bill.policies[0], policy, "policy name resolves current Resource")
-	t.check_equal(bridge.state_version, 1, "successful policy mutation advances version")
+	t.check_equal(bridge.state_version, 1, "successful policy mutation advances version once")
 	var unavailable := bridge.receive_ipc_message(
 		_message("draft.policy.add", {"state_version": 1, "display_name": "missing"})
 	)
@@ -635,10 +635,11 @@ func _test_game_root_shell(t: BackendTestContext) -> void:
 	t.check(parliament.seats[0].race == parliament_race, "ParliamentWorld receives active race definition")
 	t.check(parliament.seats[0].visual.texture == parliament_race.portrait, "active race portrait reaches ParliamentWorld")
 	var parliament_ready := bridge.receive_ipc_message(_message("ui.ready", {}))
+	var visible_anchors := parliament.get_seat_anchors()
 	t.check_equal(
-		parliament_ready[0]["payload"]["parliament_seat_anchors"].size(),
-		session.state.seats.size(),
-		"parliament full state includes every world seat anchor"
+		parliament_ready[0]["payload"]["parliament_seat_anchors"],
+		visible_anchors,
+		"parliament full state includes the currently visible world seat anchors"
 	)
 	var outgoing: Array[Dictionary] = []
 	bridge.outgoing_message.connect(
