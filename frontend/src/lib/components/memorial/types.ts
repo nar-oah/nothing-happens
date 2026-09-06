@@ -1,10 +1,12 @@
+import { translate } from '../../i18n/index.ts';
+
 export const MetricText = {
-	Tax: '税課',
-	Consumption: '消費',
-	Production: '生産',
-	Employment: '就業',
-	Investment: '投資',
-	Lag: '滞后'
+	Tax: translate('game.metric.tax', undefined, 'zh_CN'),
+	Consumption: translate('game.metric.consumption', undefined, 'zh_CN'),
+	Production: translate('game.metric.production', undefined, 'zh_CN'),
+	Employment: translate('game.metric.employment', undefined, 'zh_CN'),
+	Investment: translate('game.metric.investment', undefined, 'zh_CN'),
+	Lag: translate('memorial.lag', undefined, 'zh_CN')
 } as const;
 
 export const MetricSymbol = {

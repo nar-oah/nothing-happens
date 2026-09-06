@@ -1,7 +1,8 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import MemorialClosedFrame from './MemorialClosedFrame.svelte';
 	import MemorialMetric from '../shared/MemorialMetric.svelte';
-	import { MetricText, type MemorialMetricData } from '../types';
+	import type { MemorialMetricData } from '../types';
 
 	type Props = {
 		option: string;
@@ -14,7 +15,7 @@
 	let leadingMetrics = $derived(metrics.filter((metric) => !metric.isReverse));
 	let trailingMetrics = $derived(metrics.filter((metric) => metric.isReverse));
 	let lagMetric: MemorialMetricData = $derived({
-		text: MetricText.Lag,
+		text: $t('memorial.lag'),
 		value: lag
 	});
 </script>

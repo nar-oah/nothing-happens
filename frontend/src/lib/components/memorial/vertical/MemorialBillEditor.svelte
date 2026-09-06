@@ -7,7 +7,7 @@
 	import { policyToMemorialContent, proposalToMemorialContent } from '../presentation';
 	import MemorialMetric from '../shared/MemorialMetric.svelte';
 	import MemorialTitleStrip from '../shared/MemorialTitleStrip.svelte';
-	import { MetricText, type MemorialMetricData } from '../types';
+	import type { MemorialMetricData } from '../types';
 	import MemorialVertical from './MemorialVertical.svelte';
 	import MemorialVerticalCover from './MemorialVerticalCover.svelte';
 
@@ -35,11 +35,13 @@
 	let titleInput = $state<HTMLInputElement>();
 	let displayTitle = $derived(bill.title || $t('memorial.newBill'));
 	let lag = $derived(getBillLagMonths(bill.proposals));
-	let proposalPages = $derived(bill.proposals.map(proposalToMemorialContent));
-	let policyPages = $derived(bill.policies.map(policyToMemorialContent));
+	let proposalPages = $derived(
+		bill.proposals.map((proposal) => proposalToMemorialContent(proposal, $t))
+	);
+	let policyPages = $derived(bill.policies.map((policy) => policyToMemorialContent(policy, $t)));
 	let coverMetrics: MemorialMetricData[] = $derived([
 		...preview,
-		{ text: MetricText.Lag, value: lag, isReverse: true }
+		{ text: $t('memorial.lag'), value: lag, isReverse: true }
 	]);
 
 	function toggleCover() {
