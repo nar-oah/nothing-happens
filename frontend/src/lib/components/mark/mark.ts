@@ -45,7 +45,9 @@ export function createPolicyMarkContent(
 	const leftValue = getMetricValue(baseline, condition.left_metric);
 	const rightValue = getMetricValue(baseline, condition.right_metric) * condition.right_multiplier;
 	const multiplier = formatMultiplier(condition.right_multiplier);
-	const triggerText = translator(isMetricConditionMet(condition, baseline) ? 'mark.triggered' : 'mark.notTriggered');
+	const triggerText = translator(
+		isMetricConditionMet(condition, baseline) ? 'mark.triggered' : 'mark.notTriggered'
+	);
 	const effectRules = policy.effects.map((effect) => formatEffectRule(effect, translator));
 	const effectAmounts = policy.effects.map((effect) => {
 		const amount = calculatePolicyEffectAmount(effect, baseline);
@@ -53,12 +55,27 @@ export function createPolicyMarkContent(
 	});
 	return {
 		requirement: {
-			headline: translator('mark.required', { condition: `${leftName}${symbol}${rightName}${multiplier}` }),
-			detail: translator('mark.current', { condition: `${formatNumber(leftValue)}${symbol}${formatNumber(rightValue)}`, trigger: triggerText })
+			headline: translator('mark.required', {
+				condition: `${leftName}${symbol}${rightName}${multiplier}`
+			}),
+			detail: translator('mark.current', {
+				condition: `${formatNumber(leftValue)}${symbol}${formatNumber(rightValue)}`,
+				trigger: triggerText
+			})
 		},
 		effect: {
-			headline: translator('mark.effect', { effects: effectRules.length > 0 ? effectRules.join(translator('common.listSeparator')) : translator('mark.noEffects') }),
-			detail: translator('mark.once', { effects: effectAmounts.length > 0 ? effectAmounts.join(translator('common.listSeparator')) : translator('mark.noChange') })
+			headline: translator('mark.effect', {
+				effects:
+					effectRules.length > 0
+						? effectRules.join(translator('common.listSeparator'))
+						: translator('mark.noEffects')
+			}),
+			detail: translator('mark.once', {
+				effects:
+					effectAmounts.length > 0
+						? effectAmounts.join(translator('common.listSeparator'))
+						: translator('mark.noChange')
+			})
 		}
 	};
 }

@@ -38,44 +38,63 @@ export const gameZhCN = {
 	'saves.actionLabel': '{action}：{term}，{date}{automatic}',
 	'saves.term': '第 {term} 任',
 	'saves.date': '{year} 年 {month} 月',
-	"newspaper.comment.0.title": "年初的数字不是预言",
-	"newspaper.comment.0.body": "本报以为，各族公开的年度期望更像一张价目表：今年最低要到哪里，早已写在纸上。真正会不会闹成事件，要看现实离这张表差了多远。",
-	"newspaper.comment.1.title": "消息早，\n不等于事情轻",
-	"newspaper.comment.1.body": "有人把提前获知当成危机打了折扣，这是误会。消息人士能多给政府几个月，却不能替任何一项要求少掉半分；早知道，只是早一点开始收拾。",
-	"newspaper.comment.2.title": "八成只能叫停，\n不能叫好",
-	"newspaper.comment.2.body": "把一件事做到八成，足以让局势暂时不再恶化，却还谈不上解决。只有完整满足当前要求，事件才会真正开始缓解。",
-	"newspaper.comment.3.title": "登报之前，\n事情也在长大",
-	"newspaper.comment.3.body": "没有见报不等于没有发生。尚未知晓的事件会继续恶化，只是政府还不能据此结算处置；等它走到公开阶段，留给所有人的时间自然更少。",
-	"newspaper.comment.4.title": "席位买不到便宜，\n只买得到耳朵",
-	"newspaper.comment.4.body": "某族席位越多，政府越容易提前听见该族正在酝酿的麻烦。议席不会降低事件要求，也不会改变八成与十分的门槛，它提供的是提前量。",
-	"newspaper.comment.5.title": "公所的提案从来不是慈善",
-	"newspaper.comment.5.body": "普通提案的底色很简单：公共指标要付出代价，议会里受该集团影响的人才肯给支持。要多少支持，就得先问自己肯留下多大的窟窿。",
-	"newspaper.comment.6.title": "越弱的集团，\n越爱敲门",
-	"newspaper.comment.6.body": "议会影响越小的集团，反而越积极把提案塞到政府桌上，也更可能亲自来访。弱者没有更多票，只好多给你一些可以交易的东西。",
-	"newspaper.comment.7.title": "额外的一点甜头",
-	"newspaper.comment.7.body": "主动来访者留下的提案总会多一项正面附益。自动送来的普通提案没有这种好处；要把甜头留得久一些，只能靠之后的同集团合成。",
-	"newspaper.comment.8.title": "三份旧案，\n只能留一副骨架",
-	"newspaper.comment.8.body": "三张同集团提案合成时，负面底子必须整张选择，不能逐项拼出一张完美公文。正面附益也最多留一种，其余只拿来把选中的那一项做强。",
-	"newspaper.comment.9.title": "终点看得见，\n路却不听话",
-	"newspaper.comment.9.body": "法案的充分消化结果可以计算，但市场每个月走多少、哪一项先动，并不照公文逐字执行。趋势可预见，时序不可预见，恰恰是政策链最麻烦的地方。",
-	"newspaper.comment.10.title": "别把政策算进终点",
-	"newspaper.comment.10.body": "报表上的纯提案目标只回答一件事：这些提案若充分消化，最后会把指标带到哪里。政策是一次性的瞬时动作，不会改写这份长期目标。",
-	"newspaper.comment.11.title": "印一落，\n事情当场发生",
-	"newspaper.comment.11.body": "政策不是另一种慢提案。条件一旦满足，本法授权便立即结算一次；同一状态下同时满足的政策按同一批处理，随后还可能继续引出下一批。",
-	"newspaper.comment.12.title": "同一条政策，\n还能再批一次",
-	"newspaper.comment.12.body": "一份法案里的政策触发后就死了，但新法案会重新授予一次资格，即使新法与旧法内容相同。能不能再次赚到好处，要看旧的指标落差还剩多少。",
-	"newspaper.comment.13.title": "今年处理谁，\n明年谁坐得多",
-	"newspaper.comment.13.body": "种族事件的解决与失败最终会变成政治信任，并在下一年改写可变席位。眼前的经济处置，过一个年关就会变成议会结构。",
-	"newspaper.comment.14.title": "今年用了谁的案，\n明年谁的话更响",
-	"newspaper.comment.14.body": "本年通过法案里，新授权的提案来自哪些集团，会影响下一年议员实际听谁的。集团影响越大，自己的提案越容易过；过得越多，下一年又越容易继续扩大。",
-	"newspaper.comment.15.title": "约法不是月度公文",
-	"newspaper.comment.15.body": "《蓬莱约法》每年只有一次修订机会。五条种族路线一旦向某一侧推进便不能撤回或转向；这不是救急按钮，而是在决定以后要用什么规则继续救急。",
-	"newspaper.comment.16.title": "献金有效，\n丑闻也有效",
-	"newspaper.comment.16.body": "政治献金即使被发现，照样会影响本次表决；代价是崩溃度会因此增加。监管决定的不是献金有没有用，而是这件事有多容易被看见。",
-	"newspaper.comment.17.title": "崩溃度量的是相信，\n不是产量",
-	"newspaper.comment.17.body": "崩溃度记录的是各族有多相信全面崩溃将至，不是五项经济指标的总分。一个数字很难看，未必会直接推高恐慌；真正的后果仍要经过事件与政治失败。",
-	"newspaper.comment.18.title": "案牍堆着，\n不等于政府已经动手",
-	"newspaper.comment.18.body": "收到提案、谈判、搁置或合成都只是整理桌面。真正留下干预记录的，是把非空草案送去表决、奏请朝廷或修订约法。"
+	'newspaper.comment.0.title': '年初的数字不是预言',
+	'newspaper.comment.0.body':
+		'本报以为，各族公开的年度期望更像一张价目表：今年最低要到哪里，早已写在纸上。真正会不会闹成事件，要看现实离这张表差了多远。',
+	'newspaper.comment.1.title': '消息早，\n不等于事情轻',
+	'newspaper.comment.1.body':
+		'有人把提前获知当成危机打了折扣，这是误会。消息人士能多给政府几个月，却不能替任何一项要求少掉半分；早知道，只是早一点开始收拾。',
+	'newspaper.comment.2.title': '八成只能叫停，\n不能叫好',
+	'newspaper.comment.2.body':
+		'把一件事做到八成，足以让局势暂时不再恶化，却还谈不上解决。只有完整满足当前要求，事件才会真正开始缓解。',
+	'newspaper.comment.3.title': '登报之前，\n事情也在长大',
+	'newspaper.comment.3.body':
+		'没有见报不等于没有发生。尚未知晓的事件会继续恶化，只是政府还不能据此结算处置；等它走到公开阶段，留给所有人的时间自然更少。',
+	'newspaper.comment.4.title': '席位买不到便宜，\n只买得到耳朵',
+	'newspaper.comment.4.body':
+		'某族席位越多，政府越容易提前听见该族正在酝酿的麻烦。议席不会降低事件要求，也不会改变八成与十分的门槛，它提供的是提前量。',
+	'newspaper.comment.5.title': '公所的提案从来不是慈善',
+	'newspaper.comment.5.body':
+		'普通提案的底色很简单：公共指标要付出代价，议会里受该集团影响的人才肯给支持。要多少支持，就得先问自己肯留下多大的窟窿。',
+	'newspaper.comment.6.title': '越弱的集团，\n越爱敲门',
+	'newspaper.comment.6.body':
+		'议会影响越小的集团，反而越积极把提案塞到政府桌上，也更可能亲自来访。弱者没有更多票，只好多给你一些可以交易的东西。',
+	'newspaper.comment.7.title': '额外的一点甜头',
+	'newspaper.comment.7.body':
+		'主动来访者留下的提案总会多一项正面附益。自动送来的普通提案没有这种好处；要把甜头留得久一些，只能靠之后的同集团合成。',
+	'newspaper.comment.8.title': '三份旧案，\n只能留一副骨架',
+	'newspaper.comment.8.body':
+		'三张同集团提案合成时，负面底子必须整张选择，不能逐项拼出一张完美公文。正面附益也最多留一种，其余只拿来把选中的那一项做强。',
+	'newspaper.comment.9.title': '终点看得见，\n路却不听话',
+	'newspaper.comment.9.body':
+		'法案的充分消化结果可以计算，但市场每个月走多少、哪一项先动，并不照公文逐字执行。趋势可预见，时序不可预见，恰恰是政策链最麻烦的地方。',
+	'newspaper.comment.10.title': '别把政策算进终点',
+	'newspaper.comment.10.body':
+		'报表上的纯提案目标只回答一件事：这些提案若充分消化，最后会把指标带到哪里。政策是一次性的瞬时动作，不会改写这份长期目标。',
+	'newspaper.comment.11.title': '印一落，\n事情当场发生',
+	'newspaper.comment.11.body':
+		'政策不是另一种慢提案。条件一旦满足，本法授权便立即结算一次；同一状态下同时满足的政策按同一批处理，随后还可能继续引出下一批。',
+	'newspaper.comment.12.title': '同一条政策，\n还能再批一次',
+	'newspaper.comment.12.body':
+		'一份法案里的政策触发后就死了，但新法案会重新授予一次资格，即使新法与旧法内容相同。能不能再次赚到好处，要看旧的指标落差还剩多少。',
+	'newspaper.comment.13.title': '今年处理谁，\n明年谁坐得多',
+	'newspaper.comment.13.body':
+		'种族事件的解决与失败最终会变成政治信任，并在下一年改写可变席位。眼前的经济处置，过一个年关就会变成议会结构。',
+	'newspaper.comment.14.title': '今年用了谁的案，\n明年谁的话更响',
+	'newspaper.comment.14.body':
+		'本年通过法案里，新授权的提案来自哪些集团，会影响下一年议员实际听谁的。集团影响越大，自己的提案越容易过；过得越多，下一年又越容易继续扩大。',
+	'newspaper.comment.15.title': '约法不是月度公文',
+	'newspaper.comment.15.body':
+		'《蓬莱约法》每年只有一次修订机会。五条种族路线一旦向某一侧推进便不能撤回或转向；这不是救急按钮，而是在决定以后要用什么规则继续救急。',
+	'newspaper.comment.16.title': '献金有效，\n丑闻也有效',
+	'newspaper.comment.16.body':
+		'政治献金即使被发现，照样会影响本次表决；代价是崩溃度会因此增加。监管决定的不是献金有没有用，而是这件事有多容易被看见。',
+	'newspaper.comment.17.title': '崩溃度量的是相信，\n不是产量',
+	'newspaper.comment.17.body':
+		'崩溃度记录的是各族有多相信全面崩溃将至，不是五项经济指标的总分。一个数字很难看，未必会直接推高恐慌；真正的后果仍要经过事件与政治失败。',
+	'newspaper.comment.18.title': '案牍堆着，\n不等于政府已经动手',
+	'newspaper.comment.18.body':
+		'收到提案、谈判、搁置或合成都只是整理桌面。真正留下干预记录的，是把非空草案送去表决、奏请朝廷或修订约法。'
 };
 
 export const gameEn: Record<keyof typeof gameZhCN, string> = {
@@ -118,42 +137,61 @@ export const gameEn: Record<keyof typeof gameZhCN, string> = {
 	'saves.actionLabel': '{action}: {term}, {date}{automatic}',
 	'saves.term': 'Term {term}',
 	'saves.date': 'Year {year}, month {month}',
-	"newspaper.comment.0.title": "The year's opening figures\nare no prophecy",
-	"newspaper.comment.0.body": "The annual expectations published by each people read more like a price list: their minimum demands for this year are already on paper. Whether trouble actually erupts depends on how far reality falls short.",
-	"newspaper.comment.1.title": "Earlier news\ndoes not mean lesser trouble",
-	"newspaper.comment.1.body": "Some mistake advance warning for a discount on a crisis. An informant can give the government a few more months, but cannot shave even a fraction off any demand. Knowing sooner only means starting the cleanup sooner.",
-	"newspaper.comment.2.title": "Eighty percent can stop decline,\nnot earn applause",
-	"newspaper.comment.2.body": "Meeting eighty percent of a demand can keep a situation from worsening, but it does not solve it. An event only begins to subside once its current requirements are fully met.",
-	"newspaper.comment.3.title": "Trouble grows\nbefore it makes the papers",
-	"newspaper.comment.3.body": "Unreported does not mean nonexistent. Unknown events continue to worsen, even though the government cannot yet resolve them. By the time they become public, everyone has less time left.",
-	"newspaper.comment.4.title": "Seats buy a hearing,\nnot a discount",
-	"newspaper.comment.4.body": "The more seats a people holds, the sooner the government is likely to hear about trouble brewing among them. Seats neither lower event demands nor change the eighty-percent and full-compliance thresholds. They buy time.",
-	"newspaper.comment.5.title": "Guild proposals\nare never charity",
-	"newspaper.comment.5.body": "Ordinary proposals have a simple bargain at their heart: public metrics must pay a price before the lawmakers influenced by that group will lend their support. Before asking for votes, decide how large a hole you are willing to leave.",
-	"newspaper.comment.6.title": "Weaker groups\nknock more often",
-	"newspaper.comment.6.body": "Groups with less influence in parliament are more eager to put proposals on the government's desk and more likely to visit in person. Lacking votes, they offer more things to trade.",
-	"newspaper.comment.7.title": "A little extra sweetener",
-	"newspaper.comment.7.body": "Proposals left by personal visitors always include one positive bonus. Ordinary proposals delivered automatically have no such benefit. To make that sweetener last, combine proposals from the same group later.",
-	"newspaper.comment.8.title": "Three old proposals,\none framework to keep",
-	"newspaper.comment.8.body": "When combining three proposals from the same group, you must choose one complete set of negative effects; you cannot assemble a perfect document effect by effect. You may also keep at most one positive bonus. The others only strengthen the chosen one.",
-	"newspaper.comment.9.title": "The destination is visible,\nthe road is unruly",
-	"newspaper.comment.9.body": "A bill's fully absorbed outcome can be calculated, but the market's monthly pace and the order of its movements do not follow the document word for word. Predictable direction and unpredictable timing make the policy chain so difficult.",
-	"newspaper.comment.10.title": "Keep policies out\nof the destination",
-	"newspaper.comment.10.body": "The proposal-only target in the report answers one question: where will these proposals take the metrics once fully absorbed? Policies are one-time, immediate actions. They do not rewrite that long-term target.",
-	"newspaper.comment.11.title": "The seal falls,\nthe effect is immediate",
-	"newspaper.comment.11.body": "A policy is not another slow proposal. Once its conditions are met, the authorization in the current bill takes effect immediately, once. Policies whose conditions are met in the same state resolve as one batch, which may then trigger another.",
-	"newspaper.comment.12.title": "The same policy\ncan be authorized again",
-	"newspaper.comment.12.body": "A policy is spent once triggered under a bill, but a new bill grants it one more use, even when the new bill matches the old. Whether it can pay off again depends on how much of the old metric gap remains.",
-	"newspaper.comment.13.title": "Whose trouble you handle today\nshapes next year's seats",
-	"newspaper.comment.13.body": "Resolved and failed events change political trust and, in the following year, the distribution of variable seats. Today's economic response becomes next year's parliamentary structure.",
-	"newspaper.comment.14.title": "Whose proposals pass this year\nshapes who is heard next year",
-	"newspaper.comment.14.body": "The groups behind newly authorized proposals in bills passed this year influence whom lawmakers actually listen to next year. Greater influence makes a group's proposals easier to pass; more passages help that influence keep growing.",
-	"newspaper.comment.15.title": "The constitution\nis no monthly memorandum",
-	"newspaper.comment.15.body": "The Penglai Constitution can be revised only once a year. Once any of the five peoples' paths advances toward one side, it cannot be reversed or redirected. This is not an emergency button: it decides the rules for handling future emergencies.",
-	"newspaper.comment.16.title": "Donations work.\nSo do scandals.",
-	"newspaper.comment.16.body": "Political donations still affect the current vote even when exposed, at the cost of increased collapse. Oversight determines how easily the transaction is seen, not whether the donation works.",
-	"newspaper.comment.17.title": "Collapse measures belief,\nnot production",
-	"newspaper.comment.17.body": "Collapse records how strongly the peoples believe a total breakdown is coming. It is not the sum of the five economic metrics. One ugly number need not directly raise panic; consequences still pass through events and political failures.",
-	"newspaper.comment.18.title": "A desk full of papers\ndoes not mean action",
-	"newspaper.comment.18.body": "Receiving proposals, negotiating, shelving them, and combining them merely organize the desk. An intervention is recorded only when a nonempty draft goes to a vote, the court is petitioned, or the constitution is revised."
+	'newspaper.comment.0.title': "The year's opening figures\nare no prophecy",
+	'newspaper.comment.0.body':
+		'The annual expectations published by each people read more like a price list: their minimum demands for this year are already on paper. Whether trouble actually erupts depends on how far reality falls short.',
+	'newspaper.comment.1.title': 'Earlier news\ndoes not mean lesser trouble',
+	'newspaper.comment.1.body':
+		'Some mistake advance warning for a discount on a crisis. An informant can give the government a few more months, but cannot shave even a fraction off any demand. Knowing sooner only means starting the cleanup sooner.',
+	'newspaper.comment.2.title': 'Eighty percent can stop decline,\nnot earn applause',
+	'newspaper.comment.2.body':
+		'Meeting eighty percent of a demand can keep a situation from worsening, but it does not solve it. An event only begins to subside once its current requirements are fully met.',
+	'newspaper.comment.3.title': 'Trouble grows\nbefore it makes the papers',
+	'newspaper.comment.3.body':
+		'Unreported does not mean nonexistent. Unknown events continue to worsen, even though the government cannot yet resolve them. By the time they become public, everyone has less time left.',
+	'newspaper.comment.4.title': 'Seats buy a hearing,\nnot a discount',
+	'newspaper.comment.4.body':
+		'The more seats a people holds, the sooner the government is likely to hear about trouble brewing among them. Seats neither lower event demands nor change the eighty-percent and full-compliance thresholds. They buy time.',
+	'newspaper.comment.5.title': 'Guild proposals\nare never charity',
+	'newspaper.comment.5.body':
+		'Ordinary proposals have a simple bargain at their heart: public metrics must pay a price before the lawmakers influenced by that group will lend their support. Before asking for votes, decide how large a hole you are willing to leave.',
+	'newspaper.comment.6.title': 'Weaker groups\nknock more often',
+	'newspaper.comment.6.body':
+		"Groups with less influence in parliament are more eager to put proposals on the government's desk and more likely to visit in person. Lacking votes, they offer more things to trade.",
+	'newspaper.comment.7.title': 'A little extra sweetener',
+	'newspaper.comment.7.body':
+		'Proposals left by personal visitors always include one positive bonus. Ordinary proposals delivered automatically have no such benefit. To make that sweetener last, combine proposals from the same group later.',
+	'newspaper.comment.8.title': 'Three old proposals,\none framework to keep',
+	'newspaper.comment.8.body':
+		'When combining three proposals from the same group, you must choose one complete set of negative effects; you cannot assemble a perfect document effect by effect. You may also keep at most one positive bonus. The others only strengthen the chosen one.',
+	'newspaper.comment.9.title': 'The destination is visible,\nthe road is unruly',
+	'newspaper.comment.9.body':
+		"A bill's fully absorbed outcome can be calculated, but the market's monthly pace and the order of its movements do not follow the document word for word. Predictable direction and unpredictable timing make the policy chain so difficult.",
+	'newspaper.comment.10.title': 'Keep policies out\nof the destination',
+	'newspaper.comment.10.body':
+		'The proposal-only target in the report answers one question: where will these proposals take the metrics once fully absorbed? Policies are one-time, immediate actions. They do not rewrite that long-term target.',
+	'newspaper.comment.11.title': 'The seal falls,\nthe effect is immediate',
+	'newspaper.comment.11.body':
+		'A policy is not another slow proposal. Once its conditions are met, the authorization in the current bill takes effect immediately, once. Policies whose conditions are met in the same state resolve as one batch, which may then trigger another.',
+	'newspaper.comment.12.title': 'The same policy\ncan be authorized again',
+	'newspaper.comment.12.body':
+		'A policy is spent once triggered under a bill, but a new bill grants it one more use, even when the new bill matches the old. Whether it can pay off again depends on how much of the old metric gap remains.',
+	'newspaper.comment.13.title': "Whose trouble you handle today\nshapes next year's seats",
+	'newspaper.comment.13.body':
+		"Resolved and failed events change political trust and, in the following year, the distribution of variable seats. Today's economic response becomes next year's parliamentary structure.",
+	'newspaper.comment.14.title': 'Whose proposals pass this year\nshapes who is heard next year',
+	'newspaper.comment.14.body':
+		"The groups behind newly authorized proposals in bills passed this year influence whom lawmakers actually listen to next year. Greater influence makes a group's proposals easier to pass; more passages help that influence keep growing.",
+	'newspaper.comment.15.title': 'The constitution\nis no monthly memorandum',
+	'newspaper.comment.15.body':
+		"The Penglai Constitution can be revised only once a year. Once any of the five peoples' paths advances toward one side, it cannot be reversed or redirected. This is not an emergency button: it decides the rules for handling future emergencies.",
+	'newspaper.comment.16.title': 'Donations work.\nSo do scandals.',
+	'newspaper.comment.16.body':
+		'Political donations still affect the current vote even when exposed, at the cost of increased collapse. Oversight determines how easily the transaction is seen, not whether the donation works.',
+	'newspaper.comment.17.title': 'Collapse measures belief,\nnot production',
+	'newspaper.comment.17.body':
+		'Collapse records how strongly the peoples believe a total breakdown is coming. It is not the sum of the five economic metrics. One ugly number need not directly raise panic; consequences still pass through events and political failures.',
+	'newspaper.comment.18.title': 'A desk full of papers\ndoes not mean action',
+	'newspaper.comment.18.body':
+		'Receiving proposals, negotiating, shelving them, and combining them merely organize the desk. An intervention is recorded only when a nonempty draft goes to a vote, the court is petitioned, or the constitution is revised.'
 };

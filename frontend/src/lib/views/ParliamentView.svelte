@@ -223,7 +223,9 @@
 					<div class="vote-switch">
 						<ChoreSwitch
 							left={$t('view.draft')}
-							right={voteCanPass ? $t('view.votePass') : $t('view.voteShort', { count: votesNeeded })}
+							right={voteCanPass
+								? $t('view.votePass')
+								: $t('view.voteShort', { count: votesNeeded })}
 							bind:isSwitch={voteMode}
 							disabled={!voteCanPass}
 							onSwitchChange={submitDraft}

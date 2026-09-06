@@ -12,6 +12,6 @@ export function getNewspaperComments(translator: Translate = translate): Newspap
 	}));
 }
 
-export const NEWSPAPER_COMMENTS: NewspaperComment[] = getNewspaperComments(
-	(key, params) => translate(key, params, 'zh_CN')
+export const NEWSPAPER_COMMENTS: NewspaperComment[] = getNewspaperComments((key, params) =>
+	translate(key, params, 'zh_CN')
 );

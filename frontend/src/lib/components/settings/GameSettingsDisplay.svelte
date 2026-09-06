@@ -23,7 +23,11 @@
 	const displayLabel = $derived($t(`settings.${displayMode}`));
 </script>
 
-<aside class="flex flex-col items-end gap-[20px]" aria-label={$t('settings.title')} data-block-world-input>
+<aside
+	class="flex flex-col items-end gap-[20px]"
+	aria-label={$t('settings.title')}
+	data-block-world-input
+>
 	<button
 		type="button"
 		class="cursor-pointer border-0 bg-transparent p-0 disabled:cursor-default"

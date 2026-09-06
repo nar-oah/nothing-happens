@@ -19,7 +19,10 @@ export function deriveSaveItems(
 		: { ...automatic, slot_id: 'auto', automatic: true, saved_at: '', ...current };
 	return [...manual, ...(last ? [last] : [])].map((slot) => ({
 		slot,
-		item: { text: translator('saves.term', { term: slot.term }), value: translator('saves.date', { year: slot.year, month: slot.month }) }
+		item: {
+			text: translator('saves.term', { term: slot.term }),
+			value: translator('saves.date', { year: slot.year, month: slot.month })
+		}
 	}));
 }
 

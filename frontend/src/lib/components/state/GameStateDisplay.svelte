@@ -17,7 +17,11 @@
 	let { primary, secondary }: Props = $props();
 </script>
 
-<aside class="flex flex-col items-end gap-[20px]" aria-label={$t('ui.state')} data-block-world-input>
+<aside
+	class="flex flex-col items-end gap-[20px]"
+	aria-label={$t('ui.state')}
+	data-block-world-input
+>
 	<ChoreItem {...primary} />
 	<ChoreItem {...secondary} />
 </aside>

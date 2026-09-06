@@ -41,8 +41,17 @@
 	}: Props = $props();
 	let confirmMode = $state(false);
 	let gameState = $derived({
-		primary: { text: $t('game.governingYears'), value: Math.floor(governingMonths / 12), isRow: false },
-		secondary: { text: $t('game.governingMonths'), value: governingMonths % 12, limit: 12, isRow: false }
+		primary: {
+			text: $t('game.governingYears'),
+			value: Math.floor(governingMonths / 12),
+			isRow: false
+		},
+		secondary: {
+			text: $t('game.governingMonths'),
+			value: governingMonths % 12,
+			limit: 12,
+			isRow: false
+		}
 	});
 	let unlockableSections = $derived(
 		columns

@@ -502,7 +502,7 @@
 					})}
 				onExitClick={() => changeSetting('app.quit', {})}
 				saveError={saveError
-						? errorOperation === 'quit'
+					? errorOperation === 'quit'
 						? $t('live.quitFailed', { reason: translateCommandError(saveError, $t) })
 						: translateCommandError(saveError, $t)
 					: ''}

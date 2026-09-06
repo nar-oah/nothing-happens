@@ -206,7 +206,18 @@
 						<button
 							type="button"
 							class="shrink-0 cursor-pointer border-0 bg-transparent p-0 disabled:cursor-default"
-							aria-label={$t('saves.actionLabel', { action: $t(loadingSaves ? 'saves.load' : item.slot.automatic ? 'saves.create' : 'saves.overwrite'), term: item.item.text, date: item.item.value, automatic: item.slot.automatic ? $t('saves.automaticSuffix') : '' })}
+							aria-label={$t('saves.actionLabel', {
+								action: $t(
+									loadingSaves
+										? 'saves.load'
+										: item.slot.automatic
+											? 'saves.create'
+											: 'saves.overwrite'
+								),
+								term: item.item.text,
+								date: item.item.value,
+								automatic: item.slot.automatic ? $t('saves.automaticSuffix') : ''
+							})}
 							disabled={interactionDisabled || !onSaveSelect}
 							onclick={() => onSaveSelect?.(item.slot, loadingSaves)}
 						>

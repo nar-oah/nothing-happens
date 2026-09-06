@@ -20,11 +20,18 @@ export function createInterestGroupDialogueContent(
 ): InterestGroupDialogueContent {
 	return {
 		visitor: translator('dialogue.groupVisitor', { group: groupName }),
-		body: translator('dialogue.groupBody', { group: groupName, effect: positiveEffect, donation: donationOffer })
+		body: translator('dialogue.groupBody', {
+			group: groupName,
+			effect: positiveEffect,
+			donation: donationOffer
+		})
 	};
 }
 
-export function createEventIntelDialogueContent(data: EventIntelDialogueData, translator: Translate = translate): InterestGroupDialogueContent {
+export function createEventIntelDialogueContent(
+	data: EventIntelDialogueData,
+	translator: Translate = translate
+): InterestGroupDialogueContent {
 	const visitor = translator('dialogue.intelVisitor', { race: data.raceName });
 	const body = formatEventIntelBody(data, translator);
 	return { visitor, body };

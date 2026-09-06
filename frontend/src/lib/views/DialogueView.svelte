@@ -27,12 +27,15 @@
 					$t
 				)
 			: dialogue.kind === 'event_intel'
-				? createEventIntelDialogueContent({
-						raceName: dialogue.raceName,
-						metricName: dialogue.metricName,
-						requirement: dialogue.requirement,
-						strength: dialogue.strength
-					}, $t)
+				? createEventIntelDialogueContent(
+						{
+							raceName: dialogue.raceName,
+							metricName: dialogue.metricName,
+							requirement: dialogue.requirement,
+							strength: dialogue.strength
+						},
+						$t
+					)
 				: null
 	);
 

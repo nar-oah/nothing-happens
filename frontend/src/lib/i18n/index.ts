@@ -24,6 +24,9 @@ export function translate(
 	);
 }
 
-export const t = derived(language, (locale): Translate => (key, params) =>
-	translate(key, params, locale)
+export const t = derived(
+	language,
+	(locale): Translate =>
+		(key, params) =>
+			translate(key, params, locale)
 );

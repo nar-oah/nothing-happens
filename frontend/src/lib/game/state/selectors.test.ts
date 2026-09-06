@@ -122,7 +122,10 @@ test('constitution presentation keeps one aligned row grid and turns locked colu
 
 test('constitution details preserve the authoritative description, requirements and effect sections', () => {
 	const state = makeLiveState();
-	state.constitution.articles[0].contents.push({ title: '事件情报', body: '人类事件情报概率增加25%' });
+	state.constitution.articles[0].contents.push({
+		title: '事件情报',
+		body: '人类事件情报概率增加25%'
+	});
 	const constitution = deriveConstitutionMemorial(state);
 	const rows = Array.isArray(constitution['常制']) ? constitution['常制'] : [];
 	assert.deepEqual(rows[0]?.contents, [
