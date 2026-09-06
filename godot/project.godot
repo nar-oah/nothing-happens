@@ -37,7 +37,7 @@ parliament_right={
 [internationalization]
 
 locale/fallback="zh_CN"
-locale/translations=PackedStringArray("res://localization/en.po", "res://localization/en_dynamic.po", "res://localization/en_variants.po")
+locale/translations=PackedStringArray("res://localization/en.po", "res://localization/en_dynamic.po", "res://localization/en_variants.po", "res://localization/en_constitution.po")
 
 [physics]
 
