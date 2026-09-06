@@ -14,4 +14,4 @@ func get_expectation_growth_multiplier(race: RaceDefinition) -> float:
 
 
 func get_description() -> String:
-	return "%s年度期望增长率%s" % [_format_races(races), _format_signed_percent(growth_modifier)]
+	return _t("%s年度期望增长率%s") % [_format_races(races), _format_signed_percent(growth_modifier)]

@@ -29,4 +29,4 @@ func validate_draft(
 
 
 func get_description() -> String:
-	return "草案的%s纯提案目标不得低于%s的年度期望" % [_format_metrics(metrics), _format_races(races)]
+	return _t("草案的%s纯提案目标不得低于%s的年度期望") % [_format_metrics(metrics), _format_races(races)]

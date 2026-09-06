@@ -21,4 +21,4 @@ func applies_to(race: RaceDefinition) -> bool:
 
 
 func get_description() -> String:
-	return "%s席位改由对应地方利益集团影响；地方集团要求降低%s" % [_format_races(races), Metric.display_name(decrease_metric)]
+	return _t("%s席位改由对应地方利益集团影响；地方集团要求降低%s") % [_format_races(races), _t(Metric.display_name(decrease_metric))]

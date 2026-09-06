@@ -13,4 +13,4 @@ func override_donation_detection_probability(_current: float) -> float:
 
 
 func get_description() -> String:
-	return "政治献金被发现概率为%s" % _format_percent(probability)
+	return _t("政治献金被发现概率为%s") % _format_percent(probability)

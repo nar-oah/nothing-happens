@@ -1,0 +1,367 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: nothing-happens\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# Core display names
+msgid "人类"
+msgstr "Humans"
+
+msgid "偃偶"
+msgstr "Yan'ou"
+
+msgid "南柯"
+msgstr "Nanke"
+
+msgid "桃花妖"
+msgstr "Peach Blossom Spirits"
+
+msgid "比翼"
+msgstr "Biyi"
+
+msgid "驻岁"
+msgstr "Zhushui"
+
+msgid "医学会"
+msgstr "Medical Society"
+
+msgid "听弦塔"
+msgstr "Tingxian Towers"
+
+msgid "岁契基金"
+msgstr "Long Covenant Fund"
+
+msgid "永乐局"
+msgstr "Yongle Bureau"
+
+msgid "蓬莱公所"
+msgstr "Penglai Guildhall"
+
+msgid "造身公所"
+msgstr "Bodymaking Guild"
+
+msgid "铅字报馆"
+msgstr "Lead-Type Press"
+
+# Race descriptions
+msgid "蓬莱的人类议员首先是大明的朝使。他们依靠永乐港维持朝贡、海贸和一条需要不断补充未然的全球航路，而蓬莱原生种族越被期限、竞争和劳作压迫，产生的未然也越多。因此朝廷总能把更重的征敛、更低的工钱和更繁忙的贸易解释成“国用所需”，并要求更多议员听从永乐轮运局——不是因为人类更多，而是因为控制航路便足以控制很多事情。"
+msgstr "Penglai's human legislators are first and foremost envoys of the Great Ming. They rely on Yongle Harbor to sustain tribute, maritime trade, and a global route that constantly consumes Weiran. The more Penglai's native peoples are pressed by deadlines, competition, and labor, the more Weiran they produce. The court can therefore justify heavier levies, lower wages, and busier trade as necessities of state, while demanding that more legislators heed the Yongle Bureau—not because humans are more numerous, but because controlling the route is enough to control many other things."
+
+msgid "朝使把税课与生产视为维持联合官署、岁贡和远洋航路的根本。征敛不足或产出落后，都会被解释为蓬莱正在脱离朝廷能够掌握的秩序。"
+msgstr "The imperial envoys regard taxation and production as the foundations of the joint administration, annual tribute, and ocean routes. Weak revenues or lagging output are read as signs that Penglai is slipping beyond the court's grasp."
+
+msgid "偃偶既是有姓名、有责任、有选票的公民，又是能够买卖、出租、抵押和出口的商品。它们要求更完整的人格权，却并不打算因此放弃身契，反而认为只有真正拥有自己，才有资格决定怎样出售自己。偃偶争取的因此不是逃离市场，而是取得作为一个完整的人进入市场、甚至把自己卖得更彻底的权利。"
+msgstr "Yan'ou are citizens with names, duties, and votes, yet also commodities that can be bought, leased, mortgaged, and exported. They demand fuller personhood without intending to abolish body contracts; on the contrary, they argue that only those who truly own themselves have the right to decide how to sell themselves. Their struggle is not to escape the market, but to enter it as complete persons—even to sell themselves more completely."
+
+msgid "偃偶不再以公共指标形成独立的种族年度期望；其议席的普通政治压力来自造身公所。"
+msgstr "Yan'ou no longer form an independent annual expectation around public metrics; the ordinary political pressure on their seats comes from the Bodymaking Guild."
+
+msgid "南柯睡着时会进入一个已经实现其理想社会的“理想国”，醒来后却承担着蓬莱最繁重的取能、维修与未然工程。别人嘲笑他们贪睡，他们却比谁都清楚现实本可以有另一种活法。因此南柯要求更好的工钱与生活，并试图用工会、合作社，最终把梦里已经存在的制度真正造进现实。"
+msgstr "When Nanke sleep, they enter a Utopia where their ideal society already exists; awake, they shoulder Penglai's hardest energy extraction, maintenance, and Weiran engineering. Others mock them for sleeping too much, but no one knows better that reality could be organized differently. Nanke therefore demand better wages and lives, using unions and cooperatives in an attempt to build into reality the institutions that already exist in their dreams."
+
+msgid "南柯承担蓬莱最重的现实劳动，也最在意劳动是否还有位置、成果是否能换成生活。就业或消费落后时，他们会认为现实正在离梦中那个更好的社会越来越远。"
+msgstr "Nanke bear Penglai's heaviest physical labor and care most about whether there is still work to do and whether its fruits can sustain a life. When employment or consumption falls behind, they see reality drifting farther from the better society of their dreams."
+
+msgid "桃花妖曾生活在会主动遮蔽道路的桃源里，土地、宗族与生活资料很少需要服从外界的价格和期限。现代市场却把粮食、木材、土地和劳作都变成税课、货价和不断催促的供货单。于是他们相信疲惫并不是因为世界还不够开放，而是因为道路开得太多了——只要把权力重新收回地方，把往来慢下来，生活自然会恢复秩序。"
+msgstr "Peach Blossom Spirits once lived in Taoyuan, whose paths concealed themselves from outsiders. Land, kinship, and the means of life rarely had to obey outside prices or deadlines. Modern markets turned grain, timber, land, and labor into taxes, prices, and ever-urgent delivery orders. They therefore believe exhaustion comes not from a world that is insufficiently open, but from having opened too many roads: return power to the local community, slow exchange down, and life will recover its order."
+
+msgid "桃源关心的不是账面扩张，而是土地与生命资料是否仍然丰足，并真正进入日常生活。生产或消费落后时，他们会把原因归咎于外界征敛、贸易和现代化对地方生活的侵入。"
+msgstr "Taoyuan cares less about growth on paper than whether land and the means of life remain abundant and actually reach everyday households. When production or consumption falls behind, they blame outside levies, trade, and modernization for intruding on local life."
+
+msgid "比翼曾替蓬莱保存文字、历法与知识，也因此长期把自己视为本土文化最可靠的解释者。汉语官署、印刷、海贸教育和外来技术让这种地位迅速消失，他们便把失业、传承断裂和机会减少理解成外来者夺走了原本属于自己的位置。于是，比翼越来越希望让本族语言、知识传统乃至政治组织重新成为蓬莱的中心。"
+msgstr "Biyi once preserved Penglai's writing, calendars, and knowledge, and long regarded themselves as the most reliable interpreters of its native culture. Chinese-language administration, printing, maritime education, and imported technology rapidly eroded that status. They came to understand unemployment, broken traditions, and dwindling opportunities as outsiders taking what had once been theirs. Biyi increasingly seek to restore their language, intellectual traditions, and even political institutions to the center of Penglai."
+
+msgid "比翼把知识地位的流失首先体验为职位与发展机会减少。就业不足会成为两半共同的焦虑；阴月又担心公共机构缺少税课，阳月则担心新的知识产业缺少投资。"
+msgstr "Biyi experience the loss of intellectual status first as fewer jobs and fewer opportunities. Weak employment troubles both halves; in Yin months they also worry that public institutions lack tax revenue, while in Yang months they fear new knowledge industries lack investment."
+
+msgid "驻岁曾替各族见证旧约、调停争端，因为寿命漫长，人们相信他们比谁都懂得等待。但这个几乎无法繁衍的种族，也曾因害怕落后而追逐更快的生产、更早的收益和更激烈的竞争，最终只剩下玩家与助手。如今他们对“危机将至”格外迟疑，并非天生超然，而是因为整个种族已经为这种恐惧付过一次代价。"
+msgstr "Zhushui once witnessed old covenants and mediated disputes among every people. Because they lived so long, others believed no one understood patience better. Yet this almost infertile people once feared being left behind and chased faster production, earlier returns, and harsher competition until only the player and the assistant remained. Their hesitation toward every warning that a crisis is coming is not innate detachment; their entire people have already paid for that fear once."
+
+msgid "驻岁并不追求增长，只把五项公共指标的零点视为共同底线。任何一项跌入负值，都意味着玩家正在把一次极端构筑维持得太久，连助手也开始怀疑是否还值得继续。"
+msgstr "Zhushui do not seek growth. They treat zero across the five public metrics as a common floor. If any metric falls below zero, the player has kept an extreme arrangement in place too long, and even the assistant begins to wonder whether it is worth continuing."
+
+# Interest-group descriptions
+msgid "人类医药传入蓬莱后，人们很快发现，同一味药、同一种疗法落在不同种族身上，往往会产生截然不同的结果。来自世界各地的医生因此汇聚蓬莱，与长期保存异族知识的比翼学者共同建立了医学会。如今，从药物、诊疗到异族病例与医学知识，几乎都掌握在这个学术共同体手中——它既是研究蓬莱生命的最高学府，也是蓬莱医药业事实上的垄断者。"
+msgstr "After human medicine reached Penglai, it soon became clear that the same drug or treatment could produce radically different results in different peoples. Physicians from around the world gathered on the island and, together with Biyi scholars who had long preserved knowledge of other peoples, founded the Medical Society. Today this academic community controls nearly everything from medicines and clinical practice to case records and medical knowledge: it is both Penglai's foremost institution for the study of life and the de facto monopoly of its medical industry."
+
+msgid "以遍布全岛的古老听弦塔为名，掌握未然取能、未然胆制造、能源配给与相关技术开发的组织。没有人知道那些古塔从何而来，但今日蓬莱的工场、偃偶、航船和远距通信都离不开从塔中取出的未然。于是，谁掌握听弦塔，谁便握住了这个工业时代最接近血液的东西。"
+msgstr "Named for the ancient Tingxian Towers scattered across the island, this organization controls Weiran extraction, Weiran-cell manufacture, energy distribution, and related technology. No one knows where the old towers came from, but Penglai's factories, Yan'ou, ships, and long-distance communications all depend on the Weiran drawn from them. Whoever controls the towers therefore holds the closest thing this industrial age has to blood."
+
+msgid "在人类带来白银与铜钱以前，各族便已经以未然互相借贷；那些跨越漫长年月仍能兑现的契约，大多需要驻岁出面作保。围绕这种信用逐渐形成的岁契基金延续至今，成为蓬莱几乎唯一真正意义上的银行，经营存贷、收债以及由此衍生的金融业务。岛上无数本土商号、工场与小业主都是它的债务人，因此岁契基金代表的从来不只是一家银行，而是整个依靠借来的钱维持运转的本土商业社会。"
+msgstr "Long before humans brought silver and copper coin, Penglai's peoples lent Weiran to one another. Contracts expected to remain valid across great spans of time usually required a Zhushui guarantor. The credit institutions that grew around those guarantees became the Long Covenant Fund, now almost the island's only bank in the modern sense, handling deposits, loans, debt collection, and related finance. Countless local firms, workshops, and small proprietors owe it money, so the Fund represents more than a bank: it represents an entire local commercial society kept running on borrowed funds."
+
+msgid "从永乐港的贡船、码头、仓栈与远洋船队中成长起来的庞大商办机构，几乎垄断了蓬莱与外界之间的航运。漫长海路总与沉船、失货和延期相伴，永乐局于是又替船货承担风险，并由此发展出保险、信托、股份等尚显稚嫩的金融业务。今天，人们托它把货送往世界，也把一部分风险、财富与未来交到它手中。"
+msgstr "A vast commercial institution grown from Yongle Harbor's tribute ships, docks, warehouses, and ocean fleets, the Yongle Bureau nearly monopolizes shipping between Penglai and the outside world. Long voyages bring wrecks, lost cargo, and delays, so the Bureau began underwriting those risks and developed still-young businesses in insurance, trusts, and shares. Today people entrust it not only with carrying goods into the world, but with part of their risk, wealth, and future."
+
+msgid "掌管行身制造、机谱、机件规格、身契登记与维修网络的庞大公所。每一具新偃偶的诞生、每一次大修乃至身体如何被买卖，都绕不开它制定的标准。它既把自己称作偃偶一族得以延续的保障，也让偃偶从出生起便活在它的账册、工场与契约之中。"
+msgstr "A vast guild controlling body manufacture, machine schematics, component standards, body-contract registration, and maintenance networks. Every new Yan'ou, every major repair, and even the terms on which bodies are bought and sold must pass through standards it sets. It calls itself the guarantee of Yan'ou continuity, while ensuring that every Yan'ou lives from birth inside its ledgers, workshops, and contracts."
+
+msgid "蓬莱的报纸、告示、统计与公共消息几乎都从这里排印出去。它不仅经营新闻，也决定什么值得成为新闻、哪些数字应当登上头版，以及全岛在同一个早晨讨论什么。《听弦》正是其发行的严肃政治经济报纸；许多蓬莱人以为自己只是从报纸上了解世界，却很少意识到，他们了解世界的方式本身也掌握在报馆手中。"
+msgstr "Nearly all of Penglai's newspapers, notices, statistics, and public bulletins are typeset here. The Press does not merely sell news; it decides what deserves to become news, which figures belong on the front page, and what the whole island will discuss on the same morning. Tingxian, its serious political and economic paper, is only the clearest example. Many Penglai residents think they merely learn about the world from newspapers, rarely noticing that the very form of that knowledge is also in the Press's hands."
+
+# Constitution display strings
+msgid "蓬莱约法"
+msgstr "Penglai Constitution"
+
+msgid "要求"
+msgstr "Requirements"
+
+msgid "无"
+msgstr "None"
+
+msgid "保守"
+msgstr "Conservative"
+
+msgid "中立"
+msgstr "Moderate"
+
+msgid "激进"
+msgstr "Radical"
+
+msgid "互助"
+msgstr "Mutual Aid"
+msgid "内附"
+msgstr "Incorporation"
+msgid "包容"
+msgstr "Equal Citizenship"
+msgid "合作社"
+msgstr "Cooperatives"
+msgid "否决"
+msgstr "Imperial Veto"
+msgid "哲人王"
+msgstr "Philosopher-King"
+msgid "国有化"
+msgstr "Nationalization"
+msgid "地区自治"
+msgstr "Regional Autonomy"
+msgid "外藩"
+msgstr "Outer Dependency"
+msgid "封闭"
+msgstr "Closure"
+msgid "工会"
+msgstr "Trade Unions"
+msgid "开放"
+msgstr "Openness"
+msgid "托拉斯"
+msgstr "Trusts"
+msgid "承认"
+msgstr "Recognition"
+msgid "有限"
+msgstr "Limited Government"
+msgid "有限监管"
+msgstr "Limited Regulation"
+msgid "朝贡"
+msgstr "Tributary Status"
+msgid "比翼化"
+msgstr "Biyiization"
+msgid "汉化"
+msgstr "Sinicization"
+msgid "法团"
+msgstr "Corporatism"
+msgid "理想国"
+msgstr "Utopia"
+msgid "自治"
+msgstr "Local Autonomy"
+msgid "自由贸易"
+msgstr "Free Trade"
+msgid "行省"
+msgstr "Province"
+msgid "言论自由"
+msgstr "Freedom of Speech"
+msgid "透明政府"
+msgstr "Transparent Government"
+msgid "锦衣卫"
+msgstr "Jinyiwei"
+
+msgid "在桃花妖留下并重新扩建的互助网络中，地方公所、宗族、寺庙与邻里组织共同承担生活资料的分配。收入降低的部分被公共供给、互助信用和非市场交换抵消，因此桃花妖不再把许多变化理解为消费危机。"
+msgstr "Within the mutual-aid networks inherited from the Peach Blossom Spirits and rebuilt on a larger scale, local guildhalls, clans, temples, and neighborhood organizations share responsibility for distributing the means of life. Public provision, mutual credit, and non-market exchange offset lost income, so the Peach Blossom Spirits no longer interpret many changes as consumption crises."
+
+msgid "将人类正式纳入蓬莱的地方共同体结构，允许他们加入桃花妖地方集团，并规定其他种族也可在本地获得同等资格。原本人类专属的政治要求不再以独立集团形式存在。"
+msgstr "Formally incorporates humans into Penglai's local communities, allowing them to join Peach Blossom local groups and granting the same local status to other peoples. Political demands formerly exclusive to humans no longer exist as a separate group."
+
+msgid "承认人类是蓬莱政治共同体的一部分，并禁止按种族区别民事与政治权利。"
+msgstr "Recognizes humans as part of Penglai's political community and prohibits distinctions in civil or political rights based on people."
+
+msgid "通过合作社制度，让劳动者共同持有部分生产资料并参与经营决策。南柯对就业增长的年度期望逐年降低，而消费要求相应提高。"
+msgstr "Uses cooperatives to give workers collective ownership of part of the means of production and a role in management. Nanke's annual expectation for employment growth falls over time while their consumption demand rises accordingly."
+
+msgid "赋予朝廷对议会法案的否决权。人类议席不再正常表决；只有当法案偏离帝国利益时，他们才会以统一的反对票阻止法案通过。"
+msgstr "Grants the imperial court a veto over parliamentary bills. Human seats no longer vote normally; only when a bill departs from imperial interests do they cast a unified opposition vote to block it."
+
+msgid "比翼的知识联合会正式取得国家主导权，并将议会从蓬莱政治中移除。"
+msgstr "The Biyi knowledge federation formally takes command of the state and removes parliament from Penglai politics."
+
+msgid "将重要银行、工场和商业设施纳入公共所有，使经济活动改由国家主导。现代派比翼不再以投资增长作为年度政治目标。"
+msgstr "Places major banks, workshops, and commercial facilities under public ownership, shifting economic direction to the state. Modernist Biyi no longer treat investment growth as an annual political objective."
+
+msgid "将种族事务交由各地区分别管理。比翼议席此后不再直接响应全岛统一集团，而是由各地区自己的利益组织影响。"
+msgstr "Delegates affairs of each people to regional administration. Biyi seats no longer answer directly to island-wide groups and are instead influenced by interest organizations in their own regions."
+
+msgid "人类在蓬莱成为大明体系中的特殊外藩人口，其政治地位独立于本地居民，也不再属于桃花妖公所。"
+msgstr "Makes humans in Penglai a special outer dependency population within the Great Ming system, politically distinct from local residents and no longer part of the Peach Blossom guildhalls."
+
+msgid "限制人口迁徙与外来永久定居，使人类更难把蓬莱当作普通的移居地。"
+msgstr "Restricts migration and permanent settlement from outside, making it harder for humans to treat Penglai as an ordinary destination for immigration."
+
+msgid "允许劳动者建立正式工会，并通过罢工参与政治。南柯提案更加频繁，南柯议员也会在不利于工人利益的法案上集体反对。"
+msgstr "Allows workers to form formal trade unions and participate in politics through strikes. Nanke proposals become more frequent, and Nanke legislators collectively oppose bills harmful to workers' interests."
+
+msgid "进一步向外来商人、移民与技术人员开放蓬莱。人类在蓬莱更容易生活和定居，但传统生活方式受到的冲击也更大。"
+msgstr "Further opens Penglai to foreign merchants, migrants, and technical workers. Humans find it easier to live and settle on the island, while traditional ways of life face greater disruption."
+
+msgid "允许大型企业、银行和工业资本进一步集中，使垄断性组织成为现代化的主要力量。现代派比翼不再以投资增长作为年度政治目标。"
+msgstr "Allows further concentration of large firms, banks, and industrial capital, making monopolistic organizations a principal force of modernization. Modernist Biyi no longer treat investment growth as an annual political objective."
+
+msgid "正式承认蓬莱属于大明政治秩序的一部分，但朝廷只保留较弱的制度性特权。"
+msgstr "Formally recognizes Penglai as part of the Great Ming political order while leaving the court only limited institutional privileges."
+
+msgid "限制政府干预经济的范围，同时继续保护本土企业、居民和基本公共结构。"
+msgstr "Limits the scope of government intervention in the economy while continuing to protect local firms, residents, and basic public institutions."
+
+msgid "对政治献金进行有限监管。献金仍然普遍合法，但较大的金额更容易引起调查与丑闻。"
+msgstr "Introduces limited regulation of political donations. Donations remain broadly legal, but larger sums are more likely to trigger investigations and scandals."
+
+msgid "确立朝贡关系，以岁贡换取大明对蓬莱内部政治的有限承认。"
+msgstr "Establishes a tributary relationship, exchanging annual tribute for limited Great Ming recognition of Penglai's internal politics."
+
+msgid "以比翼传统重新解释现代公共制度，使学校、行政与公共文化更多采用比翼语言与知识体系。"
+msgstr "Reinterprets modern public institutions through Biyi traditions, bringing more Biyi language and systems of knowledge into schools, administration, and public culture."
+
+msgid "将汉语、明式制度与人类政治文化作为蓬莱现代化的主要标准。"
+msgstr "Makes the Chinese language, Ming institutions, and human political culture the principal standards of Penglai's modernization."
+
+msgid "将主要利益集团正式纳入国家结构，使它们不再只是外部游说者，而成为制度化政治代表。人类原有的永乐局集团不再以独立形式存在。"
+msgstr "Formally incorporates the major interest groups into the state, turning them from outside lobbyists into institutional political representatives. The former human Yongle Bureau group no longer exists independently."
+
+msgid "南柯开始把梦中理想社会的制度完整带入现实：生产资料公有，重要资源统一配置，政治依靠对公共事务的直接参与而不是私人资本与利益集团运作。"
+msgstr "Nanke begin bringing the institutions of their dreamed ideal society fully into reality: public ownership of the means of production, unified allocation of major resources, and politics based on direct participation in public affairs rather than private capital and interest-group bargaining."
+
+msgid "建立普遍地方自治制度，由地方共同体自行处理大量事务。"
+msgstr "Establishes general local autonomy, leaving a wide range of affairs to local communities themselves."
+
+msgid "取消对外贸易限制，让商品和资本能够更自由地进出蓬莱，并对其他种族开放更多市场与居留机会。"
+msgstr "Removes restrictions on foreign trade, allowing goods and capital to move more freely in and out of Penglai and opening more market and residency opportunities to other peoples."
+
+msgid "将蓬莱明确作为大明的一省来治理，由朝廷制度直接决定其人类人口和政治结构。"
+msgstr "Explicitly governs Penglai as a province of the Great Ming, with imperial institutions directly determining its human population and political structure."
+
+msgid "保障公开批评、出版与政治讨论的权利，并降低国家对报刊和公共表达的干预。"
+msgstr "Protects the rights of public criticism, publication, and political debate while reducing state intervention in newspapers and public expression."
+
+msgid "要求政府公开关键财政、议会和行政信息，使腐败与秘密交易更难被掩盖。"
+msgstr "Requires the government to disclose key fiscal, parliamentary, and administrative information, making corruption and secret deals harder to conceal."
+
+msgid "允许朝廷的秘密警察系统在蓬莱长期活动，以维护帝国秩序并压制被视为威胁的政治活动。"
+msgstr "Allows the imperial secret-police system to operate permanently in Penglai in order to preserve imperial order and suppress political activity deemed threatening."
+
+# Dialogue
+msgid "老板。"
+msgstr "Boss."
+msgid "你能不能有点坐相？"
+msgstr "Could you at least sit properly?"
+msgid "驻岁真的只剩我们两个了？"
+msgstr "Are we really the only two Zhushui left?"
+msgid "咱俩都认识多少年了，这屋里又没别人。我坐那么端正，给谁看？"
+msgstr "How many years have we known each other? There's nobody else in here. Who am I supposed to sit up straight for?"
+msgid "嗯。你一个，我一个。驻岁只是不会老，又不是不会死；死一个少一个，偏偏还生不回来。"
+msgstr "Yeah. You and me. Zhushui don't age, but that doesn't mean we can't die. Every death leaves one fewer, and we can't make more."
+
+msgid "一位驻岁画家留下的旧画。画的是他亲眼所见——大明宝船第一次驶入蓬莱，船影几乎遮住了整片海湾。"
+msgstr "An old painting left by a Zhushui artist. He painted what he saw himself: the first Great Ming treasure ships entering Penglai, their silhouettes nearly covering the whole bay."
+msgid "画这幅画的人呢？"
+msgstr "What happened to the painter?"
+msgid "那天后来怎样了？"
+msgstr "What happened after that day?"
+msgid "驻岁不会老死，却不是死不了。他后来总怕自己落在时代后面，什么都要赶，最后死在一场本不必发生的赶工事故里。"
+msgstr "Zhushui do not die of age, but they can still die. He became terrified of falling behind the times and rushed everything, until he died in an accident caused by haste that never needed to happen."
+msgid "起初是惊讶、畏惧，也有人欢喜。后来是争地、停市和战争。再后来谁也赢不了谁，只好坐到一张桌前——于是有了今天的议会。"
+msgstr "First came amazement and fear, and for some, delight. Then came disputes over land, closed markets, and war. In the end no one could defeat anyone else, so they had to sit at the same table—and that became today's parliament."
+
+msgid "一只素瓷瓶，最早是人类商船带来的舶货。几百年买卖往来以后，各族的器物、衣食和习惯早已你中有我——如今反倒很难说什么还只属于谁。"
+msgstr "A plain porcelain vase, first brought here as cargo on human merchant ships. After centuries of trade, every people's objects, clothing, food, and habits have mingled so thoroughly that it is now hard to say what belongs to only one of them."
+
+msgid "会同常见的灯。形制还是旧式的，材料、玻璃和做工却早已混进了几百年海贸带来的洋式手艺。"
+msgstr "A common lamp in Huitong. Its form is still traditional, but its materials, glass, and workmanship have long absorbed techniques brought by centuries of maritime trade."
+msgid "这算什么风格？"
+msgstr "What style is this?"
+msgid "它怎么亮的？"
+msgstr "How does it produce light?"
+msgid "没人特意给它起过名字。明制的骨架没变，洋布、玻璃、皮革和新工艺却早成了日用品。用久了，也就没人觉得它们是两回事了。"
+msgstr "No one ever gave it a special name. The Ming-style frame never changed, while imported cloth, glass, leather, and newer techniques became ordinary materials. After long enough, no one thought of them as separate styles at all."
+msgid "不烧油，也不用电。未然胆里的未然经引弦管路转成光，安静得像电灯，只是燃料来自蓬莱人的焦虑。"
+msgstr "It burns no oil and uses no electricity. Weiran from the cell is carried through Yinxian conduits and converted into light, as quietly as an electric lamp—except its fuel comes from the anxieties of Penglai's people."
+
+# Common generated terms
+msgid "全部种族"
+msgstr "All peoples"
+msgid "全部指标"
+msgstr "All metrics"
+msgid "税課"
+msgstr "Tax"
+msgid "消費"
+msgstr "Consumption"
+msgid "生産"
+msgstr "Production"
+msgid "就業"
+msgstr "Employment"
+msgid "投資"
+msgstr "Investment"
+
+# Constitution requirements/effects templates
+msgid "政治献金被发现概率为%s"
+msgstr "Political donations have a %s chance of being discovered"
+msgid "草案%s不得高于当前%s"
+msgstr "Draft %s must not exceed current %s"
+msgid "草案%s不得低于当前%s"
+msgstr "Draft %s must not fall below current %s"
+msgid "%s事件每月有额外%s概率进入提醒"
+msgstr "%s events gain an additional %s monthly chance to enter alerts"
+msgid "%s年度期望增长率%s"
+msgstr "%s annual expectation growth %s"
+msgid "议会名称改为%s"
+msgstr "Parliament renamed to %s"
+msgid "合并%s与%s为%s"
+msgstr "Merge %s and %s into %s"
+msgid "%s影响力%s"
+msgstr "%s influence %s"
+msgid "%s对%s来源提案的基础共同立场%s"
+msgstr "%s baseline shared stance toward proposals from %s %s"
+msgid "%s席位改由对应地方利益集团影响；地方集团要求降低%s"
+msgstr "%s seats are influenced by their corresponding local interest groups; local groups demand a %s reduction"
+msgid "修改集团：%s"
+msgstr "Modify group: %s"
+msgid "修改种族：%s"
+msgstr "Modify people: %s"
+msgid "%d + ceil(%s席位数 × %s)"
+msgstr "%d + ceil(%s seats × %s)"
+msgid "%d + ceil(总席位数 × %s)"
+msgstr "%d + ceil(total seats × %s)"
+msgid "每%s个月，从%s中自动收到%s份提案（%s）"
+msgstr "Every %s months, automatically receive %s proposals from %s (%s)"
+msgid "%s参加可变席位分配，保留固定席位"
+msgstr "%s participate in variable-seat allocation and retain fixed seats"
+msgid "%s参加可变席位分配，取消固定席位"
+msgstr "%s participate in variable-seat allocation and lose fixed seats"
+msgid "%s不参加可变席位分配，保留固定席位"
+msgstr "%s do not participate in variable-seat allocation and retain fixed seats"
+msgid "%s不参加可变席位分配，取消固定席位"
+msgstr "%s do not participate in variable-seat allocation and lose fixed seats"
+msgid "受%s影响的%s在草案使%s低于%s时投反对票；忽略提案收益并额外%s；月度增长最大按%s计算。"
+msgstr "%s-influenced %s vote against a draft when it pushes %s below %s; proposal gains are ignored with an additional %s; monthly growth is capped at %s."
+msgid "要求%s不低于%s"
+msgstr "Requires %s to be at least %s"
+msgid "要求%s不高于%s"
+msgstr "Requires %s to be at most %s"
+msgid "要求%s高于%s"
+msgstr "Requires %s to exceed %s"
+msgid "要求%s低于%s"
+msgstr "Requires %s to be below %s"
+
+# Common punctuation used by generated descriptions
+msgid "、"
+msgstr ", "
+msgid "；"
+msgstr "; "

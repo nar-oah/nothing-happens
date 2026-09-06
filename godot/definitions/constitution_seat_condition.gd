@@ -42,21 +42,21 @@ func is_met(context: RunContext) -> bool:
 
 
 func get_description() -> String:
-	var comparison_text: String = ["不低于", "不高于", "高于", "低于"][comparison]
+	var comparison_text: String = [_t("不低于"), _t("不高于"), _t("高于"), _t("低于")][comparison]
 	var threshold := "%s%s%%" % [comparison_text, String.num(required_rate * 100.0, 2).trim_suffix(".0")]
 	var groups := _get_groups()
 	if groups.is_empty():
 		if race == null:
-			return "未指定种族或利益集团，无法满足"
-		return "种族：%s\n席位占比：%s" % [race.display_name, threshold]
+			return _t("未指定种族或利益集团，无法满足")
+		return _t("种族：%s\n席位占比：%s") % [_t(race.display_name), threshold]
 	var names := PackedStringArray()
 	for group in groups:
-		names.append(group.display_name)
-	return "范围：%s\n利益集团：%s\n各集团影响力占比：%s\n满足方式：%s" % [
-		"全议会" if race == null else race.display_name,
-		"、".join(names),
+		names.append(_t(group.display_name))
+	return _t("范围：%s\n利益集团：%s\n各集团影响力占比：%s\n满足方式：%s") % [
+		_t("全议会") if race == null else _t(race.display_name),
+		_t("、").join(names),
 		threshold,
-		"任一满足" if match_mode == MatchMode.ANY else "全部满足",
+		_t("任一满足") if match_mode == MatchMode.ANY else _t("全部满足"),
 	]
 
 
@@ -80,3 +80,7 @@ func _compare(rate: float) -> bool:
 			return rate < required_rate
 		_:
 			return rate >= required_rate
+
+
+func _t(text: String) -> String:
+	return text if text.is_empty() else str(TranslationServer.translate(text))

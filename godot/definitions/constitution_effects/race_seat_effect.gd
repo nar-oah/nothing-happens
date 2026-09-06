@@ -21,6 +21,9 @@ func applies_to(race: RaceDefinition) -> bool:
 
 
 func get_description() -> String:
-	var variable_text := "参加" if participates_in_variable_seat_allocation else "不参加"
-	var fixed_text := "保留" if fixed_seat_enabled else "取消"
-	return "%s%s可变席位分配，%s固定席位" % [_format_races(races), variable_text, fixed_text]
+	var template: String
+	if participates_in_variable_seat_allocation:
+		template = "%s参加可变席位分配，保留固定席位" if fixed_seat_enabled else "%s参加可变席位分配，取消固定席位"
+	else:
+		template = "%s不参加可变席位分配，保留固定席位" if fixed_seat_enabled else "%s不参加可变席位分配，取消固定席位"
+	return _t(template) % _format_races(races)

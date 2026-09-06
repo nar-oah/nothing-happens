@@ -34,6 +34,10 @@ parliament_right={
 ]
 }
 
+[internationalization]
+
+locale/translations=PackedStringArray("res://localization/en.po", "res://localization/en_dynamic.po")
+
 [physics]
 
 3d/physics_engine="Jolt Physics"
