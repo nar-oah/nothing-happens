@@ -17,7 +17,9 @@ export const liveZhCN: Record<string, string> = {
 	'error.snapshot_failed': '无法保存当前状态。',
 	'error.save_write_failed': '无法写入存档，原存档已保留。',
 	'error.invalid_save': '存档文件无效或损坏。',
+	'error.invalid_snapshot': '无法恢复存档状态。',
 	'error.unsupported_save_version': '不支持此存档版本。',
+	'error.stale_state': '游戏状态已变化，请重试。',
 	'error.stale_command': '游戏状态已变化，请重试。'
 };
 
@@ -37,7 +39,9 @@ export const liveEn: Record<keyof typeof liveZhCN, string> = {
 	'error.snapshot_failed': 'Unable to save the current state.',
 	'error.save_write_failed': 'Unable to write the save. The previous save has been kept.',
 	'error.invalid_save': 'The save file is invalid or damaged.',
+	'error.invalid_snapshot': 'Unable to restore the saved state.',
 	'error.unsupported_save_version': 'This save version is not supported.',
+	'error.stale_state': 'The game state has changed. Please try again.',
 	'error.stale_command': 'The game state has changed. Please try again.'
 };
 

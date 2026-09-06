@@ -50,6 +50,40 @@ test('state.full requires authoritative supported settings', () => {
 	}
 });
 
+test('CEF settings requests await full sync and quit failures reject through command.error', async () => {
+	const sent: OutboundMessage[] = [];
+	let listener: CefIpcListener | undefined;
+	let snapshot = makeLiveState(8);
+	const target = {
+		sendIpcMessage: (raw: string) => sent.push(JSON.parse(raw)),
+		ipcMessage: { addListener: (next: CefIpcListener) => { listener = next; } }
+	} as unknown as CefBridgeWindow;
+	const client = new CefIpcClient(target, {
+		onMessage: (message) => { if (message.type === 'state.full') snapshot = message.payload; }
+	});
+	client.connect();
+	const request = client.request('settings.language.set', { language: 'en' });
+	assert.equal(snapshot.language, 'zh_CN');
+	assert.deepEqual(sent[1].payload, { language: 'en' });
+	listener?.(JSON.stringify({
+		type: 'state.full', request_id: sent[1].request_id,
+		payload: { ...snapshot, language: 'en' }
+	}));
+	await request;
+	assert.equal(snapshot.language, 'en');
+	assert.equal(snapshot.state_version, 8);
+	const quit = client.request('app.quit', {});
+	assert.deepEqual(sent[2].payload, {});
+	listener?.(JSON.stringify({
+		type: 'command.error', request_id: sent[2].request_id,
+		payload: { code: 'save_write_failed', message: 'Unable to save.' }
+	}));
+	await assert.rejects(quit, (error) => error instanceof CommandError && error.code === 'save_write_failed');
+	assert.equal(snapshot.state_version, 8);
+	assert.equal(snapshot.language, 'en');
+	client.destroy();
+});
+
 test('IPC supports all save commands and validates the save list in full and list responses', () => {
 	const saves = [
 		{
