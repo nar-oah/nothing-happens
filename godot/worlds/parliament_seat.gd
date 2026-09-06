@@ -19,6 +19,6 @@ func get_normalized_ui_anchor() -> Vector2:
 		return Vector2.ZERO
 	var anchor_position := ui_anchor.get_global_transform_with_canvas().origin
 	return Vector2(
-		clampf(anchor_position.x / viewport_size.x, 0.0, 1.0),
-		clampf(anchor_position.y / viewport_size.y, 0.0, 1.0)
+		anchor_position.x / viewport_size.x,
+		anchor_position.y / viewport_size.y
 	)

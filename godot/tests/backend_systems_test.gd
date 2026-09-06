@@ -12,6 +12,7 @@ const AnnualFlowAndBalanceTests = preload("res://tests/backend/test_annual_flow_
 const CollapseTests = preload("res://tests/backend/test_collapse.gd")
 const SavedBillTests = preload("res://tests/backend/test_saved_bills.gd")
 const UiIntegrationTests = preload("res://tests/backend/test_ui_integration.gd")
+const ParliamentLayoutTests = preload("res://tests/backend/test_parliament_layout.gd")
 const TransitionFlowTests = preload("res://tests/backend/test_transition_flow.gd")
 const SaveGameTests = preload("res://tests/backend/test_save_game.gd")
 const SettingsTests = preload("res://tests/backend/test_settings.gd")
@@ -47,6 +48,7 @@ func _run() -> void:
 		CollapseTests.new(),
 		SavedBillTests.new(),
 		UiIntegrationTests.new(),
+		ParliamentLayoutTests.new(),
 		TransitionFlowTests.new(),
 		SaveGameTests.new(),
 		SettingsTests.new(),

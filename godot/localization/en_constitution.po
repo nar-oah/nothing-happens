@@ -1,0 +1,261 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: nothing-happens\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# Constitution board row names
+msgid "外交"
+msgstr "Foreign Relations"
+
+msgid "文化"
+msgstr "Culture"
+
+msgid "偃偶"
+msgstr "Yan'ou"
+
+msgid "桃源"
+msgstr "Taoyuan"
+
+msgid "团体"
+msgstr "Organization"
+
+msgid "监管"
+msgstr "Oversight"
+
+# Constitution board column names
+msgid "异制"
+msgstr "Alternative"
+
+msgid "变制"
+msgstr "Reform"
+
+msgid "偏制"
+msgstr "Variant"
+
+msgid "常制"
+msgstr "Standard"
+
+msgid "新制"
+msgstr "New Order"
+
+msgid "强制"
+msgstr "Mandate"
+
+msgid "极制"
+msgstr "Extreme"
+
+# Constitution article descriptions: Mutual Aid
+msgid "并不是所有共同劳动都需要一座正式组织，也不是所有争端都要变成谈判与罢工。"
+msgstr "Not all shared labor needs a formal organization, and not every dispute has to become a negotiation or a strike."
+
+msgid "互助让南柯重新依靠旧有的换班、照护、借贷和彼此顶工。它保留劳动者之间的联系，却放弃用一个统一组织去约束产业和议会。"
+msgstr "Mutual Aid returns the Nanke to older practices of swapping shifts, caring for one another, lending, and covering one another's work. It preserves ties among workers while giving up the attempt to bind industry and parliament through a single organization."
+
+msgid "世界仍然很累，只是大家再次把如何撑下去当成彼此之间的私事。"
+msgstr "The world is still exhausting; people simply go back to treating how they endure it as a private matter among themselves."
+
+# Incorporation
+msgid "与其每遇大事都争论朝廷究竟能管多少，不如把这个问题一次写死。"
+msgstr "Rather than argue at every crisis over how much authority the court really has, settle the question once and for all."
+
+msgid "内附承认大明在岛上的最高统治权，让联合政府逐渐从各族共同议事的机关，变成一座允许异族参与的地方官署。朝廷因此更容易替蓬莱处理麻烦；代价是，哪些麻烦还算“蓬莱自己的事”，会越来越难说清。"
+msgstr "Incorporation recognizes the Great Ming as the supreme authority on the island, gradually turning the joint government from an institution where the peoples deliberate together into a local administration that permits non-humans to participate. The court can therefore handle Penglai's troubles more easily; the cost is that it becomes harder and harder to say which troubles are still ‘Penglai's own affairs.’"
+
+# Inclusion
+msgid "官署说汉语，比翼仍保存自己的文字、历法和学问；不同族群在公共事务里使用同一套语言，又各自带着自己的旧传统生活。"
+msgstr "Government offices use Chinese, while the Biyi retain their own writing, calendar, and scholarship; different peoples conduct public affairs in a shared language while continuing to live with their own old traditions."
+
+msgid "这套制度没有解决比翼对失去知识地位的不满，只是默认一种朴素的妥协：公共世界可以改变，但至少族内还有些东西不必跟着改变。"
+msgstr "This arrangement does not resolve Biyi resentment over their lost intellectual status. It simply accepts a plain compromise: the public world may change, but at least some things within the community need not change with it."
+
+# Cooperative
+msgid "如果共同劳动创造的东西最终仍由别人决定如何生产、分配和出售，那么工会争来的底线始终只是谈判条件。"
+msgstr "If the products of collective labor are still controlled by others—how they are produced, distributed, and sold—then the floor won by unions remains only a bargaining condition."
+
+msgid "合作社试图更进一步：劳动者不只在坏条件出现时拒绝工作，也开始共同掌握生产本身。原本属于南柯的劳动问题因此越过族群边界，成为所有加入组织的人共同承担的事情。"
+msgstr "The cooperative goes a step further: workers do not merely refuse work when conditions turn bad; they begin to control production itself together. What began as a Nanke labor question thus crosses ethnic boundaries and becomes a shared concern of everyone who joins the organization."
+
+# Rejection
+msgid "蓬莱已经给了偃偶姓名、财产和议席，再继续承认下去，究竟还剩多少东西不能被叫作“人”？"
+msgstr "Penglai has already given the Yan'ou names, property, and seats in parliament. If recognition goes further, what will remain that cannot be called a ‘person’?"
+
+msgid "否决派选择把界线停在这里。一身两籍的矛盾继续存在，但至少制度不再试图把它推到更远的地方。"
+msgstr "The rejectionists choose to stop the line here. The contradiction of one body under two registries remains, but at least the system no longer tries to push it any farther."
+
+# Philosopher-King
+msgid "蓬莱把政权交给驻岁，本来就是因为相信活得足够久的人能够看得比普通人更远。"
+msgstr "Penglai entrusted power to the Zhushui in the first place because it believed those who live long enough can see farther than ordinary people."
+
+msgid "既然执政者已经见过几代人的兴衰，又何必让那些只能看到眼前几十年的人监督他们？哲人王制度建立在一份简单而危险的信任上：长寿本身足以保证审慎。"
+msgstr "If a ruler has already watched generations rise and fall, why should they be supervised by people who can see only a few decades ahead? Philosopher-King rule rests on a simple and dangerous faith: longevity itself is enough to guarantee prudence."
+
+# Nationalization
+msgid "外来的市场夺走了知识，本地的小集团又把公共需要切成各自的买卖。比翼给出的答案不是退回过去，而是让国家把这些东西重新收拢起来。"
+msgstr "Foreign markets took away knowledge, while small local groups carved public needs into separate businesses. The Biyi answer is not to retreat into the past, but to have the state gather these things back together."
+
+msgid "于是产业、任命和资源开始汇入蓬莱公所。市场造成的混乱被统一调配取代，而谁能够解释“公共利益”，也越来越集中到同一个地方。"
+msgstr "Industry, appointments, and resources therefore begin to flow into the Penglai Guildhall. Unified allocation replaces the disorder created by the market, while the authority to define the ‘public interest’ is concentrated in the same place."
+
+# Regional Autonomy
+msgid "如果每个地方都有自己的土地、祖先、生活和麻烦，那么“整个蓬莱共同的利益”究竟是谁的利益？"
+msgstr "If every place has its own land, ancestors, way of life, and troubles, whose interests are really meant by ‘the common interests of all Penglai’?"
+
+msgid "地区自治把这个怀疑贯彻到底。跨地区集团退出议会，每一席只代表一个具体地方；任何想改变全岛的方案，都必须重新面对那些地图上彼此分开的生活。"
+msgstr "Regional Autonomy carries that doubt to its conclusion. Cross-regional groups leave parliament, and each seat represents only one specific place; any plan that seeks to change the whole island must face again the separate lives scattered across the map."
+
+msgid "议会最终变成了蓬莱本身：许多地方彼此相邻，却再没有谁能轻易替所有地方说话。"
+msgstr "Parliament ultimately becomes Penglai itself: many places side by side, with no one able to speak easily for them all."
+
+# Outer Dependency
+msgid "大明守着永乐港与远洋航路，蓬莱诸族守着自己的土地、习惯和议会。谁都没有真正制服谁，于是双方把这份妥协写成了制度：蓬莱自行治理岛内事务，却仍向朝廷称臣纳贡，也容许朝廷在最要紧的时候伸手进来。"
+msgstr "The Great Ming holds Yongle Harbor and the ocean routes; Penglai's peoples hold their own lands, customs, and parliament. Neither side ever truly subdued the other, so they wrote the compromise into law: Penglai governs its internal affairs, yet still professes allegiance and pays tribute to the court, allowing the court to reach in at the moments that matter most."
+
+msgid "这不是独立，也不是统治，而是一份维持了太久、以至于所有人都习惯把它当成自然秩序的停战书。"
+msgstr "This is neither independence nor direct rule, but a truce maintained so long that everyone has grown used to treating it as the natural order."
+
+# Closure
+msgid "桃花妖看见的答案比其他人简单得多：麻烦之所以越来越多，是因为路开得太多。"
+msgstr "The Peach Blossom Spirits see a simpler answer than everyone else: troubles keep multiplying because too many roads have been opened."
+
+msgid "于是每个地方重新只为自己负责，每名议员先回答故土的需要，再谈全岛的宏大方案。蓬莱仍有议会，但桃源不再愿意让一个跨岛组织替所有村镇同时作答。"
+msgstr "Each place therefore returns to answering only for itself, and each legislator answers first to the needs of home before discussing grand plans for the whole island. Penglai still has a parliament, but Taoyuan no longer wants any island-wide organization to answer for every town and village at once."
+
+# Union
+msgid "南柯守着听弦塔、维修机器、制造未然胆，也最常被人抱怨“怎么又睡着了”。"
+msgstr "The Nanke tend the Tingxian Towers, repair machinery, and make Weiran cells—and are also the people most often accused of ‘falling asleep again.’"
+
+msgid "工会把一个长期被当作个人懒散的问题重新解释成劳动问题：若全岛都离不开南柯的技术，那么他们至少应当有权决定自己以什么条件继续工作。梦仍会偶尔把人带走，但现实里终于有人替醒着的人守住底线。"
+msgstr "The union recasts a problem long dismissed as individual laziness as a labor question: if the whole island depends on Nanke expertise, they should at least have the right to decide under what conditions they keep working. Dreams will still carry someone away from time to time, but at last someone in waking life defends the floor for those who remain awake."
+
+# Opening
+msgid "道路既然已经修到桃源门口，再不断封闭它们，只会让土地、货物与人困在越来越小的范围里。"
+msgstr "Now that roads have already reached Taoyuan's doorstep, repeatedly closing them will only trap land, goods, and people within ever smaller bounds."
+
+msgid "开放派选择接受桃源已经属于整个蓬莱的事实。道路、土地产品和贸易重新进入全岛网络，祖地不再以隔绝来换取安宁。"
+msgstr "The Open faction accepts that Taoyuan is already part of Penglai as a whole. Roads, products of the land, and trade re-enter the island-wide network, and the ancestral homeland no longer buys peace through isolation."
+
+msgid "他们相信桃源可以生活在世界之中，而不是永远藏在世界之外。"
+msgstr "They believe Taoyuan can live within the world instead of hiding outside it forever."
+
+# Trust
+msgid "当所有身体都可以自由交易，所有产业都可以自由兼并，最后留下的最自由状态，也许就是所有人面对同一个买家。"
+msgstr "When every body can be freely traded and every industry freely merged, perhaps the freest condition left is one in which everyone faces the same buyer."
+
+msgid "托拉斯把产业集团、合同标准、行身市场乃至议会影响收进一个组织。偃偶终于成为完整的市场主体，也因此迎来了一个可以把完整的“自己”全部交给市场的世界。"
+msgstr "The Trust gathers industrial groups, contract standards, the market in living bodies, and even parliamentary influence into a single organization. The Yan'ou finally become complete market subjects—and thereby enter a world in which they can hand their complete selves over to the market."
+
+msgid "他们没有摆脱商品身份，只是让商品与公民之间最后那条界线失去了意义。"
+msgstr "They do not escape commodity status; they merely make the last boundary between commodity and citizen meaningless."
+
+# Recognition
+msgid "既然偃偶能够思考、签约、投票和承担责任，那么它的身体理应首先属于它自己。"
+msgstr "If Yan'ou can think, sign contracts, vote, and bear responsibility, then their bodies should belong first to themselves."
+
+msgid "承认把每具行身视为完整公民，却没有因此废除身契。相反，只有拥有完整身体所有权的人，才能最彻底地决定如何出售、出租和抵押自己。"
+msgstr "Recognition treats every living body as a full citizen without abolishing body contracts. On the contrary, only someone with full ownership of their body can decide most completely how to sell, lease, or mortgage it."
+
+msgid "偃偶争取到了不再被别人卖掉的自由，也争取到了把自己卖得更自由的权利。"
+msgstr "The Yan'ou win the freedom not to be sold by others—and also the right to sell themselves more freely."
+
+# Limited Status
+msgid "偃偶可以拥有姓名、财产、合同和议席，也可以像货物一样被登记、出租、抵押和转卖。"
+msgstr "Yan'ou may own names, property, contracts, and seats in parliament, and they may also be registered, leased, mortgaged, and resold like goods."
+
+msgid "蓬莱没有解决这个矛盾，只是学会了同时承认两边都是真的。一具行身既是公民，也是商品；只要日子还能继续，这份“一身两籍”就被视作足够合理。"
+msgstr "Penglai has not resolved this contradiction; it has merely learned to accept both sides as true at once. A living body is both citizen and commodity, and so long as life continues, this ‘one body, two registries’ is considered reasonable enough."
+
+# Limited Oversight
+msgid "即便驻岁值得信任，偶尔有人看看账本，也不算冒犯。"
+msgstr "Even if the Zhushui deserve trust, it is no insult for someone to look over the accounts now and then."
+
+msgid "有限监管承认执政者可能犯错，却仍把监督视作例外而非常态。政府允许部分事情被看见，但保留足够多的阴影，好让政治继续以原来的方式运转。"
+msgstr "Limited Oversight accepts that rulers can make mistakes, yet still treats supervision as an exception rather than the norm. The government allows some things to be seen while preserving enough shadow for politics to continue much as before."
+
+# Tribute
+msgid "既然只是奉表称臣、按期入贡，又何必让朝廷继续过问岛内每一件事？"
+msgstr "If this relationship means only submitting memorials of allegiance and paying tribute on schedule, why should the court keep intervening in every island affair?"
+
+msgid "朝贡派愿意保留天朝名分，却要求把名分重新缩回礼仪与贡路之中。蓬莱仍向大明低头，但这一低头应当止于海岸，不该一路伸进议会。"
+msgstr "The Tribute faction is willing to preserve the formal hierarchy of the Celestial Court, but wants to confine it once again to ceremony and tribute routes. Penglai still bows to the Great Ming, but the bow should stop at the shore rather than reach all the way into parliament."
+
+# Biyification
+msgid "如果蓬莱必须拥有一种共同文化，比翼相信最合适的当然是自己保存了数百年的那一种。"
+msgstr "If Penglai must have a common culture, the Biyi naturally believe the best choice is the one they have preserved for centuries."
+
+msgid "他们曾经替全岛记事、定历、传授知识；如今，他们要求国家重新承认这份古老资格。比翼化不是单纯恢复旧文字，而是把比翼理解世界的方式重新变成所有人的公共规则。"
+msgstr "They once kept records, set calendars, and transmitted knowledge for the entire island; now they demand that the state recognize that ancient qualification again. Biyification is not merely the restoration of an old script, but the return of the Biyi way of understanding the world as a public rule for everyone."
+
+# Sinicization
+msgid "既然大家已经在同一个政府、同一个市场和同一份报纸里生活，为什么还要维持一套只有少数人掌握的文字与历法？"
+msgstr "If everyone already lives under the same government, in the same market, and in the same newspaper, why maintain a writing system and calendar mastered by only a minority?"
+
+msgid "汉化把这种疑问变成制度答案：公共生活只保留汉语，比翼旧有的知识体系退出官署与教育。它让交流变得简单，也告诉比翼，他们最珍视的那些东西今后只能算私人的旧习。"
+msgstr "Sinicization turns that question into an institutional answer: public life keeps only Chinese, while the Biyi's old knowledge system leaves government and education. Communication becomes simpler, but the Biyi are told that what they value most will henceforth count only as private custom."
+
+# Corporatist State
+msgid "既然国家需要统一调配，产业需要统一组织，议会又总被无数私利拖慢，那么为什么还要保留那么多彼此争吵的集团？"
+msgstr "If the state needs unified allocation, industry needs unified organization, and parliament is always slowed by countless private interests, why preserve so many quarrelling groups?"
+
+msgid "法团给出的答案是：不需要。国家、产业与政治被压进同一个庞大的组织里，支持它的人替国家说话，不属于它的人则天然站在国家的对面。"
+msgstr "The Corporatist State answers: there is no need. State, industry, and politics are compressed into one vast organization; those who support it speak for the state, while those outside it are naturally placed against the state."
+
+msgid "比翼终于重新取得定义蓬莱秩序的权力——只是如今，他们保存的已经不再是旧日典籍，而是一整套国家机器。"
+msgstr "The Biyi finally regain the power to define Penglai's order—only now what they preserve is no longer old texts, but an entire state machine."
+
+# Utopia
+msgid "南柯睡着时曾无数次生活在另一个世界。那里有更先进的工具、更好的劳动制度，也有一种不必把疲惫当成发展代价的生活。"
+msgstr "While asleep, the Nanke have lived countless times in another world. It has more advanced tools, better labor institutions, and a way of life that does not treat exhaustion as the price of development."
+
+msgid "他们并不知道现实一定会走到那里，所以决定亲手把它建出来。"
+msgstr "They do not know that reality will necessarily arrive there, so they decide to build it themselves."
+
+msgid "理想国不是预言实现，而是南柯终于拒绝在醒来后接受“现实只能如此”。从此，梦中的标准不再是慰藉，而成为现实制度必须达到的最低线。"
+msgstr "Utopia is not a prophecy fulfilled, but the Nanke finally refusing to accept, upon waking, that ‘reality can only be this way.’ From now on, the standard of the dream is no longer consolation but the minimum that real institutions must meet."
+
+# Autonomy
+msgid "桃源各地仍由自己的家系、长辈与合枝议处理生活，只有那些实在绕不开的事情才拿到联合政府里讨论。"
+msgstr "Life in Taoyuan's different localities is still handled by their own families, elders, and branch councils; only matters that truly cannot be avoided are taken to the joint government."
+
+msgid "他们参加蓬莱，却从来不觉得蓬莱有必要进入生活的每一个角落。道路可以相通，议会可以存在，只要外面的变化不要来得太深、太快。"
+msgstr "They participate in Penglai, but have never believed Penglai needs to enter every corner of life. Roads may connect and parliament may exist, as long as outside change does not come too deeply or too quickly."
+
+# Free Trade
+msgid "大明的旗号可以留在港口，但货物不该因为挂着谁的旗就先过栈桥。"
+msgstr "The Great Ming's banners may remain in the harbor, but goods should not cross the gangway first merely because of whose flag they carry."
+
+msgid "自由贸易取消朝廷在航路、关税和货物上的优先权，把永乐港变成所有商人都按同一套规矩竞争的港口。可当旧有特权真正消失，原本只想做生意的轮运局，也会突然发现自己肩上还有“官督”二字。"
+msgstr "Free Trade abolishes the court's priority over routes, tariffs, and cargo, making Yongle Harbor a port where all merchants compete under the same rules. Yet once the old privileges truly disappear, the Yongle Bureau—which only wanted to do business—suddenly remembers the words ‘state-supervised’ attached to its name."
+
+# Province
+msgid "争论结束了：蓬莱是大明的一省。"
+msgstr "The argument is over: Penglai is a province of the Great Ming."
+
+msgid "原来的议员仍然坐在那里，各族的产业、恩怨和生活也没有凭空消失，只是他们从此不再以本族的名义决定国家应该成为什么样子。旧议会没有被摧毁，它只是换了匾额，然后继续办公。"
+msgstr "The old legislators still sit where they did; the peoples' industries, grudges, and lives have not vanished. They simply no longer decide what the state should become in the name of their own peoples. The old parliament was not destroyed. Its signboard changed, and it kept working."
+
+# Freedom of Speech
+msgid "监督不应依赖官署愿意公开多少，而应允许任何人去问、去写、去查。"
+msgstr "Supervision should not depend on how much the government chooses to disclose; anyone should be free to ask, write, and investigate."
+
+msgid "报馆、议员和普通人因此更容易发现那些原本只在办公室里解决的交易。政府未必因此更清白，但越来越难假装没人知道。"
+msgstr "Newspapers, legislators, and ordinary people therefore find it easier to uncover deals once settled only inside offices. The government may not become cleaner, but it becomes much harder to pretend no one knows."
+
+# Transparent Government
+msgid "既然权力属于联合政府，那么联合政府做过的交易就没有理由藏起来。"
+msgstr "If power belongs to the joint government, there is no reason for the deals made by that government to remain hidden."
+
+msgid "透明政府把监督推到最彻底的程度：不再赌事情会不会被发现，而是假定一切迟早都会公开。秘密政治并没有因此消失，只是每一次秘密都必须按“终将成为新闻”的方式计算代价。"
+msgstr "Transparent Government pushes oversight to its furthest point: instead of gambling on whether something will be discovered, it assumes everything will eventually become public. Secret politics does not disappear, but every secret must be priced as something that will ‘eventually become news.’"
+
+# Jinyiwei
+msgid "若问题在于政府知道得太晚，那么最直接的答案，就是派更多人去更早地知道一切。"
+msgstr "If the problem is that the government learns too late, the most direct answer is to send more people to learn everything earlier."
+
+msgid "锦衣卫绕过公开监督，把耳目伸进尚未成为新闻的地方。它确实能更早发现正在形成的问题，可当整个社会知道有人正在寻找危机时，每一个风声也会显得更像危机。"
+msgstr "The Jinyiwei bypass public oversight and extend their eyes and ears into places not yet turned into news. They really can discover emerging problems earlier; but once society knows someone is looking for crises, every rumor begins to look more like one."
+
+msgid "蓬莱获得了一双更敏锐的眼睛，也顺便学会了更加紧张地看待自己。"
+msgstr "Penglai gains a sharper pair of eyes—and, along the way, learns to watch itself more anxiously."
