@@ -137,7 +137,7 @@
 	let selectedConstitutionArticle = $state<number>();
 	let loadRevision = $state(0);
 	let saveError = $state<unknown>(null);
-	let quitting = $state(false);
+	let errorOperation = $state<'save' | 'settings' | 'quit'>('save');
 	let settingsBusy = $state(false);
 	let newspaperOpen = $state(true);
 	let newspaperBusy = $state(false);
@@ -206,13 +206,13 @@
 		if (settingsBusy || !client) return;
 		const requestClient = client;
 		settingsBusy = true;
-		saveError = null;
-		quitting = type === 'app.quit';
+		if (type === 'app.quit' || errorOperation === 'settings') saveError = null;
 		try {
 			await mutationQueue;
 			if (client === requestClient) await requestClient.request(type, payload);
 		} catch (error: unknown) {
 			saveError = error;
+			errorOperation = type === 'app.quit' ? 'quit' : 'settings';
 		} finally {
 			settingsBusy = false;
 		}
@@ -263,7 +263,7 @@
 		if (newspaperBusy || newspaperLeaving) return;
 		newspaperBusy = true;
 		saveError = null;
-		quitting = false;
+		errorOperation = 'save';
 		const action = getSaveAction(slot, loading);
 		try {
 			await requestMutation(action.type, action.payload);
@@ -501,7 +501,7 @@
 					})}
 				onExitClick={() => changeSetting('app.quit', {})}
 				saveError={saveError
-					? quitting
+						? errorOperation === 'quit'
 						? $t('live.quitFailed', { reason: translateCommandError(saveError, $t) })
 						: translateCommandError(saveError, $t)
 					: ''}

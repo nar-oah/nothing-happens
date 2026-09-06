@@ -21,7 +21,7 @@
 	}: Props = $props();
 
 	let geometry = $derived(createMarkGeometry(direction));
-	let content = $derived(createPolicyMarkContent(policy, baseline));
+	let content = $derived(createPolicyMarkContent(policy, baseline, $t));
 
 	function setDirection(next: MarkDirection) {
 		if (direction === next) return;

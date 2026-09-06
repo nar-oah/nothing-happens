@@ -1,5 +1,5 @@
 import {
-	METRIC_DISPLAY_NAMES,
+	getMetricDisplayName,
 	MetricConditionOperator,
 	PolicyEffectFormula,
 	calculatePolicyEffectAmount,
@@ -8,7 +8,8 @@ import {
 	type MetricValues,
 	type PolicyDefinition,
 	type PolicyEffect
-} from '$lib/game';
+} from '../../game/index.ts';
+import { translate, type Translate } from '../../i18n/index.ts';
 
 export const MARK_WIDTH = 230;
 export const MARK_HEIGHT = 86;
@@ -34,42 +35,43 @@ const CONDITION_SYMBOLS: Record<MetricConditionOperator, string> = {
 
 export function createPolicyMarkContent(
 	policy: PolicyDefinition,
-	baseline: MetricValues
+	baseline: MetricValues,
+	translator: Translate = translate
 ): { requirement: MarkFaceContent; effect: MarkFaceContent } {
 	const condition = policy.condition;
 	const symbol = CONDITION_SYMBOLS[condition.operator];
-	const leftName = METRIC_DISPLAY_NAMES[condition.left_metric];
-	const rightName = METRIC_DISPLAY_NAMES[condition.right_metric];
+	const leftName = getMetricDisplayName(condition.left_metric, translator);
+	const rightName = getMetricDisplayName(condition.right_metric, translator);
 	const leftValue = getMetricValue(baseline, condition.left_metric);
 	const rightValue = getMetricValue(baseline, condition.right_metric) * condition.right_multiplier;
 	const multiplier = formatMultiplier(condition.right_multiplier);
-	const triggerText = isMetricConditionMet(condition, baseline) ? '本批觸發' : '本批不觸發';
-	const effectRules = policy.effects.map(formatEffectRule);
+	const triggerText = translator(isMetricConditionMet(condition, baseline) ? 'mark.triggered' : 'mark.notTriggered');
+	const effectRules = policy.effects.map((effect) => formatEffectRule(effect, translator));
 	const effectAmounts = policy.effects.map((effect) => {
 		const amount = calculatePolicyEffectAmount(effect, baseline);
-		return `${METRIC_DISPLAY_NAMES[effect.target_metric]}${formatSigned(amount)}`;
+		return `${getMetricDisplayName(effect.target_metric, translator)}${formatSigned(amount)}`;
 	});
 	return {
 		requirement: {
-			headline: `所需\u3000${leftName}${symbol}${rightName}${multiplier}`,
-			detail: `今數\u3000${formatNumber(leftValue)}${symbol}${formatNumber(rightValue)}\u3000${triggerText}`
+			headline: translator('mark.required', { condition: `${leftName}${symbol}${rightName}${multiplier}` }),
+			detail: translator('mark.current', { condition: `${formatNumber(leftValue)}${symbol}${formatNumber(rightValue)}`, trigger: triggerText })
 		},
 		effect: {
-			headline: `效用\u3000${effectRules.length > 0 ? effectRules.join('；') : '無指標效果'}`,
-			detail: `單次\u3000${effectAmounts.length > 0 ? effectAmounts.join('；') : '無變化'}`
+			headline: translator('mark.effect', { effects: effectRules.length > 0 ? effectRules.join(translator('common.listSeparator')) : translator('mark.noEffects') }),
+			detail: translator('mark.once', { effects: effectAmounts.length > 0 ? effectAmounts.join(translator('common.listSeparator')) : translator('mark.noChange') })
 		}
 	};
 }
 
-function formatEffectRule(effect: PolicyEffect): string {
-	const target = METRIC_DISPLAY_NAMES[effect.target_metric];
-	const sourceA = METRIC_DISPLAY_NAMES[effect.source_a];
+function formatEffectRule(effect: PolicyEffect, translator: Translate): string {
+	const target = getMetricDisplayName(effect.target_metric, translator);
+	const sourceA = getMetricDisplayName(effect.source_a, translator);
 	const multiplier = formatMultiplier(effect.multiplier);
 	if (effect.formula === PolicyEffectFormula.METRIC_VALUE) {
-		return `${target}按${sourceA}${multiplier}變動`;
+		return translator('mark.change', { target, source: sourceA, multiplier });
 	}
-	const sourceB = METRIC_DISPLAY_NAMES[effect.source_b];
-	return `${target}按（${sourceA}－${sourceB}）${multiplier}變動`;
+	const sourceB = getMetricDisplayName(effect.source_b, translator);
+	return translator('mark.change', { target, source: `（${sourceA}－${sourceB}）`, multiplier });
 }
 
 function formatMultiplier(multiplier: number): string {
