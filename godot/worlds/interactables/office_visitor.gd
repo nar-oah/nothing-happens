@@ -10,13 +10,16 @@ var hover_texture: Texture2D
 @onready var hitbox: CollisionShape2D = $Hitbox
 
 
+func _ready() -> void:
+	mouse_entered.connect(_on_mouse_entered)
+	mouse_exited.connect(_on_mouse_exited)
+
+
 func set_portrait(portrait: Texture2D, hover: Texture2D) -> void:
 	visual.texture = portrait
 	normal_texture = portrait
 	hover_texture = hover
 	_update_hitbox()
-	mouse_entered.connect(_on_mouse_entered)
-	mouse_exited.connect(_on_mouse_exited)
 
 
 func _update_hitbox() -> void:
