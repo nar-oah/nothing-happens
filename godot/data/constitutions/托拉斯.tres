@@ -29,7 +29,7 @@
 [ext_resource type="Resource" uid="uid://w2npxj4g5fd1" path="res://data/races/variants/托拉斯/桃花妖（托拉斯）.tres" id="variant_24"]
 [ext_resource type="Resource" uid="uid://b00fecc3hc6jm" path="res://data/races/variants/托拉斯/南柯（托拉斯）.tres" id="variant_25"]
 [ext_resource type="Resource" uid="uid://be70qiitqiiqp" path="res://data/races/variants/托拉斯/驻岁（托拉斯）.tres" id="variant_26"]
-[ext_resource type="Resource" path="res://data/interest_groups/variants/造身公所（托拉斯）.tres" id="variant_group_28"]
+[ext_resource type="Resource" uid="uid://dl5bglvox4rw8" path="res://data/interest_groups/variants/造身公所（托拉斯）.tres" id="variant_group_28"]
 
 [sub_resource type="Resource" id="Effect_1"]
 script = ExtResource("effscript_race_seat_13")

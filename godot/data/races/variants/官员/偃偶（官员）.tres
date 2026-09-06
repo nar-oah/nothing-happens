@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="RaceDefinition" format=3 uid="uid://2jspjsoxvi4e"]
 
 [ext_resource type="Texture2D" uid="uid://3hwq83kguif0" path="res://assets/races/偃偶.png" id="2_0bfut"]
+[ext_resource type="Texture2D" uid="uid://ml5hcgjs8d6n" path="res://assets/races/偃偶悬停.png" id="2_pei3m"]
 [ext_resource type="Resource" uid="uid://b7vlc4eb8m4io" path="res://data/interest_groups/造身公所.tres" id="fixed_group"]
 [ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="script"]
 
@@ -12,5 +13,6 @@ description = "偃偶既是有姓名、有责任、有选票的公民，又是�
 event_description = "偃偶不再以公共指标形成独立的种族年度期望；其议席的普通政治压力来自造身公所。"
 fixed_interest_group = ExtResource("fixed_group")
 portrait = ExtResource("2_0bfut")
+hover_portrait = ExtResource("2_pei3m")
 increase_tax = true
 increase_production = true
