@@ -3,7 +3,9 @@ import test from 'node:test';
 import {
 	arePoliciesGameplayEquivalent,
 	areProposalsGameplayEquivalent,
+	calculateDraftProjectedMetrics,
 	calculatePureProposalTarget,
+	isMetricConditionMet,
 	reconcileSavedBill,
 	reconcileSavedBillProposals
 } from './rules.ts';
@@ -105,6 +107,62 @@ test('pure proposal target follows the same proposal effects used by the backend
 		),
 		{ tax: 90, consumption: 100, production: 107, employment: 100, investment: 100 }
 	);
+});
+
+test('draft projected metrics include policy chains for subsequent Left policy triggers', () => {
+	const current = {
+		tax: 100,
+		consumption: 100,
+		production: 100,
+		employment: 100,
+		investment: 100
+	};
+	const firstPolicy: PolicyDefinition = {
+		display_name: '先行政策',
+		condition: {
+			left_metric: Metric.TAX,
+			operator: MetricConditionOperator.GREATER_THAN_OR_EQUAL,
+			right_metric: Metric.INVESTMENT,
+			right_multiplier: 1
+		},
+		effects: [
+			{
+				target_metric: Metric.INVESTMENT,
+				formula: PolicyEffectFormula.METRIC_VALUE,
+				source_a: Metric.TAX,
+				source_b: Metric.TAX,
+				multiplier: 0.1
+			}
+		]
+	};
+	const nextPolicy: PolicyDefinition = {
+		display_name: '后续政策',
+		condition: {
+			left_metric: Metric.TAX,
+			operator: MetricConditionOperator.LESS_THAN,
+			right_metric: Metric.INVESTMENT,
+			right_multiplier: 1
+		},
+		effects: [
+			{
+				target_metric: Metric.PRODUCTION,
+				formula: PolicyEffectFormula.METRIC_GAP,
+				source_a: Metric.INVESTMENT,
+				source_b: Metric.TAX,
+				multiplier: 1
+			}
+		]
+	};
+
+	const baseline = calculateDraftProjectedMetrics(current, [], [firstPolicy]);
+	assert.deepEqual(baseline, { ...current, investment: 110 });
+	assert.equal(isMetricConditionMet(nextPolicy.condition, baseline), true);
+
+	assert.deepEqual(calculateDraftProjectedMetrics(current, [], [firstPolicy, nextPolicy]), {
+		...current,
+		production: 110,
+		investment: 110
+	});
 });
 
 test('saved bill reconciliation removes missing proposals and unavailable policies', () => {
