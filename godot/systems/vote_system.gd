@@ -79,7 +79,11 @@ func clear_donations(state: RunState) -> void:
 func calculate_projected_metrics(
 	draft: DraftBillState, pure_target: MetricValues, context: RunContext
 ) -> MetricValues:
-	return context.policy_system.calculate_immediate_result(pure_target, draft.policies)
+	return context.policy_system.calculate_draft_result(
+		context.state.metrics,
+		pure_target,
+		draft.policies
+	)
 
 
 func _calculate_seat_vote(
