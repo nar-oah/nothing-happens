@@ -57,6 +57,8 @@ func get_seat_anchors() -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	for seat in seats:
 		var anchor := seat.get_normalized_ui_anchor()
+		if anchor.x < 0.0 or anchor.x > 1.0 or anchor.y < 0.0 or anchor.y > 1.0:
+			continue
 		result.append({"seat_index": seat.seat_index, "x": anchor.x, "y": anchor.y})
 	return result
 
