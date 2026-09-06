@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { t } from '$lib/i18n';
+	import { t, type Translate } from '$lib/i18n';
 	import { untrack } from 'svelte';
 	import { Metric } from '$lib/game';
 	import ChoreFilter from '../chore/ChoreFilter.svelte';
-	import type { ChoreFilters } from '../chore/chore';
+	import { CHORE_ARCHIVE_OPTIONS, CHORE_METRIC_OPTIONS, type ChoreFilters } from '../chore/chore';
 	import Mark from '../mark/Mark.svelte';
 	import MemorialBillClosed from '../memorial/closed/MemorialBillClosed.svelte';
 	import MemorialConstitutionClosed from '../memorial/closed/MemorialConstitutionClosed.svelte';
@@ -96,6 +96,17 @@
 	);
 
 	let secondaryMode = $derived(getLeftSecondaryMode(scene));
+	let filterLabels = $derived({
+		类型: $t('left.filterType'),
+		指标: $t('left.filterMetrics'),
+		时间: $t('left.filterTime'),
+		数值: $t('left.filterValue'),
+		利益集团: $t('left.filterGroup')
+	});
+	let optionLabels = $derived(Object.fromEntries([
+		...CHORE_ARCHIVE_OPTIONS.map(({ key, text }) => [text, $t(`archive.${key}`)]),
+		...CHORE_METRIC_OPTIONS.map(({ key, text }) => [text, $t(`filter.${key}`)])
+	]));
 	let proposalItems: ProposalLeftItem[] = $derived(
 		items.filter((item): item is ProposalLeftItem => item.kind === 'proposal')
 	);
@@ -168,8 +179,8 @@
 		selectedProposals = toggleProposalSelection(selectedProposals, item);
 	}
 
-	function synthesisPreviewFor(item: ProposalLeftItem) {
-		return createProposalSynthesisPreview(selectedProposals, item);
+	function synthesisPreviewFor(item: ProposalLeftItem, translator: Translate) {
+		return createProposalSynthesisPreview(selectedProposals, item, translator);
 	}
 
 	function confirmSynthesis(negativeBase: ProposalLeftItem) {
@@ -179,8 +190,8 @@
 	}
 
 	function optionFor(item: ProposalLeftItem): string {
-		if (!confirming) return '選取';
-		return isSameLeftRef(selectedProposals[2].ref, item.ref) ? '取消' : '確認';
+		if (!confirming) return 'left.select';
+		return isSameLeftRef(selectedProposals[2].ref, item.ref) ? 'left.cancel' : 'left.confirm';
 	}
 
 	function activateOption(item: ProposalLeftItem) {
@@ -240,7 +251,7 @@
 		<MemorialProposalClosed
 			title={item.proposal.source_group.display_name}
 			lag={item.proposal.lag_months}
-			metrics={proposalToMemorialMetrics(item.proposal)}
+			metrics={proposalToMemorialMetrics(item.proposal, $t)}
 		/>
 	{/if}
 {/snippet}
@@ -251,7 +262,9 @@
 			<div class="filter-slot z-10 shrink-0">
 				<ChoreFilter
 					left={$t('left.archive')}
-					right={secondaryMode === 'synthesis' ? '合成' : '选择'}
+					right={$t(secondaryMode === 'synthesis' ? 'left.synthesis' : 'left.selection')}
+					labels={filterLabels}
+					{optionLabels}
 					bind:leftFilters
 					rightFilters={secondaryFilters}
 					isSwitch={activeMode === secondaryMode}
@@ -279,17 +292,17 @@
 					>
 						{#if selected}
 							<MemorialProposalOption
-								option={optionFor(item)}
+								option={$t(optionFor(item))}
 								lag={item.proposal.lag_months}
 								metrics={confirming
-									? synthesisPreviewFor(item).metrics
-									: proposalToMemorialMetrics(item.proposal)}
+									? synthesisPreviewFor(item, $t).metrics
+									: proposalToMemorialMetrics(item.proposal, $t)}
 							/>
 						{:else}
 							<MemorialProposalClosed
 								title={item.proposal.source_group.display_name}
 								lag={item.proposal.lag_months}
-								metrics={proposalToMemorialMetrics(item.proposal)}
+								metrics={proposalToMemorialMetrics(item.proposal, $t)}
 							/>
 					{/if}
 					</button>
@@ -332,10 +345,10 @@
 						<div class="shrink-0">
 							<MemorialHorizontal
 								contents={item.kind === 'constitution'
-									? constitutionToHorizontalContents(item.constitution)
+									? constitutionToHorizontalContents(item.constitution, $t)
 									: item.kind === 'bill'
-										? billToHorizontalContents(item.bill)
-										: proposalToHorizontalContents(item.proposal)}
+										? billToHorizontalContents(item.bill, $t)
+										: proposalToHorizontalContents(item.proposal, $t)}
 								onOpenChange={() => onItemSelect?.(item, 'archive')}
 							>
 								{#snippet closed()}
