@@ -14,6 +14,7 @@
 		'raceItems' | 'interestGroupItems' | 'term' | 'year' | 'month' | 'onNewspaperOpen'
 	> & {
 		title: string;
+		stateVersion?: number;
 		constitution: MemorialConstitutionData;
 		columns: ConstitutionColumnDto[];
 		governingMonths: number;
@@ -30,6 +31,7 @@
 		month,
 		onNewspaperOpen,
 		title,
+		stateVersion,
 		constitution,
 		columns,
 		governingMonths,
@@ -81,6 +83,7 @@
 				<MemorialVerticalConstitution
 					{title}
 					{constitution}
+					{stateVersion}
 					{unlockableSections}
 					{onArticleSelectionChange}
 					onSectionUnlock={unlockSection}

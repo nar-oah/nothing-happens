@@ -464,6 +464,7 @@
 			/>
 		{:else if snapshot.ui_mode === 'constitution'}
 			<ConstitutionView
+				stateVersion={snapshot.state_version}
 				raceItems={topItems.raceItems}
 				interestGroupItems={topItems.interestGroupItems}
 				governingMonths={snapshot.constitution.available_governing_months}

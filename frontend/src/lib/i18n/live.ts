@@ -2,6 +2,7 @@ import { CommandError } from '../bridge/protocol.ts';
 import type { Translate } from './index.ts';
 
 export const liveZhCN: Record<string, string> = {
+	'common.listSeparator': '；',
 	'live.proposalCount': '{group}提案数',
 	'live.saveFailed': '存档操作失败。',
 	'live.settingsFailed': '无法更新设置。',
@@ -24,6 +25,7 @@ export const liveZhCN: Record<string, string> = {
 };
 
 export const liveEn: Record<keyof typeof liveZhCN, string> = {
+	'common.listSeparator': '; ',
 	'live.proposalCount': '{group} proposals',
 	'live.saveFailed': 'The save operation failed.',
 	'live.settingsFailed': 'Unable to update settings.',
