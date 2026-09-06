@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	type Props = {
 		left: string;
 		right: string;
@@ -24,7 +25,7 @@
 <button
 	type="button"
 	class="flex cursor-pointer flex-col items-start border-0 bg-transparent p-0 text-left disabled:cursor-default"
-	aria-label={`切换至${isSwitch ? left : right}`}
+	aria-label={$t('ui.switch', { text: isSwitch ? left : right })}
 	aria-pressed={isSwitch}
 	{disabled}
 	data-block-world-input

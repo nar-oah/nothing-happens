@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { untrack } from 'svelte';
 	import { NEWSPAPER_COMMENTS } from '$lib/content/newspaper-comments';
 	import MorphText from '../text/MorphText.svelte';
@@ -24,7 +25,7 @@
 <button
 	class="flex h-full w-full flex-col items-start gap-[3px] overflow-hidden border-0 bg-transparent px-8 py-5 text-left text-ink-primary"
 	type="button"
-	aria-label="切换报纸评论"
+	aria-label={$t('newspaper.commentAria')}
 	onmouseenter={() => (hovering = true)}
 	onmouseleave={() => (hovering = false)}
 	onfocus={() => (hovering = true)}

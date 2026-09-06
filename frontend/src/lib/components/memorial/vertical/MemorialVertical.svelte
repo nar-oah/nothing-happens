@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import type { Snippet } from 'svelte';
 	import MemorialVerticalFold from './MemorialVerticalFold.svelte';
 	import { VERTICAL_FOLD_HEIGHT, VERTICAL_FOLD_SKEW, VERTICAL_FOLD_WIDTH } from '../constants';
@@ -29,7 +30,7 @@
 	class="relative overflow-visible"
 	style:width={`${count * VERTICAL_FOLD_WIDTH}px`}
 	style:height={`${VERTICAL_FOLD_HEIGHT + maxY - minY}px`}
-	aria-label="展开的竖版奏折"
+	aria-label={$t('memorial.openVertical')}
 	data-block-world-input
 >
 	{#each skews as skew, index (index)}

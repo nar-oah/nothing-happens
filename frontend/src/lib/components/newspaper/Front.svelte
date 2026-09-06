@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import {
 		formatNewspaperNumber,
 		getNewspaperEventStateLabel,
@@ -24,7 +25,7 @@
 	<div class="flex h-full w-full flex-col gap-[3px] overflow-hidden px-8 py-5">
 		<div class="flex w-full shrink-0 items-start overflow-hidden bg-surface-indigo px-5 py-2">
 			<p class="typo-newspaper-caption min-w-0 flex-1 text-surface-amber">
-				頭版 / FRONT PAGE · 已核實事件
+				{$t('newspaper.front')}
 			</p>
 		</div>
 		<div class="flex min-h-0 w-full flex-1 items-start gap-8 overflow-hidden text-ink-primary">
@@ -32,7 +33,7 @@
 				<div class="flex shrink-0 items-start gap-8 whitespace-nowrap">
 					<p class="typo-newspaper-headline shrink-0">{getNewspaperRaceLabel(props.race)}</p>
 					<div class="typo-newspaper-caption flex shrink-0 items-center gap-[3px]">
-						<span>需求</span><span>/</span><span>{getNewspaperMetricLabel(props.metric)}</span><span
+						<span>{$t('newspaper.requirement')}</span><span>/</span><span>{getNewspaperMetricLabel(props.metric)}</span><span
 							>{props.value}</span
 						>
 					</div>
@@ -45,11 +46,11 @@
 				<p class="typo-newspaper-data-hero shrink-0 text-center">
 					{formatNewspaperNumber(props.countdown)}
 				</p>
-				<p class="typo-newspaper-caption shrink-0 text-center">个月</p>
+				<p class="typo-newspaper-caption shrink-0 text-center">{$t('newspaper.months')}</p>
 				<div
 					class="typo-newspaper-caption flex shrink-0 items-start gap-[6px] border-t border-ink-primary"
 				>
-					<span>強度 {props.strength}%</span><span>·</span><span
+					<span>{$t('newspaper.strength', { strength: props.strength })}</span><span>·</span><span
 						>{getNewspaperEventStateLabel(props.state)}</span
 					>
 				</div>

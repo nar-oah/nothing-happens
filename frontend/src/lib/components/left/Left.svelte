@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { untrack } from 'svelte';
 	import { Metric } from '$lib/game';
 	import ChoreFilter from '../chore/ChoreFilter.svelte';
@@ -244,12 +245,12 @@
 	{/if}
 {/snippet}
 
-<aside class="left-hover-area" aria-label="左侧案牍" data-block-world-input>
+<aside class="left-hover-area" aria-label={$t('left.aria')} data-block-world-input>
 	<div class="left-content flex h-full w-[390px] flex-col items-start">
 		{#if secondaryMode}
 			<div class="filter-slot z-10 shrink-0">
 				<ChoreFilter
-					left="案牍"
+					left={$t('left.archive')}
 					right={secondaryMode === 'synthesis' ? '合成' : '选择'}
 					bind:leftFilters
 					rightFilters={secondaryFilters}

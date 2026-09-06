@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import MarkFace from './MarkFace.svelte';
 	import MarkSeal from './MarkSeal.svelte';
 	import { MARK_SEAL_SOURCE_SIZE, createMarkGeometry, createPolicyMarkContent } from './mark';
@@ -38,7 +39,7 @@
 	class="relative block h-$mark-height w-$mark-width cursor-pointer overflow-hidden border-0 bg-transparent p-0 text-left disabled:cursor-default"
 	style:--mark-width={`${geometry.width}px`}
 	style:--mark-height={`${geometry.height}px`}
-	aria-label={direction === 'up' ? '查看政策效果' : '查看政策条件'}
+	aria-label={$t(direction === 'up' ? 'mark.viewEffect' : 'mark.viewCondition')}
 	aria-pressed={direction === 'down'}
 	onclick={toggleDirection}
 >

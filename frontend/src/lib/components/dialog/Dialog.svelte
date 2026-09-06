@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { asset } from '$app/paths';
 
 	type Props = {
@@ -30,7 +31,7 @@
 		type="button"
 		class="relative block w-full cursor-pointer border-0 bg-transparent p-0 text-left"
 		style="aspect-ratio: 644 / 132"
-		aria-label="对话"
+		aria-label={$t('ui.dialogue')}
 		data-block-world-input
 		{onclick}
 	>
@@ -40,7 +41,7 @@
 	<section
 		class="relative w-full"
 		style="aspect-ratio: 644 / 132"
-		aria-label="对话"
+		aria-label={$t('ui.dialogue')}
 		data-block-world-input
 	>
 		{@render dialogContent()}

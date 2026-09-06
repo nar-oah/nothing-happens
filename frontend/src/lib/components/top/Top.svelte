@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { onMount } from 'svelte';
 	import ChoreItem from '../chore/ChoreItem.svelte';
 	import ChoreSwitch from '../chore/ChoreSwitch.svelte';
@@ -43,7 +44,7 @@
 	}
 </script>
 
-<nav class="flex w-screen items-start justify-end gap-12 overflow-hidden" aria-label="顶部信息">
+<nav class="flex w-screen items-start justify-end gap-12 overflow-hidden" aria-label={$t('ui.top')}>
 	<div bind:this={scrollContainer} class="top-items min-w-0 flex-1 overflow-x-auto">
 		<div class="ml-auto flex w-max items-start" data-block-world-input>
 			<div class="w-[282px] shrink-0" aria-hidden="true"></div>
@@ -62,7 +63,7 @@
 						<button
 							type="button"
 							class="shrink-0 cursor-pointer border-0 bg-transparent p-0"
-							aria-label={`展开${item.item.text}`}
+							aria-label={$t('ui.expand', { text: item.item.text })}
 							onclick={() => open(item)}
 						>
 							<ChoreItem {...item.item} isRow />
@@ -75,8 +76,8 @@
 
 	<div class="shrink-0">
 		<ChoreSwitch
-			left="种族"
-			right="利益集团"
+			left={$t('ui.races')}
+			right={$t('ui.groups')}
 			bind:isSwitch={isInterestGroups}
 			onSwitchChange={setMode}
 		/>

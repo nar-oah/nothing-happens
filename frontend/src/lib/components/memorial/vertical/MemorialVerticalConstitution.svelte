@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { untrack } from 'svelte';
 	import MemorialConstitutionContent from '../content/MemorialConstitutionContent.svelte';
 	import MemorialConstitutionRow from '../content/MemorialConstitutionRow.svelte';
@@ -156,7 +157,7 @@
 							type="button"
 							disabled={!unlockableSections.includes(currentPage.title)}
 							onclick={() => onSectionUnlock?.(currentPage.title)}
-							aria-label={`解锁${currentPage.title}，需要执政${currentPage.content}年`}
+							aria-label={$t('memorial.unlock', { title: currentPage.title, years: currentPage.content })}
 						>
 							{#each [0, 1, 2, 3, 4, 5] as row (row)}
 								<span>{currentPage.content}</span>
