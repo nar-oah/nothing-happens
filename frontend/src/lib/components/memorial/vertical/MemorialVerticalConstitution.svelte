@@ -162,7 +162,10 @@
 							type="button"
 							disabled={!unlockableSections.includes(currentPage.title)}
 							onclick={() => onSectionUnlock?.(currentPage.title)}
-							aria-label={$t('memorial.unlock', { title: currentPage.title, years: currentPage.content })}
+							aria-label={$t('memorial.unlock', {
+								title: currentPage.title,
+								years: currentPage.content
+							})}
 						>
 							{#each [0, 1, 2, 3, 4, 5] as row (row)}
 								<span>{currentPage.content}</span>
