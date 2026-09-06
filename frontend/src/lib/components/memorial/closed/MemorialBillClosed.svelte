@@ -28,7 +28,7 @@
 		}))
 	);
 	let lagMetric: MemorialMetricData = $derived({
-		text: $t('memorial.lag'),
+		text: zh('memorial.lag'),
 		value: lag,
 		isReverse: true
 	});
