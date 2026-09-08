@@ -42,6 +42,11 @@ export type OutboundPayloads = {
 	'draft.proposal.remove': { state_version: number; draft_index: number };
 	'draft.policy.add': { state_version: number; display_name: string };
 	'draft.policy.remove': { state_version: number; draft_index: number };
+	'draft.policy.delay.set': {
+		state_version: number;
+		draft_index: number;
+		delay_months: number;
+	};
 	'draft.title.set': { state_version: number; title: string };
 	'bill.new': { state_version: number };
 	'bill.edit': { state_version: number; saved_bill_index: number };

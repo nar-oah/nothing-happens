@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { playUiSfx } from '$lib/audio/ui-sfx';
 	import { t } from '$lib/i18n';
 	import MorphText from '../text/MorphText.svelte';
 	import { formatNewspaperNumber } from './types';
@@ -24,6 +25,12 @@
 		if (advanceDisabled && value) return;
 		hovering = value;
 	}
+
+	function advance() {
+		if (advanceDisabled || !onAdvance) return;
+		playUiSfx('memorial-toggle', true);
+		onAdvance();
+	}
 </script>
 
 <button
@@ -35,7 +42,7 @@
 	onmouseleave={() => setHovering(false)}
 	onfocus={() => setHovering(true)}
 	onblur={() => setHovering(false)}
-	onclick={onAdvance}
+	onclick={advance}
 >
 	<div class="h-px w-full shrink-0 bg-ink-primary"></div>
 	<div class="h-px w-full shrink-0 bg-ink-primary"></div>

@@ -202,10 +202,15 @@ test('Saved Bill optimistic reconciliation still uses gameplay equivalence', () 
 		positive_effect: { ...testProposal.positive_effect }
 	};
 	const reconciled = reconcileSavedBill(
-		{ title: '旧法案', proposals: [testProposal], policies: [{ ...testPolicy }] },
+		{
+			title: '旧法案',
+			proposals: [testProposal],
+			policies: [{ definition: { ...testPolicy }, delay_months: 5 }]
+		},
 		[handProposal],
 		[testPolicy]
 	);
 	assert.equal(reconciled.proposals[0], handProposal);
-	assert.equal(reconciled.policies[0], testPolicy);
+	assert.equal(reconciled.policies[0].definition, testPolicy);
+	assert.equal(reconciled.policies[0].delay_months, 5);
 });

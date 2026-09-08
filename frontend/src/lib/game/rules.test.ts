@@ -4,14 +4,15 @@ import {
 	arePoliciesGameplayEquivalent,
 	areProposalsGameplayEquivalent,
 	calculateDraftProjectedMetrics,
+	calculatePolicyEffectAmount,
 	calculatePureProposalTarget,
-	isMetricConditionMet,
+	clampBillPolicyDelays,
+	getPolicyDelayBounds,
 	reconcileSavedBill,
 	reconcileSavedBillProposals
 } from './rules.ts';
 import {
 	Metric,
-	MetricConditionOperator,
 	PolicyEffectFormula,
 	type InterestGroupDefinition,
 	type PolicyDefinition,
@@ -109,7 +110,7 @@ test('pure proposal target follows the same proposal effects used by the backend
 	);
 });
 
-test('draft projected metrics include policy chains for subsequent Left policy triggers', () => {
+test('draft projected metrics begin with the pure proposal target', () => {
 	const current = {
 		tax: 100,
 		consumption: 100,
@@ -117,14 +118,24 @@ test('draft projected metrics include policy chains for subsequent Left policy t
 		employment: 100,
 		investment: 100
 	};
-	const firstPolicy: PolicyDefinition = {
-		display_name: '先行政策',
-		condition: {
-			left_metric: Metric.TAX,
-			operator: MetricConditionOperator.GREATER_THAN_OR_EQUAL,
-			right_metric: Metric.INVESTMENT,
-			right_multiplier: 1
-		},
+	const proposal = makeProposal();
+	proposal.base_effect.tax = -12;
+	assert.deepEqual(calculateDraftProjectedMetrics(current, [proposal], []), {
+		...current,
+		tax: 88
+	});
+});
+
+test('policies at the same delay use one pre-batch metrics snapshot', () => {
+	const current = {
+		tax: 100,
+		consumption: 100,
+		production: 100,
+		employment: 100,
+		investment: 100
+	};
+	const raiseInvestment: PolicyDefinition = {
+		display_name: '增加投资',
 		effects: [
 			{
 				target_metric: Metric.INVESTMENT,
@@ -135,14 +146,8 @@ test('draft projected metrics include policy chains for subsequent Left policy t
 			}
 		]
 	};
-	const nextPolicy: PolicyDefinition = {
-		display_name: '后续政策',
-		condition: {
-			left_metric: Metric.TAX,
-			operator: MetricConditionOperator.LESS_THAN,
-			right_metric: Metric.INVESTMENT,
-			right_multiplier: 1
-		},
+	const copyInvestmentGap: PolicyDefinition = {
+		display_name: '投资传导',
 		effects: [
 			{
 				target_metric: Metric.PRODUCTION,
@@ -154,15 +159,189 @@ test('draft projected metrics include policy chains for subsequent Left policy t
 		]
 	};
 
-	const baseline = calculateDraftProjectedMetrics(current, [], [firstPolicy]);
-	assert.deepEqual(baseline, { ...current, investment: 110 });
-	assert.equal(isMetricConditionMet(nextPolicy.condition, baseline), true);
+	assert.deepEqual(
+		calculateDraftProjectedMetrics(
+			current,
+			[],
+			[
+				{ definition: raiseInvestment, delay_months: 2 },
+				{ definition: copyInvestmentGap, delay_months: 2 }
+			]
+		),
+		{ ...current, investment: 110 }
+	);
+	assert.deepEqual(
+		calculateDraftProjectedMetrics(
+			current,
+			[],
+			[
+				{ definition: raiseInvestment, delay_months: 2 },
+				{ definition: copyInvestmentGap, delay_months: 3 }
+			]
+		),
+		{ ...current, production: 110, investment: 110 }
+	);
+});
 
-	assert.deepEqual(calculateDraftProjectedMetrics(current, [], [firstPolicy, nextPolicy]), {
-		...current,
-		production: 110,
-		investment: 110
+test('draft projection matches the backend serialized preview fixture', () => {
+	const current = {
+		tax: 100,
+		consumption: 100,
+		production: 100,
+		employment: 100,
+		investment: 100
+	};
+	const proposal = makeProposal();
+	proposal.base_effect = {
+		tax: 7,
+		consumption: 0,
+		production: 0,
+		employment: 0,
+		investment: 0
+	};
+	const policy: PolicyDefinition = {
+		display_name: '投资政策',
+		effects: [
+			{
+				target_metric: Metric.INVESTMENT,
+				formula: PolicyEffectFormula.METRIC_VALUE,
+				source_a: Metric.TAX,
+				source_b: Metric.TAX,
+				multiplier: 0.1
+			}
+		]
+	};
+	const pure = calculatePureProposalTarget(current, [proposal]);
+	const projected = calculateDraftProjectedMetrics(
+		current,
+		[proposal],
+		[{ definition: policy, delay_months: 1 }]
+	);
+	assert.deepEqual(pure, { ...current, tax: 107 });
+	assert.deepEqual(projected, { ...current, tax: 107, investment: 111 });
+});
+
+test('different policy delays chain in delay order regardless of bill array order', () => {
+	const current = {
+		tax: 100,
+		consumption: 100,
+		production: 100,
+		employment: 100,
+		investment: 100
+	};
+	const earlier: PolicyDefinition = {
+		display_name: '先到期',
+		effects: [
+			{
+				target_metric: Metric.INVESTMENT,
+				formula: PolicyEffectFormula.METRIC_VALUE,
+				source_a: Metric.TAX,
+				source_b: Metric.TAX,
+				multiplier: 0.1
+			}
+		]
+	};
+	const later: PolicyDefinition = {
+		display_name: '后到期',
+		effects: [
+			{
+				target_metric: Metric.PRODUCTION,
+				formula: PolicyEffectFormula.METRIC_GAP,
+				source_a: Metric.INVESTMENT,
+				source_b: Metric.TAX,
+				multiplier: 1
+			}
+		]
+	};
+
+	assert.deepEqual(
+		calculateDraftProjectedMetrics(
+			current,
+			[],
+			[
+				{ definition: later, delay_months: 4 },
+				{ definition: earlier, delay_months: 2 }
+			]
+		),
+		{ ...current, production: 110, investment: 110 }
+	);
+});
+
+test('draft policy batches preserve negative metric results', () => {
+	const current = {
+		tax: 10,
+		consumption: 0,
+		production: 4,
+		employment: 0,
+		investment: 0
+	};
+	const policy: PolicyDefinition = {
+		display_name: '负值政策',
+		effects: [
+			{
+				target_metric: Metric.PRODUCTION,
+				formula: PolicyEffectFormula.METRIC_VALUE,
+				source_a: Metric.TAX,
+				source_b: Metric.TAX,
+				multiplier: -1
+			}
+		]
+	};
+	assert.equal(
+		calculateDraftProjectedMetrics(current, [], [{ definition: policy, delay_months: 0 }])
+			.production,
+		-6
+	);
+});
+
+test('policy delay bounds use half the bill lag rounded up, including zero lag', () => {
+	assert.deepEqual(getPolicyDelayBounds([]), { min: 0, max: 0 });
+	assert.deepEqual(getPolicyDelayBounds([{ ...makeProposal(), lag_months: 1 }]), {
+		min: 1,
+		max: 1
 	});
+	assert.deepEqual(getPolicyDelayBounds([{ ...makeProposal(), lag_months: 5 }]), {
+		min: 3,
+		max: 5
+	});
+	assert.deepEqual(
+		getPolicyDelayBounds([
+			{ ...makeProposal(), lag_months: 2 },
+			{ ...makeProposal(), lag_months: 8 }
+		]),
+		{ min: 4, max: 8 }
+	);
+});
+
+test('policy delay clamping changes the bill instance without changing its definition', () => {
+	const definition: PolicyDefinition = { display_name: '延期政策', effects: [] };
+	const policies = [
+		{ definition, delay_months: 1 },
+		{ definition, delay_months: 9 }
+	];
+	const clamped = clampBillPolicyDelays(policies, [{ ...makeProposal(), lag_months: 5 }]);
+	assert.deepEqual(
+		clamped.map((policy) => policy.delay_months),
+		[3, 5]
+	);
+	assert.equal(clamped[0].definition, definition);
+	assert.deepEqual(definition, { display_name: '延期政策', effects: [] });
+});
+
+test('policy effects preserve negative signed results', () => {
+	assert.equal(
+		calculatePolicyEffectAmount(
+			{
+				target_metric: Metric.PRODUCTION,
+				formula: PolicyEffectFormula.METRIC_GAP,
+				source_a: Metric.INVESTMENT,
+				source_b: Metric.TAX,
+				multiplier: 0.5
+			},
+			{ tax: 100, consumption: 100, production: 100, employment: 100, investment: 80 }
+		),
+		-10
+	);
 });
 
 test('saved bill reconciliation removes missing proposals and unavailable policies', () => {
@@ -170,12 +349,6 @@ test('saved bill reconciliation removes missing proposals and unavailable polici
 	const missingProposal = { ...makeProposal(), lag_months: 99 };
 	const availablePolicy: PolicyDefinition = {
 		display_name: '现行政策',
-		condition: {
-			left_metric: Metric.TAX,
-			operator: MetricConditionOperator.LESS_THAN,
-			right_metric: Metric.INVESTMENT,
-			right_multiplier: 1
-		},
 		effects: [
 			{
 				target_metric: Metric.INVESTMENT,
@@ -191,34 +364,25 @@ test('saved bill reconciliation removes missing proposals and unavailable polici
 		{
 			title: '旧法案',
 			proposals: [availableProposal, missingProposal],
-			policies: [{ ...availablePolicy }, stalePolicy]
+			policies: [
+				{ definition: { ...availablePolicy }, delay_months: 9 },
+				{ definition: stalePolicy, delay_months: 4 }
+			]
 		},
 		[{ ...availableProposal, source_group: { ...availableProposal.source_group } }],
 		[availablePolicy]
 	);
 	assert.equal(reconciled.proposals.length, 1);
-	assert.deepEqual(reconciled.policies, [availablePolicy]);
+	assert.deepEqual(reconciled.policies, [{ definition: availablePolicy, delay_months: 4 }]);
 });
 
 test('policy identity uses display_name only', () => {
 	const first: PolicyDefinition = {
 		display_name: '同名政策',
-		condition: {
-			left_metric: Metric.TAX,
-			operator: MetricConditionOperator.LESS_THAN,
-			right_metric: Metric.INVESTMENT,
-			right_multiplier: 1
-		},
 		effects: []
 	};
 	const second: PolicyDefinition = {
 		display_name: '同名政策',
-		condition: {
-			left_metric: Metric.PRODUCTION,
-			operator: MetricConditionOperator.GREATER_THAN,
-			right_metric: Metric.CONSUMPTION,
-			right_multiplier: 2
-		},
 		effects: [
 			{
 				target_metric: Metric.EMPLOYMENT,
@@ -231,11 +395,19 @@ test('policy identity uses display_name only', () => {
 	};
 	assert.equal(arePoliciesGameplayEquivalent(first, second), true);
 	assert.deepEqual(
-		reconcileSavedBill({ title: '', proposals: [], policies: [first] }, [], [second]),
+		reconcileSavedBill(
+			{
+				title: '',
+				proposals: [],
+				policies: [{ definition: first, delay_months: 3 }]
+			},
+			[],
+			[second]
+		),
 		{
 			title: '',
 			proposals: [],
-			policies: [second]
+			policies: [{ definition: second, delay_months: 0 }]
 		}
 	);
 });

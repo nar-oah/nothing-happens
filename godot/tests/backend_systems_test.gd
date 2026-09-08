@@ -10,6 +10,7 @@ const ConstitutionInvariantTests = preload("res://tests/backend/test_constitutio
 const VotingTests = preload("res://tests/backend/test_voting.gd")
 const AnnualFlowAndBalanceTests = preload("res://tests/backend/test_annual_flow_and_balance.gd")
 const CollapseTests = preload("res://tests/backend/test_collapse.gd")
+const PolicySchedulingTests = preload("res://tests/backend/test_policy_scheduling.gd")
 const SavedBillTests = preload("res://tests/backend/test_saved_bills.gd")
 const UiIntegrationTests = preload("res://tests/backend/test_ui_integration.gd")
 const ParliamentLayoutTests = preload("res://tests/backend/test_parliament_layout.gd")
@@ -46,6 +47,7 @@ func _run() -> void:
 		VotingTests.new(),
 		AnnualFlowAndBalanceTests.new(),
 		CollapseTests.new(),
+		PolicySchedulingTests.new(),
 		SavedBillTests.new(),
 		UiIntegrationTests.new(),
 		ParliamentLayoutTests.new(),

@@ -86,16 +86,38 @@ func _test_core_dto_serialization(t: BackendTestContext) -> void:
 	t.check(not proposal_dto["bonus_choice_resolved"], "proposal pending state serializes")
 	var policy := _make_policy("serializer policy")
 	var policy_dto: Dictionary = serializer.policy(policy)
-	t.check_equal(policy_dto["condition"]["operator"], 3, "policy operator keeps enum value")
+	t.check(not policy_dto.has("condition"), "policy DTO has no obsolete trigger condition")
 	t.check_equal(policy_dto["effects"][0]["formula"], 0, "policy formula keeps enum value")
 	var draft := DraftBillState.new()
 	draft.title = "serializer bill"
 	draft.proposals.append(proposal)
-	draft.policies.append(policy)
+	draft.policies.append(PolicyState.new(policy, 3))
 	var bill_dto: Dictionary = serializer.bill(draft)
 	t.check_equal(bill_dto["title"], "serializer bill", "bill title serializes")
 	t.check_equal(bill_dto["proposals"].size(), 1, "bill proposals serialize")
 	t.check_equal(bill_dto["policies"].size(), 1, "bill policies serialize")
+	t.check_equal(
+		bill_dto["policies"][0]["definition"]["display_name"],
+		"serializer policy",
+		"bill policy instance serializes its definition"
+	)
+	t.check_equal(
+		bill_dto["policies"][0]["delay_months"], 3, "bill policy instance serializes its delay"
+	)
+	var saved := SavedBillState.new()
+	saved.policies.append(PolicyState.new(policy, 4))
+	t.check_equal(
+		serializer.bill(saved)["policies"][0]["delay_months"],
+		4,
+		"saved bill policy instance preserves its selected delay"
+	)
+	var active := ActiveBillState.new()
+	var active_policy := PolicyState.new(policy, 3)
+	active_policy.elapsed_months = 2
+	active.policies.append(active_policy)
+	var active_dto: Dictionary = serializer.active_bill(active)
+	t.check_equal(active_dto["policies"][0]["delay_months"], 3, "active policy delay serializes")
+	t.check_equal(active_dto["policies"][0]["elapsed_months"], 2, "active policy elapsed time serializes")
 
 
 func _test_full_state_and_saved_bill_indices(t: BackendTestContext) -> void:
@@ -226,6 +248,9 @@ func _test_policy_name_resolution(t: BackendTestContext) -> void:
 	var article := t.make_article(race)
 	article.policies.append(policy)
 	var session := t.make_session([race], [group], t.make_seats(1, "policy"), [article])
+	var proposal := t.make_proposal(group)
+	proposal.lag_months = 5
+	session.proposal_system.add_to_hand(session.state, proposal)
 	var bridge := UiBridge.new()
 	bridge.setup(session)
 	var messages := bridge.receive_ipc_message(
@@ -235,10 +260,45 @@ func _test_policy_name_resolution(t: BackendTestContext) -> void:
 		)
 	)
 	t.check_equal(messages[0]["type"], "draft.sync", "policy command returns draft domain sync")
-	t.check_equal(session.state.draft_bill.policies[0], policy, "policy name resolves current Resource")
+	var instance: PolicyState = session.state.draft_bill.policies[0]
+	t.check(instance.definition == policy, "policy name resolves current Resource into an instance")
+	t.check_equal(instance.delay_months, 0, "policy without proposal lag defaults to zero delay")
+	t.check_equal(
+		messages[0]["payload"]["draft_bill"]["policies"][0]["delay_months"],
+		0,
+		"draft sync carries the instance delay"
+	)
 	t.check_equal(bridge.state_version, 1, "successful policy mutation advances version once")
+	var proposal_added := bridge.receive_ipc_message(
+		_message("draft.proposal.add", {"state_version": 1, "hand_index": 0})
+	)
+	t.check_equal(proposal_added[0]["type"], "draft.sync", "proposal add returns draft sync")
+	t.check_equal(instance.delay_months, 3, "proposal add clamps policy delay to the new minimum")
+	var delayed := bridge.receive_ipc_message(
+		_message(
+			"draft.policy.delay.set",
+			{"state_version": 2, "draft_index": 0, "delay_months": 5}
+		)
+	)
+	t.check_equal(delayed[0]["type"], "draft.sync", "policy delay command returns draft sync")
+	t.check_equal(instance.delay_months, 5, "policy delay command updates only the draft instance")
+	t.check_equal(bridge.state_version, 3, "policy delay mutation advances version once")
+	var invalid_delay := bridge.receive_ipc_message(
+		_message(
+			"draft.policy.delay.set",
+			{"state_version": 3, "draft_index": 0, "delay_months": 6}
+		)
+	)
+	t.check_equal(invalid_delay[0]["payload"]["code"], "invalid_policy_delay", "out-of-range delay is rejected")
+	t.check_equal(instance.delay_months, 5, "rejected delay preserves the instance selection")
+	t.check_equal(bridge.state_version, 3, "rejected delay preserves the state version")
+	var proposal_removed := bridge.receive_ipc_message(
+		_message("draft.proposal.remove", {"state_version": 3, "draft_index": 0})
+	)
+	t.check_equal(proposal_removed[0]["type"], "draft.sync", "proposal remove returns draft sync")
+	t.check_equal(instance.delay_months, 0, "proposal remove clamps policy delay to zero")
 	var unavailable := bridge.receive_ipc_message(
-		_message("draft.policy.add", {"state_version": 1, "display_name": "missing"})
+		_message("draft.policy.add", {"state_version": 4, "display_name": "missing"})
 	)
 	t.check_equal(unavailable[0]["payload"]["code"], "unavailable_policy", "unknown policy is rejected")
 	bridge.free()
@@ -312,13 +372,13 @@ func _test_draft_preview(t: BackendTestContext) -> void:
 	var proposal := t.make_proposal(group)
 	proposal.base_effect.tax = 7
 	session.state.draft_bill.proposals.append(proposal)
-	session.state.draft_bill.policies.append(policy)
+	session.state.draft_bill.policies.append(PolicyState.new(policy, 1))
 	var preview := UiSerializer.new().draft_preview(session)
 	t.check_equal(preview["current_metrics"]["tax"], 100, "preview includes current metrics")
 	t.check_equal(preview["pure_proposal_target"]["tax"], 107, "preview uses pure proposal target")
-	t.check_equal(preview["immediate_policy_result"]["investment"], 110, "preview uses policy chain")
+	t.check_equal(preview["immediate_policy_result"]["investment"], 100, "preview applies no policy before its due month")
 	t.check_equal(preview["projected_metrics"]["tax"], 107, "projected metrics include proposal")
-	t.check_equal(preview["projected_metrics"]["investment"], 110, "projected metrics include policy")
+	t.check_equal(preview["projected_metrics"]["investment"], 111, "projected metrics apply the policy to the pure proposal target")
 	t.check_equal(preview["vote"]["seat_votes"].size(), 1, "preview uses authoritative seat vote")
 	session.free()
 
@@ -662,10 +722,6 @@ func _test_game_root_shell(t: BackendTestContext) -> void:
 
 
 func _make_policy(display_name: String) -> PolicyDefinition:
-	var condition := MetricCondition.new()
-	condition.left_metric = Metric.Id.TAX
-	condition.operator = MetricCondition.Operator.GREATER_THAN_OR_EQUAL
-	condition.right_metric = Metric.Id.INVESTMENT
 	var effect := PolicyEffect.new()
 	effect.target_metric = Metric.Id.INVESTMENT
 	effect.formula = PolicyEffect.Formula.METRIC_VALUE
@@ -673,7 +729,6 @@ func _make_policy(display_name: String) -> PolicyDefinition:
 	effect.multiplier = 0.1
 	var policy := PolicyDefinition.new()
 	policy.display_name = display_name
-	policy.condition = condition
 	policy.effects.append(effect)
 	return policy
 

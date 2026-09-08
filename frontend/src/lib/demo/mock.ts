@@ -13,14 +13,12 @@ import {
 	METRICS,
 	METRIC_DISPLAY_NAMES,
 	Metric,
-	MetricConditionOperator,
 	PolicyEffectFormula,
 	getMetricValue,
 	getProposalTotalEffect,
 	type Bill,
 	type Constitution,
 	type InterestGroupDefinition,
-	type MetricCondition,
 	type MetricValues,
 	type PolicyDefinition,
 	type PolicyEffect,
@@ -90,17 +88,6 @@ const makeProposal = (
 	};
 };
 
-const condition = (
-	left_metric: Metric,
-	right_metric: Metric,
-	operator = MetricConditionOperator.GREATER_THAN
-): MetricCondition => ({
-	left_metric,
-	operator,
-	right_metric,
-	right_multiplier: 1
-});
-
 const effect = (
 	target_metric: Metric,
 	source_a: Metric,
@@ -114,13 +101,8 @@ const effect = (
 	multiplier
 });
 
-const policy = (
-	display_name: string,
-	policyCondition: MetricCondition,
-	effects: PolicyEffect[]
-): PolicyDefinition => ({
+const policy = (display_name: string, effects: PolicyEffect[]): PolicyDefinition => ({
 	display_name,
-	condition: policyCondition,
 	effects
 });
 
@@ -133,33 +115,33 @@ export const mockBaseline: MetricValues = {
 };
 
 export const mockPolicies: PolicyDefinition[] = [
-	policy('勘合互市', condition(Metric.INVESTMENT, Metric.TAX), [
+	policy('勘合互市', [
 		effect(Metric.CONSUMPTION, Metric.INVESTMENT, Metric.TAX, -0.4),
 		effect(Metric.INVESTMENT, Metric.INVESTMENT, Metric.TAX, -0.3)
 	]),
-	policy('岁贡折征', condition(Metric.TAX, Metric.INVESTMENT), [
+	policy('岁贡折征', [
 		effect(Metric.TAX, Metric.TAX, Metric.INVESTMENT, -0.25),
 		effect(Metric.INVESTMENT, Metric.TAX, Metric.INVESTMENT, 0.5)
 	]),
-	policy('港务调停', condition(Metric.CONSUMPTION, Metric.PRODUCTION), [
+	policy('港务调停', [
 		effect(Metric.CONSUMPTION, Metric.CONSUMPTION, Metric.PRODUCTION, -0.35),
 		effect(Metric.INVESTMENT, Metric.CONSUMPTION, Metric.PRODUCTION, -0.2)
 	]),
-	policy('集体议价', condition(Metric.INVESTMENT, Metric.PRODUCTION), [
+	policy('集体议价', [
 		effect(Metric.INVESTMENT, Metric.INVESTMENT, Metric.PRODUCTION, -0.3),
 		effect(Metric.PRODUCTION, Metric.INVESTMENT, Metric.PRODUCTION, 0.6)
 	]),
-	policy('轮班限制', condition(Metric.EMPLOYMENT, Metric.PRODUCTION), [
+	policy('轮班限制', [
 		effect(Metric.EMPLOYMENT, Metric.EMPLOYMENT, Metric.PRODUCTION, -0.35),
 		effect(Metric.PRODUCTION, Metric.EMPLOYMENT, Metric.PRODUCTION, 0.5)
 	]),
-	policy('生活津贴', condition(Metric.CONSUMPTION, Metric.PRODUCTION), [
+	policy('生活津贴', [
 		effect(Metric.PRODUCTION, Metric.CONSUMPTION, Metric.PRODUCTION, 0.4),
 		effect(Metric.TAX, Metric.CONSUMPTION, Metric.PRODUCTION, 0.25)
 	])
 ];
 
-const unavailablePolicy = policy('公开预算', condition(Metric.TAX, Metric.EMPLOYMENT), [
+const unavailablePolicy = policy('公开预算', [
 	effect(Metric.TAX, Metric.TAX, Metric.EMPLOYMENT, -0.4),
 	effect(Metric.EMPLOYMENT, Metric.TAX, Metric.EMPLOYMENT, 0.6)
 ]);
@@ -204,12 +186,18 @@ export const mockSavedBills: Bill[] = [
 	{
 		title: '勘合互市',
 		proposals: [mockProposalItems[0].proposal, mockProposalItems[3].proposal],
-		policies: [mockPolicies[0], mockPolicies[2]]
+		policies: [
+			{ definition: mockPolicies[0], delay_months: 3 },
+			{ definition: mockPolicies[2], delay_months: 6 }
+		]
 	},
 	{
 		title: '集体议价',
 		proposals: [mockProposalItems[2].proposal, unavailableProposal],
-		policies: [mockPolicies[3], unavailablePolicy]
+		policies: [
+			{ definition: mockPolicies[3], delay_months: 50 },
+			{ definition: unavailablePolicy, delay_months: 99 }
+		]
 	}
 ];
 

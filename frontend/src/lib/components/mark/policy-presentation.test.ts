@@ -1,11 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {
-	Metric,
-	MetricConditionOperator,
-	PolicyEffectFormula,
-	type PolicyDefinition
-} from '../../game/types.ts';
+import { Metric, PolicyEffectFormula, type PolicyDefinition } from '../../game/types.ts';
 import { translate, type Translate } from '../../i18n/index.ts';
 import { policyToMemorialContent } from '../memorial/presentation.ts';
 import { createPolicyMarkContent } from './mark.ts';
@@ -15,12 +10,6 @@ const en: Translate = (key, params) => translate(key, params, 'en');
 
 const policy: PolicyDefinition = {
 	display_name: '测试政策',
-	condition: {
-		left_metric: Metric.PRODUCTION,
-		operator: MetricConditionOperator.GREATER_THAN,
-		right_metric: Metric.CONSUMPTION,
-		right_multiplier: 1
-	},
 	effects: [
 		{
 			target_metric: Metric.PRODUCTION,
@@ -66,5 +55,34 @@ test('vertical memorial policy content has fixed gap and stabilization blocks', 
 	assert.deepEqual(
 		policyToMemorialContent(policy, en, en).contents.map((content) => content.title),
 		['Gap', 'Damp']
+	);
+});
+
+test('all effects after the first appear in the smoothing section in order', () => {
+	const withThirdEffect: PolicyDefinition = {
+		...policy,
+		effects: [
+			...policy.effects,
+			{
+				target_metric: Metric.EMPLOYMENT,
+				formula: PolicyEffectFormula.METRIC_VALUE,
+				source_a: Metric.TAX,
+				source_b: Metric.TAX,
+				multiplier: -0.25
+			}
+		]
+	};
+	assert.deepEqual(createPolicyMarkContent(withThirdEffect, baseline, zh).smoothing, {
+		label: '平抑',
+		headline: '税課＋50\n就業－25',
+		detail: '生産－消費\n税課×0.25',
+		lines: [
+			{ headline: '税課＋50', detail: '生産－消費' },
+			{ headline: '就業－25', detail: '税課×0.25' }
+		]
+	});
+	assert.equal(
+		policyToMemorialContent(withThirdEffect, zh, zh).contents[1].body,
+		'税課＋（生産－消費）\n就業－税課×0.25'
 	);
 });

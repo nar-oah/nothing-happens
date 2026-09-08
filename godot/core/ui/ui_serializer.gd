@@ -44,12 +44,6 @@ func proposal(value: ProposalInstance) -> Variant:
 	}
 
 
-func metric_condition(condition: MetricCondition) -> Variant:
-	if condition == null:
-		return null
-	return {"left_metric": int(condition.left_metric), "operator": int(condition.operator), "right_metric": int(condition.right_metric), "right_multiplier": condition.right_multiplier}
-
-
 func policy_effect(effect: PolicyEffect) -> Variant:
 	if effect == null:
 		return null
@@ -65,7 +59,13 @@ func policy(definition: PolicyDefinition) -> Variant:
 			effects.append(policy_effect(effect))
 	# Policy display_name is intentionally left untranslated: it also acts as the backend lookup key
 	# and the Chinese name is part of the seal/stamp presentation in the frontend.
-	return {"display_name": definition.display_name, "condition": metric_condition(definition.condition), "effects": effects}
+	return {"display_name": definition.display_name, "effects": effects}
+
+
+func policy_instance(value: PolicyState) -> Variant:
+	if value == null:
+		return null
+	return {"definition": policy(value.definition), "delay_months": value.delay_months}
 
 
 func bill(value: Variant) -> Variant:
@@ -78,7 +78,7 @@ func bill(value: Variant) -> Variant:
 	var policies: Array = []
 	for current in value.policies:
 		if current != null:
-			policies.append(policy(current))
+			policies.append(policy_instance(current))
 	return {"title": value.title, "proposals": proposals, "policies": policies}
 
 
@@ -93,7 +93,7 @@ func active_bill(value: ActiveBillState) -> Variant:
 	var policies: Array = []
 	for current in value.policies:
 		if current != null:
-			policies.append({"definition": policy(current.definition), "triggered": current.triggered})
+			policies.append({"definition": policy(current.definition), "delay_months": current.delay_months, "elapsed_months": current.elapsed_months, "triggered": current.triggered})
 	return {"title": value.title, "start_values": metric_values(value.start_values), "pure_target": metric_values(value.pure_target), "proposals": proposals, "policies": policies}
 
 
@@ -125,9 +125,9 @@ func draft_preview(session: RunSession) -> Dictionary:
 	var state := session.state
 	var draft := state.draft_bill
 	var pure_target := session.proposal_system.calculate_pure_target(state.metrics, draft.proposals)
-	var projected := session.vote_system.calculate_projected_metrics(draft, pure_target, session.context)
+	var projected := session.policy_system.calculate_planned_result(pure_target, draft.policies)
 	var vote := session.vote_system.preview_vote(draft, session.context)
-	return {"current_metrics": metric_values(state.metrics), "pure_proposal_target": metric_values(pure_target), "immediate_policy_result": metric_values(projected), "projected_metrics": metric_values(projected), "vote": vote_result(vote, session)}
+	return {"current_metrics": metric_values(state.metrics), "pure_proposal_target": metric_values(pure_target), "immediate_policy_result": metric_values(state.metrics), "projected_metrics": metric_values(projected), "vote": vote_result(vote, session)}
 
 
 func pending_dialogue(session: RunSession) -> Variant:

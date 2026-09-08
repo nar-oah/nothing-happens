@@ -34,14 +34,16 @@
 			<MarkSeal text={policyTitle} is_ghost={true} />
 		</div>
 		{#if showLagEditor && lagMonths !== undefined && min !== undefined && max !== undefined}
-			<NumberEditor
-				value={lagMonths}
-				{min}
-				{max}
-				{step}
-				disabled={disabled || !onChange}
-				onChange={(value) => onChange?.(value)}
-			/>
+			<div class="pointer-events-auto relative z-10">
+				<NumberEditor
+					value={lagMonths}
+					{min}
+					{max}
+					{step}
+					disabled={disabled || !onChange}
+					onChange={(value) => onChange?.(value)}
+				/>
+			</div>
 		{/if}
 	</div>
 	<div class="flex w-[92px] flex-col gap-4">

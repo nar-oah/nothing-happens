@@ -65,7 +65,6 @@ export const componentsZhCN = {
 	'memorial.metrics': '指标',
 	'memorial.groupHappy': '如果你把该提案加入到法案中，{group}会很高兴。',
 	'memorial.compromise': '这是为了保证蓬莱岛的运转，各族妥协出的结果，尽管真正满意的人很少。',
-	'memorial.condition': '条件：{requirement}',
 	'memorial.effect': '{target}按{source}×{multiplier}变动',
 	'memorial.effectSeparator': '；',
 	'memorial.noEffects': '无指标效果',
@@ -221,7 +220,6 @@ export const componentsEn: Record<keyof typeof componentsZhCN, string> = {
 	'memorial.groupHappy': '{group} would be pleased if you added this proposal to a bill.',
 	'memorial.compromise':
 		'A compromise among the peoples to keep Penglai Island running, though few are truly satisfied.',
-	'memorial.condition': 'Condition: {requirement}',
 	'memorial.effect': '{target} changes by {source} × {multiplier}',
 	'memorial.effectSeparator': '; ',
 	'memorial.noEffects': 'No metric effects',
