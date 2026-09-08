@@ -110,7 +110,7 @@ test('pure proposal target follows the same proposal effects used by the backend
 	);
 });
 
-test('draft projected metrics exclude policies whose execution-time metrics are unknown', () => {
+test('draft projected metrics begin with the pure proposal target', () => {
 	const current = {
 		tax: 100,
 		consumption: 100,
@@ -120,10 +120,121 @@ test('draft projected metrics exclude policies whose execution-time metrics are 
 	};
 	const proposal = makeProposal();
 	proposal.base_effect.tax = -12;
-	assert.deepEqual(calculateDraftProjectedMetrics(current, [proposal]), {
+	assert.deepEqual(calculateDraftProjectedMetrics(current, [proposal], []), {
 		...current,
 		tax: 88
 	});
+});
+
+test('policies at the same delay use one pre-batch metrics snapshot', () => {
+	const current = {
+		tax: 100,
+		consumption: 100,
+		production: 100,
+		employment: 100,
+		investment: 100
+	};
+	const raiseInvestment: PolicyDefinition = {
+		display_name: '增加投资',
+		effects: [
+			{
+				target_metric: Metric.INVESTMENT,
+				formula: PolicyEffectFormula.METRIC_VALUE,
+				source_a: Metric.TAX,
+				source_b: Metric.TAX,
+				multiplier: 0.1
+			}
+		]
+	};
+	const copyInvestmentGap: PolicyDefinition = {
+		display_name: '投资传导',
+		effects: [
+			{
+				target_metric: Metric.PRODUCTION,
+				formula: PolicyEffectFormula.METRIC_GAP,
+				source_a: Metric.INVESTMENT,
+				source_b: Metric.TAX,
+				multiplier: 1
+			}
+		]
+	};
+
+	assert.deepEqual(
+		calculateDraftProjectedMetrics(current, [], [
+			{ definition: raiseInvestment, delay_months: 2 },
+			{ definition: copyInvestmentGap, delay_months: 2 }
+		]),
+		{ ...current, investment: 110 }
+	);
+});
+
+test('different policy delays chain in delay order regardless of bill array order', () => {
+	const current = {
+		tax: 100,
+		consumption: 100,
+		production: 100,
+		employment: 100,
+		investment: 100
+	};
+	const earlier: PolicyDefinition = {
+		display_name: '先到期',
+		effects: [
+			{
+				target_metric: Metric.INVESTMENT,
+				formula: PolicyEffectFormula.METRIC_VALUE,
+				source_a: Metric.TAX,
+				source_b: Metric.TAX,
+				multiplier: 0.1
+			}
+		]
+	};
+	const later: PolicyDefinition = {
+		display_name: '后到期',
+		effects: [
+			{
+				target_metric: Metric.PRODUCTION,
+				formula: PolicyEffectFormula.METRIC_GAP,
+				source_a: Metric.INVESTMENT,
+				source_b: Metric.TAX,
+				multiplier: 1
+			}
+		]
+	};
+
+	assert.deepEqual(
+		calculateDraftProjectedMetrics(current, [], [
+			{ definition: later, delay_months: 4 },
+			{ definition: earlier, delay_months: 2 }
+		]),
+		{ ...current, production: 110, investment: 110 }
+	);
+});
+
+test('draft policy batches preserve negative metric results', () => {
+	const current = {
+		tax: 10,
+		consumption: 0,
+		production: 4,
+		employment: 0,
+		investment: 0
+	};
+	const policy: PolicyDefinition = {
+		display_name: '负值政策',
+		effects: [
+			{
+				target_metric: Metric.PRODUCTION,
+				formula: PolicyEffectFormula.METRIC_VALUE,
+				source_a: Metric.TAX,
+				source_b: Metric.TAX,
+				multiplier: -1
+			}
+		]
+	};
+	assert.equal(
+		calculateDraftProjectedMetrics(current, [], [{ definition: policy, delay_months: 0 }])
+			.production,
+		-6
+	);
 });
 
 test('policy delay bounds use half the bill lag rounded up, including zero lag', () => {
