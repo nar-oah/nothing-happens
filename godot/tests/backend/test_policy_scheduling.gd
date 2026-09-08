@@ -8,6 +8,7 @@ func run(t: BackendTestContext) -> void:
 	_test_zero_delay_executes_on_enactment(t)
 	_test_new_bill_keeps_old_schedule_and_batches_same_month(t)
 	_test_different_months_resolve_in_order(t)
+	_test_month_flow_orders_market_policy_and_event(t)
 	_test_negative_policy_effect_is_preserved(t)
 
 
@@ -146,6 +147,55 @@ func _test_different_months_resolve_in_order(t: BackendTestContext) -> void:
 	system.advance_month_and_resolve(state)
 	t.check_equal(state.metrics.investment, 24, "a later-month policy reads effects from earlier months")
 	t.check(state.scheduled_policies.is_empty(), "all ordered policies leave the queue after execution")
+
+
+func _test_month_flow_orders_market_policy_and_event(t: BackendTestContext) -> void:
+	var race := t.make_race("settlement order")
+	var group := t.make_group("settlement source")
+	var policy := _make_metric_policy(
+		"settlement policy", Metric.Id.INVESTMENT, PolicyEffect.Formula.METRIC_VALUE,
+		Metric.Id.TAX, Metric.Id.CONSUMPTION, 1.0
+	)
+	var article := t.make_article(race)
+	article.policies = [policy]
+	var balance := GameBalanceDefinition.new()
+	balance.automatic_draw_count = 0
+	balance.event_spawn_count_min = 0
+	balance.event_spawn_count_max = 0
+	balance.event_early_reveal_probability_per_seat = 0.0
+	balance.proposal_digestion_variance = 0.0
+	var session := t.make_session(
+		[race], [group], t.make_seats(1, "settlement order"), [article], balance
+	)
+	session.state.metrics.tax = 100
+	session.state.metrics.investment = 0
+	var proposal := t.make_proposal(group)
+	proposal.lag_months = 1
+	proposal.base_effect.tax = 10
+	var draft := DraftBillState.new()
+	draft.proposals.append(proposal)
+	draft.policies.append(PolicyState.new(policy, 1))
+	session.enact_bill(draft)
+
+	var event := EventState.new(race, Metric.Id.INVESTMENT, 0, 100)
+	event.known = true
+	event.published = true
+	event.growth_progress = 1.0
+	session.state.events.append(event)
+	session.state.month = 1
+	t.check(session.advance_month(), "the settlement-order month advances")
+	t.check_equal(session.state.metrics.tax, 110, "the market settles the proposal first")
+	t.check_equal(
+		session.state.metrics.investment,
+		110,
+		"the due policy reads the post-market metric snapshot"
+	)
+	t.check_equal(
+		event.phase,
+		EventState.Phase.RELIEVING,
+		"event settlement observes the policy result from the same month"
+	)
+	session.free()
 
 
 func _test_negative_policy_effect_is_preserved(t: BackendTestContext) -> void:
