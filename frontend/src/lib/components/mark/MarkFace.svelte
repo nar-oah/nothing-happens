@@ -7,6 +7,7 @@
 		lines?: string[];
 	};
 
+	const IDEOGRAPHIC_SPACE = '\u3000';
 	let { is_show, label, headline, detail, lines }: Props = $props();
 </script>
 
@@ -27,7 +28,7 @@
 			{/each}
 		{:else}
 			<p class="typo-seal-policy-clause m-0 shrink-0 whitespace-nowrap text-surface-indigo">
-				{label}　{headline}
+				{label}{IDEOGRAPHIC_SPACE}{headline}
 			</p>
 			<p class="typo-seal-policy-detail m-0 shrink-0 whitespace-nowrap text-surface-indigo">
 				{detail}

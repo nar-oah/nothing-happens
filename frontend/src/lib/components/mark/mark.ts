@@ -60,7 +60,7 @@ function createEffectFace(
 		headline: headlines.join('\n'),
 		detail: details.join('\n'),
 		...(effects.length > 1
-			? { lines: headlines.map((headline, index) => `${headline}　${details[index]}`) }
+			? { lines: headlines.map((headline, index) => `${headline}\u3000${details[index]}`) }
 			: {})
 	};
 }

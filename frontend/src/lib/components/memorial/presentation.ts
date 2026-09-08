@@ -105,15 +105,10 @@ function formatPolicyEffects(
 ): string {
 	return effects.length === 0
 		? translator('memorial.noEffects')
-		: effects
-				.map((effect) => formatPolicyEffect(effect, metricTranslator))
-				.join('\n');
+		: effects.map((effect) => formatPolicyEffect(effect, metricTranslator)).join('\n');
 }
 
-function formatPolicyEffect(
-	effect: PolicyEffect,
-	metricTranslator: Translate
-): string {
+function formatPolicyEffect(effect: PolicyEffect, metricTranslator: Translate): string {
 	const target = getMetricDisplayName(effect.target_metric, metricTranslator);
 	const sourceA = getMetricDisplayName(effect.source_a, metricTranslator);
 	const source =

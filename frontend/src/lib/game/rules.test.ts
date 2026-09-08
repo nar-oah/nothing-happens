@@ -160,17 +160,25 @@ test('policies at the same delay use one pre-batch metrics snapshot', () => {
 	};
 
 	assert.deepEqual(
-		calculateDraftProjectedMetrics(current, [], [
-			{ definition: raiseInvestment, delay_months: 2 },
-			{ definition: copyInvestmentGap, delay_months: 2 }
-		]),
+		calculateDraftProjectedMetrics(
+			current,
+			[],
+			[
+				{ definition: raiseInvestment, delay_months: 2 },
+				{ definition: copyInvestmentGap, delay_months: 2 }
+			]
+		),
 		{ ...current, investment: 110 }
 	);
 	assert.deepEqual(
-		calculateDraftProjectedMetrics(current, [], [
-			{ definition: raiseInvestment, delay_months: 2 },
-			{ definition: copyInvestmentGap, delay_months: 3 }
-		]),
+		calculateDraftProjectedMetrics(
+			current,
+			[],
+			[
+				{ definition: raiseInvestment, delay_months: 2 },
+				{ definition: copyInvestmentGap, delay_months: 3 }
+			]
+		),
 		{ ...current, production: 110, investment: 110 }
 	);
 });
@@ -204,9 +212,11 @@ test('draft projection matches the backend serialized preview fixture', () => {
 		]
 	};
 	const pure = calculatePureProposalTarget(current, [proposal]);
-	const projected = calculateDraftProjectedMetrics(current, [proposal], [
-		{ definition: policy, delay_months: 1 }
-	]);
+	const projected = calculateDraftProjectedMetrics(
+		current,
+		[proposal],
+		[{ definition: policy, delay_months: 1 }]
+	);
 	assert.deepEqual(pure, { ...current, tax: 107 });
 	assert.deepEqual(projected, { ...current, tax: 107, investment: 111 });
 });
@@ -245,10 +255,14 @@ test('different policy delays chain in delay order regardless of bill array orde
 	};
 
 	assert.deepEqual(
-		calculateDraftProjectedMetrics(current, [], [
-			{ definition: later, delay_months: 4 },
-			{ definition: earlier, delay_months: 2 }
-		]),
+		calculateDraftProjectedMetrics(
+			current,
+			[],
+			[
+				{ definition: later, delay_months: 4 },
+				{ definition: earlier, delay_months: 2 }
+			]
+		),
 		{ ...current, production: 110, investment: 110 }
 	);
 });
