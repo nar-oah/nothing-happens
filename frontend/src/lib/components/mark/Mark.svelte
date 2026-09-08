@@ -39,32 +39,34 @@
 	class="relative block h-$mark-height w-$mark-width cursor-pointer overflow-hidden border-0 bg-transparent p-0 text-left disabled:cursor-default"
 	style:--mark-width={`${geometry.width}px`}
 	style:--mark-height={`${geometry.height}px`}
-	aria-label={$t(direction === 'up' ? 'mark.viewEffect' : 'mark.viewCondition')}
+	aria-label={$t(direction === 'up' ? 'mark.viewSmoothing' : 'mark.viewGap')}
 	aria-pressed={direction === 'down'}
 	onclick={toggleDirection}
 >
 	<div
 		class="absolute left-0 top-0 h-$face-height w-$front-width origin-top-left overflow-hidden"
-		style:--face-height={`${geometry.requirement.height}px`}
+		style:--face-height={`${geometry.gap.height}px`}
 		style:--front-width={`${geometry.frontWidth}px`}
-		style:transform={geometry.requirement.transform}
+		style:transform={geometry.gap.transform}
 	>
 		<MarkFace
-			headline={content.requirement.headline}
-			detail={content.requirement.detail}
+			label={content.gap.label}
+			headline={content.gap.headline}
+			detail={content.gap.detail}
 			is_show={direction === 'up'}
 		/>
 	</div>
 
 	<div
 		class="absolute left-0 top-0 h-$face-height w-$front-width origin-top-left overflow-hidden"
-		style:--face-height={`${geometry.effect.height}px`}
+		style:--face-height={`${geometry.smoothing.height}px`}
 		style:--front-width={`${geometry.frontWidth}px`}
-		style:transform={geometry.effect.transform}
+		style:transform={geometry.smoothing.transform}
 	>
 		<MarkFace
-			headline={content.effect.headline}
-			detail={content.effect.detail}
+			label={content.smoothing.label}
+			headline={content.smoothing.headline}
+			detail={content.smoothing.detail}
 			is_show={direction === 'down'}
 		/>
 	</div>

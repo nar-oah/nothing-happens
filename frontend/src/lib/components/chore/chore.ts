@@ -5,6 +5,15 @@ export type ChoreMetricKey = 'tax' | 'consumption' | 'production' | 'employment'
 export type ChoreArchiveState = Record<ChoreArchiveKey, boolean>;
 export type ChoreMetricState = Record<ChoreMetricKey, boolean>;
 
+export type ChoreNumberEditorValue = {
+	value: number;
+	min: number;
+	max: number;
+	step?: number;
+	disabled?: boolean;
+	onChange: (value: number) => void;
+};
+
 export type ChoreFilterOptions = {
 	options: string[];
 	selected: string[];
@@ -35,4 +44,10 @@ export function createChoreArchiveState(): ChoreArchiveState {
 
 export function createChoreMetricState(): ChoreMetricState {
 	return { tax: true, consumption: false, production: true, employment: false, investment: false };
+}
+
+export function clampNumberEditorValue(value: number, min: number, max: number): number {
+	const lower = Math.min(min, max);
+	const upper = Math.max(min, max);
+	return Math.min(upper, Math.max(lower, value));
 }

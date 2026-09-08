@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { language } from '$lib/i18n';
+	import NumberEditor from './NumberEditor.svelte';
+	import type { ChoreNumberEditorValue } from './chore';
 
 	type Props = {
 		text: string;
-		value?: string | number;
+		value?: string | number | ChoreNumberEditorValue;
 		limit?: number;
 		isRow?: boolean;
 		isCenter?: boolean;
@@ -11,10 +13,16 @@
 	};
 
 	let { text, value, limit = 0, isRow = false, isCenter = true, onTitleClick }: Props = $props();
+	let editor = $derived(isNumberEditorValue(value) ? value : undefined);
+	let displayValue = $derived(editor ? editor.value : (value ?? ''));
 	let rowWithValue = $derived(!limit && isRow);
 	let columnWithValue = $derived(!limit && !isRow);
-	let valueCharacters = $derived(Array.from(String(value ?? '')));
+	let valueCharacters = $derived(Array.from(String(displayValue)));
 	let limitCharacters = $derived(Array.from(String(limit ?? '')));
+
+	function isNumberEditorValue(next: Props['value']): next is ChoreNumberEditorValue {
+		return typeof next === 'object' && next !== null && 'onChange' in next;
+	}
 </script>
 
 {#snippet number(characters: string[])}
@@ -25,6 +33,17 @@
 			</span>
 		{/each}
 	</span>
+{/snippet}
+
+{#snippet numberEditor(config: ChoreNumberEditorValue)}
+	<NumberEditor
+		value={config.value}
+		min={config.min}
+		max={config.max}
+		step={config.step ?? 1}
+		disabled={config.disabled ?? false}
+		onChange={config.onChange}
+	/>
 {/snippet}
 
 {#snippet rowTitle()}
@@ -61,23 +80,39 @@
 	{/if}
 
 	{#if !isCenter}
-		<div class="z-1 flex max-w-[500px] items-center justify-center bg-ink-secondary">
-			<p
-				class="m-0 max-w-full whitespace-pre-line font-document text-30 font-light leading-auto text-accent-amber-deep [overflow-wrap:anywhere]"
-			>
-				{value}
-			</p>
-		</div>
+		{#if editor}
+			<div class="z-1 flex max-w-[500px] items-center justify-center">
+				{@render numberEditor(editor)}
+			</div>
+		{:else}
+			<div class="z-1 flex max-w-[500px] items-center justify-center bg-ink-secondary">
+				<p
+					class="m-0 max-w-full whitespace-pre-line font-document text-30 font-light leading-auto text-accent-amber-deep [overflow-wrap:anywhere]"
+				>
+					{displayValue}
+				</p>
+			</div>
+		{/if}
 	{:else if rowWithValue}
-		<div class="z-1 flex items-center justify-center bg-accent-amber-deep">
-			<p
-				class="m-0 flex justify-center whitespace-nowrap font-document text-30 font-light leading-auto text-shadow-deep"
-			>
-				{@render number(valueCharacters)}
-			</p>
-		</div>
+		{#if editor}
+			<div class="z-1 flex items-center justify-center">
+				{@render numberEditor(editor)}
+			</div>
+		{:else}
+			<div class="z-1 flex items-center justify-center bg-accent-amber-deep">
+				<p
+					class="m-0 flex justify-center whitespace-nowrap font-document text-30 font-light leading-auto text-shadow-deep"
+				>
+					{@render number(valueCharacters)}
+				</p>
+			</div>
+		{/if}
 	{:else if !isRow}
-		{#if limit}
+		{#if editor}
+			<div class="z-2 -mr-[10px] flex items-center justify-center">
+				{@render numberEditor(editor)}
+			</div>
+		{:else if limit}
 			<div
 				class="z-2 -mr-[10px] flex h-[55px] w-[30px] flex-col items-center justify-center bg-accent-amber-deep font-document text-30 font-light leading-auto text-shadow-deep"
 			>
