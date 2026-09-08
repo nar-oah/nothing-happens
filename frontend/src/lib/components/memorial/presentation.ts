@@ -111,8 +111,7 @@ function formatPolicyEffect(
 			? sourceA
 			: `${sourceA}－${getMetricDisplayName(effect.source_b, metricTranslator)}`;
 	const multiplier = Math.abs(effect.multiplier);
-	const wrapped =
-		effect.formula === PolicyEffectFormula.METRIC_GAP && multiplier !== 1 ? `（${source}）` : source;
+	const wrapped = effect.formula === PolicyEffectFormula.METRIC_GAP ? `（${source}）` : source;
 	const formula = multiplier === 1 ? wrapped : `${wrapped}×${formatNumber(multiplier)}`;
 	return `${target}${effect.multiplier >= 0 ? '＋' : '－'}${formula}`;
 }

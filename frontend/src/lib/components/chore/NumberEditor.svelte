@@ -5,8 +5,8 @@
 		value: number;
 		min: number;
 		max: number;
-		step: number;
-		disabled: boolean;
+		step?: number;
+		disabled?: boolean;
 		onChange: (value: number) => void;
 	};
 
@@ -37,17 +37,15 @@
 >
 	<button
 		type="button"
-		class="cursor-pointer border-0 bg-transparent p-0 font-inherit text-inherit text-shadow-deep disabled:cursor-default"
+		class="cursor-pointer border-0 bg-transparent p-0 font-document text-30 font-light leading-auto text-shadow-deep disabled:cursor-default"
 		disabled={incrementDisabled}
 		onclick={() => write(current + normalizedStep)}
-	>+</button
-	>
+	>+</button>
 	<span class="whitespace-nowrap text-shadow-deep">{formatNumber(current)}</span>
 	<button
 		type="button"
-		class="cursor-pointer border-0 bg-transparent p-0 font-inherit text-inherit text-shadow-deep disabled:cursor-default"
+		class="cursor-pointer border-0 bg-transparent p-0 font-document text-30 font-light leading-auto text-shadow-deep disabled:cursor-default"
 		disabled={decrementDisabled}
 		onclick={() => write(current - normalizedStep)}
-	>−</button
-	>
+	>-</button>
 </div>

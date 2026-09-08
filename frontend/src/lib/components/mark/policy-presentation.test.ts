@@ -1,6 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { Metric, MetricConditionOperator, PolicyEffectFormula, type PolicyDefinition } from '../../game/types.ts';
+import {
+	Metric,
+	MetricConditionOperator,
+	PolicyEffectFormula,
+	type PolicyDefinition
+} from '../../game/types.ts';
 import { translate, type Translate } from '../../i18n/index.ts';
 import { policyToMemorialContent } from '../memorial/presentation.ts';
 import { createPolicyMarkContent } from './mark.ts';
@@ -55,7 +60,7 @@ test('vertical memorial policy content has fixed gap and stabilization blocks', 
 		policyTitle: '测试政策',
 		contents: [
 			{ title: '落差', body: '生産－（生産－消費）×0.5' },
-			{ title: '平抑', body: '税課＋生産－消費' }
+			{ title: '平抑', body: '税課＋（生産－消費）' }
 		]
 	});
 	assert.deepEqual(
