@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { playUiSfx } from '$lib/audio/ui-sfx';
 	import { t, type Language } from '$lib/i18n';
 	import { tick } from 'svelte';
 	import ChoreItem from '$lib/components/chore/ChoreItem.svelte';
@@ -113,6 +114,7 @@
 
 	function requestClose() {
 		if (interactionDisabled || !onRequestClose) return;
+		playUiSfx('memorial-toggle', true);
 		onRequestClose();
 	}
 
@@ -320,21 +322,66 @@
 		left: 50%;
 		transform: translate(-50%, -50%) rotate(-20deg);
 		transform-origin: center;
+		pointer-events: auto;
+	}
+	.newspaper-axis-track {
+		position: absolute;
+		top: 0;
+		left: 50%;
+		will-change: transform;
+	}
+	.newspaper-scaler {
+		position: absolute;
+		top: 0;
+		left: 0;
+		transform-origin: top left;
+	}
+	.top-controls {
+		position: fixed;
+		top: 0;
+		left: 0;
+		z-index: 3;
+		display: flex;
+		align-items: flex-start;
+		gap: 12px;
+		max-width: calc(100vw - 260px);
+	}
+	.top-items {
+		display: flex;
+		max-width: min(1220px, calc(100vw - 500px));
+		overflow-x: auto;
+		scrollbar-width: none;
+	}
+	.top-items::-webkit-scrollbar {
+		display: none;
+	}
+	.state-slot {
+		position: fixed;
+		top: 72px;
+		right: 0;
+		z-index: 3;
+	}
+	.save-error {
+		margin: 4px 0 0;
+		max-width: 360px;
+		font-family: var(--font-document);
+		font-size: 18px;
+		color: var(--color-shadow-deep);
 	}
 	@keyframes newspaper-enter {
 		from {
-			transform: translate3d(-50vw, -50vh, 0);
+			transform: translateY(-118vh) rotate(-4deg) scale(0.92);
 		}
 		to {
-			transform: translate3d(0, 0, 0);
+			transform: translateY(0) rotate(0deg) scale(1);
 		}
 	}
 	@keyframes newspaper-leave {
 		from {
-			transform: translate3d(0, 0, 0);
+			transform: translateY(0) rotate(0deg) scale(1);
 		}
 		to {
-			transform: translate3d(-50vw, -50vh, 0);
+			transform: translateY(-118vh) rotate(-4deg) scale(0.92);
 		}
 	}
 	@media (prefers-reduced-motion: reduce) {
@@ -342,47 +389,5 @@
 		.newspaper-entry-motion.leaving {
 			animation-duration: 1ms;
 		}
-	}
-	.newspaper-axis-track {
-		width: 100%;
-		height: 100%;
-		will-change: transform;
-	}
-	.newspaper-scaler {
-		pointer-events: auto;
-		transform-origin: top left;
-	}
-	.top-controls {
-		position: absolute;
-		top: 0;
-		right: 0;
-		z-index: 20;
-		display: flex;
-		width: min(960px, 100vw);
-		align-items: flex-start;
-		gap: 30px;
-		pointer-events: auto;
-	}
-	.top-items {
-		min-width: 0;
-		flex: 1;
-		overflow-x: auto;
-		overscroll-behavior: contain;
-		scrollbar-width: none;
-	}
-	.top-items::-webkit-scrollbar {
-		display: none;
-	}
-	.save-error {
-		position: absolute;
-		top: 100%;
-		left: 0;
-		margin: 8px 0;
-	}
-	.state-slot {
-		position: absolute;
-		top: 72px;
-		right: 0;
-		z-index: 20;
 	}
 </style>
