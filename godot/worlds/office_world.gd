@@ -33,10 +33,12 @@ func _update_layout() -> void:
 
 
 func _on_door_clicked(_dialogue: SimpleDialogueDefinition) -> void:
+	AudioDirector.play_door()
 	parliament_requested.emit()
 
 
 func _on_visitor_clicked() -> void:
+	AudioDirector.play_dialogue()
 	if has_visitors():
 		visitor_requested.emit()
 		assistant_door.visible = true
@@ -88,18 +90,22 @@ func _refresh_visitor() -> void:
 
 
 func _on_painting_clicked(dialogue: SimpleDialogueDefinition) -> void:
+	AudioDirector.play_other()
 	request_simple_dialogue(dialogue)
 
 
 func _on_lamp_clicked(dialogue: SimpleDialogueDefinition) -> void:
+	AudioDirector.play_other()
 	request_simple_dialogue(dialogue)
 
 
 func _on_high_lamp_clicked(dialogue: SimpleDialogueDefinition) -> void:
+	AudioDirector.play_other()
 	request_simple_dialogue(dialogue)
 
 
 func _on_ornament_clicked(dialogue: SimpleDialogueDefinition) -> void:
+	AudioDirector.play_other()
 	request_simple_dialogue(dialogue)
 
 
