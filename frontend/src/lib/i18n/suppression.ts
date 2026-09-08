@@ -4,7 +4,7 @@ export const suppressionZhCN = {
 	'newspaper.suppressionAction': '镇压（{count}次）',
 	'newspaper.unsuppress': '不镇压',
 	'newspaper.suppressionDescription':
-		'朝廷素来体恤恭顺诸邦，凡能遵制听命者，偶有难处，自当代为弹压料理，免使小患滋蔓。'
+		'朝廷乐意替听话守规矩的属国收拾麻烦。只要肯服从约法、按规矩办事，出了乱子，自会有人替你压下去。'
 } as const;
 
 export const suppressionEn: Record<keyof typeof suppressionZhCN, string> = {
@@ -13,5 +13,5 @@ export const suppressionEn: Record<keyof typeof suppressionZhCN, string> = {
 	'newspaper.suppressionAction': 'Suppress ({count} left)',
 	'newspaper.unsuppress': 'Do not suppress',
 	'newspaper.suppressionDescription':
-		'The Court has ever shown favor to obedient dependencies; those who observe its ordinances may have their troubles put down before small disorders are allowed to spread.'
+		'The Court is happy to clean up trouble for obedient dependencies. Follow the constitution and the rules, and when disorder breaks out, someone will be sent to put it down for you.'
 };
