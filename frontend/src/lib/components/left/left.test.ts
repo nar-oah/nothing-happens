@@ -2,7 +2,6 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
 	Metric,
-	MetricConditionOperator,
 	PolicyEffectFormula,
 	type InterestGroupDefinition,
 	type PolicyDefinition,
@@ -67,12 +66,6 @@ const proposalItem = (index: number, value: Proposal): ProposalLeftItem => ({
 
 const policy: PolicyDefinition = {
 	display_name: '工贸调节',
-	condition: {
-		left_metric: Metric.PRODUCTION,
-		operator: MetricConditionOperator.LESS_THAN,
-		right_metric: Metric.INVESTMENT,
-		right_multiplier: 1
-	},
 	effects: [
 		{
 			target_metric: Metric.EMPLOYMENT,
@@ -86,12 +79,6 @@ const policy: PolicyDefinition = {
 
 const secondArticlePolicy: PolicyDefinition = {
 	display_name: '消费政策',
-	condition: {
-		left_metric: Metric.CONSUMPTION,
-		operator: MetricConditionOperator.GREATER_THAN,
-		right_metric: Metric.TAX,
-		right_multiplier: 1
-	},
 	effects: []
 };
 

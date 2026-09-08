@@ -2,7 +2,6 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
 	Metric,
-	MetricConditionOperator,
 	PolicyEffectFormula,
 	type PolicyDefinition
 } from '../../game/types.ts';
@@ -15,12 +14,6 @@ const en: Translate = (key, params) => translate(key, params, 'en');
 
 const policy: PolicyDefinition = {
 	display_name: '测试政策',
-	condition: {
-		left_metric: Metric.PRODUCTION,
-		operator: MetricConditionOperator.GREATER_THAN,
-		right_metric: Metric.CONSUMPTION,
-		right_multiplier: 1
-	},
 	effects: [
 		{
 			target_metric: Metric.PRODUCTION,
