@@ -50,6 +50,10 @@
 	}: Props = $props();
 	let foldReported = false;
 	let foldTimer: ReturnType<typeof setTimeout> | undefined;
+	let selectedSuppressionIndices = $state<number[]>([]);
+	const localSuppressionRemaining = $derived(
+		Math.max(0, suppressionRemaining - selectedSuppressionIndices.length)
+	);
 	const sortedEvents = $derived([...events].sort((a, b) => a.countdown - b.countdown));
 	const pages = $derived.by((): NewspaperPage[] => {
 		const result: NewspaperPage[] = [{ kind: 'top' }, { kind: 'metrics' }];
@@ -81,6 +85,29 @@
 		return skews
 			.slice(0, index)
 			.reduce((x, skew) => x + NEWSPAPER_FOLD_HEIGHT * Math.tan((skew * Math.PI) / 180), 0);
+	}
+
+	function isSuppressed(eventIndex: number | undefined): boolean {
+		return eventIndex !== undefined && selectedSuppressionIndices.includes(eventIndex);
+	}
+
+	function setSuppressionSelection(eventIndex: number, selected: boolean): void {
+		if (disabled || !onSuppress) return;
+		const alreadySelected = selectedSuppressionIndices.includes(eventIndex);
+		if (selected) {
+			if (alreadySelected || localSuppressionRemaining <= 0) return;
+			selectedSuppressionIndices = [...selectedSuppressionIndices, eventIndex];
+			return;
+		}
+		if (!alreadySelected) return;
+		selectedSuppressionIndices = selectedSuppressionIndices.filter((index) => index !== eventIndex);
+	}
+
+	function advanceWithSuppressions(): void {
+		if (disabled || !onAdvance) return;
+		for (const eventIndex of selectedSuppressionIndices) onSuppress?.(eventIndex);
+		selectedSuppressionIndices = [];
+		onAdvance();
 	}
 
 	function finishFold(): void {
@@ -132,7 +159,12 @@
 			height={NEWSPAPER_FOLD_HEIGHT}
 		>
 			{#if page.kind === 'top'}
-				<Top {year} {month} {disabled} {onAdvance} />
+				<Top
+					{year}
+					{month}
+					{disabled}
+					onAdvance={onAdvance ? advanceWithSuppressions : undefined}
+				/>
 			{:else if page.kind === 'metrics'}
 				<PublicMetrics {metrics} />
 			{:else if page.kind === 'front'}
@@ -140,7 +172,13 @@
 			{:else if page.kind === 'summary'}
 				<Front {...page.front} />
 			{:else if page.kind === 'event'}
-				<Event {...page.event} {suppressionRemaining} {disabled} {onSuppress} />
+				<Event
+					{...page.event}
+					suppressionRemaining={localSuppressionRemaining}
+					suppressed={isSuppressed(page.event.eventIndex)}
+					{disabled}
+					onSuppressionChange={onSuppress ? setSuppressionSelection : undefined}
+				/>
 			{:else if page.kind === 'calendar'}
 				<Calendar {month} />
 			{:else}
