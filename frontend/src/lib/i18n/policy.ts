@@ -10,10 +10,10 @@ export const policyZhCN = {
 
 export const policyEn: Record<keyof typeof policyZhCN, string> = {
 	'mark.gap': 'Gap',
-	'mark.smoothing': 'Stabilization',
+	'mark.smoothing': 'Damp',
 	'mark.viewGap': 'View gap face',
 	'mark.viewSmoothing': 'View stabilization face',
 	'mark.noFormula': 'No formula',
 	'memorial.gap': 'Gap',
-	'memorial.smoothing': 'Stabilization'
+	'memorial.smoothing': 'Damp'
 };
