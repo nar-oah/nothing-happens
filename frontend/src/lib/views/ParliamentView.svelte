@@ -89,9 +89,7 @@
 	let appliedVersion = untrack(() => stateVersion);
 	let appliedDraft = untrack(() => draft);
 	let visibleDraft = $derived(optimisticDraft ?? draft);
-	let policyBaseline = $derived(
-		calculateDraftProjectedMetrics(baseline, visibleDraft.proposals)
-	);
+	let policyBaseline = $derived(calculateDraftProjectedMetrics(baseline, visibleDraft.proposals));
 	let selection = $derived({
 		proposalRefs: [],
 		policyDisplayNames: visibleDraft.policies.map((policy) => policy.definition.display_name),
@@ -127,10 +125,7 @@
 			const { min } = getPolicyDelayBounds(visibleDraft.proposals);
 			optimisticDraft = {
 				...visibleDraft,
-				policies: [
-					...visibleDraft.policies,
-					{ definition: item.policy, delay_months: min }
-				]
+				policies: [...visibleDraft.policies, { definition: item.policy, delay_months: min }]
 			};
 			return onAddPolicy?.(item.policy.display_name);
 		}
@@ -147,9 +142,7 @@
 	}
 
 	function removeProposal(_proposal: Proposal, index: number) {
-		const proposals = visibleDraft.proposals.filter(
-			(_, currentIndex) => currentIndex !== index
-		);
+		const proposals = visibleDraft.proposals.filter((_, currentIndex) => currentIndex !== index);
 		optimisticDraft = {
 			...visibleDraft,
 			proposals,

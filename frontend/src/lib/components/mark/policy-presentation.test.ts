@@ -1,10 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {
-	Metric,
-	PolicyEffectFormula,
-	type PolicyDefinition
-} from '../../game/types.ts';
+import { Metric, PolicyEffectFormula, type PolicyDefinition } from '../../game/types.ts';
 import { translate, type Translate } from '../../i18n/index.ts';
 import { policyToMemorialContent } from '../memorial/presentation.ts';
 import { createPolicyMarkContent } from './mark.ts';

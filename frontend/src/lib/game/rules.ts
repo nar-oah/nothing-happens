@@ -112,9 +112,7 @@ export function reconcileSavedBill(
 		const available = availablePolicies.find((policy) =>
 			arePoliciesGameplayEquivalent(savedPolicy.definition, policy)
 		);
-		return available
-			? [{ definition: available, delay_months: savedPolicy.delay_months }]
-			: [];
+		return available ? [{ definition: available, delay_months: savedPolicy.delay_months }] : [];
 	});
 	return {
 		title: savedBill.title,

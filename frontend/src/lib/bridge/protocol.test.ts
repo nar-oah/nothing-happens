@@ -258,8 +258,9 @@ test('IPC keeps policy definitions shared and validates bill policy delay instan
 	);
 
 	const missingDelay = JSON.parse(JSON.stringify(valid)) as typeof valid;
-	delete (missingDelay.draft_bill.policies[0] as Partial<(typeof valid.draft_bill.policies)[number]>)
-		.delay_months;
+	delete (
+		missingDelay.draft_bill.policies[0] as Partial<(typeof valid.draft_bill.policies)[number]>
+	).delay_months;
 	assert.deepEqual(
 		decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: missingDelay })),
 		{ ok: false, error: 'Invalid payload for state.full' }
@@ -275,9 +276,7 @@ test('IPC keeps policy definitions shared and validates bill policy delay instan
 	const wrappedAvailablePolicy = JSON.parse(JSON.stringify(valid)) as Record<string, unknown>;
 	wrappedAvailablePolicy.available_policies = valid.draft_bill.policies;
 	assert.deepEqual(
-		decodeInboundMessage(
-			JSON.stringify({ type: 'state.full', payload: wrappedAvailablePolicy })
-		),
+		decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: wrappedAvailablePolicy })),
 		{ ok: false, error: 'Invalid payload for state.full' }
 	);
 });

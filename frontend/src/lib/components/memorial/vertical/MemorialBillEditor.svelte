@@ -164,14 +164,14 @@
 		<MemorialVertical count={proposalPages.length + policyPages.length}>
 			{#snippet page(index: number)}
 				{#if proposalPages[index]}
-				<button
-					class="h-full w-full cursor-pointer border-0 bg-transparent p-0 text-left"
-					type="button"
-					aria-label={$t('memorial.deletePage', { page: index + 1 })}
-					onclick={() => removePage(index)}
-				>
-					<MemorialProposalContent {...proposalPages[index]} />
-				</button>
+					<button
+						class="h-full w-full cursor-pointer border-0 bg-transparent p-0 text-left"
+						type="button"
+						aria-label={$t('memorial.deletePage', { page: index + 1 })}
+						onclick={() => removePage(index)}
+					>
+						<MemorialProposalContent {...proposalPages[index]} />
+					</button>
 				{:else if policyPages[index - proposalPages.length]}
 					{@const policyIndex = index - proposalPages.length}
 					<div class="relative h-full w-full">
@@ -187,8 +187,7 @@
 								lagMonths={bill.policies[policyIndex].delay_months}
 								min={policyDelayBounds.min}
 								max={policyDelayBounds.max}
-								onChange={(delayMonths) =>
-									onPolicyDelayChange?.(policyIndex, delayMonths)}
+								onChange={(delayMonths) => onPolicyDelayChange?.(policyIndex, delayMonths)}
 							/>
 						</div>
 					</div>

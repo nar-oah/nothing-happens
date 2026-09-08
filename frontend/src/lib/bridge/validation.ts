@@ -339,11 +339,7 @@ function isPolicy(value: unknown): value is PolicyDefinition {
 }
 
 function isPolicyInstance(value: unknown): value is PolicyInstance {
-	return (
-		isRecord(value) &&
-		isPolicy(value.definition) &&
-		isNonnegativeInteger(value.delay_months)
-	);
+	return isRecord(value) && isPolicy(value.definition) && isNonnegativeInteger(value.delay_months);
 }
 
 function isBill(value: unknown): value is Bill {
