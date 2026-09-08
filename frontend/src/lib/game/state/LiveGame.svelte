@@ -115,6 +115,7 @@
 					: event.metric;
 			return [
 				{
+					eventIndex: event.event_index,
 					race,
 					description: event.event_description,
 					metric,
@@ -521,6 +522,8 @@
 				metrics={newspaperEdition.metrics}
 				front={newspaperEdition.front}
 				events={newspaperEdition.events}
+				suppressionRemaining={snapshot.suppression_remaining}
+				onSuppress={(eventIndex) => mutate('event.suppress', { event_index: eventIndex })}
 				busy={newspaperBusy}
 				folded={newspaperFolded}
 				leaving={newspaperLeaving}
