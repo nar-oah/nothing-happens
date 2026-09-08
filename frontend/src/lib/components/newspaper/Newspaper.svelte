@@ -185,7 +185,9 @@
 			{:else if page.kind === 'calendar'}
 				<Calendar {month} />
 			{:else}
-				<Comment context={commentContext} />
+				{#key commentContext}
+					<Comment context={commentContext} />
+				{/key}
 			{/if}
 		</MemorialHorizontalFold>
 	{/each}
