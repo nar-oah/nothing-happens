@@ -90,7 +90,9 @@
 	let appliedVersion = untrack(() => stateVersion);
 	let appliedDraft = untrack(() => draft);
 	let visibleDraft = $derived(optimisticDraft ?? draft);
-	let policyBaseline = $derived(calculateDraftProjectedMetrics(baseline, visibleDraft.proposals));
+	let policyBaseline = $derived(
+		calculateDraftProjectedMetrics(baseline, visibleDraft.proposals, visibleDraft.policies)
+	);
 	let selection = $derived({
 		proposalRefs: [],
 		policyDisplayNames: visibleDraft.policies.map((policy) => policy.definition.display_name),

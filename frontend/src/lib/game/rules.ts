@@ -148,9 +148,35 @@ export function calculatePureProposalTarget(
 
 export function calculateDraftProjectedMetrics(
 	current: MetricValues,
-	proposals: Proposal[]
+	proposals: Proposal[],
+	policies: PolicyInstance[]
 ): MetricValues {
-	return calculatePureProposalTarget(current, proposals);
+	const result = calculatePureProposalTarget(current, proposals);
+	const delays = [...new Set(policies.map((policy) => policy.delay_months))].sort(
+		(first, second) => first - second
+	);
+	for (const delay of delays) {
+		const snapshot = { ...result };
+		const delta: MetricVector = {
+			tax: 0,
+			consumption: 0,
+			production: 0,
+			employment: 0,
+			investment: 0
+		};
+		for (const policy of policies) {
+			if (policy.delay_months !== delay) continue;
+			for (const effect of policy.definition.effects) {
+				const key = METRIC_KEYS[effect.target_metric];
+				delta[key] += calculatePolicyEffectAmount(effect, snapshot);
+			}
+		}
+		for (const metric of METRICS) {
+			const key = METRIC_KEYS[metric];
+			result[key] += getMetricValue(delta, metric);
+		}
+	}
+	return result;
 }
 
 export function getBillLagMonths(proposals: Proposal[]): number {
