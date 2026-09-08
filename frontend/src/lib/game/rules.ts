@@ -1,14 +1,13 @@
 import { translate, type Translate } from '../i18n/index.ts';
 import {
 	Metric,
-	MetricConditionOperator,
 	PolicyEffectFormula,
-	type MetricCondition,
 	type MetricValues,
 	type MetricVector,
 	type Bill,
 	type PolicyDefinition,
 	type PolicyEffect,
+	type PolicyInstance,
 	type Proposal
 } from './types.ts';
 
@@ -42,21 +41,6 @@ export function getMetricDisplayName(metric: Metric, translator: Translate = tra
 
 export function getMetricValue(values: MetricValues, metric: Metric): number {
 	return values[METRIC_KEYS[metric]];
-}
-
-export function isMetricConditionMet(condition: MetricCondition, values: MetricValues): boolean {
-	const left = getMetricValue(values, condition.left_metric);
-	const right = getMetricValue(values, condition.right_metric) * condition.right_multiplier;
-	switch (condition.operator) {
-		case MetricConditionOperator.LESS_THAN:
-			return left < right;
-		case MetricConditionOperator.LESS_THAN_OR_EQUAL:
-			return left <= right;
-		case MetricConditionOperator.GREATER_THAN:
-			return left > right;
-		case MetricConditionOperator.GREATER_THAN_OR_EQUAL:
-			return left >= right;
-	}
 }
 
 export function calculatePolicyEffectAmount(effect: PolicyEffect, values: MetricValues): number {
@@ -126,11 +110,17 @@ export function reconcileSavedBill(
 	);
 	const policies = savedBill.policies.flatMap((savedPolicy) => {
 		const available = availablePolicies.find((policy) =>
-			arePoliciesGameplayEquivalent(savedPolicy, policy)
+			arePoliciesGameplayEquivalent(savedPolicy.definition, policy)
 		);
-		return available ? [available] : [];
+		return available
+			? [{ definition: available, delay_months: savedPolicy.delay_months }]
+			: [];
 	});
-	return { title: savedBill.title, proposals, policies };
+	return {
+		title: savedBill.title,
+		proposals,
+		policies: clampBillPolicyDelays(policies, proposals)
+	};
 }
 
 export function getProposalTotalEffect(proposal: Proposal): MetricVector {
@@ -160,77 +150,59 @@ export function calculatePureProposalTarget(
 
 export function calculateDraftProjectedMetrics(
 	current: MetricValues,
-	proposals: Proposal[],
-	policies: PolicyDefinition[]
+	proposals: Proposal[]
 ): MetricValues {
-	const pureTarget = calculatePureProposalTarget(current, proposals);
-	const triggered = new Set<number>();
-	const immediate = resolvePolicyChain(current, policies, triggered);
-	const projected: MetricValues = { ...pureTarget };
-	for (const metric of METRICS) {
-		const key = METRIC_KEYS[metric];
-		projected[key] += getMetricValue(immediate, metric) - getMetricValue(current, metric);
-	}
-	return resolvePolicyChain(projected, policies, triggered);
+	return calculatePureProposalTarget(current, proposals);
 }
 
 export function getBillLagMonths(proposals: Proposal[]): number {
 	return proposals.reduce((maximum, proposal) => Math.max(maximum, proposal.lag_months), 0);
 }
 
-export function getBillMetrics(proposals: Proposal[], policies: PolicyDefinition[]): Metric[] {
+export function getPolicyDelayBounds(proposals: Proposal[]): { min: number; max: number } {
+	const max = getBillLagMonths(proposals);
+	return { min: max === 0 ? 0 : Math.ceil(max / 2), max };
+}
+
+export function clampPolicyDelayMonths(delayMonths: number, proposals: Proposal[]): number {
+	const { min, max } = getPolicyDelayBounds(proposals);
+	return Math.min(max, Math.max(min, delayMonths));
+}
+
+export function clampBillPolicyDelays(
+	policies: PolicyInstance[],
+	proposals: Proposal[]
+): PolicyInstance[] {
+	return policies.map((policy) => ({
+		...policy,
+		delay_months: clampPolicyDelayMonths(policy.delay_months, proposals)
+	}));
+}
+
+export function getBillMetrics(
+	proposals: Proposal[],
+	policies: Array<PolicyDefinition | PolicyInstance>
+): Metric[] {
 	const involved = new Set<Metric>();
 	for (const proposal of proposals) {
 		addVectorMetrics(involved, proposal.base_effect);
 		if (proposal.positive_trait_accepted) addVectorMetrics(involved, proposal.positive_effect);
 	}
-	for (const policy of policies) getPolicyMetrics(policy).forEach((metric) => involved.add(metric));
+	for (const policy of policies) {
+		const definition = 'definition' in policy ? policy.definition : policy;
+		getPolicyMetrics(definition).forEach((metric) => involved.add(metric));
+	}
 	return METRICS.filter((metric) => involved.has(metric));
 }
 
 export function getPolicyMetrics(policy: PolicyDefinition): Metric[] {
-	const involved = new Set<Metric>([policy.condition.left_metric, policy.condition.right_metric]);
+	const involved = new Set<Metric>();
 	for (const effect of policy.effects) {
 		involved.add(effect.target_metric);
 		involved.add(effect.source_a);
 		if (effect.formula === PolicyEffectFormula.METRIC_GAP) involved.add(effect.source_b);
 	}
 	return METRICS.filter((metric) => involved.has(metric));
-}
-
-function resolvePolicyChain(
-	start: MetricValues,
-	policies: PolicyDefinition[],
-	triggered: Set<number>
-): MetricValues {
-	const result: MetricValues = { ...start };
-	while (true) {
-		const batch = policies.flatMap((policy, index) =>
-			!triggered.has(index) && isMetricConditionMet(policy.condition, result)
-				? [{ policy, index }]
-				: []
-		);
-		if (batch.length === 0) return result;
-		const snapshot: MetricValues = { ...result };
-		const delta: MetricVector = {
-			tax: 0,
-			consumption: 0,
-			production: 0,
-			employment: 0,
-			investment: 0
-		};
-		for (const { policy, index } of batch) {
-			triggered.add(index);
-			for (const effect of policy.effects) {
-				const key = METRIC_KEYS[effect.target_metric];
-				delta[key] += calculatePolicyEffectAmount(effect, snapshot);
-			}
-		}
-		for (const metric of METRICS) {
-			const key = METRIC_KEYS[metric];
-			result[key] += getMetricValue(delta, metric);
-		}
-	}
 }
 
 function addVectorMetrics(involved: Set<Metric>, values: MetricValues): void {
