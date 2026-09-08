@@ -57,6 +57,10 @@ function handleClick(event: MouseEvent): void {
 		'button, [role="button"], a[href], input[type="button"], input[type="submit"]'
 	);
 	if (!control || disabled(control)) return;
+	if (control.classList.contains('newspaper-close-layer')) {
+		playUiSfx('memorial-toggle');
+		return;
+	}
 	playUiSfx('other');
 }
 
