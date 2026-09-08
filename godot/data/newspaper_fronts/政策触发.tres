@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="PolicyTriggeredNewspaperFrontDefinition" format=3 uid="uid://f9v2c7m4xp1ka"]
+
+[ext_resource type="Script" path="res://definitions/newspaper_fronts/policy_triggered_newspaper_front_definition.gd" id="1_front"]
+
+[resource]
+script = ExtResource("1_front")
+title = "%s触发　授权即时生效"
+content = "本月账簿关系满足既定条件，%s随即执行。其影响已经记入当前市场状态；若由此带动其它政策条件，同月连锁也已一并结算。"
+policy_name_format = "《%s》"
+list_separator = "、"
+multiple_title = "%d项政策相继触发"
+multiple_content = "本月市场关系连续触及既定条款，%s即时生效。各项影响与由此产生的连锁变化，均已记入本期账簿。"

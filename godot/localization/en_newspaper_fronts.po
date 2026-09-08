@@ -1,0 +1,78 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: nothing-happens\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# No public event
+msgid "无事发生？"
+msgstr "Nothing Happens?"
+
+msgid "本月没有任何种族事件达到公开门槛。报馆未能找到足以占据头版的危机，只得提醒读者：没有消息，或许正是最值得警惕的消息。"
+msgstr "No event concerning any people reached the threshold for publication this month. Unable to find a crisis worthy of the front page, the press can only remind its readers: perhaps no news is the most alarming news of all."
+
+# New term
+msgid "第%d次入主会同"
+msgstr "Term %d Begins in Huitong"
+
+msgid "新一任联合政府开议。各族在彼此之间挑了一圈，最终还是把会同的印信交到驻岁案前；至少在谁也不肯让步的时候，长生者看起来还算能等。"
+msgstr "A new Joint Government has convened. After looking one another over, the peoples have once again placed Huitong's seal before the Zhushui desk; when no one else is willing to yield, the long-lived at least look capable of waiting."
+
+# Bill passed
+msgid "%s获议会通过"
+msgstr "%s Passed by Parliament"
+
+msgid "新法已经生效。%s；实际月度路径仍可能短暂偏离。"
+msgstr "The new bill is now in force. %s; the actual monthly path may still deviate briefly."
+
+msgid "新法案"
+msgstr "New Bill"
+
+msgid "《%s》"
+msgstr "%s"
+
+msgid "按所含提案的形成速度估算，五项公共指标平均每月没有净下降"
+msgstr "At the formation rates of its proposals, the five public metrics show no net average monthly decline"
+
+msgid "按所含提案的形成速度估算，平均每月预计减少：%s"
+msgstr "At the formation rates of its proposals, the estimated average monthly decreases are: %s"
+
+msgid "%s约%s"
+msgstr "%s about %s"
+
+msgid "、"
+msgstr ", "
+
+# Policy triggered
+msgid "%s触发　授权即时生效"
+msgstr "%s Triggered — Authorization Takes Effect"
+
+msgid "本月账簿关系满足既定条件，%s随即执行。其影响已经记入当前市场状态；若由此带动其它政策条件，同月连锁也已一并结算。"
+msgstr "This month's ledger satisfied the prescribed condition, so %s took effect immediately. Its impact is already reflected in the current market state; any policy conditions triggered in turn were resolved in the same month."
+
+msgid "%d项政策相继触发"
+msgstr "%d Policies Trigger in Succession"
+
+msgid "本月市场关系连续触及既定条款，%s即时生效。各项影响与由此产生的连锁变化，均已记入本期账簿。"
+msgstr "Market relations crossed several prescribed conditions this month, causing %s to take effect immediately. Their effects and the resulting chain changes have all been entered in this issue's ledger."
+
+# Collapse thresholds
+msgid "危机预期过半　议会警告声渐密"
+msgstr "Crisis Expectations Pass Halfway — Warnings Mount in Parliament"
+
+msgid "各族对全面崩溃的共同预期已经越过半数。报馆、议员与来访者开始反复引用彼此的警告；但截至目前，仍没有证据能够证明一场全面灾难已经发生。"
+msgstr "The peoples' shared expectation of total collapse has passed the halfway mark. Newspapers, legislators, and visitors increasingly repeat one another's warnings; yet so far, no evidence proves that a comprehensive disaster has actually begun."
+
+msgid "八成相信危机将至　会同难闻别声"
+msgstr "Eight in Ten Expect Crisis — Huitong Hears Little Else"
+
+msgid "崩溃预期已经越过八成。原本彼此矛盾的警告开始汇成同一种结论：必须立刻做些什么。至于灾难本身，仍没有一项账簿记录能够单独证实它。"
+msgstr "Collapse expectations have passed eighty percent. Warnings that once contradicted one another are converging on a single conclusion: something must be done immediately. As for the disaster itself, no single ledger entry can yet confirm it."
+
+msgid "九成危言同指一处　已经没有时间了"
+msgstr "Nine in Ten Warnings Point One Way — There Is No Time Left"
+
+msgid "崩溃预期越过九成，会同几乎无人再讨论危机是否会来，只争论它将在何时到来。越是缺少确定证据，新的期限、推算和补救方案反而越快出现。"
+msgstr "With collapse expectations above ninety percent, almost no one in Huitong still debates whether the crisis will come, only when. The less certain the evidence becomes, the faster new deadlines, projections, and remedies appear."

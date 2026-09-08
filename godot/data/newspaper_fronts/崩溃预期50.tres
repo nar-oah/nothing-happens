@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="CollapseThresholdNewspaperFrontDefinition" format=3 uid="uid://g5b8r3n0wd6qt"]
+
+[ext_resource type="Script" path="res://definitions/newspaper_fronts/collapse_threshold_newspaper_front_definition.gd" id="1_front"]
+
+[resource]
+script = ExtResource("1_front")
+title = "危机预期过半　议会警告声渐密"
+content = "各族对全面崩溃的共同预期已经越过半数。报馆、议员与来访者开始反复引用彼此的警告；但截至目前，仍没有证据能够证明一场全面灾难已经发生。"
+collapse_ratio = 0.5

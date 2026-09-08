@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="CollapseThresholdNewspaperFrontDefinition" format=3 uid="uid://h1x4m9c2vk7pe"]
+
+[ext_resource type="Script" path="res://definitions/newspaper_fronts/collapse_threshold_newspaper_front_definition.gd" id="1_front"]
+
+[resource]
+script = ExtResource("1_front")
+title = "八成相信危机将至　会同难闻别声"
+content = "崩溃预期已经越过八成。原本彼此矛盾的警告开始汇成同一种结论：必须立刻做些什么。至于灾难本身，仍没有一项账簿记录能够单独证实它。"
+collapse_ratio = 0.8
