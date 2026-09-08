@@ -5,6 +5,7 @@ import type {
 	Metric,
 	MetricValues,
 	PolicyDefinition,
+	PolicyInstance,
 	Proposal
 } from '../types.ts';
 
@@ -151,7 +152,10 @@ export type ActiveProposalDto = {
 	digestion_progress: number;
 	fully_digested: boolean;
 };
-export type ActivePolicyDto = { definition: PolicyDefinition; triggered: boolean };
+export type ActivePolicyDto = PolicyInstance & {
+	elapsed_months: number;
+	triggered: boolean;
+};
 export type ActiveBillDto = {
 	title: string;
 	start_values: MetricValues;

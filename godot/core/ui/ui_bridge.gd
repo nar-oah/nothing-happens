@@ -225,6 +225,8 @@ func _dispatch(message: Dictionary, messages: Array[Dictionary]) -> void:
 			_handle_draft_policy_add(message, messages)
 		"draft.policy.remove":
 			_handle_draft_policy_remove(message, messages)
+		"draft.policy.delay.set":
+			_handle_draft_policy_delay_set(message, messages)
 		"draft.title.set":
 			_handle_draft_title(message, messages)
 		"bill.new":
@@ -413,6 +415,32 @@ func _handle_draft_policy_remove(message: Dictionary, messages: Array[Dictionary
 		_append_mutation_error(
 			messages,
 			{"code": "invalid_draft_index", "message": "Draft policy index is invalid."},
+			message["request_id"]
+		)
+		return
+	_finish_draft_mutation(messages, message["request_id"])
+
+
+func _handle_draft_policy_delay_set(
+	message: Dictionary, messages: Array[Dictionary]
+) -> void:
+	var index := _protocol.read_int(message["payload"], "draft_index")
+	if not index["ok"]:
+		_append_mutation_error(messages, index["error"], message["request_id"])
+		return
+	var delay := _protocol.read_int(message["payload"], "delay_months")
+	if not delay["ok"]:
+		_append_mutation_error(messages, delay["error"], message["request_id"])
+		return
+	if not run_session.draft_bill_system.set_policy_delay(
+		run_session.state, index["value"], delay["value"]
+	):
+		_append_mutation_error(
+			messages,
+			{
+				"code": "invalid_policy_delay",
+				"message": "Draft policy index or delay is outside the legal range.",
+			},
 			message["request_id"]
 		)
 		return

@@ -28,6 +28,7 @@ var newspaper_front: Dictionary = {}
 var newspaper_pending_bill: ActiveBillState
 var newspaper_triggered_policies: Array[PolicyDefinition] = []
 var active_bill: ActiveBillState
+var scheduled_policies: Array[PolicyState] = []
 var proposal_hand: Array[ProposalInstance] = []
 var proposal_acquisition_order: Array[ProposalInstance] = []
 var office_visits: Array[OfficeVisitState] = []

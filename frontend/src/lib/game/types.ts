@@ -8,16 +8,6 @@ export const Metric = {
 
 export type Metric = (typeof Metric)[keyof typeof Metric];
 
-export const MetricConditionOperator = {
-	LESS_THAN: 0,
-	LESS_THAN_OR_EQUAL: 1,
-	GREATER_THAN: 2,
-	GREATER_THAN_OR_EQUAL: 3
-} as const;
-
-export type MetricConditionOperator =
-	(typeof MetricConditionOperator)[keyof typeof MetricConditionOperator];
-
 export const PolicyEffectFormula = {
 	METRIC_VALUE: 0,
 	METRIC_GAP: 1
@@ -47,13 +37,6 @@ export type InterestGroupDefinition = {
 	decrease_investment: boolean;
 };
 
-export type MetricCondition = {
-	left_metric: Metric;
-	operator: MetricConditionOperator;
-	right_metric: Metric;
-	right_multiplier: number;
-};
-
 export type PolicyEffect = {
 	target_metric: Metric;
 	formula: PolicyEffectFormula;
@@ -64,11 +47,13 @@ export type PolicyEffect = {
 
 export type PolicyDefinition = {
 	display_name: string;
-	condition: MetricCondition;
 	effects: PolicyEffect[];
 };
 
-export type Policy = PolicyDefinition;
+export type PolicyInstance = {
+	definition: PolicyDefinition;
+	delay_months: number;
+};
 
 export type Proposal = {
 	source_group: InterestGroupDefinition;
@@ -83,7 +68,7 @@ export type Proposal = {
 export type Bill = {
 	title: string;
 	proposals: Proposal[];
-	policies: PolicyDefinition[];
+	policies: PolicyInstance[];
 };
 
 export type ConstitutionEffect = {

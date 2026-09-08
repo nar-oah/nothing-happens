@@ -10,7 +10,6 @@ func run(t: BackendTestContext) -> void:
 	_test_maximum_without_submitted_bill_is_nothing_happens(t)
 	_test_maximum_with_submitted_bill_is_collapse(t)
 	_test_bill_digestion_and_market_movement(t)
-	_test_policy_trigger_chain(t)
 
 
 func _make_collapse_session(
@@ -169,46 +168,3 @@ func _test_bill_digestion_and_market_movement(t: BackendTestContext) -> void:
 	)
 	t.check_equal(session.state.metrics.tax, 120, "market reaches fully-digested target without a second response layer")
 	session.free()
-
-
-func _test_policy_trigger_chain(t: BackendTestContext) -> void:
-	var first := PolicyDefinition.new()
-	first.display_name = "first"
-	first.condition = MetricCondition.new()
-	first.condition.left_metric = Metric.Id.TAX
-	first.condition.operator = MetricCondition.Operator.GREATER_THAN
-	first.condition.right_metric = Metric.Id.CONSUMPTION
-	var first_effect := PolicyEffect.new()
-	first_effect.target_metric = Metric.Id.PRODUCTION
-	first_effect.formula = PolicyEffect.Formula.METRIC_VALUE
-	first_effect.source_a = Metric.Id.TAX
-	first_effect.multiplier = 1.0
-	first.effects = [first_effect]
-
-	var second := PolicyDefinition.new()
-	second.display_name = "second"
-	second.condition = MetricCondition.new()
-	second.condition.left_metric = Metric.Id.PRODUCTION
-	second.condition.operator = MetricCondition.Operator.GREATER_THAN_OR_EQUAL
-	second.condition.right_metric = Metric.Id.TAX
-	var second_effect := PolicyEffect.new()
-	second_effect.target_metric = Metric.Id.INVESTMENT
-	second_effect.formula = PolicyEffect.Formula.METRIC_VALUE
-	second_effect.source_a = Metric.Id.PRODUCTION
-	second_effect.multiplier = 2.0
-	second.effects = [second_effect]
-
-	var state := RunState.new()
-	state.metrics.tax = 10
-	state.metrics.consumption = 5
-	state.metrics.production = 0
-	state.metrics.investment = 0
-	state.active_bill = ActiveBillState.new()
-	var system := PolicySystem.new()
-	state.active_bill.policies = system.create_states([first, second])
-	system.resolve_policy_chain(state)
-	t.check_equal(state.metrics.production, 10, "first policy applies from initial condition")
-	t.check_equal(state.metrics.investment, 20, "second policy triggers from first policy result")
-	t.check(state.active_bill.policies[0].triggered, "first policy is marked triggered")
-	t.check(state.active_bill.policies[1].triggered, "second policy is marked triggered")
-	t.check_equal(state.collapse_level, 0, "policies do not add collapse")

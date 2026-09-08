@@ -1,6 +1,5 @@
 import {
 	Metric,
-	MetricConditionOperator,
 	PolicyEffectFormula,
 	type InterestGroupDefinition,
 	type MetricValues,
@@ -40,12 +39,6 @@ export const testProposal: Proposal = {
 
 export const testPolicy: PolicyDefinition = {
 	display_name: '勘合互市',
-	condition: {
-		left_metric: Metric.INVESTMENT,
-		operator: MetricConditionOperator.GREATER_THAN,
-		right_metric: Metric.TAX,
-		right_multiplier: 1
-	},
 	effects: [
 		{
 			target_metric: Metric.INVESTMENT,
@@ -107,8 +100,18 @@ export function makeLiveState(stateVersion = 1): LiveGameState {
 		term_report: null,
 		metrics: current,
 		proposal_hand: [testProposal],
-		saved_bills: [{ title: '旧法案', proposals: [testProposal], policies: [testPolicy] }],
-		draft_bill: { title: '草案', proposals: [testProposal], policies: [testPolicy] },
+		saved_bills: [
+			{
+				title: '旧法案',
+				proposals: [testProposal],
+				policies: [{ definition: testPolicy, delay_months: 4 }]
+			}
+		],
+		draft_bill: {
+			title: '草案',
+			proposals: [testProposal],
+			policies: [{ definition: testPolicy, delay_months: 4 }]
+		},
 		editing_saved_bill_index: null,
 		available_policies: [testPolicy],
 		constitution: {

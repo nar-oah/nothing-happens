@@ -3,7 +3,13 @@
 	import { restoreProposalToHand, sortProposalItemsByTime } from '$lib/components/left/left';
 	import type { LeftItem, ProposalLeftItem } from '$lib/components/left/types';
 	import { NewspaperEventState, NewspaperRace } from '$lib/components/newspaper/types';
-	import { Metric, type Bill } from '$lib/game';
+	import {
+		Metric,
+		clampBillPolicyDelays,
+		clampPolicyDelayMonths,
+		getPolicyDelayBounds,
+		type Bill
+	} from '$lib/game';
 	import ConstitutionView from '$lib/views/ConstitutionView.svelte';
 	import DialogueView from '$lib/views/DialogueView.svelte';
 	import OfficeView from '$lib/views/OfficeView.svelte';
@@ -78,7 +84,7 @@
 	let draft = $state<Bill>({
 		title: '勘合互市',
 		proposals: [initialDraftProposal.proposal],
-		policies: [mockPolicies[0]]
+		policies: [{ definition: mockPolicies[0], delay_months: 3 }]
 	});
 	let items: LeftItem[] = $derived([...mockArchiveItems, ...proposalHand, ...mockPolicyItems]);
 	let preview = $derived(getMockBillPreview(draft));
@@ -112,7 +118,8 @@
 		if (!item) return;
 		proposalHand = proposalHand.filter((current) => current !== item);
 		draftProposalItems = [...draftProposalItems, item];
-		draft = { ...draft, proposals: [...draft.proposals, item.proposal] };
+		const proposals = [...draft.proposals, item.proposal];
+		draft = { ...draft, proposals, policies: clampBillPolicyDelays(draft.policies, proposals) };
 		stateVersion += 1;
 	}
 
@@ -120,19 +127,39 @@
 		const item = draftProposalItems[draftIndex];
 		if (item) proposalHand = restoreProposalToHand(proposalHand, item);
 		draftProposalItems = draftProposalItems.filter((_, index) => index !== draftIndex);
-		draft = { ...draft, proposals: draft.proposals.filter((_, index) => index !== draftIndex) };
+		const proposals = draft.proposals.filter((_, index) => index !== draftIndex);
+		draft = { ...draft, proposals, policies: clampBillPolicyDelays(draft.policies, proposals) };
 		stateVersion += 1;
 	}
 
 	function addPolicy(displayName: string) {
 		const policy = mockPolicies.find((current) => current.display_name === displayName);
-		if (!policy || draft.policies.some((current) => current.display_name === displayName)) return;
-		draft = { ...draft, policies: [...draft.policies, policy] };
+		if (
+			!policy ||
+			draft.policies.some((current) => current.definition.display_name === displayName)
+		)
+			return;
+		const { min } = getPolicyDelayBounds(draft.proposals);
+		draft = {
+			...draft,
+			policies: [...draft.policies, { definition: policy, delay_months: min }]
+		};
 		stateVersion += 1;
 	}
 
 	function removePolicy(draftIndex: number) {
 		draft = { ...draft, policies: draft.policies.filter((_, index) => index !== draftIndex) };
+		stateVersion += 1;
+	}
+
+	function setPolicyDelay(draftIndex: number, delayMonths: number) {
+		const delay = clampPolicyDelayMonths(delayMonths, draft.proposals);
+		draft = {
+			...draft,
+			policies: draft.policies.map((policy, index) =>
+				index === draftIndex ? { ...policy, delay_months: delay } : policy
+			)
+		};
 		stateVersion += 1;
 	}
 
@@ -152,7 +179,9 @@
 			title: saved.bill.title,
 			proposals: matched.map((item) => item.proposal),
 			policies: saved.bill.policies.filter((policy) =>
-				mockPolicies.some((availablePolicy) => availablePolicy.display_name === policy.display_name)
+				mockPolicies.some(
+					(availablePolicy) => availablePolicy.display_name === policy.definition.display_name
+				)
 			)
 		};
 		editingSavedBillIndex = savedBillIndex;
@@ -209,6 +238,7 @@
 			onRemoveProposal={removeProposal}
 			onAddPolicy={addPolicy}
 			onRemovePolicy={removePolicy}
+			onSetPolicyDelay={setPolicyDelay}
 			onTitleChange={setTitle}
 			onEditSavedBill={editSavedBill}
 			onSubmit={() => console.info('Submit bill', draft)}

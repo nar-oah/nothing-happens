@@ -124,7 +124,8 @@ func _test_saved_bill_editing_is_isolated(t: BackendTestContext) -> void:
 	proposal.lag_months = 4
 	session.state.draft_bill.title = "original"
 	session.state.draft_bill.proposals.append(proposal)
-	session.state.draft_bill.policies.append(policy)
+	var draft_policy := PolicyState.new(policy, 3)
+	session.state.draft_bill.policies.append(draft_policy)
 	var saved_index := session.draft_bill_system.save_draft(session.state)
 
 	t.check_equal(saved_index, 0, "a new draft appends one saved bill")
@@ -134,10 +135,12 @@ func _test_saved_bill_editing_is_isolated(t: BackendTestContext) -> void:
 	t.check(saved.proposals[0] != proposal, "saved proposals are independent copies")
 	session.state.draft_bill.title = "unsaved mutation"
 	proposal.base_effect.tax = 99
+	draft_policy.delay_months = 4
 	session.state.draft_bill.policies.clear()
 	t.check_equal(saved.title, "original", "draft title edits do not mutate the saved bill")
 	t.check_equal(saved.proposals[0].base_effect.tax, 8, "draft proposal edits stay isolated")
 	t.check_equal(saved.policies.size(), 1, "draft policy edits stay isolated")
+	t.check_equal(saved.policies[0].delay_months, 3, "saved policy delay is an independent copy")
 
 	session.cancel_bill_editing()
 	var replacement := saved.proposals[0].copy()
@@ -151,6 +154,7 @@ func _test_saved_bill_editing_is_isolated(t: BackendTestContext) -> void:
 		"loading uses an equivalent current hand instance"
 	)
 	t.check_equal(session.state.proposal_hand.size(), 0, "the matched hand card is reserved")
+	t.check_equal(session.state.draft_bill.policies[0].delay_months, 3, "loading restores the saved policy delay")
 	session.state.draft_bill.title = "edited"
 	replacement.base_effect.tax = 12
 	session.draft_bill_system.save_draft(session.state)
@@ -195,7 +199,7 @@ func _test_saved_policy_reconciles_with_constitution(t: BackendTestContext) -> v
 	proposal.base_effect.investment = -5
 	session.state.draft_bill.title = "old constitution bill"
 	session.state.draft_bill.proposals.append(proposal)
-	session.state.draft_bill.policies.append(old_policy)
+	session.state.draft_bill.policies.append(PolicyState.new(old_policy, 1))
 	session.draft_bill_system.save_draft(session.state)
 	session.cancel_bill_editing()
 
@@ -209,7 +213,7 @@ func _test_saved_policy_reconciles_with_constitution(t: BackendTestContext) -> v
 		0,
 		"loading filters policies that are no longer constitution-authorized"
 	)
-	session.state.draft_bill.policies.append(old_policy)
+	session.state.draft_bill.policies.append(PolicyState.new(old_policy, 1))
 	t.check(
 		not session.draft_bill_system.is_ready_to_submit(
 			session.context, session.state.draft_bill

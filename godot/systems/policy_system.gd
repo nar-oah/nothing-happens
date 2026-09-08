@@ -4,90 +4,82 @@ class_name PolicySystem
 var last_triggered_definitions: Array[PolicyDefinition] = []
 
 
-func create_states(definitions: Array[PolicyDefinition]) -> Array[PolicyState]:
+func create_states(instances: Array[PolicyState]) -> Array[PolicyState]:
 	var result: Array[PolicyState] = []
-	for definition in definitions:
-		result.append(PolicyState.new(definition))
+	for instance in instances:
+		if instance != null:
+			result.append(PolicyState.new(instance.definition, instance.delay_months))
 	return result
 
 
-func resolve_policy_chain(state: RunState) -> void:
+func calculate_planned_result(
+	pure_target: MetricValues, policies: Array[PolicyState]
+) -> MetricValues:
+	var result := pure_target.copy()
+	var batches: Dictionary = {}
+	for policy in policies:
+		if policy == null or policy.definition == null:
+			continue
+		if not batches.has(policy.delay_months):
+			batches[policy.delay_months] = []
+		batches[policy.delay_months].append(policy)
+	var delays: Array[int] = []
+	for delay in batches:
+		delays.append(delay)
+	delays.sort()
+	for delay in delays:
+		var snapshot := result.copy()
+		var total_delta := MetricVector.new()
+		for policy: PolicyState in batches[delay]:
+			for effect in policy.definition.effects:
+				if effect != null:
+					total_delta.add_value(
+						effect.target_metric,
+						effect.calculate_amount(snapshot)
+					)
+		result.apply_delta(total_delta)
+	return result
+
+
+func schedule_policies(state: RunState, policies: Array[PolicyState]) -> void:
+	for policy in policies:
+		if policy == null or policy.definition == null:
+			continue
+		policy.elapsed_months = 0
+		policy.triggered = false
+		state.scheduled_policies.append(policy)
+
+
+func advance_month_and_resolve(state: RunState) -> void:
+	for policy in state.scheduled_policies:
+		if policy != null and not policy.triggered:
+			policy.elapsed_months += 1
+	resolve_due_policies(state)
+
+
+func resolve_due_policies(state: RunState) -> void:
 	last_triggered_definitions.clear()
-	var bill := state.active_bill
-	if bill == null:
+	var due: Array[PolicyState] = []
+	for policy in state.scheduled_policies:
+		if (
+			policy != null
+			and not policy.triggered
+			and policy.elapsed_months >= policy.delay_months
+		):
+			due.append(policy)
+	if due.is_empty():
 		return
-	while true:
-		var triggered_batch := _find_triggered_batch(bill, state.metrics)
-		if triggered_batch.is_empty():
-			return
-		for policy_state in triggered_batch:
-			if policy_state != null and policy_state.definition != null:
-				last_triggered_definitions.append(policy_state.definition)
-		_resolve_batch(triggered_batch, state)
-
-
-func calculate_immediate_result(
-	current: MetricValues, definitions: Array[PolicyDefinition]
-) -> MetricValues:
-	var simulation := RunState.new()
-	simulation.metrics = current.copy()
-	var bill := ActiveBillState.new()
-	bill.policies = create_states(definitions)
-	simulation.active_bill = bill
-	resolve_policy_chain(simulation)
-	return simulation.metrics
-
-
-func calculate_draft_result(
-	current: MetricValues,
-	pure_target: MetricValues,
-	definitions: Array[PolicyDefinition]
-) -> MetricValues:
-	var simulation := RunState.new()
-	simulation.metrics = current.copy()
-	var bill := ActiveBillState.new()
-	bill.policies = create_states(definitions)
-	simulation.active_bill = bill
-	resolve_policy_chain(simulation)
-	var immediate_delta := MetricVector.new()
-	for metric in Metric.all_ids():
-		immediate_delta.set_value(
-			metric,
-			simulation.metrics.get_value(metric) - current.get_value(metric)
-		)
-	simulation.metrics = pure_target.copy()
-	simulation.metrics.apply_delta(immediate_delta)
-	resolve_policy_chain(simulation)
-	return simulation.metrics
-
-
-func _find_triggered_batch(bill: ActiveBillState, values: MetricValues) -> Array[PolicyState]:
-	var result: Array[PolicyState] = []
-	for policy_state in bill.policies:
-		if policy_state.triggered:
-			continue
-		var definition := policy_state.definition
-		if definition == null:
-			push_error("PolicyState has no PolicyDefinition.")
-			continue
-		if definition.condition == null:
-			push_error("Policy has no condition: %s" % definition.display_name)
-			continue
-		if definition.condition.is_met(values):
-			result.append(policy_state)
-	return result
-
-
-func _resolve_batch(batch: Array[PolicyState], state: RunState) -> void:
 	var snapshot := state.metrics.copy()
-	for policy_state in batch:
-		policy_state.triggered = true
 	var total_delta := MetricVector.new()
-	for policy_state in batch:
-		var definition := policy_state.definition
-		for effect in definition.effects:
-			if effect == null:
-				continue
-			var amount := effect.calculate_amount(snapshot)
-			total_delta.add_value(effect.target_metric, amount)
+	for policy in due:
+		policy.triggered = true
+		last_triggered_definitions.append(policy.definition)
+		for effect in policy.definition.effects:
+			if effect != null:
+				total_delta.add_value(
+					effect.target_metric,
+					effect.calculate_amount(snapshot)
+				)
 	state.metrics.apply_delta(total_delta)
+	for policy in due:
+		state.scheduled_policies.erase(policy)

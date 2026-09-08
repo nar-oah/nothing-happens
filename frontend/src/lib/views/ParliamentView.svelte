@@ -12,9 +12,13 @@
 	import Top from '$lib/components/top/Top.svelte';
 	import {
 		calculateDraftProjectedMetrics,
+		clampBillPolicyDelays,
+		clampPolicyDelayMonths,
+		getPolicyDelayBounds,
 		reconcileSavedBill,
 		type Bill,
 		type PolicyDefinition,
+		type PolicyInstance,
 		type Proposal
 	} from '$lib/game';
 	import type { ParliamentSeatAnchorDto, SeatSummaryDto, SeatVoteDto } from '$lib/game/state/types';
@@ -41,6 +45,7 @@
 		onRemoveProposal?: (draftIndex: number) => void;
 		onAddPolicy?: (displayName: string) => void;
 		onRemovePolicy?: (draftIndex: number) => void;
+		onSetPolicyDelay?: (draftIndex: number, delayMonths: number) => void;
 		onTitleChange?: (title: string) => void;
 		onEditSavedBill?: (savedBillIndex: number) => void;
 		onBribeSeat?: (seatIndex: number) => void;
@@ -73,6 +78,7 @@
 		onRemoveProposal,
 		onAddPolicy,
 		onRemovePolicy,
+		onSetPolicyDelay,
 		onTitleChange,
 		onEditSavedBill,
 		onBribeSeat,
@@ -89,7 +95,7 @@
 	);
 	let selection = $derived({
 		proposalRefs: [],
-		policyDisplayNames: visibleDraft.policies.map((policy) => policy.display_name),
+		policyDisplayNames: visibleDraft.policies.map((policy) => policy.definition.display_name),
 		editingSavedBillIndex
 	});
 	let anchoredSeats = $derived(mergeSeats(seats, seatAnchors, seatVotes));
@@ -110,18 +116,21 @@
 	function selectLeft(item: LeftItem, mode: LeftMode) {
 		if (mode !== 'selection') return;
 		if (item.kind === 'proposal') {
+			const proposals = [...visibleDraft.proposals, item.proposal];
 			playUiSfx('memorial-insert', true);
 			optimisticDraft = {
 				...visibleDraft,
-				proposals: [...visibleDraft.proposals, item.proposal]
+				proposals,
+				policies: clampBillPolicyDelays(visibleDraft.policies, proposals)
 			};
 			return onAddProposal?.(item.ref.index);
 		}
 		if (item.kind === 'policy') {
+			const { min } = getPolicyDelayBounds(visibleDraft.proposals);
 			playUiSfx('memorial-insert', true);
 			optimisticDraft = {
 				...visibleDraft,
-				policies: [...visibleDraft.policies, item.policy]
+				policies: [...visibleDraft.policies, { definition: item.policy, delay_months: min }]
 			};
 			return onAddPolicy?.(item.policy.display_name);
 		}
@@ -138,19 +147,33 @@
 	}
 
 	function removeProposal(_proposal: Proposal, index: number) {
+		const proposals = visibleDraft.proposals.filter((_, currentIndex) => currentIndex !== index);
 		optimisticDraft = {
 			...visibleDraft,
-			proposals: visibleDraft.proposals.filter((_, currentIndex) => currentIndex !== index)
+			proposals,
+			policies: clampBillPolicyDelays(visibleDraft.policies, proposals)
 		};
 		onRemoveProposal?.(index);
 	}
 
-	function removePolicy(_policy: PolicyDefinition, index: number) {
+	function removePolicy(_policy: PolicyInstance, index: number) {
 		optimisticDraft = {
 			...visibleDraft,
 			policies: visibleDraft.policies.filter((_, currentIndex) => currentIndex !== index)
 		};
 		onRemovePolicy?.(index);
+	}
+
+	function setPolicyDelay(index: number, delayMonths: number) {
+		if (!visibleDraft.policies[index]) return;
+		const delay = clampPolicyDelayMonths(delayMonths, visibleDraft.proposals);
+		optimisticDraft = {
+			...visibleDraft,
+			policies: visibleDraft.policies.map((policy, currentIndex) =>
+				currentIndex === index ? { ...policy, delay_months: delay } : policy
+			)
+		};
+		onSetPolicyDelay?.(index, delay);
 	}
 
 	function setTitle(title: string) {
@@ -243,6 +266,7 @@
 						onTitleChange={setTitle}
 						onRemoveProposal={removeProposal}
 						onRemovePolicy={removePolicy}
+						onPolicyDelayChange={setPolicyDelay}
 					/>
 				</div>
 			</div>
