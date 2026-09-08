@@ -93,6 +93,13 @@ func _test_new_bill_keeps_old_schedule_and_batches_same_month(t: BackendTestCont
 		session.context.interest_groups[0], production_policy, 4, 4, "first bill"
 	)
 	session.enact_bill(first)
+	var enacted_policy := session.state.scheduled_policies[0]
+	first.policies[0].delay_months = 2
+	t.check_equal(
+		enacted_policy.delay_months,
+		4,
+		"changing the draft after enactment cannot alter the locked scheduled delay"
+	)
 	session.policy_system.advance_month_and_resolve(session.state)
 	session.policy_system.advance_month_and_resolve(session.state)
 	var old_schedule := session.state.scheduled_policies[0]
