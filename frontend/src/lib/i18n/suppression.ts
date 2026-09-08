@@ -1,6 +1,4 @@
 export const suppressionZhCN = {
-	'newspaper.suppressionCount': '{count}次',
-	'newspaper.suppress': '镇压',
 	'newspaper.suppressionAction': '镇压（{count}次）',
 	'newspaper.unsuppress': '不镇压',
 	'newspaper.suppressionDescription':
@@ -8,8 +6,6 @@ export const suppressionZhCN = {
 } as const;
 
 export const suppressionEn: Record<keyof typeof suppressionZhCN, string> = {
-	'newspaper.suppressionCount': '{count} uses',
-	'newspaper.suppress': 'Suppress',
 	'newspaper.suppressionAction': 'Suppress ({count} left)',
 	'newspaper.unsuppress': 'Do not suppress',
 	'newspaper.suppressionDescription':
