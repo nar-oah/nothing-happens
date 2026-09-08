@@ -75,7 +75,7 @@
 </script>
 
 <button
-	class="flex h-full w-full items-start gap-8 overflow-hidden border-0 bg-transparent px-8 py-5 text-left disabled:cursor-default"
+	class="flex h-full w-full items-start gap-8 overflow-hidden border-0 bg-transparent px-8 py-5 text-left text-ink-primary disabled:cursor-default"
 	type="button"
 	aria-pressed={suppressed}
 	disabled={suppressionDisabled}
@@ -113,7 +113,9 @@
 				>{getNewspaperEventStateLabel(state, $t)}</span
 			>
 		</div>
-		<p class="typo-newspaper-body min-w-full w-min">
+		<p
+			class="typo-newspaper-body min-w-full w-min [overflow-wrap:anywhere] [&>span]:whitespace-normal"
+		>
 			{#key suppressed}
 				<MorphText text={displayDescription} />
 			{/key}
