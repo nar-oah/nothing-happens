@@ -76,6 +76,8 @@ func set_collapse(collapse_level: int, max_collapse: int) -> void:
 	if next_stage == _anxiety_stage:
 		return
 	_anxiety_stage = next_stage
+	if _world_scene == "office":
+		_typewriter_timer.stop()
 	_refresh_anxiety()
 
 
