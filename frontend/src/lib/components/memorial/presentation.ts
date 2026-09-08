@@ -1,13 +1,13 @@
 import {
 	METRICS,
 	getMetricDisplayName,
-	MetricConditionOperator,
 	PolicyEffectFormula,
 	getMetricValue,
 	getProposalTotalEffect,
 	type Bill,
 	type Constitution,
 	type PolicyDefinition,
+	type PolicyEffect,
 	type Proposal
 } from '../../game/index.ts';
 import { translate, type Translate } from '../../i18n/index.ts';
@@ -16,13 +16,6 @@ import type {
 	MemorialPolicyContentData,
 	MemorialProposalContentData
 } from './types';
-
-const CONDITION_SYMBOLS: Record<MetricConditionOperator, string> = {
-	[MetricConditionOperator.LESS_THAN]: '＜',
-	[MetricConditionOperator.LESS_THAN_OR_EQUAL]: '≤',
-	[MetricConditionOperator.GREATER_THAN]: '＞',
-	[MetricConditionOperator.GREATER_THAN_OR_EQUAL]: '≥'
-};
 
 export function proposalToMemorialContent(
 	proposal: Proposal,
@@ -90,29 +83,41 @@ export function policyToMemorialContent(
 	translator: Translate = translate,
 	metricTranslator: Translate = translator
 ): MemorialPolicyContentData {
-	const condition = policy.condition;
-	const multiplier = condition.right_multiplier === 1 ? '' : `×${condition.right_multiplier}`;
-	const requirement = `${getMetricDisplayName(condition.left_metric, metricTranslator)}${CONDITION_SYMBOLS[condition.operator]}${getMetricDisplayName(condition.right_metric, metricTranslator)}${multiplier}`;
-	const effects = policy.effects.map((effect) => {
-		const source =
-			effect.formula === PolicyEffectFormula.METRIC_VALUE
-				? getMetricDisplayName(effect.source_a, metricTranslator)
-				: `${getMetricDisplayName(effect.source_a, metricTranslator)}－${getMetricDisplayName(effect.source_b, metricTranslator)}`;
-		return translator('memorial.effect', {
-			target: getMetricDisplayName(effect.target_metric, metricTranslator),
-			source,
-			multiplier: effect.multiplier
-		});
-	});
 	return {
 		policyTitle: policy.display_name,
-		content: {
-			title: translator('memorial.condition', { requirement }),
-			body: effects.length
-				? effects.join(translator('memorial.effectSeparator'))
-				: translator('memorial.noEffects')
-		}
+		contents: [
+			{
+				title: translator('memorial.gap'),
+				body: formatPolicyEffect(policy.effects[0], translator, metricTranslator)
+			},
+			{
+				title: translator('memorial.smoothing'),
+				body: formatPolicyEffect(policy.effects[1], translator, metricTranslator)
+			}
+		]
 	};
+}
+
+function formatPolicyEffect(
+	effect: PolicyEffect | undefined,
+	translator: Translate,
+	metricTranslator: Translate
+): string {
+	if (!effect) return translator('memorial.noEffects');
+	const target = getMetricDisplayName(effect.target_metric, metricTranslator);
+	const sourceA = getMetricDisplayName(effect.source_a, metricTranslator);
+	const source =
+		effect.formula === PolicyEffectFormula.METRIC_VALUE
+			? sourceA
+			: `${sourceA}－${getMetricDisplayName(effect.source_b, metricTranslator)}`;
+	const multiplier = Math.abs(effect.multiplier);
+	const wrapped = effect.formula === PolicyEffectFormula.METRIC_GAP ? `（${source}）` : source;
+	const formula = multiplier === 1 ? wrapped : `${wrapped}×${formatNumber(multiplier)}`;
+	return `${target}${effect.multiplier >= 0 ? '＋' : '－'}${formula}`;
+}
+
+function formatNumber(value: number): string {
+	return Number.isInteger(value) ? String(value) : String(Number(value.toFixed(4)));
 }
 
 function formatVector(values: Proposal['base_effect'], translator: Translate): string {

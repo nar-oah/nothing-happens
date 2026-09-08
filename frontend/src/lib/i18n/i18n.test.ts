@@ -66,7 +66,7 @@ test('newspaper labels and negotiation month follow the supplied language', () =
 	assert.equal(formatNewspaperNumber(0, zh), '談判');
 	assert.equal(formatNewspaperNumber(0, en), 'Talks');
 	assert.equal(formatNewspaperNumber(3, en), '03');
-	assert.equal(getMetricDisplayName(Metric.INVESTMENT, en), 'Investment');
+	assert.equal(getMetricDisplayName(Metric.INVESTMENT, en), 'Invest');
 });
 
 test('term report and all newspaper commentary translate without changing their values or order', () => {

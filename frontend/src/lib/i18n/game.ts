@@ -99,10 +99,10 @@ export const gameZhCN = {
 
 export const gameEn: Record<keyof typeof gameZhCN, string> = {
 	'game.metric.tax': 'Tax',
-	'game.metric.consumption': 'Consumption',
-	'game.metric.production': 'Production',
-	'game.metric.employment': 'Employment',
-	'game.metric.investment': 'Investment',
+	'game.metric.consumption': 'Spend',
+	'game.metric.production': 'Output',
+	'game.metric.employment': 'Jobs',
+	'game.metric.investment': 'Invest',
 	'game.annualExpectations': 'Annual expectations',
 	'game.raceDescription': 'People overview',
 	'game.metricStance': 'Fixed metric positions',
