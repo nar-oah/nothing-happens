@@ -22,7 +22,7 @@
 		description,
 		metric,
 		race,
-		state,
+		state: eventState,
 		strength,
 		value,
 		suppressionRemaining = 0,
@@ -110,7 +110,7 @@
 				><span>{value}</span>
 			</div>
 			<span>·</span><span>{$t('newspaper.strength', { strength })}</span><span>·</span><span
-				>{getNewspaperEventStateLabel(state, $t)}</span
+				>{getNewspaperEventStateLabel(eventState, $t)}</span
 			>
 		</div>
 		<p
