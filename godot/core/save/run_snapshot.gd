@@ -1,7 +1,7 @@
 extends RefCounted
 class_name RunSnapshot
 
-const VERSION: int = 1
+const VERSION: int = 2
 const STATE_TYPES: Dictionary = {
 	"RunState": preload("res://core/run/run_state.gd"),
 	"MetaProgressionState": preload("res://states/meta_progression_state.gd"),
