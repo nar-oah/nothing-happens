@@ -1,10 +1,7 @@
 import {
-	getMetricDisplayName,
-	MetricConditionOperator,
 	PolicyEffectFormula,
 	calculatePolicyEffectAmount,
-	getMetricValue,
-	isMetricConditionMet,
+	getMetricDisplayName,
 	type MetricValues,
 	type PolicyDefinition,
 	type PolicyEffect
@@ -22,77 +19,54 @@ export const MARK_SEAL_SOURCE_SIZE = 80;
 export type MarkDirection = 'up' | 'down';
 
 export type MarkFaceContent = {
+	label: string;
 	headline: string;
 	detail: string;
-};
-
-const CONDITION_SYMBOLS: Record<MetricConditionOperator, string> = {
-	[MetricConditionOperator.LESS_THAN]: '＜',
-	[MetricConditionOperator.LESS_THAN_OR_EQUAL]: '≤',
-	[MetricConditionOperator.GREATER_THAN]: '＞',
-	[MetricConditionOperator.GREATER_THAN_OR_EQUAL]: '≥'
 };
 
 export function createPolicyMarkContent(
 	policy: PolicyDefinition,
 	baseline: MetricValues,
 	translator: Translate = translate
-): { requirement: MarkFaceContent; effect: MarkFaceContent } {
-	const condition = policy.condition;
-	const symbol = CONDITION_SYMBOLS[condition.operator];
-	const leftName = getMetricDisplayName(condition.left_metric, translator);
-	const rightName = getMetricDisplayName(condition.right_metric, translator);
-	const leftValue = getMetricValue(baseline, condition.left_metric);
-	const rightValue = getMetricValue(baseline, condition.right_metric) * condition.right_multiplier;
-	const multiplier = formatMultiplier(condition.right_multiplier);
-	const triggerText = translator(
-		isMetricConditionMet(condition, baseline) ? 'mark.triggered' : 'mark.notTriggered'
-	);
-	const effectRules = policy.effects.map((effect) => formatEffectRule(effect, translator));
-	const effectAmounts = policy.effects.map((effect) => {
-		const amount = calculatePolicyEffectAmount(effect, baseline);
-		return `${getMetricDisplayName(effect.target_metric, translator)}${formatSigned(amount)}`;
-	});
+): { gap: MarkFaceContent; smoothing: MarkFaceContent } {
 	return {
-		requirement: {
-			headline: translator('mark.required', {
-				condition: `${leftName}${symbol}${rightName}${multiplier}`
-			}),
-			detail: translator('mark.current', {
-				condition: `${formatNumber(leftValue)}${symbol}${formatNumber(rightValue)}`,
-				trigger: triggerText
-			})
-		},
-		effect: {
-			headline: translator('mark.effect', {
-				effects:
-					effectRules.length > 0
-						? effectRules.join(translator('common.listSeparator'))
-						: translator('mark.noEffects')
-			}),
-			detail: translator('mark.once', {
-				effects:
-					effectAmounts.length > 0
-						? effectAmounts.join(translator('common.listSeparator'))
-						: translator('mark.noChange')
-			})
-		}
+		gap: createEffectFace(policy.effects[0], baseline, translator('mark.gap'), translator),
+		smoothing: createEffectFace(
+			policy.effects[1],
+			baseline,
+			translator('mark.smoothing'),
+			translator
+		)
 	};
 }
 
-function formatEffectRule(effect: PolicyEffect, translator: Translate): string {
-	const target = getMetricDisplayName(effect.target_metric, translator);
-	const sourceA = getMetricDisplayName(effect.source_a, translator);
-	const multiplier = formatMultiplier(effect.multiplier);
-	if (effect.formula === PolicyEffectFormula.METRIC_VALUE) {
-		return translator('mark.change', { target, source: sourceA, multiplier });
+function createEffectFace(
+	effect: PolicyEffect | undefined,
+	baseline: MetricValues,
+	label: string,
+	translator: Translate
+): MarkFaceContent {
+	if (!effect) {
+		return { label, headline: translator('mark.noChange'), detail: translator('mark.noFormula') };
 	}
-	const sourceB = getMetricDisplayName(effect.source_b, translator);
-	return translator('mark.change', { target, source: `（${sourceA}－${sourceB}）`, multiplier });
+	const amount = calculatePolicyEffectAmount(effect, baseline);
+	return {
+		label,
+		headline: `${getMetricDisplayName(effect.target_metric, translator)}${formatSigned(amount)}`,
+		detail: formatEffectSource(effect, translator)
+	};
 }
 
-function formatMultiplier(multiplier: number): string {
-	return multiplier === 1 ? '' : `×${formatNumber(multiplier)}`;
+function formatEffectSource(effect: PolicyEffect, translator: Translate): string {
+	const sourceA = getMetricDisplayName(effect.source_a, translator);
+	const source =
+		effect.formula === PolicyEffectFormula.METRIC_VALUE
+			? sourceA
+			: `${sourceA}－${getMetricDisplayName(effect.source_b, translator)}`;
+	const multiplier = Math.abs(effect.multiplier);
+	if (multiplier === 1) return source;
+	const wrapped = effect.formula === PolicyEffectFormula.METRIC_GAP ? `（${source}）` : source;
+	return `${wrapped}×${formatNumber(multiplier)}`;
 }
 
 function formatSigned(value: number): string {
@@ -131,11 +105,11 @@ export function createMarkGeometry(direction: MarkDirection) {
 			width,
 			height,
 			frontWidth,
-			requirement: {
+			gap: {
 				height: largeHeight,
 				transform: matrix(1, -slant / frontWidth, 0, 1, 0, slant)
 			},
-			effect: {
+			smoothing: {
 				height: smallHeight,
 				transform: matrix(1, -slant / frontWidth, depth / smallHeight, 1, 0, slant + largeHeight)
 			},
@@ -154,11 +128,11 @@ export function createMarkGeometry(direction: MarkDirection) {
 		width,
 		height,
 		frontWidth,
-		requirement: {
+		gap: {
 			height: smallHeight,
 			transform: matrix(1, slant / frontWidth, -depth / smallHeight, 1, depth, 0)
 		},
-		effect: {
+		smoothing: {
 			height: largeHeight,
 			transform: matrix(1, slant / frontWidth, 0, 1, 0, smallHeight)
 		},

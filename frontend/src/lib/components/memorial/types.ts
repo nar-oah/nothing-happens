@@ -36,7 +36,7 @@ export type MemorialProposalContentData = {
 
 export type MemorialPolicyContentData = {
 	policyTitle: string;
-	content: MemorialHorizontalContentData;
+	contents: [MemorialHorizontalContentData, MemorialHorizontalContentData];
 };
 
 export type MemorialConstitutionRowData = {
