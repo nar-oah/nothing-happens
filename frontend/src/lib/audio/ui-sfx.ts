@@ -52,21 +52,24 @@ function disabled(control: HTMLElement): boolean {
 }
 
 function handleClick(event: MouseEvent): void {
-	if (suppressDefaultClick) {
-		suppressDefaultClick = false;
-		return;
-	}
 	const target = event.target;
 	if (!(target instanceof Element)) return;
 	const control = target.closest<HTMLElement>(
 		'button, [role="button"], a[href], input[type="button"], input[type="submit"]'
 	);
 	if (!control || disabled(control)) return;
-	playUiSfx('other');
+
+	queueMicrotask(() => {
+		if (suppressDefaultClick) {
+			suppressDefaultClick = false;
+			return;
+		}
+		playUiSfx('other');
+	});
 }
 
 export function installUiSfx(): () => void {
 	if (typeof document === 'undefined') return () => {};
-	document.addEventListener('click', handleClick);
-	return () => document.removeEventListener('click', handleClick);
+	document.addEventListener('click', handleClick, true);
+	return () => document.removeEventListener('click', handleClick, true);
 }
