@@ -20,12 +20,6 @@
 	const displayNumber = $derived(count > 0 ? String(displayIndex + 1).padStart(2, '0') : '00');
 	const totalNumber = $derived(String(count).padStart(2, '0'));
 
-	$effect(() => {
-		context;
-		index = 0;
-		hovering = false;
-	});
-
 	function advance() {
 		index = nextIndex;
 		hovering = false;
