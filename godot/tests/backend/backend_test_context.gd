@@ -92,8 +92,7 @@ func make_article(
 	result.display_name = "%s article" % race.display_name
 	result.race = race
 	result.is_initial = is_initial
-	if race != null:
-		race.expectation_growth_rate = growth_rate
+	result.expectation_growth_rate = growth_rate
 	return result
 
 
