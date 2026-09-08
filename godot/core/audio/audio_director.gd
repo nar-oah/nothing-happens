@@ -1,11 +1,11 @@
 extends Node
 
-const BGM := preload("res://assets/audio/bgm.mp3")
-const DIALOGUE_SFX := preload("res://assets/audio/dialogue.ogg")
-const DOOR_SFX := preload("res://assets/audio/door.ogg")
-const OTHER_SFX := preload("res://assets/audio/other.ogg")
-const TYPEWRITER_ANXIETY := preload("res://assets/audio/typewriter_anxiety.ogg")
-const PARLIAMENT_MURMUR := preload("res://assets/audio/parliament_murmur.ogg")
+const BGM_PATH := "res://assets/audio/bgm.mp3"
+const DIALOGUE_SFX_PATH := "res://assets/audio/dialogue.ogg"
+const DOOR_SFX_PATH := "res://assets/audio/door.ogg"
+const OTHER_SFX_PATH := "res://assets/audio/other.ogg"
+const TYPEWRITER_ANXIETY_PATH := "res://assets/audio/typewriter_anxiety.ogg"
+const PARLIAMENT_MURMUR_PATH := "res://assets/audio/parliament_murmur.ogg"
 
 const TYPEWRITER_INTERVALS := {
 	1: Vector2(22.0, 34.0),
@@ -27,6 +27,10 @@ var _typewriter_timer: Timer
 var _interaction_players: Array[AudioStreamPlayer] = []
 var _interaction_index: int = 0
 
+var _dialogue_sfx: AudioStream
+var _door_sfx: AudioStream
+var _other_sfx: AudioStream
+
 
 func _ready() -> void:
 	_music_player = _make_player("Music", -10.0)
@@ -41,12 +45,22 @@ func _ready() -> void:
 	_typewriter_timer.timeout.connect(_on_typewriter_timer_timeout)
 	add_child(_typewriter_timer)
 
-	_set_loop(BGM, true)
-	_set_loop(PARLIAMENT_MURMUR, true)
-	_music_player.stream = BGM
-	_music_player.play()
-	_murmur_player.stream = PARLIAMENT_MURMUR
-	_typewriter_player.stream = TYPEWRITER_ANXIETY
+	var bgm := _load_audio(BGM_PATH)
+	_dialogue_sfx = _load_audio(DIALOGUE_SFX_PATH)
+	_door_sfx = _load_audio(DOOR_SFX_PATH)
+	_other_sfx = _load_audio(OTHER_SFX_PATH)
+	var typewriter_anxiety := _load_audio(TYPEWRITER_ANXIETY_PATH)
+	var parliament_murmur := _load_audio(PARLIAMENT_MURMUR_PATH)
+
+	if bgm != null:
+		_set_loop(bgm, true)
+		_music_player.stream = bgm
+		_music_player.play()
+	if parliament_murmur != null:
+		_set_loop(parliament_murmur, true)
+		_murmur_player.stream = parliament_murmur
+	if typewriter_anxiety != null:
+		_typewriter_player.stream = typewriter_anxiety
 	_refresh_anxiety()
 
 
@@ -66,15 +80,15 @@ func set_collapse(collapse_level: int, max_collapse: int) -> void:
 
 
 func play_dialogue() -> void:
-	_play_interaction(DIALOGUE_SFX, -2.0)
+	_play_interaction(_dialogue_sfx, -2.0)
 
 
 func play_door() -> void:
-	_play_interaction(DOOR_SFX, -1.0)
+	_play_interaction(_door_sfx, -1.0)
 
 
 func play_other() -> void:
-	_play_interaction(OTHER_SFX, -3.0)
+	_play_interaction(_other_sfx, -3.0)
 
 
 func _stage_for(collapse_level: int, max_collapse: int) -> int:
@@ -98,7 +112,7 @@ func _refresh_anxiety() -> void:
 	if _world_scene == "parliament" and _anxiety_stage > 0:
 		_stop_typewriter()
 		_murmur_player.volume_db = MURMUR_VOLUMES.get(_anxiety_stage, -31.0)
-		if not _murmur_player.playing:
+		if _murmur_player.stream != null and not _murmur_player.playing:
 			_murmur_player.play()
 		return
 	_stop_typewriter()
@@ -106,7 +120,7 @@ func _refresh_anxiety() -> void:
 
 
 func _schedule_typewriter() -> void:
-	if _world_scene != "office" or _anxiety_stage <= 0:
+	if _world_scene != "office" or _anxiety_stage <= 0 or _typewriter_player.stream == null:
 		_typewriter_timer.stop()
 		return
 	if not _typewriter_timer.is_stopped():
@@ -116,7 +130,7 @@ func _schedule_typewriter() -> void:
 
 
 func _on_typewriter_timer_timeout() -> void:
-	if _world_scene != "office" or _anxiety_stage <= 0:
+	if _world_scene != "office" or _anxiety_stage <= 0 or _typewriter_player.stream == null:
 		return
 	_typewriter_player.pitch_scale = randf_range(0.96, 1.04)
 	_typewriter_player.volume_db = -15.0 + float(_anxiety_stage - 1) * 1.5
@@ -135,7 +149,7 @@ func _stop_murmur() -> void:
 
 
 func _play_interaction(stream: AudioStream, volume_db: float) -> void:
-	if _interaction_players.is_empty():
+	if stream == null or _interaction_players.is_empty():
 		return
 	var player := _interaction_players[_interaction_index]
 	_interaction_index = (_interaction_index + 1) % _interaction_players.size()
@@ -151,6 +165,14 @@ func _make_player(player_name: String, volume_db: float) -> AudioStreamPlayer:
 	player.volume_db = volume_db
 	add_child(player)
 	return player
+
+
+func _load_audio(path: String) -> AudioStream:
+	var resource := ResourceLoader.load(path)
+	if resource is AudioStream:
+		return resource as AudioStream
+	push_warning("AudioDirector could not load audio resource: %s" % path)
+	return null
 
 
 func _set_loop(stream: AudioStream, enabled: bool) -> void:
