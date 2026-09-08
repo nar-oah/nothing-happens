@@ -166,6 +166,49 @@ test('policies at the same delay use one pre-batch metrics snapshot', () => {
 		]),
 		{ ...current, investment: 110 }
 	);
+	assert.deepEqual(
+		calculateDraftProjectedMetrics(current, [], [
+			{ definition: raiseInvestment, delay_months: 2 },
+			{ definition: copyInvestmentGap, delay_months: 3 }
+		]),
+		{ ...current, production: 110, investment: 110 }
+	);
+});
+
+test('draft projection matches the backend serialized preview fixture', () => {
+	const current = {
+		tax: 100,
+		consumption: 100,
+		production: 100,
+		employment: 100,
+		investment: 100
+	};
+	const proposal = makeProposal();
+	proposal.base_effect = {
+		tax: 7,
+		consumption: 0,
+		production: 0,
+		employment: 0,
+		investment: 0
+	};
+	const policy: PolicyDefinition = {
+		display_name: '投资政策',
+		effects: [
+			{
+				target_metric: Metric.INVESTMENT,
+				formula: PolicyEffectFormula.METRIC_VALUE,
+				source_a: Metric.TAX,
+				source_b: Metric.TAX,
+				multiplier: 0.1
+			}
+		]
+	};
+	const pure = calculatePureProposalTarget(current, [proposal]);
+	const projected = calculateDraftProjectedMetrics(current, [proposal], [
+		{ definition: policy, delay_months: 1 }
+	]);
+	assert.deepEqual(pure, { ...current, tax: 107 });
+	assert.deepEqual(projected, { ...current, tax: 107, investment: 111 });
 });
 
 test('different policy delays chain in delay order regardless of bill array order', () => {
