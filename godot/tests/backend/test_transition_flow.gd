@@ -10,6 +10,7 @@ func run(t: BackendTestContext) -> void:
 	_test_constitution_month_returns_to_office(t)
 	_test_active_variant_growth_uses_month_zero_economy(t)
 	_test_term_lifecycle_resets_run_state(t)
+	_test_newspaper_event_suppression(t)
 	_test_zhushui_fixed_executive_seat(t)
 
 
@@ -116,6 +117,38 @@ func _test_term_lifecycle_resets_run_state(t: BackendTestContext) -> void:
 	t.check_equal(session.state.year, 1, "next term resets year")
 	t.check_equal(session.state.month, 0, "next term resets to constitution month")
 	t.check_equal(session.state.collapse_level, 0, "next term resets collapse")
+	session.free()
+
+
+func _test_newspaper_event_suppression(t: BackendTestContext) -> void:
+	var race := t.make_race("suppression race")
+	var group := t.make_group("suppression group")
+	var article := t.make_article(race)
+	var petition := PetitionEffect.new()
+	petition.fixed_count = 1
+	petition.event_races = [race]
+	article.effects.append(petition)
+	var session := t.make_session([race], [group], t.make_seats(1, "suppression"), [article])
+	var event := EventState.new(race, Metric.Id.TAX, 50, 100)
+	event.known = true
+	event.published = true
+	session.state.events.append(event)
+	session.state.month_report_events.append({"event_index": 0})
+	var bridge := NewspaperUiBridge.new()
+	bridge.setup(session)
+	var ready := bridge.receive_ipc_message(_message("ui.ready", {}))
+	t.check_equal(ready[0]["payload"]["suppression_remaining"], 1, "full state exposes available suppression uses")
+	var messages := bridge.receive_ipc_message(
+		_message("event.suppress", {"state_version": 0, "event_index": 0})
+	)
+	var full: Dictionary = messages[messages.size() - 1]
+	t.check_equal(event.phase, EventState.Phase.RESOLVED, "suppression immediately resolves the event")
+	t.check_equal(session.state.petition_used_this_year, 1, "suppression consumes one annual use")
+	t.check_equal(session.state.month_report_events.size(), 0, "suppressed event disappears from the current newspaper report")
+	t.check_equal(session.state.get_race(race).resolved_events_this_year, 0, "suppression does not grant normal event-resolution trust")
+	t.check_equal(full["payload"]["suppression_remaining"], 0, "full state returns the decremented suppression count")
+	t.check_equal(full["payload"]["state_version"], 1, "successful suppression advances state version")
+	bridge.free()
 	session.free()
 
 
