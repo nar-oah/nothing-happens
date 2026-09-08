@@ -588,6 +588,7 @@ function isActiveBill(value: unknown): value is ActiveBillDto {
 		isArrayOf(
 			value.policies,
 			(item) =>
+				isRecord(item) &&
 				isPolicyInstance(item) &&
 				isNonnegativeInteger(item.elapsed_months) &&
 				typeof item.triggered === 'boolean'
