@@ -31,7 +31,12 @@ function poolFor(name: UiSfx): HTMLAudioElement[] {
 
 export function playUiSfx(name: UiSfx, suppressDefault = false): void {
 	if (typeof window === 'undefined') return;
-	if (suppressDefault) suppressDefaultClick = true;
+	if (suppressDefault) {
+		suppressDefaultClick = true;
+		queueMicrotask(() => {
+			suppressDefaultClick = false;
+		});
+	}
 	const pool = poolFor(name);
 	const audio = pool.find((candidate) => candidate.paused || candidate.ended) ?? pool[0];
 	audio.currentTime = 0;
@@ -57,10 +62,6 @@ function handleClick(event: MouseEvent): void {
 		'button, [role="button"], a[href], input[type="button"], input[type="submit"]'
 	);
 	if (!control || disabled(control)) return;
-	if (control.classList.contains('newspaper-close-layer')) {
-		playUiSfx('memorial-toggle');
-		return;
-	}
 	playUiSfx('other');
 }
 
