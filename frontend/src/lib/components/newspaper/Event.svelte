@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ChoreSwitch from '$lib/components/chore/ChoreSwitch.svelte';
 	import { t } from '$lib/i18n';
 	import {
 		formatNewspaperNumber,
@@ -8,9 +9,25 @@
 		type NewspaperEventData
 	} from './types';
 
-	type Props = NewspaperEventData;
+	type Props = NewspaperEventData & {
+		suppressionRemaining?: number;
+		disabled?: boolean;
+		onSuppress?: (eventIndex: number) => void;
+	};
 
-	let { countdown, description, metric, race, state, strength, value }: Props = $props();
+	let {
+		eventIndex,
+		countdown,
+		description,
+		metric,
+		race,
+		state,
+		strength,
+		value,
+		suppressionRemaining = 0,
+		disabled = false,
+		onSuppress
+	}: Props = $props();
 	const countdownText = $derived(formatNewspaperNumber(countdown, $t));
 </script>
 
@@ -25,6 +42,13 @@
 		>
 			<p class="typo-newspaper-caption shrink-0 text-surface-amber whitespace-nowrap">COUNTDOWN</p>
 		</div>
+		<ChoreSwitch
+			left={$t('newspaper.suppressionCount', { count: suppressionRemaining })}
+			right={$t('newspaper.suppress')}
+			isSwitch={false}
+			disabled={disabled || suppressionRemaining <= 0 || !onSuppress}
+			onSwitchChange={() => onSuppress?.(eventIndex)}
+		/>
 	</div>
 	<div class="flex min-w-0 flex-1 flex-col items-start gap-2 overflow-hidden text-ink-primary">
 		<p class="typo-newspaper-headline shrink-0 whitespace-nowrap">
