@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { playUiSfx } from '$lib/audio/ui-sfx';
 	import { t } from '$lib/i18n';
 	import { onDestroy, type Snippet } from 'svelte';
 	import { HORIZONTAL_FOLD_HEIGHT, HORIZONTAL_FOLD_WIDTH } from '../constants';
@@ -58,6 +59,7 @@
 
 	function setOpen(next: boolean) {
 		if (open === next) return;
+		playUiSfx('memorial-toggle', true);
 		if (next) showClosed = false;
 		open = next;
 		onOpenChange?.(next);
