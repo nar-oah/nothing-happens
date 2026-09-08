@@ -6,6 +6,7 @@
 
 [node name="InteractiveSceneElement" unique_id=2114060250 instance=ExtResource("1_8ucpt")]
 hover_texture = ExtResource("2_3rh8p")
+play_default_sfx = false
 
 [node name="Visual" parent="." index="0" unique_id=858468202]
 texture = ExtResource("3_wspau")

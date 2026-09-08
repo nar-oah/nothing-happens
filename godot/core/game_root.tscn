@@ -75,14 +75,14 @@
 [ext_resource type="Script" uid="uid://bwxkupoah84lu" path="res://core/world/scene_manager.gd" id="73_scene_manager"]
 [ext_resource type="PackedScene" uid="uid://o0ltyn1r88fx" path="res://worlds/office_world.tscn" id="74_office_world"]
 [ext_resource type="PackedScene" uid="uid://dqmb5k6l2ysti" path="res://worlds/parliament_world.tscn" id="75_parliament_world"]
-[ext_resource type="Script" path="res://core/ui/newspaper_ui_bridge.gd" id="76_ui_bridge"]
+[ext_resource type="Script" uid="uid://wgsuibh73cg5" path="res://core/ui/newspaper_ui_bridge.gd" id="76_ui_bridge"]
 [ext_resource type="Script" uid="uid://csskkp1dektw0" path="res://core/world/world_input_router.gd" id="77_input_router"]
-[ext_resource type="Script" path="res://core/settings_manager.gd" id="78_settings_manager"]
+[ext_resource type="Script" uid="uid://bpts08fvu8d6k" path="res://core/settings_manager.gd" id="78_settings_manager"]
 
 [node name="GameRoot" type="Node" unique_id=1300880904]
 script = ExtResource("1_x0thd")
 
-[node name="SettingsManager" type="Node" parent="."]
+[node name="SettingsManager" type="Node" parent="." unique_id=1756178541]
 script = ExtResource("78_settings_manager")
 
 [node name="RunSession" parent="." unique_id=1121832609 instance=ExtResource("2_5gaxf")]
