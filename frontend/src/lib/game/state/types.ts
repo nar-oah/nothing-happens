@@ -162,6 +162,7 @@ export type ActiveBillDto = {
 export type NewspaperFrontDto = { title: string; content: string };
 export type MonthReportEventPhase = 0 | 1 | 2;
 export type MonthReportEventDto = {
+	event_index: number;
 	race_display_name: string;
 	event_description: string;
 	requirement_kind?: EventRequirementKind;
@@ -216,6 +217,7 @@ export type LiveGameState = GameStatusDto & {
 	ui_mode: UiMode;
 	world_scene: WorldScene;
 	parliament_seat_anchors: ParliamentSeatAnchorDto[];
+	suppression_remaining: number;
 	proposal_hand: Proposal[];
 	saved_bills: Bill[];
 	draft_bill: Bill;

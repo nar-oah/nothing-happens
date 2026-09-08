@@ -72,6 +72,7 @@ const outboundTypes = new Set<OutboundType>([
 	'vote.donation.add',
 	'proposal.merge',
 	'office.visit.resolve',
+	'event.suppress',
 	'constitution.revise',
 	'constitution.column.unlock',
 	'month.advance',
@@ -136,6 +137,7 @@ export function isLiveGameState(value: unknown): value is LiveGameState {
 		isUiMode(state.ui_mode) &&
 		isWorldScene(state.world_scene) &&
 		isArrayOf(state.parliament_seat_anchors, isParliamentSeatAnchor) &&
+		isNonnegativeInteger(state.suppression_remaining) &&
 		isNonnegativeInteger(state.term) &&
 		isArrayOf(state.proposal_hand, isProposal) &&
 		isArrayOf(state.saved_bills, isBill) &&

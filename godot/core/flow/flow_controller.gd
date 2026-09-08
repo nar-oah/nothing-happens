@@ -93,6 +93,7 @@ func _record_month_report(report_year: int, report_month: int, previous_metrics:
 			continue
 		var active_race := context.constitution_system.get_active_race_definition(context, event.race)
 		var event_report := {
+			"event_index": state.events.find(event),
 			"race_display_name": "" if active_race == null else active_race.display_name,
 			"event_description": "" if active_race == null else active_race.event_description,
 			"metric": int(event.metric),
