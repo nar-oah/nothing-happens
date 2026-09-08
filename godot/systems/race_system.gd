@@ -41,15 +41,9 @@ func rebuild_annual_expectations(context: RunContext) -> void:
 func get_expectation_growth_rate(race: RaceState, context: RunContext) -> float:
 	if race == null or race.definition == null or context == null:
 		return 0.0
-	var active := race.active_definition
-	if active == null:
-		active = race.definition
-	var growth_rate := active.expectation_growth_rate
-	if context.constitution_system != null:
-		growth_rate *= context.constitution_system.get_expectation_growth_multiplier(
-			context, race.definition
-		)
-	return clampf(growth_rate, -1.0, 10.0)
+	if context.constitution_system == null:
+		return 0.0
+	return context.constitution_system.get_expectation_growth_rate(context, race.definition)
 
 
 func get_interest_group_proposal_expectation(
