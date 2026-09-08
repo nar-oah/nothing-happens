@@ -22,6 +22,7 @@ export type MarkFaceContent = {
 	label: string;
 	headline: string;
 	detail: string;
+	lines?: string[];
 };
 
 export function createPolicyMarkContent(
@@ -49,15 +50,18 @@ function createEffectFace(
 	if (effects.length === 0) {
 		return { label, headline: translator('mark.noChange'), detail: translator('mark.noFormula') };
 	}
+	const headlines = effects.map((effect) => {
+		const amount = calculatePolicyEffectAmount(effect, baseline);
+		return `${getMetricDisplayName(effect.target_metric, translator)}${formatSigned(amount)}`;
+	});
+	const details = effects.map((effect) => formatEffectSource(effect, translator));
 	return {
 		label,
-		headline: effects
-			.map((effect) => {
-				const amount = calculatePolicyEffectAmount(effect, baseline);
-				return `${getMetricDisplayName(effect.target_metric, translator)}${formatSigned(amount)}`;
-			})
-			.join('\n'),
-		detail: effects.map((effect) => formatEffectSource(effect, translator)).join('\n')
+		headline: headlines.join('\n'),
+		detail: details.join('\n'),
+		...(effects.length > 1
+			? { lines: headlines.map((headline, index) => `${headline}　${details[index]}`) }
+			: {})
 	};
 }
 

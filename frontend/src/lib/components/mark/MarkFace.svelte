@@ -4,9 +4,10 @@
 		label: string;
 		headline: string;
 		detail: string;
+		lines?: string[];
 	};
 
-	let { is_show, label, headline, detail }: Props = $props();
+	let { is_show, label, headline, detail, lines }: Props = $props();
 </script>
 
 <div
@@ -15,11 +16,22 @@
 	class="flex h-full w-full flex-col overflow-hidden text-center"
 >
 	{#if is_show}
-		<p class="typo-seal-policy-clause whitespace-pre-line leading-0 text-surface-indigo">
-			{label}　{headline}
-		</p>
-		<p class="typo-seal-policy-detail whitespace-pre-line leading-0 text-surface-indigo">
-			{detail}
-		</p>
+		{#if lines && lines.length > 1}
+			<p class="typo-seal-policy-clause m-0 shrink-0 whitespace-nowrap text-surface-indigo">
+				{label}
+			</p>
+			{#each lines as line, index (`${line}-${index}`)}
+				<p class="typo-seal-policy-detail m-0 shrink-0 whitespace-nowrap text-surface-indigo">
+					{line}
+				</p>
+			{/each}
+		{:else}
+			<p class="typo-seal-policy-clause m-0 shrink-0 whitespace-nowrap text-surface-indigo">
+				{label}　{headline}
+			</p>
+			<p class="typo-seal-policy-detail m-0 shrink-0 whitespace-nowrap text-surface-indigo">
+				{detail}
+			</p>
+		{/if}
 	{/if}
 </div>

@@ -53,6 +53,7 @@
 			label={content.gap.label}
 			headline={content.gap.headline}
 			detail={content.gap.detail}
+			lines={content.gap.lines}
 			is_show={direction === 'up'}
 		/>
 	</div>
@@ -67,6 +68,7 @@
 			label={content.smoothing.label}
 			headline={content.smoothing.headline}
 			detail={content.smoothing.detail}
+			lines={content.smoothing.lines}
 			is_show={direction === 'down'}
 		/>
 	</div>
