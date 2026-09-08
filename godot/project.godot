@@ -4,7 +4,7 @@
 ;
 ; Format:
 ;   [section] ; section goes between []
-;   param=value ; assign values to parameters
+;   param=value
 
 config_version=5
 
@@ -13,6 +13,10 @@ config_version=5
 config/name="godot"
 run/main_scene="uid://dd2d3ryrnbww7"
 config/features=PackedStringArray("4.7", "Mobile")
+
+[autoload]
+
+AudioDirector="*res://core/audio/audio_director.gd"
 
 [display]
 
