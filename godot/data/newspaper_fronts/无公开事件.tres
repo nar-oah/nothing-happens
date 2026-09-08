@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="NoEventNewspaperFrontDefinition" format=3 uid="uid://c2h0e6qmw8v1p"]
+
+[ext_resource type="Script" path="res://definitions/newspaper_fronts/no_event_newspaper_front_definition.gd" id="1_front"]
+
+[resource]
+script = ExtResource("1_front")
+title = "无事发生？"
+content = "本月没有任何种族事件达到公开门槛。报馆未能找到足以占据头版的危机，只得提醒读者：没有消息，或许正是最值得警惕的消息。"
