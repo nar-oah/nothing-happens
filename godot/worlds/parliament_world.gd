@@ -43,6 +43,7 @@ func _process(delta: float) -> void:
 
 
 func _on_door_clicked(_dialogue: SimpleDialogueDefinition) -> void:
+	AudioDirector.play_door()
 	office_requested.emit()
 
 
