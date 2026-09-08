@@ -60,7 +60,7 @@ export function billToHorizontalContents(
 		},
 		{
 			title: translator('archive.policy'),
-			body: bill.policies.map((policy) => policy.display_name).join('\n')
+			body: bill.policies.map((policy) => policy.definition.display_name).join('\n')
 		}
 	];
 }

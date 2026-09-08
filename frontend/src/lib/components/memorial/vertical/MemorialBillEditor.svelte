@@ -4,9 +4,10 @@
 	import {
 		METRICS,
 		getBillLagMonths,
+		getPolicyDelayBounds,
 		getMetricDisplayName,
 		type Bill,
-		type PolicyDefinition,
+		type PolicyInstance,
 		type Proposal
 	} from '$lib/game';
 	import MemorialPolicyContent from '../content/MemorialPolicyContent.svelte';
@@ -24,7 +25,8 @@
 		isTitle?: boolean;
 		onTitleChange?: (title: string) => void;
 		onRemoveProposal?: (proposal: Proposal, index: number) => void;
-		onRemovePolicy?: (policy: PolicyDefinition, index: number) => void;
+		onRemovePolicy?: (policy: PolicyInstance, index: number) => void;
+		onPolicyDelayChange?: (index: number, delayMonths: number) => void;
 		onCoverChange?: (isTitle: boolean) => void;
 	};
 
@@ -36,6 +38,7 @@
 		onTitleChange,
 		onRemoveProposal,
 		onRemovePolicy,
+		onPolicyDelayChange,
 		onCoverChange
 	}: Props = $props();
 	let editingTitle = $state(false);
@@ -43,11 +46,12 @@
 	let titleInput = $state<HTMLInputElement>();
 	let displayTitle = $derived(bill.title || $t('memorial.newBill'));
 	let lag = $derived(getBillLagMonths(bill.proposals));
+	let policyDelayBounds = $derived(getPolicyDelayBounds(bill.proposals));
 	let proposalPages = $derived(
 		bill.proposals.map((proposal) => proposalToMemorialContent(proposal, $t, zh))
 	);
 	let policyPages = $derived(
-		bill.policies.map((policy) => policyToMemorialContent(policy, $t, zh))
+		bill.policies.map((policy) => policyToMemorialContent(policy.definition, $t, zh))
 	);
 	let coverMetrics: MemorialMetricData[] = $derived([
 		...preview.map((metric) => ({ ...metric, text: chineseMetricName(metric.text) })),
@@ -159,18 +163,37 @@
 		</MemorialVerticalCover>
 		<MemorialVertical count={proposalPages.length + policyPages.length}>
 			{#snippet page(index: number)}
+				{#if proposalPages[index]}
 				<button
 					class="h-full w-full cursor-pointer border-0 bg-transparent p-0 text-left"
 					type="button"
 					aria-label={$t('memorial.deletePage', { page: index + 1 })}
 					onclick={() => removePage(index)}
 				>
-					{#if proposalPages[index]}
-						<MemorialProposalContent {...proposalPages[index]} />
-					{:else if policyPages[index - proposalPages.length]}
-						<MemorialPolicyContent {...policyPages[index - proposalPages.length]} />
-					{/if}
+					<MemorialProposalContent {...proposalPages[index]} />
 				</button>
+				{:else if policyPages[index - proposalPages.length]}
+					{@const policyIndex = index - proposalPages.length}
+					<div class="relative h-full w-full">
+						<button
+							class="absolute inset-0 z-0 cursor-pointer border-0 bg-transparent p-0"
+							type="button"
+							aria-label={$t('memorial.deletePage', { page: index + 1 })}
+							onclick={() => removePage(index)}
+						></button>
+						<div class="pointer-events-none relative z-1">
+						<MemorialPolicyContent {...policyPages[index - proposalPages.length]} />
+							<MemorialPolicyContent
+								{...policyPages[policyIndex]}
+								lagMonths={bill.policies[policyIndex].delay_months}
+								min={policyDelayBounds.min}
+								max={policyDelayBounds.max}
+								onChange={(delayMonths) =>
+									onPolicyDelayChange?.(policyIndex, delayMonths)}
+							/>
+						</div>
+					</div>
+				{/if}
 			{/snippet}
 		</MemorialVertical>
 	</div>

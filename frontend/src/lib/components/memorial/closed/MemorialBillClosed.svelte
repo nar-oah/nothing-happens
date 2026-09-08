@@ -8,14 +8,14 @@
 		getMetricDisplayName,
 		getBillLagMonths,
 		getBillMetrics,
-		type PolicyDefinition,
+		type PolicyInstance,
 		type Proposal
 	} from '$lib/game';
 
 	type Props = {
 		title: string;
 		proposals: Proposal[];
-		policies: PolicyDefinition[];
+		policies: PolicyInstance[];
 	};
 
 	const zh: Translate = (key, params) => translate(key, params, 'zh_CN');
