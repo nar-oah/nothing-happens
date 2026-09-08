@@ -31,7 +31,7 @@
 		metrics: NewspaperMetricData[];
 		front?: NewspaperFrontData;
 		events: NewspaperEventData[];
-		commentContext: UiMode;
+		commentContext?: UiMode;
 		suppressionRemaining?: number;
 		busy?: boolean;
 		folded?: boolean;
@@ -64,7 +64,7 @@
 		metrics,
 		front,
 		events,
-		commentContext,
+		commentContext = 'office',
 		suppressionRemaining = 0,
 		busy = false,
 		folded = false,
