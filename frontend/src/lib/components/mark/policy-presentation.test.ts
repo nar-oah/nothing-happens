@@ -52,7 +52,7 @@ test('policy mark faces show gap and stabilization effects instead of condition 
 		gap: { label: '落差', headline: '生産－25', detail: '（生産－消費）×0.5' },
 		smoothing: { label: '平抑', headline: '税課＋50', detail: '生産－消費' }
 	});
-	assert.equal(createPolicyMarkContent(policy, baseline, en).smoothing.label, 'Stabilization');
+	assert.equal(createPolicyMarkContent(policy, baseline, en).smoothing.label, 'Damp');
 });
 
 test('vertical memorial policy content has fixed gap and stabilization blocks', () => {
@@ -65,6 +65,6 @@ test('vertical memorial policy content has fixed gap and stabilization blocks', 
 	});
 	assert.deepEqual(
 		policyToMemorialContent(policy, en, en).contents.map((content) => content.title),
-		['Gap', 'Stabilization']
+		['Gap', 'Damp']
 	);
 });
