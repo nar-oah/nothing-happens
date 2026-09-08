@@ -310,11 +310,17 @@ func get_variable_race_seat_constraint(
 	return RaceSeatConstraint.new(0, context.parliament_system.get_variable_seats(context.state).size())
 
 
-func get_expectation_growth_multiplier(context: RunContext, race: RaceDefinition) -> float:
-	var result := 1.0
+func get_expectation_growth_rate(context: RunContext, race: RaceDefinition) -> float:
+	if context == null or race == null:
+		return 0.0
+	var result := 0.0
+	for article in get_active_articles(context):
+		if article.get_race() == race:
+			result = article.expectation_growth_rate
+			break
 	for effect in get_active_effects(context):
-		result *= effect.get_expectation_growth_multiplier(race)
-	return maxf(result, 0.0)
+		result += effect.get_expectation_growth_modifier(race)
+	return clampf(result, -1.0, 10.0)
 
 
 func get_event_intel_probability_modifier(context: RunContext, race: RaceDefinition) -> float:
