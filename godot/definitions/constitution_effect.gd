@@ -29,8 +29,8 @@ func validate_draft(
 	return true
 
 
-func get_expectation_growth_multiplier(_race: RaceDefinition) -> float:
-	return 1.0
+func get_expectation_growth_modifier(_race: RaceDefinition) -> float:
+	return 0.0
 
 
 func get_event_intel_probability_modifier(_race: RaceDefinition) -> float:

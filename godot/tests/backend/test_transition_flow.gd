@@ -77,8 +77,7 @@ func _test_active_variant_growth_uses_month_zero_economy(t: BackendTestContext) 
 	var canonical := t.make_race("growth canonical")
 	var variant := t.make_race("growth variant")
 	variant.increase_production = true
-	variant.expectation_growth_rate = 0.10
-	var article := t.make_article(canonical)
+	var article := t.make_article(canonical, true, 0.10)
 	var modify := ModifyRaceEffect.new()
 	modify.target_races = [canonical]
 	modify.source_races = [variant]
@@ -87,7 +86,7 @@ func _test_active_variant_growth_uses_month_zero_economy(t: BackendTestContext) 
 	var race_state := session.state.get_race(canonical)
 	t.check(race_state.definition == canonical, "transition keeps canonical race identity")
 	t.check(race_state.active_definition == variant, "transition exposes active race variant")
-	t.check_equal(race_state.get_expectation(Metric.Id.PRODUCTION, 0), 110, "opening target uses active variant growth")
+	t.check_equal(race_state.get_expectation(Metric.Id.PRODUCTION, 0), 110, "active variant stance uses constitution growth")
 	session.state.metrics.production = 200
 	session.annual_settlement_system.settle_year(session.context)
 	t.check_equal(race_state.get_expectation(Metric.Id.PRODUCTION, 0), 220, "annual settlement rebuilds target from new month-zero economy")

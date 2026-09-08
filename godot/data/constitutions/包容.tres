@@ -21,8 +21,8 @@ source_races = Array[ExtResource("race_type_5")]([ExtResource("variant_13")])
 [resource]
 script = ExtResource("article_script_1")
 display_name = "包容"
-description = "官署说汉语，比翼仍保存自己的文字、历法和学问；不同族群在公共事务里使用同一套语言，又各自带着自己的旧传统生活。
-这套制度没有解决比翼对失去知识地位的不满，只是默认一种朴素的妥协：公共世界可以改变，但至少族内还有些东西不必跟着改变。"
+description = "官署说汉语，比翼仍保存自己的文字、历法和学问；不同族群在公共事务里使用同一套语言，又各自带着自己的旧传统生活。\n这套制度没有解决比翼对失去知识地位的不满，只是默认一种朴素的妥协：公共世界可以改变，但至少族内还有些东西不必跟着改变。"
 row = ExtResource("row_7")
+expectation_growth_rate = 0.1
 policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
 effects = Array[ExtResource("effect_type_3")]([SubResource("Effect_1")])

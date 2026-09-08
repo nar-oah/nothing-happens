@@ -67,9 +67,9 @@ target_group = ExtResource("group_29")
 [resource]
 script = ExtResource("article_script_1")
 display_name = "国有化"
-description = "外来的市场夺走了知识，本地的小集团又把公共需要切成各自的买卖。比翼给出的答案不是退回过去，而是让国家把这些东西重新收拢起来。
-于是产业、任命和资源开始汇入蓬莱公所。市场造成的混乱被统一调配取代，而谁能够解释“公共利益”，也越来越集中到同一个地方。"
+description = "外来的市场夺走了知识，本地的小集团又把公共需要切成各自的买卖。比翼给出的答案不是退回过去，而是让国家把这些东西重新收拢起来。\n于是产业、任命和资源开始汇入蓬莱公所。市场造成的混乱被统一调配取代，而谁能够解释“公共利益”，也越来越集中到同一个地方。"
 row = ExtResource("row_7")
 conditions = Array[ExtResource("condition_type_4")]([SubResource("Condition_101"), SubResource("Condition_102"), SubResource("Condition_103")])
+expectation_growth_rate = 0.1
 policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
 effects = Array[ExtResource("effect_type_3")]([SubResource("Effect_1"), SubResource("Effect_2"), SubResource("Effect_3")])

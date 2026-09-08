@@ -9,8 +9,8 @@ func _init() -> void:
 	display_name = "年度期望增长"
 
 
-func get_expectation_growth_multiplier(race: RaceDefinition) -> float:
-	return maxf(0.0, 1.0 + growth_modifier) if _matches_race(races, race) else 1.0
+func get_expectation_growth_modifier(race: RaceDefinition) -> float:
+	return growth_modifier if _matches_race(races, race) else 0.0
 
 
 func get_description() -> String:
