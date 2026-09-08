@@ -64,6 +64,10 @@ function handleClick(event: MouseEvent): void {
 			suppressDefaultClick = false;
 			return;
 		}
+		if (control.classList.contains('newspaper-close-layer')) {
+			playUiSfx('memorial-toggle');
+			return;
+		}
 		playUiSfx('other');
 	});
 }
