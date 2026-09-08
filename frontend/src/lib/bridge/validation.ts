@@ -1,11 +1,11 @@
 import {
 	Metric,
-	MetricConditionOperator,
 	PolicyEffectFormula,
 	type Bill,
 	type InterestGroupDefinition,
 	type MetricValues,
 	type PolicyDefinition,
+	type PolicyInstance,
 	type Proposal
 } from '../game/types.ts';
 import type {
@@ -65,6 +65,7 @@ const outboundTypes = new Set<OutboundType>([
 	'draft.proposal.remove',
 	'draft.policy.add',
 	'draft.policy.remove',
+	'draft.policy.delay.set',
 	'draft.title.set',
 	'bill.new',
 	'bill.edit',
@@ -324,11 +325,6 @@ function isPolicy(value: unknown): value is PolicyDefinition {
 	return (
 		isRecord(value) &&
 		typeof value.display_name === 'string' &&
-		isRecord(value.condition) &&
-		isMetric(value.condition.left_metric) &&
-		isConditionOperator(value.condition.operator) &&
-		isMetric(value.condition.right_metric) &&
-		isNumber(value.condition.right_multiplier) &&
 		isArrayOf(
 			value.effects,
 			(effect) =>
@@ -342,12 +338,20 @@ function isPolicy(value: unknown): value is PolicyDefinition {
 	);
 }
 
+function isPolicyInstance(value: unknown): value is PolicyInstance {
+	return (
+		isRecord(value) &&
+		isPolicy(value.definition) &&
+		isNonnegativeInteger(value.delay_months)
+	);
+}
+
 function isBill(value: unknown): value is Bill {
 	return (
 		isRecord(value) &&
 		typeof value.title === 'string' &&
 		isArrayOf(value.proposals, isProposal) &&
-		isArrayOf(value.policies, isPolicy)
+		isArrayOf(value.policies, isPolicyInstance)
 	);
 }
 
@@ -587,7 +591,10 @@ function isActiveBill(value: unknown): value is ActiveBillDto {
 		) &&
 		isArrayOf(
 			value.policies,
-			(item) => isRecord(item) && isPolicy(item.definition) && typeof item.triggered === 'boolean'
+			(item) =>
+				isPolicyInstance(item) &&
+				isNonnegativeInteger(item.elapsed_months) &&
+				typeof item.triggered === 'boolean'
 		)
 	);
 }
@@ -603,15 +610,6 @@ function isMetric(value: unknown): boolean {
 		value === Metric.PRODUCTION ||
 		value === Metric.EMPLOYMENT ||
 		value === Metric.INVESTMENT
-	);
-}
-
-function isConditionOperator(value: unknown): boolean {
-	return (
-		value === MetricConditionOperator.LESS_THAN ||
-		value === MetricConditionOperator.LESS_THAN_OR_EQUAL ||
-		value === MetricConditionOperator.GREATER_THAN ||
-		value === MetricConditionOperator.GREATER_THAN_OR_EQUAL
 	);
 }
 
