@@ -14,6 +14,9 @@ class_name ConstitutionArticleDefinition
 @export var seat_condition: ConstitutionSeatCondition
 @export var conditions: Array[ConstitutionCondition] = []
 
+@export_group("制度参数")
+@export_range(-1.0, 10.0, 0.01) var expectation_growth_rate: float = 0.0
+
 @export_group("内容")
 @export var policies: Array[PolicyDefinition] = []
 @export var effects: Array[ConstitutionEffect] = []
