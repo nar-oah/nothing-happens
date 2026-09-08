@@ -6,7 +6,7 @@ const YinYangRuleDefinitionScript = preload("res://definitions/yin_yang_rule_def
 
 func run(t: BackendTestContext) -> void:
 	_test_fixed_proposal_source_support(t)
-	_test_future_policy_is_excluded_from_projection(t)
+	_test_planned_policy_projection_drives_support(t)
 	_test_zhushui_support_is_always_99(t)
 	_test_donation_pool_spending_and_detection(t)
 	_test_nanke_variant_absence_is_submit_only(t)
@@ -28,7 +28,7 @@ func _test_fixed_proposal_source_support(t: BackendTestContext) -> void:
 	session.free()
 
 
-func _test_future_policy_is_excluded_from_projection(t: BackendTestContext) -> void:
+func _test_planned_policy_projection_drives_support(t: BackendTestContext) -> void:
 	var race := t.make_race("projection race")
 	race.increase_production = true
 	var source := t.make_group("projection source")
@@ -54,7 +54,7 @@ func _test_future_policy_is_excluded_from_projection(t: BackendTestContext) -> v
 	t.check_equal(
 		t.vote_for_race(before, race).position,
 		SeatVoteState.Position.ABSTAIN,
-		"a future policy does not affect the vote projection"
+		"a policy with no calculated effect does not affect the vote projection"
 	)
 	var proposal := t.make_proposal(source)
 	proposal.base_effect.tax = 10
@@ -65,18 +65,18 @@ func _test_future_policy_is_excluded_from_projection(t: BackendTestContext) -> v
 	var vote := t.vote_for_race(result, race)
 	t.check_approx(
 		vote.breakdown[&"race_expectation"],
-		0.0,
-		"future policy effects do not count toward race support"
+		session.balance.race_expectation_score,
+		"the planned policy improvement counts toward race support"
 	)
 	t.check_approx(vote.breakdown[&"proposal_source"], 0.0, "group support does not mask the policy result")
-	t.check_equal(vote.position, SeatVoteState.Position.ABSTAIN, "future policy effects cannot make the seat support")
+	t.check_equal(vote.position, SeatVoteState.Position.SUPPORT, "the planned policy projection can make the seat support")
 	var preview := UiSerializer.new().draft_preview(session)
 	t.check_equal(preview["pure_proposal_target"]["tax"], 100, "session draft remains empty in serializer baseline")
 	session.state.draft_bill = draft
 	preview = UiSerializer.new().draft_preview(session)
 	t.check_equal(preview["pure_proposal_target"]["tax"], 110, "UI preview includes the proposal gap")
-	t.check_equal(preview["projected_metrics"]["production"], 100, "UI preview excludes future policy effects")
-	t.check_equal(preview["vote"]["seat_votes"][0]["position"], int(SeatVoteState.Position.ABSTAIN), "serialized preview uses the same proposal-only vote")
+	t.check_equal(preview["projected_metrics"]["production"], 110, "UI preview applies policies at their planned delays")
+	t.check_equal(preview["vote"]["seat_votes"][0]["position"], int(SeatVoteState.Position.SUPPORT), "serialized preview uses the same planned projection")
 	session.free()
 
 

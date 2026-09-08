@@ -10,6 +10,8 @@ func run(t: BackendTestContext) -> void:
 	_test_different_months_resolve_in_order(t)
 	_test_month_flow_orders_market_policy_and_event(t)
 	_test_negative_policy_effect_is_preserved(t)
+	_test_single_policy_planning_preview(t)
+	_test_planning_preview_groups_by_delay(t)
 
 
 func _test_delay_bounds_defaults_and_clamping(t: BackendTestContext) -> void:
@@ -210,6 +212,49 @@ func _test_negative_policy_effect_is_preserved(t: BackendTestContext) -> void:
 	state.scheduled_policies.append(PolicyState.new(policy, 0))
 	PolicySystem.new().resolve_due_policies(state)
 	t.check_equal(state.metrics.employment, -5, "a signed policy calculation may produce a negative metric")
+
+
+func _test_single_policy_planning_preview(t: BackendTestContext) -> void:
+	var policy := _make_metric_policy(
+		"single preview", Metric.Id.INVESTMENT, PolicyEffect.Formula.METRIC_VALUE,
+		Metric.Id.TAX, Metric.Id.CONSUMPTION, 2.0
+	)
+	var pure_target := MetricValues.new()
+	pure_target.tax = 7
+	pure_target.investment = 1
+	var instance := PolicyState.new(policy, 3)
+	instance.elapsed_months = 2
+	var policies: Array[PolicyState] = [instance]
+	var projected := PolicySystem.new().calculate_planned_result(pure_target, policies)
+	t.check_equal(projected.investment, 15, "planning preview applies a single policy to the pure proposal target")
+	t.check_equal(pure_target.investment, 1, "planning preview leaves its input metrics unchanged")
+	t.check_equal(instance.elapsed_months, 2, "planning preview does not advance scheduled state")
+	t.check(not instance.triggered, "planning preview does not mark policy state as executed")
+
+
+func _test_planning_preview_groups_by_delay(t: BackendTestContext) -> void:
+	var first := _make_metric_policy(
+		"preview production", Metric.Id.PRODUCTION, PolicyEffect.Formula.METRIC_VALUE,
+		Metric.Id.TAX, Metric.Id.CONSUMPTION, 1.0
+	)
+	var second := _make_metric_policy(
+		"preview investment", Metric.Id.INVESTMENT, PolicyEffect.Formula.METRIC_VALUE,
+		Metric.Id.PRODUCTION, Metric.Id.CONSUMPTION, 2.0
+	)
+	var pure_target := MetricValues.new()
+	pure_target.tax = 10
+	pure_target.production = 2
+	var first_state := PolicyState.new(first, 1)
+	var second_state := PolicyState.new(second, 1)
+	var policies: Array[PolicyState] = [second_state, first_state]
+	var system := PolicySystem.new()
+	var same_month := system.calculate_planned_result(pure_target, policies)
+	t.check_equal(same_month.production, 12, "same-delay preview policies all apply")
+	t.check_equal(same_month.investment, 4, "same-delay preview policies use one batch snapshot")
+	second_state.delay_months = 2
+	var later_month := system.calculate_planned_result(pure_target, policies)
+	t.check_equal(later_month.production, 12, "changing delay preserves the earlier policy result")
+	t.check_equal(later_month.investment, 24, "a later-delay preview policy reads the earlier batch result")
 
 
 func _make_policy_session(

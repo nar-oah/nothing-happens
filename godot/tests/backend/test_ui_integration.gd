@@ -378,7 +378,7 @@ func _test_draft_preview(t: BackendTestContext) -> void:
 	t.check_equal(preview["pure_proposal_target"]["tax"], 107, "preview uses pure proposal target")
 	t.check_equal(preview["immediate_policy_result"]["investment"], 100, "preview applies no policy before its due month")
 	t.check_equal(preview["projected_metrics"]["tax"], 107, "projected metrics include proposal")
-	t.check_equal(preview["projected_metrics"]["investment"], 100, "projected metrics exclude scheduled policy")
+	t.check_equal(preview["projected_metrics"]["investment"], 111, "projected metrics apply the policy to the pure proposal target")
 	t.check_equal(preview["vote"]["seat_votes"].size(), 1, "preview uses authoritative seat vote")
 	session.free()
 
