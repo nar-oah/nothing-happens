@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { playUiSfx } from '$lib/audio/ui-sfx';
 	import { t } from '$lib/i18n';
 	import { onMount, untrack } from 'svelte';
 	import ChoreSwitch from '$lib/components/chore/ChoreSwitch.svelte';
@@ -114,6 +115,7 @@
 		if (mode !== 'selection') return;
 		if (item.kind === 'proposal') {
 			const proposals = [...visibleDraft.proposals, item.proposal];
+			playUiSfx('memorial-insert', true);
 			optimisticDraft = {
 				...visibleDraft,
 				proposals,
@@ -123,6 +125,7 @@
 		}
 		if (item.kind === 'policy') {
 			const { min } = getPolicyDelayBounds(visibleDraft.proposals);
+			playUiSfx('memorial-insert', true);
 			optimisticDraft = {
 				...visibleDraft,
 				policies: [...visibleDraft.policies, { definition: item.policy, delay_months: min }]
@@ -178,12 +181,14 @@
 
 	function submitDraft(isVote: boolean) {
 		if (!isVote) return;
+		playUiSfx('passed', true);
 		onSubmit?.();
 		queueMicrotask(() => (voteMode = false));
 	}
 
 	function bribeSeat(seatIndex: number, isSwitch: boolean) {
 		if (!isSwitch) return;
+		playUiSfx('bribe', true);
 		onBribeSeat?.(seatIndex);
 	}
 

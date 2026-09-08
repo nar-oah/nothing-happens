@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { playUiSfx } from '$lib/audio/ui-sfx';
 	import { t } from '$lib/i18n';
 	import ChoreSwitch from '$lib/components/chore/ChoreSwitch.svelte';
 	import { MemorialVerticalConstitution } from '$lib/components/memorial';
@@ -61,6 +62,7 @@
 
 	function submitRevision(isConfirm: boolean) {
 		if (!isConfirm) return;
+		playUiSfx('passed', true);
 		onSubmit?.();
 		queueMicrotask(() => (confirmMode = false));
 	}

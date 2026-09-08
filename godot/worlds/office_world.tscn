@@ -22,7 +22,7 @@ assistant_race = ExtResource("2_07aia")
 assistant_dialogue = ExtResource("3_pourb")
 
 [node name="Painting" parent="." unique_id=82985051 instance=ExtResource("4_ltqoq")]
-position = Vector2(503.00003, 295)
+position = Vector2(1079, 295)
 scale = Vector2(0.6, 0.6)
 dialogue = ExtResource("5_xnoqu")
 
@@ -55,7 +55,7 @@ position = Vector2(92, -165)
 dialogue = ExtResource("7_6kiej")
 
 [node name="High Lamp" parent="LeftAnchor" unique_id=411025428 instance=ExtResource("5_nl8yu")]
-position = Vector2(850, -615)
+position = Vector2(674, -615)
 dialogue = ExtResource("7_6kiej")
 
 [node name="Big Rock" type="Sprite2D" parent="LeftAnchor" unique_id=1050922794]

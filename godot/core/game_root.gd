@@ -13,6 +13,8 @@ const CefTextureInputScript = preload("res://core/ui/cef_texture_input.gd")
 func _ready() -> void:
 	print("GameRoot started.")
 	run_session.start_new_run()
+	_sync_audio_collapse()
+	_set_audio_world("office")
 	ui_bridge.outgoing_message.connect(_on_ui_message)
 	scene_manager.show_office()
 	var cef_texture := _create_cef_texture()
@@ -47,6 +49,7 @@ func _create_cef_texture() -> Control:
 
 
 func _on_world_changed(scene_name: String, world: Node) -> void:
+	_set_audio_world(scene_name)
 	if scene_name == "office":
 		world.parliament_requested.connect(_on_parliament_requested)
 		world.visitor_requested.connect(_on_visitor_requested)
@@ -88,6 +91,7 @@ func _on_simple_dialogue_requested(
 func _on_ui_message(message: Dictionary) -> void:
 	if message.get("type") != "state.full":
 		return
+	_sync_audio_collapse()
 	if scene_manager.current_scene_name == "office":
 		_sync_office_visitors(scene_manager.current_world)
 	elif scene_manager.current_scene_name == "parliament":
@@ -125,3 +129,21 @@ func _sync_parliament_seats(world: Node) -> void:
 			)
 		seat_races.append(active)
 	world.call("set_seat_races", seat_races)
+
+
+func _audio_director() -> Node:
+	return get_node_or_null("/root/AudioDirector")
+
+
+func _sync_audio_collapse() -> void:
+	var director := _audio_director()
+	if director == null or not director.has_method(&"set_collapse"):
+		return
+	director.call(&"set_collapse", run_session.state.collapse_level, run_session.balance.max_collapse)
+
+
+func _set_audio_world(scene_name: String) -> void:
+	var director := _audio_director()
+	if director == null or not director.has_method(&"set_world_scene"):
+		return
+	director.call(&"set_world_scene", scene_name)

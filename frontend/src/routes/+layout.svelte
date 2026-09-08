@@ -1,8 +1,12 @@
 <script lang="ts">
 	import favicon from '$lib/assets/favicon.svg';
+	import { installUiSfx } from '$lib/audio/ui-sfx';
+	import { onMount } from 'svelte';
 	import 'virtual:uno.css';
 
 	let { children } = $props();
+
+	onMount(installUiSfx);
 </script>
 
 <svelte:head>
