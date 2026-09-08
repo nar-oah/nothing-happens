@@ -31,10 +31,12 @@
 		metrics: NewspaperMetricData[];
 		front?: NewspaperFrontData;
 		events: NewspaperEventData[];
+		suppressionRemaining?: number;
 		busy?: boolean;
 		folded?: boolean;
 		leaving?: boolean;
 		onAdvance?: () => void;
+		onSuppress?: (eventIndex: number) => void;
 		onCovered?: () => void;
 		onRequestClose?: () => void;
 		onFolded?: () => void;
@@ -61,10 +63,12 @@
 		metrics,
 		front,
 		events,
+		suppressionRemaining = 0,
 		busy = false,
 		folded = false,
 		leaving = false,
 		onAdvance,
+		onSuppress,
 		onCovered,
 		onRequestClose,
 		onFolded,
@@ -79,7 +83,7 @@
 	let saveScrollElement = $state<HTMLDivElement>();
 	let scrollElement: HTMLDivElement;
 	const saveItems = $derived(deriveSaveItems(saves, { term, year, month }, loadingSaves, $t));
-	const pageCount = $derived(4 + events.length + (front ? 1 : 0));
+	const pageCount = $derived(4 + events.length + (front || events.length > 0 ? 1 : 0));
 	const baseHeight = $derived(pageCount * VERTICAL_FOLD_WIDTH);
 	const scale = $derived(viewportWidth / VERTICAL_FOLD_HEIGHT);
 	const scaledHeight = $derived(baseHeight * scale);
@@ -186,7 +190,9 @@
 									{metrics}
 									{front}
 									{events}
+									{suppressionRemaining}
 									{onAdvance}
+									{onSuppress}
 									{onFolded}
 									open={!folded}
 									disabled={interactionDisabled}
