@@ -22,7 +22,7 @@ export type MarkFaceContent = {
 	label: string;
 	headline: string;
 	detail: string;
-	lines?: string[];
+	lines?: Array<{ headline: string; detail: string }>;
 };
 
 export function createPolicyMarkContent(
@@ -60,7 +60,7 @@ function createEffectFace(
 		headline: headlines.join('\n'),
 		detail: details.join('\n'),
 		...(effects.length > 1
-			? { lines: headlines.map((headline, index) => `${headline}\u3000${details[index]}`) }
+			? { lines: headlines.map((headline, index) => ({ headline, detail: details[index] })) }
 			: {})
 	};
 }

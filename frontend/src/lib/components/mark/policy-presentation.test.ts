@@ -76,7 +76,10 @@ test('all effects after the first appear in the smoothing section in order', () 
 		label: '平抑',
 		headline: '税課＋50\n就業－25',
 		detail: '生産－消費\n税課×0.25',
-		lines: ['税課＋50　生産－消費', '就業－25　税課×0.25']
+		lines: [
+			{ headline: '税課＋50', detail: '生産－消費' },
+			{ headline: '就業－25', detail: '税課×0.25' }
+		]
 	});
 	assert.equal(
 		policyToMemorialContent(withThirdEffect, zh, zh).contents[1].body,

@@ -4,7 +4,7 @@
 		label: string;
 		headline: string;
 		detail: string;
-		lines?: string[];
+		lines?: Array<{ headline: string; detail: string }>;
 	};
 
 	const IDEOGRAPHIC_SPACE = '\u3000';
@@ -18,12 +18,21 @@
 >
 	{#if is_show}
 		{#if lines && lines.length > 1}
-			<p class="typo-seal-policy-clause m-0 shrink-0 whitespace-nowrap text-surface-indigo">
+			<p
+				class="m-0 shrink-0 whitespace-nowrap font-policy text-13 font-medium leading-16 text-surface-indigo"
+			>
 				{label}
 			</p>
 			{#each lines as line, index (`${line}-${index}`)}
-				<p class="typo-seal-policy-detail m-0 shrink-0 whitespace-nowrap text-surface-indigo">
-					{line}
+				<p
+					class="m-0 shrink-0 whitespace-nowrap font-policy text-9 font-medium leading-[9px] text-surface-indigo"
+				>
+					{line.headline}
+				</p>
+				<p
+					class="m-0 shrink-0 whitespace-nowrap font-document text-9 font-light leading-[9px] text-surface-indigo"
+				>
+					{line.detail}
 				</p>
 			{/each}
 		{:else}
