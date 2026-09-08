@@ -119,7 +119,7 @@ test('proposal details show the source interest group description', () => {
 test('Left filters by discriminated kind without mutating input', () => {
 	const filtered = filterArchiveItems(items, {
 		kinds: ['bill', 'policy'],
-		metrics: [Metric.TAX, Metric.PRODUCTION],
+		metrics: [Metric.TAX, Metric.EMPLOYMENT],
 		timeAscending: false,
 		valueAscending: false
 	});
@@ -133,7 +133,7 @@ test('Left filters by discriminated kind without mutating input', () => {
 test('Left metric filter matches any involved metric', () => {
 	const filtered = filterArchiveItems(items, {
 		kinds: ['constitution', 'proposal'],
-		metrics: [Metric.CONSUMPTION],
+		metrics: [Metric.EMPLOYMENT],
 		timeAscending: false,
 		valueAscending: false
 	});
