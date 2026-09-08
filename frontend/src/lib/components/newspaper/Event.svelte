@@ -29,6 +29,11 @@
 		onSuppress
 	}: Props = $props();
 	const countdownText = $derived(formatNewspaperNumber(countdown, $t));
+
+	function suppressEvent(): void {
+		if (eventIndex === undefined) return;
+		onSuppress?.(eventIndex);
+	}
 </script>
 
 <div class="flex h-full w-full items-start gap-8 overflow-hidden px-8 py-5">
@@ -46,8 +51,8 @@
 			left={$t('newspaper.suppressionCount', { count: suppressionRemaining })}
 			right={$t('newspaper.suppress')}
 			isSwitch={false}
-			disabled={disabled || suppressionRemaining <= 0 || !onSuppress}
-			onSwitchChange={() => onSuppress?.(eventIndex)}
+			disabled={disabled || suppressionRemaining <= 0 || !onSuppress || eventIndex === undefined}
+			onSwitchChange={suppressEvent}
 		/>
 	</div>
 	<div class="flex min-w-0 flex-1 flex-col items-start gap-2 overflow-hidden text-ink-primary">
