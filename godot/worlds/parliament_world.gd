@@ -43,7 +43,7 @@ func _process(delta: float) -> void:
 
 
 func _on_door_clicked(_dialogue: SimpleDialogueDefinition) -> void:
-	AudioDirector.play_door()
+	_play_audio(&"play_door")
 	office_requested.emit()
 
 
@@ -98,3 +98,9 @@ func _on_viewport_size_changed() -> void:
 func _emit_layout_changed() -> void:
 	camera.force_update_scroll()
 	layout_changed.emit(get_seat_anchors())
+
+
+func _play_audio(method: StringName) -> void:
+	var director := get_node_or_null("/root/AudioDirector")
+	if director != null and director.has_method(method):
+		director.call(method)
