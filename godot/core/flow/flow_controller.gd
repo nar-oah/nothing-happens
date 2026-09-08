@@ -50,6 +50,9 @@ func enact_bill(draft: DraftBillState) -> void:
 		push_error("Cannot enact an unavailable or unresolved draft.")
 		return
 	var new_bill := _build_active_bill(draft)
+	# Passing a new bill replaces the previous bill completely. Any policies that
+	# have not executed yet belong to the superseded bill and must be cancelled.
+	context.state.scheduled_policies.clear()
 	context.state.active_bill = new_bill
 	context.state.newspaper_pending_bill = new_bill
 	context.policy_system.schedule_policies(context.state, new_bill.policies)
