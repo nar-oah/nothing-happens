@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { t } from '$lib/i18n';
 	import { onDestroy } from 'svelte';
+	import type { UiMode } from '$lib/game/state/types';
 	import { VERTICAL_FOLD_HEIGHT, VERTICAL_FOLD_WIDTH } from '../memorial/constants';
 	import MemorialHorizontalFold from '../memorial/horizontal/MemorialHorizontalFold.svelte';
 	import Calendar from './Calendar.svelte';
@@ -27,6 +28,7 @@
 		metrics: NewspaperMetricData[];
 		front?: NewspaperFrontData;
 		events: NewspaperEventData[];
+		commentContext: UiMode;
 		suppressionRemaining?: number;
 		disabled?: boolean;
 		open?: boolean;
@@ -41,6 +43,7 @@
 		metrics,
 		front,
 		events,
+		commentContext,
 		suppressionRemaining = 0,
 		disabled = false,
 		open = true,
@@ -182,7 +185,7 @@
 			{:else if page.kind === 'calendar'}
 				<Calendar {month} />
 			{:else}
-				<Comment />
+				<Comment context={commentContext} />
 			{/if}
 		</MemorialHorizontalFold>
 	{/each}
