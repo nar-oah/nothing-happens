@@ -4,7 +4,7 @@
 	import ChoreItem from '$lib/components/chore/ChoreItem.svelte';
 	import ChoreSwitch from '$lib/components/chore/ChoreSwitch.svelte';
 	import { deriveSaveItems } from '$lib/game/state/saves';
-	import type { SaveSlotDto } from '$lib/game/state/types';
+	import type { SaveSlotDto, UiMode } from '$lib/game/state/types';
 	import { VERTICAL_FOLD_HEIGHT, VERTICAL_FOLD_WIDTH } from '$lib/components/memorial/constants';
 	import Newspaper from '$lib/components/newspaper/Newspaper.svelte';
 	import GameSettingsDisplay from '$lib/components/settings/GameSettingsDisplay.svelte';
@@ -31,6 +31,7 @@
 		metrics: NewspaperMetricData[];
 		front?: NewspaperFrontData;
 		events: NewspaperEventData[];
+		commentContext?: UiMode;
 		suppressionRemaining?: number;
 		busy?: boolean;
 		folded?: boolean;
@@ -63,6 +64,7 @@
 		metrics,
 		front,
 		events,
+		commentContext = 'office',
 		suppressionRemaining = 0,
 		busy = false,
 		folded = false,
@@ -190,6 +192,7 @@
 									{metrics}
 									{front}
 									{events}
+									{commentContext}
 									{suppressionRemaining}
 									{onAdvance}
 									{onSuppress}

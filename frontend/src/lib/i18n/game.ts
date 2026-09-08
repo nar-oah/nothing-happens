@@ -67,16 +67,16 @@ export const gameZhCN = {
 		'三张同集团提案合成时，负面底子必须整张选择，不能逐项拼出一张完美公文。正面附益也最多留一种，其余只拿来把选中的那一项做强。',
 	'newspaper.comment.9.title': '终点看得见，\n路却不听话',
 	'newspaper.comment.9.body':
-		'法案的充分消化结果可以计算，但市场每个月走多少、哪一项先动，并不照公文逐字执行。趋势可预见，时序不可预见，恰恰是政策链最麻烦的地方。',
+		'法案的充分消化结果可以计算，但市场每个月走多少、哪一项先动，并不照公文逐字执行。政策的执行月份倒可以预先写进法案；真正到期时能换来多少，仍要看那一刻实际留下多大的落差。',
 	'newspaper.comment.10.title': '别把政策算进终点',
 	'newspaper.comment.10.body':
-		'报表上的纯提案目标只回答一件事：这些提案若充分消化，最后会把指标带到哪里。政策是一次性的瞬时动作，不会改写这份长期目标。',
-	'newspaper.comment.11.title': '印一落，\n事情当场发生',
+		'报表上的纯提案目标只回答一件事：这些提案若充分消化，最后会把指标带到哪里。政策另有法案中指定的滞后月数，到期才按当时实际落差结算，因此不属于这份提案终点。',
+	'newspaper.comment.11.title': '印先盖，\n效用后到',
 	'newspaper.comment.11.body':
-		'政策不是另一种慢提案。条件一旦满足，本法授权便立即结算一次；同一状态下同时满足的政策按同一批处理，随后还可能继续引出下一批。',
-	'newspaper.comment.12.title': '同一条政策，\n还能再批一次',
+		'政策并非条件一满足就当场发动。法案通过时先为它写定滞后月数；到了期限，才读取那一刻的实际指标落差并执行效果。等待期间若落差变了，最后结算的数也会跟着变。',
+	'newspaper.comment.12.title': '早到还是晚到，\n也是法案的一部分',
 	'newspaper.comment.12.body':
-		'一份法案里的政策触发后就死了，但新法案会重新授予一次资格，即使新法与旧法内容相同。能不能再次赚到好处，要看旧的指标落差还剩多少。',
+		'政策不会守着某个门槛等待自动触发。滞后多久由法案指定，收益则由到期当月的实际落差决定；同一种政策换一个执行月份，结果就可能完全不同。',
 	'newspaper.comment.13.title': '今年处理谁，\n明年谁坐得多',
 	'newspaper.comment.13.body':
 		'种族事件的解决与失败最终会变成政治信任，并在下一年改写可变席位。眼前的经济处置，过一个年关就会变成议会结构。',
@@ -166,16 +166,16 @@ export const gameEn: Record<keyof typeof gameZhCN, string> = {
 		'When combining three proposals from the same group, you must choose one complete set of negative effects; you cannot assemble a perfect document effect by effect. You may also keep at most one positive bonus. The others only strengthen the chosen one.',
 	'newspaper.comment.9.title': 'The destination is visible,\nthe road is unruly',
 	'newspaper.comment.9.body':
-		"A bill's fully absorbed outcome can be calculated, but the market's monthly pace and the order of its movements do not follow the document word for word. Predictable direction and unpredictable timing make the policy chain so difficult.",
+		"A bill's fully absorbed outcome can be calculated, but the market's monthly pace and the order of its movements do not follow the document word for word. A policy's execution month can be written into the bill in advance; what it yields when due still depends on the actual gap left at that moment.",
 	'newspaper.comment.10.title': 'Keep policies out\nof the destination',
 	'newspaper.comment.10.body':
-		'The proposal-only target in the report answers one question: where will these proposals take the metrics once fully absorbed? Policies are one-time, immediate actions. They do not rewrite that long-term target.',
-	'newspaper.comment.11.title': 'The seal falls,\nthe effect is immediate',
+		'The proposal-only target in the report answers one question: where will these proposals take the metrics once fully absorbed? A policy has a lag chosen in the bill and settles against the actual gap when that lag expires, so it does not belong in the proposal destination.',
+	'newspaper.comment.11.title': 'The seal is set now,\nthe effect comes later',
 	'newspaper.comment.11.body':
-		'A policy is not another slow proposal. Once its conditions are met, the authorization in the current bill takes effect immediately, once. Policies whose conditions are met in the same state resolve as one batch, which may then trigger another.',
-	'newspaper.comment.12.title': 'The same policy\ncan be authorized again',
+		'A policy does not fire the moment some condition is met. Its lag is set in the bill; when that time arrives, the policy reads the actual metric gap at that moment and applies its effect. If the gap changes while everyone waits, the eventual result changes with it.',
+	'newspaper.comment.12.title': 'Sooner or later\nis part of the bill',
 	'newspaper.comment.12.body':
-		'A policy is spent once triggered under a bill, but a new bill grants it one more use, even when the new bill matches the old. Whether it can pay off again depends on how much of the old metric gap remains.',
+		'A policy does not sit on a threshold waiting to trigger itself. The bill decides how many months it lags, while the actual gap in the due month decides the payoff. The same policy can therefore land very differently at a different execution date.',
 	'newspaper.comment.13.title': "Whose trouble you handle today\nshapes next year's seats",
 	'newspaper.comment.13.body':
 		"Resolved and failed events change political trust and, in the following year, the distribution of variable seats. Today's economic response becomes next year's parliamentary structure.",

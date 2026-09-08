@@ -522,6 +522,7 @@
 				metrics={newspaperEdition.metrics}
 				front={newspaperEdition.front}
 				events={newspaperEdition.events}
+				commentContext={snapshot.ui_mode}
 				suppressionRemaining={snapshot.suppression_remaining}
 				onSuppress={(eventIndex) => mutate('event.suppress', { event_index: eventIndex })}
 				busy={newspaperBusy}

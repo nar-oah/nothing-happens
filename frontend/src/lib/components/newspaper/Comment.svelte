@@ -1,19 +1,24 @@
 <script lang="ts">
 	import { t } from '$lib/i18n';
-	import { untrack } from 'svelte';
 	import { getNewspaperComments } from '$lib/content/newspaper-comments';
+	import type { UiMode } from '$lib/game/state/types';
 	import MorphText from '../text/MorphText.svelte';
 
-	const comments = $derived(getNewspaperComments($t));
-	let index = $state(
-		untrack(() => (comments.length > 0 ? Math.floor(Math.random() * comments.length) : 0))
-	);
+	type Props = {
+		context: UiMode;
+	};
+
+	let { context }: Props = $props();
+	const comments = $derived(getNewspaperComments(context, $t));
+	let index = $state(0);
 	let hovering = $state(false);
 	const count = $derived(comments.length);
 	const nextIndex = $derived(count > 0 ? (index + 1) % count : 0);
 	const displayIndex = $derived(hovering ? nextIndex : index);
 	const displayTitle = $derived(comments[displayIndex]?.title ?? '');
 	const displayComment = $derived(comments[displayIndex]?.comment ?? '');
+	const displayNumber = $derived(count > 0 ? String(displayIndex + 1).padStart(2, '0') : '00');
+	const totalNumber = $derived(String(count).padStart(2, '0'));
 
 	function advance() {
 		index = nextIndex;
@@ -38,7 +43,9 @@
 			{/key}
 		</p>
 		<div class="flex shrink-0 flex-col items-end px-5 py-2">
-			<p class="typo-newspaper-caption whitespace-nowrap">COMMENT / BACK PAGE</p>
+			<p class="typo-newspaper-caption whitespace-nowrap">
+				COMMENT / {displayNumber} · {totalNumber}
+			</p>
 		</div>
 	</div>
 	<div class="h-px w-full shrink-0 bg-ink-primary"></div>
