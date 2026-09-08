@@ -26,8 +26,8 @@ fixed_count = 5
 [resource]
 script = ExtResource("article_script_1")
 display_name = "朝贡"
-description = "既然只是奉表称臣、按期入贡，又何必让朝廷继续过问岛内每一件事？
-朝贡派愿意保留天朝名分，却要求把名分重新缩回礼仪与贡路之中。蓬莱仍向大明低头，但这一低头应当止于海岸，不该一路伸进议会。"
+description = "既然只是奉表称臣、按期入贡，又何必让朝廷继续过问岛内每一件事？\n朝贡派愿意保留天朝名分，却要求把名分重新缩回礼仪与贡路之中。蓬莱仍向大明低头，但这一低头应当止于海岸，不该一路伸进议会。"
 row = ExtResource("row_7")
+expectation_growth_rate = 0.1
 policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
 effects = Array[ExtResource("effect_type_3")]([SubResource("Effect_1"), SubResource("Effect_2")])
