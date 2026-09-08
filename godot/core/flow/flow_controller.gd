@@ -28,7 +28,7 @@ func advance_month() -> bool:
 		if active != null:
 			active.on_month_start(context, race_state)
 	context.market_system.settle_month(context)
-	context.policy_system.resolve_policy_chain(context.state)
+	context.policy_system.advance_month_and_resolve(context.state)
 	_record_triggered_policies(context.policy_system.last_triggered_definitions)
 	context.event_system.try_generate_month(context)
 	context.event_system.settle_month(context)
@@ -52,8 +52,9 @@ func enact_bill(draft: DraftBillState) -> void:
 	var new_bill := _build_active_bill(draft)
 	context.state.active_bill = new_bill
 	context.state.newspaper_pending_bill = new_bill
+	context.policy_system.schedule_policies(context.state, new_bill.policies)
 	context.parliament_system.record_authorized_proposal_slots(context.state, draft.proposals)
-	context.policy_system.resolve_policy_chain(context.state)
+	context.policy_system.resolve_due_policies(context.state)
 	_record_triggered_policies(context.policy_system.last_triggered_definitions)
 
 
