@@ -11,8 +11,9 @@
 
 	type Props = NewspaperEventData & {
 		suppressionRemaining?: number;
+		suppressed?: boolean;
 		disabled?: boolean;
-		onSuppress?: (eventIndex: number) => void;
+		onSuppressionChange?: (eventIndex: number, suppressed: boolean) => void;
 	};
 
 	let {
@@ -25,14 +26,21 @@
 		strength,
 		value,
 		suppressionRemaining = 0,
+		suppressed = false,
 		disabled = false,
-		onSuppress
+		onSuppressionChange
 	}: Props = $props();
 	const countdownText = $derived(formatNewspaperNumber(countdown, $t));
+	const suppressionDisabled = $derived(
+		disabled ||
+		!onSuppressionChange ||
+		eventIndex === undefined ||
+		(!suppressed && suppressionRemaining <= 0)
+	);
 
-	function suppressEvent(): void {
+	function setSuppressed(nextSuppressed: boolean): void {
 		if (eventIndex === undefined) return;
-		onSuppress?.(eventIndex);
+		onSuppressionChange?.(eventIndex, nextSuppressed);
 	}
 </script>
 
@@ -47,13 +55,15 @@
 		>
 			<p class="typo-newspaper-caption shrink-0 text-surface-amber whitespace-nowrap">COUNTDOWN</p>
 		</div>
-		<ChoreSwitch
-			left={$t('newspaper.suppressionCount', { count: suppressionRemaining })}
-			right={$t('newspaper.suppress')}
-			isSwitch={false}
-			disabled={disabled || suppressionRemaining <= 0 || !onSuppress || eventIndex === undefined}
-			onSwitchChange={suppressEvent}
-		/>
+		<div class="shrink-0">
+			<ChoreSwitch
+				left={$t('newspaper.suppressionCount', { count: suppressionRemaining })}
+				right={$t('newspaper.suppress')}
+				isSwitch={suppressed}
+				disabled={suppressionDisabled}
+				onSwitchChange={setSuppressed}
+			/>
+		</div>
 	</div>
 	<div class="flex min-w-0 flex-1 flex-col items-start gap-2 overflow-hidden text-ink-primary">
 		<p class="typo-newspaper-headline shrink-0 whitespace-nowrap">
