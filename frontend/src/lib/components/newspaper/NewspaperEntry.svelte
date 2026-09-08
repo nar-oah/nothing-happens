@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { playUiSfx } from '$lib/audio/ui-sfx';
 	import { t } from '$lib/i18n';
 	import MemorialNewspaper from '../memorial/MemorialNewspaper.svelte';
 
@@ -10,11 +11,17 @@
 	};
 
 	let { term, year, month, onOpen }: Props = $props();
+
+	function openNewspaper() {
+		if (!onOpen) return;
+		playUiSfx('memorial-toggle', true);
+		onOpen();
+	}
 </script>
 
 <aside class="newspaper-hover-area" aria-label={$t('newspaper.entry')} data-block-world-input>
 	<div class="newspaper">
-		<MemorialNewspaper {term} {year} {month} onclick={onOpen} />
+		<MemorialNewspaper {term} {year} {month} onclick={openNewspaper} />
 	</div>
 </aside>
 
