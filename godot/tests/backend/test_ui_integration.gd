@@ -243,7 +243,7 @@ func _test_policy_name_resolution(t: BackendTestContext) -> void:
 	var session := t.make_session([race], [group], t.make_seats(1, "policy"), [article])
 	var proposal := t.make_proposal(group)
 	proposal.lag_months = 5
-	session.state.draft_bill.proposals.append(proposal)
+	session.proposal_system.add_to_hand(session.state, proposal)
 	var bridge := UiBridge.new()
 	bridge.setup(session)
 	var messages := bridge.receive_ipc_message(
@@ -255,33 +255,43 @@ func _test_policy_name_resolution(t: BackendTestContext) -> void:
 	t.check_equal(messages[0]["type"], "draft.sync", "policy command returns draft domain sync")
 	var instance: PolicyState = session.state.draft_bill.policies[0]
 	t.check(instance.definition == policy, "policy name resolves current Resource into an instance")
-	t.check_equal(instance.delay_months, 3, "new policy defaults to the legal minimum delay")
+	t.check_equal(instance.delay_months, 0, "policy without proposal lag defaults to zero delay")
 	t.check_equal(
 		messages[0]["payload"]["draft_bill"]["policies"][0]["delay_months"],
-		3,
+		0,
 		"draft sync carries the instance delay"
 	)
 	t.check_equal(bridge.state_version, 1, "successful policy mutation advances version once")
+	var proposal_added := bridge.receive_ipc_message(
+		_message("draft.proposal.add", {"state_version": 1, "hand_index": 0})
+	)
+	t.check_equal(proposal_added[0]["type"], "draft.sync", "proposal add returns draft sync")
+	t.check_equal(instance.delay_months, 3, "proposal add clamps policy delay to the new minimum")
 	var delayed := bridge.receive_ipc_message(
 		_message(
 			"draft.policy.delay.set",
-			{"state_version": 1, "draft_index": 0, "delay_months": 5}
+			{"state_version": 2, "draft_index": 0, "delay_months": 5}
 		)
 	)
 	t.check_equal(delayed[0]["type"], "draft.sync", "policy delay command returns draft sync")
 	t.check_equal(instance.delay_months, 5, "policy delay command updates only the draft instance")
-	t.check_equal(bridge.state_version, 2, "policy delay mutation advances version once")
+	t.check_equal(bridge.state_version, 3, "policy delay mutation advances version once")
 	var invalid_delay := bridge.receive_ipc_message(
 		_message(
 			"draft.policy.delay.set",
-			{"state_version": 2, "draft_index": 0, "delay_months": 6}
+			{"state_version": 3, "draft_index": 0, "delay_months": 6}
 		)
 	)
 	t.check_equal(invalid_delay[0]["payload"]["code"], "invalid_policy_delay", "out-of-range delay is rejected")
 	t.check_equal(instance.delay_months, 5, "rejected delay preserves the instance selection")
-	t.check_equal(bridge.state_version, 2, "rejected delay preserves the state version")
+	t.check_equal(bridge.state_version, 3, "rejected delay preserves the state version")
+	var proposal_removed := bridge.receive_ipc_message(
+		_message("draft.proposal.remove", {"state_version": 3, "draft_index": 0})
+	)
+	t.check_equal(proposal_removed[0]["type"], "draft.sync", "proposal remove returns draft sync")
+	t.check_equal(instance.delay_months, 0, "proposal remove clamps policy delay to zero")
 	var unavailable := bridge.receive_ipc_message(
-		_message("draft.policy.add", {"state_version": 2, "display_name": "missing"})
+		_message("draft.policy.add", {"state_version": 4, "display_name": "missing"})
 	)
 	t.check_equal(unavailable[0]["payload"]["code"], "unavailable_policy", "unknown policy is rejected")
 	bridge.free()
