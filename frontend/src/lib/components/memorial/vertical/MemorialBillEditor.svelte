@@ -182,7 +182,6 @@
 							onclick={() => removePage(index)}
 						></button>
 						<div class="pointer-events-none relative z-1">
-						<MemorialPolicyContent {...policyPages[index - proposalPages.length]} />
 							<MemorialPolicyContent
 								{...policyPages[policyIndex]}
 								lagMonths={bill.policies[policyIndex].delay_months}
