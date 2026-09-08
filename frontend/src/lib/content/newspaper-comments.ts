@@ -35,7 +35,10 @@ const COMMENT_DEFINITIONS: NewspaperCommentDefinition[] = [
 	{ id: 17, context: 'common' }
 ];
 
-function translateComment(definition: NewspaperCommentDefinition, translator: Translate): NewspaperComment {
+function translateComment(
+	definition: NewspaperCommentDefinition,
+	translator: Translate
+): NewspaperComment {
 	return {
 		id: definition.id,
 		title: translator(`newspaper.comment.${definition.id}.title`),
