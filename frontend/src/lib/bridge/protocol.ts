@@ -54,6 +54,7 @@ export type OutboundPayloads = {
 		selected_positive_index: number | null;
 	};
 	'office.visit.resolve': { state_version: number; accept_trait?: boolean };
+	'event.suppress': { state_version: number; event_index: number };
 	'constitution.revise': { state_version: number; article_index: number };
 	'constitution.column.unlock': { state_version: number; column_index: number };
 	'month.advance': { state_version: number };
