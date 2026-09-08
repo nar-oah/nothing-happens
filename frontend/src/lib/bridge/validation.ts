@@ -585,14 +585,17 @@ function isActiveBill(value: unknown): value is ActiveBillDto {
 				isNumber(item.digestion_progress) &&
 				typeof item.fully_digested === 'boolean'
 		) &&
-		isArrayOf(
-			value.policies,
-			(item) =>
-				isRecord(item) &&
-				isPolicyInstance(item) &&
-				isNonnegativeInteger(item.elapsed_months) &&
-				typeof item.triggered === 'boolean'
-		)
+		isArrayOf(value.policies, isActivePolicy)
+	);
+}
+
+function isActivePolicy(value: unknown): boolean {
+	if (!isRecord(value)) return false;
+	const state = value;
+	return (
+		isPolicyInstance(value) &&
+		isNonnegativeInteger(state.elapsed_months) &&
+		typeof state.triggered === 'boolean'
 	);
 }
 
