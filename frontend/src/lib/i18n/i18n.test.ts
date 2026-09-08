@@ -16,6 +16,7 @@ import {
 import { getNewspaperComments } from '../content/newspaper-comments.ts';
 import { getMetricDisplayName } from '../game/rules.ts';
 import { deriveSaveItems } from '../game/state/saves.ts';
+import type { UiMode } from '../game/state/types.ts';
 import { Metric } from '../game/types.ts';
 import { dictionaries, language, t, translate, type Translate } from './index.ts';
 import { translateCommandError } from './live.ts';
@@ -69,7 +70,7 @@ test('newspaper labels and negotiation month follow the supplied language', () =
 	assert.equal(getMetricDisplayName(Metric.INVESTMENT, en), 'Investment');
 });
 
-test('term report and all newspaper commentary translate without changing their values or order', () => {
+test('term report and contextual newspaper commentary translate without changing comment identity', () => {
 	const report = {
 		outcome: 'NOTHING_HAPPENS' as const,
 		previous_governing_months: 25,
@@ -85,16 +86,36 @@ test('term report and all newspaper commentary translate without changing their 
 		{ metric: 'Years in office', value: 2, change: 1 },
 		{ metric: 'Months in office', value: 1, change: 2 }
 	]);
-	const chinese = getNewspaperComments(zh);
-	const english = getNewspaperComments(en);
-	assert.equal(chinese.length, 19);
-	assert.equal(english.length, chinese.length);
-	for (const [index, comment] of english.entries()) {
-		assert.equal(comment.title, en(`newspaper.comment.${index}.title`));
-		assert.equal(comment.comment, en(`newspaper.comment.${index}.body`));
-		assert.notEqual(comment.title, chinese[index].title);
-		assert.notEqual(comment.comment, chinese[index].comment);
+
+	const expectedIds: Record<UiMode, number[]> = {
+		office: [0, 3, 5, 6, 8, 18, 2, 17],
+		dialogue: [1, 7, 2, 17],
+		parliament: [4, 9, 10, 11, 12, 13, 14, 16, 2, 17],
+		constitution: [15, 2, 17]
+	};
+	for (const context of Object.keys(expectedIds) as UiMode[]) {
+		const chinese = getNewspaperComments(context, zh);
+		const english = getNewspaperComments(context, en);
+		assert.deepEqual(
+			chinese.map((comment) => comment.id),
+			expectedIds[context]
+		);
+		assert.deepEqual(
+			english.map((comment) => comment.id),
+			expectedIds[context]
+		);
+		assert.equal(english.length, chinese.length);
+		for (const [index, comment] of english.entries()) {
+			const id = expectedIds[context][index];
+			assert.equal(comment.title, en(`newspaper.comment.${id}.title`));
+			assert.equal(comment.comment, en(`newspaper.comment.${id}.body`));
+			assert.notEqual(comment.title, chinese[index].title);
+			assert.notEqual(comment.comment, chinese[index].comment);
+		}
 	}
+	assert.match(zh('newspaper.comment.11.body'), /滞后月数/);
+	assert.match(en('newspaper.comment.11.body'), /lag/);
+	assert.doesNotMatch(en('newspaper.comment.11.body'), /conditions are met.*immediately/i);
 });
 
 test('save labels translate while save commands retain the same slot identity', () => {
