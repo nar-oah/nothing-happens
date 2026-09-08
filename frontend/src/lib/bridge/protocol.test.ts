@@ -221,9 +221,22 @@ test('IPC envelope encodes and decodes discriminated messages', () => {
 			payload: { state_version: 4, column_index: 2 }
 		}
 	);
+	assert.deepEqual(
+		JSON.parse(
+			encodeOutboundMessage({
+				type: 'draft.policy.delay.set',
+				payload: { state_version: 4, draft_index: 1, delay_months: 3 }
+			})
+		),
+		{
+			type: 'draft.policy.delay.set',
+			payload: { state_version: 4, draft_index: 1, delay_months: 3 }
+		}
+	);
 	assert.equal(isOutboundType('term.next'), true);
 	assert.equal(isOutboundType('vote.donation.add'), true);
 	assert.equal(isOutboundType('constitution.column.unlock'), true);
+	assert.equal(isOutboundType('draft.policy.delay.set'), true);
 	assert.equal(isOutboundType('office.visit.resolve'), true);
 	assert.equal(isOutboundType('proposal.bonus.resolve'), false);
 
@@ -235,6 +248,38 @@ test('IPC envelope encodes and decodes discriminated messages', () => {
 		assert.equal(decoded.value.type, 'state.full');
 		assert.equal(decoded.value.request_id, 'ui-1');
 	}
+});
+
+test('IPC keeps policy definitions shared and validates bill policy delay instances', () => {
+	const valid = makeLiveState(9);
+	assert.equal(
+		decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: valid })).ok,
+		true
+	);
+
+	const missingDelay = JSON.parse(JSON.stringify(valid)) as typeof valid;
+	delete (missingDelay.draft_bill.policies[0] as Partial<(typeof valid.draft_bill.policies)[number]>)
+		.delay_months;
+	assert.deepEqual(
+		decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: missingDelay })),
+		{ ok: false, error: 'Invalid payload for state.full' }
+	);
+
+	const fractionalDelay = JSON.parse(JSON.stringify(valid)) as typeof valid;
+	fractionalDelay.saved_bills[0].policies[0].delay_months = 2.5;
+	assert.deepEqual(
+		decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: fractionalDelay })),
+		{ ok: false, error: 'Invalid payload for state.full' }
+	);
+
+	const wrappedAvailablePolicy = JSON.parse(JSON.stringify(valid)) as Record<string, unknown>;
+	wrappedAvailablePolicy.available_policies = valid.draft_bill.policies;
+	assert.deepEqual(
+		decodeInboundMessage(
+			JSON.stringify({ type: 'state.full', payload: wrappedAvailablePolicy })
+		),
+		{ ok: false, error: 'Invalid payload for state.full' }
+	);
 });
 
 test('IPC validates both office visit dialogue variants', () => {
