@@ -57,3 +57,28 @@ test('vertical memorial policy content has fixed gap and stabilization blocks', 
 		['Gap', 'Damp']
 	);
 });
+
+test('all effects after the first appear in the smoothing section in order', () => {
+	const withThirdEffect: PolicyDefinition = {
+		...policy,
+		effects: [
+			...policy.effects,
+			{
+				target_metric: Metric.EMPLOYMENT,
+				formula: PolicyEffectFormula.METRIC_VALUE,
+				source_a: Metric.TAX,
+				source_b: Metric.TAX,
+				multiplier: -0.25
+			}
+		]
+	};
+	assert.deepEqual(createPolicyMarkContent(withThirdEffect, baseline, zh).smoothing, {
+		label: '平抑',
+		headline: '税課＋50\n就業－25',
+		detail: '生産－消費\n税課×0.25'
+	});
+	assert.equal(
+		policyToMemorialContent(withThirdEffect, zh, zh).contents[1].body,
+		'税課＋（生産－消費）\n就業－税課×0.25'
+	);
+});
