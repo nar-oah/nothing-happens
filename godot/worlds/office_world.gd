@@ -90,22 +90,18 @@ func _refresh_visitor() -> void:
 
 
 func _on_painting_clicked(dialogue: SimpleDialogueDefinition) -> void:
-	_play_audio(&"play_other")
 	request_simple_dialogue(dialogue)
 
 
 func _on_lamp_clicked(dialogue: SimpleDialogueDefinition) -> void:
-	_play_audio(&"play_other")
 	request_simple_dialogue(dialogue)
 
 
 func _on_high_lamp_clicked(dialogue: SimpleDialogueDefinition) -> void:
-	_play_audio(&"play_other")
 	request_simple_dialogue(dialogue)
 
 
 func _on_ornament_clicked(dialogue: SimpleDialogueDefinition) -> void:
-	_play_audio(&"play_other")
 	request_simple_dialogue(dialogue)
 
 
