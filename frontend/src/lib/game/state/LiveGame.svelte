@@ -468,6 +468,11 @@
 					mutate('draft.proposal.remove', { draft_index: draftIndex })}
 				onAddPolicy={(displayName) => mutate('draft.policy.add', { display_name: displayName })}
 				onRemovePolicy={(draftIndex) => mutate('draft.policy.remove', { draft_index: draftIndex })}
+				onSetPolicyDelay={(draftIndex, delayMonths) =>
+					mutate('draft.policy.delay.set', {
+						draft_index: draftIndex,
+						delay_months: delayMonths
+					})}
 				onTitleChange={(title) => mutate('draft.title.set', { title })}
 				onEditSavedBill={(savedBillIndex) =>
 					mutate('bill.edit', { saved_bill_index: savedBillIndex })}
