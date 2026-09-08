@@ -104,6 +104,13 @@ func _test_core_dto_serialization(t: BackendTestContext) -> void:
 	t.check_equal(
 		bill_dto["policies"][0]["delay_months"], 3, "bill policy instance serializes its delay"
 	)
+	var saved := SavedBillState.new()
+	saved.policies.append(PolicyState.new(policy, 4))
+	t.check_equal(
+		serializer.bill(saved)["policies"][0]["delay_months"],
+		4,
+		"saved bill policy instance preserves its selected delay"
+	)
 	var active := ActiveBillState.new()
 	var active_policy := PolicyState.new(policy, 3)
 	active_policy.elapsed_months = 2
