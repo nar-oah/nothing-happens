@@ -33,12 +33,12 @@ func _update_layout() -> void:
 
 
 func _on_door_clicked(_dialogue: SimpleDialogueDefinition) -> void:
-	AudioDirector.play_door()
+	_play_audio(&"play_door")
 	parliament_requested.emit()
 
 
 func _on_visitor_clicked() -> void:
-	AudioDirector.play_dialogue()
+	_play_audio(&"play_dialogue")
 	if has_visitors():
 		visitor_requested.emit()
 		assistant_door.visible = true
@@ -90,23 +90,29 @@ func _refresh_visitor() -> void:
 
 
 func _on_painting_clicked(dialogue: SimpleDialogueDefinition) -> void:
-	AudioDirector.play_other()
+	_play_audio(&"play_other")
 	request_simple_dialogue(dialogue)
 
 
 func _on_lamp_clicked(dialogue: SimpleDialogueDefinition) -> void:
-	AudioDirector.play_other()
+	_play_audio(&"play_other")
 	request_simple_dialogue(dialogue)
 
 
 func _on_high_lamp_clicked(dialogue: SimpleDialogueDefinition) -> void:
-	AudioDirector.play_other()
+	_play_audio(&"play_other")
 	request_simple_dialogue(dialogue)
 
 
 func _on_ornament_clicked(dialogue: SimpleDialogueDefinition) -> void:
-	AudioDirector.play_other()
+	_play_audio(&"play_other")
 	request_simple_dialogue(dialogue)
+
+
+func _play_audio(method: StringName) -> void:
+	var director := get_node_or_null("/root/AudioDirector")
+	if director != null and director.has_method(method):
+		director.call(method)
 
 
 func _t(text: String) -> String:
