@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="BillPassedNewspaperFrontDefinition" format=3 uid="uid://e3q8n1w6tb5jy"]
+
+[ext_resource type="Script" path="res://definitions/newspaper_fronts/bill_passed_newspaper_front_definition.gd" id="1_front"]
+
+[resource]
+script = ExtResource("1_front")
+title = "%s获议会通过"
+content = "新法已经生效。%s；实际月度路径仍可能短暂偏离。"
+default_bill_name = "新法案"
+named_bill_format = "《%s》"
+no_reduction_text = "按所含提案的形成速度估算，五项公共指标平均每月没有净下降"
+reduction_text_format = "按所含提案的形成速度估算，平均每月预计减少：%s"
+reduction_item_format = "%s约%s"
+list_separator = "、"

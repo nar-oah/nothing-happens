@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="CollapseThresholdNewspaperFrontDefinition" format=3 uid="uid://j6t0q5b8rn3wy"]
+
+[ext_resource type="Script" path="res://definitions/newspaper_fronts/collapse_threshold_newspaper_front_definition.gd" id="1_front"]
+
+[resource]
+script = ExtResource("1_front")
+title = "九成危言同指一处　已经没有时间了"
+content = "崩溃预期越过九成，会同几乎无人再讨论危机是否会来，只争论它将在何时到来。越是缺少确定证据，新的期限、推算和补救方案反而越快出现。"
+collapse_ratio = 0.9

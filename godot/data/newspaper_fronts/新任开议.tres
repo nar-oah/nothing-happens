@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="TermStartNewspaperFrontDefinition" format=3 uid="uid://d7m4k9r2va0sx"]
+
+[ext_resource type="Script" path="res://definitions/newspaper_fronts/term_start_newspaper_front_definition.gd" id="1_front"]
+
+[resource]
+script = ExtResource("1_front")
+title = "第%d次入主会同"
+content = "新一任联合政府开议。各族在彼此之间挑了一圈，最终还是把会同的印信交到驻岁案前；至少在谁也不肯让步的时候，长生者看起来还算能等。"
+target_year = 1
+target_month = 1
