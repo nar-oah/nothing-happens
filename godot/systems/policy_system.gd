@@ -12,6 +12,35 @@ func create_states(instances: Array[PolicyState]) -> Array[PolicyState]:
 	return result
 
 
+func calculate_planned_result(
+	pure_target: MetricValues, policies: Array[PolicyState]
+) -> MetricValues:
+	var result := pure_target.copy()
+	var batches: Dictionary = {}
+	for policy in policies:
+		if policy == null or policy.definition == null:
+			continue
+		if not batches.has(policy.delay_months):
+			batches[policy.delay_months] = []
+		batches[policy.delay_months].append(policy)
+	var delays: Array[int] = []
+	for delay in batches:
+		delays.append(delay)
+	delays.sort()
+	for delay in delays:
+		var snapshot := result.copy()
+		var total_delta := MetricVector.new()
+		for policy: PolicyState in batches[delay]:
+			for effect in policy.definition.effects:
+				if effect != null:
+					total_delta.add_value(
+						effect.target_metric,
+						effect.calculate_amount(snapshot)
+					)
+		result.apply_delta(total_delta)
+	return result
+
+
 func schedule_policies(state: RunState, policies: Array[PolicyState]) -> void:
 	for policy in policies:
 		if policy == null or policy.definition == null:
