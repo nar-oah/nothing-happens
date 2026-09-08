@@ -30,9 +30,9 @@ export function createPolicyMarkContent(
 	translator: Translate = translate
 ): { gap: MarkFaceContent; smoothing: MarkFaceContent } {
 	return {
-		gap: createEffectFace(policy.effects[0], baseline, translator('mark.gap'), translator),
+		gap: createEffectFace(policy.effects.slice(0, 1), baseline, translator('mark.gap'), translator),
 		smoothing: createEffectFace(
-			policy.effects[1],
+			policy.effects.slice(1),
 			baseline,
 			translator('mark.smoothing'),
 			translator
@@ -41,19 +41,23 @@ export function createPolicyMarkContent(
 }
 
 function createEffectFace(
-	effect: PolicyEffect | undefined,
+	effects: PolicyEffect[],
 	baseline: MetricValues,
 	label: string,
 	translator: Translate
 ): MarkFaceContent {
-	if (!effect) {
+	if (effects.length === 0) {
 		return { label, headline: translator('mark.noChange'), detail: translator('mark.noFormula') };
 	}
-	const amount = calculatePolicyEffectAmount(effect, baseline);
 	return {
 		label,
-		headline: `${getMetricDisplayName(effect.target_metric, translator)}${formatSigned(amount)}`,
-		detail: formatEffectSource(effect, translator)
+		headline: effects
+			.map((effect) => {
+				const amount = calculatePolicyEffectAmount(effect, baseline);
+				return `${getMetricDisplayName(effect.target_metric, translator)}${formatSigned(amount)}`;
+			})
+			.join('\n'),
+		detail: effects.map((effect) => formatEffectSource(effect, translator)).join('\n')
 	};
 }
 

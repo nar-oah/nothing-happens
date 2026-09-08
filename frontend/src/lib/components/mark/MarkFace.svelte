@@ -15,10 +15,10 @@
 	class="flex h-full w-full flex-col overflow-hidden text-center"
 >
 	{#if is_show}
-		<p class="typo-seal-policy-clause whitespace-nowrap leading-0 text-surface-indigo">
+		<p class="typo-seal-policy-clause whitespace-pre-line leading-0 text-surface-indigo">
 			{label}　{headline}
 		</p>
-		<p class="typo-seal-policy-detail whitespace-nowrap leading-0 text-surface-indigo">
+		<p class="typo-seal-policy-detail whitespace-pre-line leading-0 text-surface-indigo">
 			{detail}
 		</p>
 	{/if}

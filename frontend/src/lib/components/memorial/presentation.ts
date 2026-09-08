@@ -88,22 +88,32 @@ export function policyToMemorialContent(
 		contents: [
 			{
 				title: translator('memorial.gap'),
-				body: formatPolicyEffect(policy.effects[0], translator, metricTranslator)
+				body: formatPolicyEffects(policy.effects.slice(0, 1), translator, metricTranslator)
 			},
 			{
 				title: translator('memorial.smoothing'),
-				body: formatPolicyEffect(policy.effects[1], translator, metricTranslator)
+				body: formatPolicyEffects(policy.effects.slice(1), translator, metricTranslator)
 			}
 		]
 	};
 }
 
-function formatPolicyEffect(
-	effect: PolicyEffect | undefined,
+function formatPolicyEffects(
+	effects: PolicyEffect[],
 	translator: Translate,
 	metricTranslator: Translate
 ): string {
-	if (!effect) return translator('memorial.noEffects');
+	return effects.length === 0
+		? translator('memorial.noEffects')
+		: effects
+				.map((effect) => formatPolicyEffect(effect, metricTranslator))
+				.join('\n');
+}
+
+function formatPolicyEffect(
+	effect: PolicyEffect,
+	metricTranslator: Translate
+): string {
 	const target = getMetricDisplayName(effect.target_metric, metricTranslator);
 	const sourceA = getMetricDisplayName(effect.source_a, metricTranslator);
 	const source =
