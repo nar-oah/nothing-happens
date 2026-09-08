@@ -23,7 +23,7 @@
 			>
 				{label}
 			</p>
-			{#each lines as line, index (`${line}-${index}`)}
+			{#each lines as line, index (`${line.headline}-${line.detail}-${index}`)}
 				<p
 					class="m-0 shrink-0 whitespace-nowrap font-policy text-9 font-medium leading-[9px] text-surface-indigo"
 				>
