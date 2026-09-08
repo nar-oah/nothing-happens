@@ -28,7 +28,7 @@ test('IPC rejects malformed command and state payloads', () => {
 			encodeOutboundMessage({
 				type: 'settings.language.set',
 				payload: { language: 'fr' }
-			} as OutboundMessage),
+			} as unknown as OutboundMessage),
 		TypeError
 	);
 	assert.deepEqual(
