@@ -6,6 +6,7 @@ func move_proposal_from_hand(state: RunState, hand_index: int) -> bool:
 	if hand_index < 0 or hand_index >= state.proposal_hand.size() or state.proposal_hand[hand_index].is_bonus_choice_pending():
 		return false
 	state.draft_bill.proposals.append(state.take_proposal_from_hand(hand_index))
+	state.draft_bill.clamp_policy_delays()
 	return true
 
 
@@ -14,6 +15,7 @@ func return_proposal_to_hand(state: RunState, draft_index: int) -> bool:
 		return false
 	var proposal: ProposalInstance = state.draft_bill.proposals.pop_at(draft_index)
 	state.restore_proposal_to_hand(proposal)
+	state.draft_bill.clamp_policy_delays()
 	return true
 
 
@@ -21,9 +23,11 @@ func _add_policy(state: RunState, policy: PolicyDefinition) -> bool:
 	if policy == null:
 		return false
 	for current in state.draft_bill.policies:
-		if current != null and current.display_name == policy.display_name:
+		if current != null and current.definition != null and current.definition.display_name == policy.display_name:
 			return false
-	state.draft_bill.policies.append(policy)
+	state.draft_bill.policies.append(
+		PolicyState.new(policy, state.draft_bill.get_policy_delay_min())
+	)
 	return true
 
 
@@ -31,6 +35,16 @@ func remove_policy(state: RunState, draft_index: int) -> bool:
 	if draft_index < 0 or draft_index >= state.draft_bill.policies.size():
 		return false
 	state.draft_bill.policies.remove_at(draft_index)
+	return true
+
+
+func set_policy_delay(state: RunState, draft_index: int, delay_months: int) -> bool:
+	if draft_index < 0 or draft_index >= state.draft_bill.policies.size():
+		return false
+	var policy := state.draft_bill.policies[draft_index]
+	if policy == null or not state.draft_bill.is_policy_delay_valid(delay_months):
+		return false
+	policy.delay_months = delay_months
 	return true
 
 
@@ -47,7 +61,14 @@ func is_ready_to_submit(context: RunContext, draft: DraftBillState) -> bool:
 	if context == null or draft == null or draft.is_empty():
 		return false
 	for policy in draft.policies:
-		if policy == null or context.constitution_system.get_available_policy(context, policy.display_name) == null:
+		if (
+			policy == null
+			or policy.definition == null
+			or context.constitution_system.get_available_policy(
+				context, policy.definition.display_name
+			) == null
+			or not draft.is_policy_delay_valid(policy.delay_months)
+		):
 			return false
 	for proposal in draft.proposals:
 		if proposal == null or proposal.is_bonus_choice_pending():
@@ -67,7 +88,7 @@ func reorder_proposal(state: RunState, from_index: int, to_index: int) -> bool:
 func reorder_policy(state: RunState, from_index: int, to_index: int) -> bool:
 	if from_index < 0 or from_index >= state.draft_bill.policies.size() or to_index < 0 or to_index >= state.draft_bill.policies.size():
 		return false
-	var policy: PolicyDefinition = state.draft_bill.policies.pop_at(from_index)
+	var policy: PolicyState = state.draft_bill.policies.pop_at(from_index)
 	state.draft_bill.policies.insert(to_index, policy)
 	return true
 
@@ -97,18 +118,29 @@ func load_saved_bill_for_editing(context: RunContext, saved_index: int) -> bool:
 		if proposal != null and state.reserve_proposal_from_hand(proposal):
 			state.draft_bill.proposals.append(proposal)
 	for saved_policy in saved.policies:
-		if saved_policy != null:
-			add_available_policy_by_name(context, saved_policy.display_name)
+		if saved_policy == null or saved_policy.definition == null:
+			continue
+		var available := context.constitution_system.get_available_policy(
+			context, saved_policy.definition.display_name
+		)
+		if available != null:
+			state.draft_bill.policies.append(
+				PolicyState.new(available, saved_policy.delay_months)
+			)
+	state.draft_bill.clamp_policy_delays()
 	return true
 
 
 func save_draft(state: RunState, draft: DraftBillState = null) -> int:
 	var source := state.draft_bill if draft == null else draft
+	source.clamp_policy_delays()
 	var saved := SavedBillState.new()
 	saved.title = source.title
 	for proposal in source.proposals:
 		saved.proposals.append(proposal.copy())
-	saved.policies.assign(source.policies)
+	for policy in source.policies:
+		if policy != null:
+			saved.policies.append(policy.copy())
 	var saved_index := state.editing_saved_bill_index
 	if saved_index < 0 or saved_index >= state.saved_bills.size():
 		state.saved_bills.append(saved)
