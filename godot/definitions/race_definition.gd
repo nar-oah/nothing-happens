@@ -11,7 +11,6 @@ const YinYangRuleDefinitionScript = preload("res://definitions/yin_yang_rule_def
 @export var hover_portrait: Texture2D
 
 @export_group("制度参数")
-@export_range(-1.0, 1.0, 0.01) var expectation_growth_rate: float = 0.10
 @export var yin_yang_enabled: bool = false
 
 @export_group("希望提高")
