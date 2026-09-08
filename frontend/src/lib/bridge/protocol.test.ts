@@ -252,6 +252,20 @@ test('IPC envelope encodes and decodes discriminated messages', () => {
 
 test('IPC keeps policy definitions shared and validates bill policy delay instances', () => {
 	const valid = makeLiveState(9);
+	valid.active_bill = {
+		title: '执行中法案',
+		start_values: { ...valid.metrics },
+		pure_target: { ...valid.metrics },
+		proposals: [],
+		policies: [
+			{
+				definition: valid.available_policies[0],
+				delay_months: 4,
+				elapsed_months: 2,
+				triggered: false
+			}
+		]
+	};
 	assert.equal(
 		decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: valid })).ok,
 		true
@@ -270,6 +284,15 @@ test('IPC keeps policy definitions shared and validates bill policy delay instan
 	fractionalDelay.saved_bills[0].policies[0].delay_months = 2.5;
 	assert.deepEqual(
 		decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: fractionalDelay })),
+		{ ok: false, error: 'Invalid payload for state.full' }
+	);
+
+	const missingElapsed = JSON.parse(JSON.stringify(valid)) as typeof valid;
+	delete (missingElapsed.active_bill?.policies[0] as Partial<
+		NonNullable<typeof valid.active_bill>['policies'][number]
+	>).elapsed_months;
+	assert.deepEqual(
+		decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: missingElapsed })),
 		{ ok: false, error: 'Invalid payload for state.full' }
 	);
 
