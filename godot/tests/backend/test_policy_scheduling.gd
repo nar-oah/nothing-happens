@@ -6,7 +6,7 @@ const BackendTestContext = preload("res://tests/backend/backend_test_context.gd"
 func run(t: BackendTestContext) -> void:
 	_test_delay_bounds_defaults_and_clamping(t)
 	_test_zero_delay_executes_on_enactment(t)
-	_test_new_bill_keeps_old_schedule_and_batches_same_month(t)
+	_test_new_bill_cancels_old_schedule(t)
 	_test_different_months_resolve_in_order(t)
 	_test_month_flow_orders_market_policy_and_event(t)
 	_test_negative_policy_effect_is_preserved(t)
@@ -77,7 +77,7 @@ func _test_zero_delay_executes_on_enactment(t: BackendTestContext) -> void:
 	session.free()
 
 
-func _test_new_bill_keeps_old_schedule_and_batches_same_month(t: BackendTestContext) -> void:
+func _test_new_bill_cancels_old_schedule(t: BackendTestContext) -> void:
 	var production_policy := _make_metric_policy(
 		"old scheduled", Metric.Id.PRODUCTION, PolicyEffect.Formula.METRIC_VALUE,
 		Metric.Id.TAX, Metric.Id.CONSUMPTION, 1.0
@@ -87,7 +87,7 @@ func _test_new_bill_keeps_old_schedule_and_batches_same_month(t: BackendTestCont
 		Metric.Id.PRODUCTION, Metric.Id.CONSUMPTION, 2.0
 	)
 	var session := _make_policy_session(
-		t, [production_policy, investment_policy], "overlapping bills"
+		t, [production_policy, investment_policy], "superseded bills"
 	)
 	session.state.metrics.tax = 10
 	session.state.metrics.production = 2
@@ -96,31 +96,33 @@ func _test_new_bill_keeps_old_schedule_and_batches_same_month(t: BackendTestCont
 		session.context.interest_groups[0], production_policy, 4, 4, "first bill"
 	)
 	session.enact_bill(first)
-	var enacted_policy := session.state.scheduled_policies[0]
+	var old_schedule := session.state.scheduled_policies[0]
 	first.policies[0].delay_months = 2
 	t.check_equal(
-		enacted_policy.delay_months,
+		old_schedule.delay_months,
 		4,
 		"changing the draft after enactment cannot alter the locked scheduled delay"
 	)
 	session.policy_system.advance_month_and_resolve(session.state)
 	session.policy_system.advance_month_and_resolve(session.state)
-	var old_schedule := session.state.scheduled_policies[0]
-	t.check_equal(old_schedule.elapsed_months, 2, "the first bill records its elapsed settlement months")
+	t.check_equal(old_schedule.elapsed_months, 2, "the first bill records elapsed settlement months before replacement")
 
 	var second := _draft_with_lag(
 		session.context.interest_groups[0], investment_policy, 2, 2, "second bill"
 	)
 	session.enact_bill(second)
 	t.check_equal(session.state.active_bill.title, "second bill", "the newer bill becomes active")
-	t.check_equal(session.state.scheduled_policies.size(), 2, "the newer bill does not replace an older pending policy")
-	t.check(session.state.scheduled_policies[0] == old_schedule, "the original scheduled instance remains in the queue")
+	t.check_equal(session.state.scheduled_policies.size(), 1, "the newer bill cancels every pending policy from the superseded bill")
+	t.check(session.state.scheduled_policies[0].definition == investment_policy, "only the newer bill policy remains scheduled")
+	t.check(old_schedule not in session.state.scheduled_policies, "the superseded policy is removed from the runtime schedule")
+	t.check(not old_schedule.triggered, "cancelling a superseded policy does not execute it")
+
 	session.policy_system.advance_month_and_resolve(session.state)
-	t.check_equal(session.state.scheduled_policies.size(), 2, "neither policy executes one month before their shared due month")
+	t.check_equal(session.state.scheduled_policies.size(), 1, "the newer policy remains pending before its own due month")
 	session.policy_system.advance_month_and_resolve(session.state)
-	t.check_equal(session.state.metrics.production, 12, "the older policy executes after its fourth settlement")
-	t.check_equal(session.state.metrics.investment, 4, "same-month policies calculate from one pre-execution snapshot")
-	t.check(session.state.scheduled_policies.is_empty(), "the complete due batch is removed from the pending queue")
+	t.check_equal(session.state.metrics.production, 2, "the superseded policy never changes metrics")
+	t.check_equal(session.state.metrics.investment, 4, "the newer bill policy executes from the current metric state")
+	t.check(session.state.scheduled_policies.is_empty(), "the newer policy leaves the queue after execution")
 	session.free()
 
 
