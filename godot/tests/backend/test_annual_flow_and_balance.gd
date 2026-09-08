@@ -4,18 +4,18 @@ const BackendTestContext = preload("res://tests/backend/backend_test_context.gd"
 
 
 func run(t: BackendTestContext) -> void:
-	_test_expectation_growth_effect_modifies_active_race_growth(t)
+	_test_expectation_growth_effect_modifies_constitution_growth(t)
 	_test_annual_settlement_reapplies_group_effects(t)
 	_test_annual_settlement_resets_yearly_runtime_state(t)
 
 
-func _test_expectation_growth_effect_modifies_active_race_growth(t: BackendTestContext) -> void:
+func _test_expectation_growth_effect_modifies_constitution_growth(t: BackendTestContext) -> void:
 	var race := t.make_race("growth")
 	race.increase_tax = true
 	var article := t.make_article(race, true, 0.2)
 	var growth := ExpectationGrowthEffect.new()
 	growth.races = [race]
-	growth.growth_modifier = -0.5
+	growth.growth_modifier = -0.1
 	article.effects.append(growth)
 	var balance := GameBalanceDefinition.new()
 	balance.automatic_draw_count = 0
@@ -25,10 +25,11 @@ func _test_expectation_growth_effect_modifies_active_race_growth(t: BackendTestC
 	var session := t.make_session([race], [t.make_group("group")], t.make_seats(2, "growth"), [article], balance)
 	session.state.year_start_metrics.tax = 100
 	session.race_system.rebuild_annual_expectations(session.context)
-	t.check_equal(session.state.get_race(race).get_expectation(Metric.Id.TAX, 0), 110, "-50% growth modifier scales 20% intrinsic growth to 10%")
+	t.check_equal(session.state.get_race(race).get_expectation(Metric.Id.TAX, 0), 110, "-10 percentage points modifies 20% constitution growth to 10%")
+	article.expectation_growth_rate = 0.0
 	growth.growth_modifier = -1.0
 	session.race_system.rebuild_annual_expectations(session.context)
-	t.check_equal(session.state.get_race(race).get_expectation(Metric.Id.TAX, 0), 100, "-100% growth modifier cleanly disables growth")
+	t.check_equal(session.state.get_race(race).get_expectation(Metric.Id.TAX, 0), 0, "-100 percentage points produces a zero expectation target")
 	session.free()
 
 
