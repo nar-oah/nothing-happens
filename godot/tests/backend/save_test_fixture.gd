@@ -65,11 +65,11 @@ static func populate(session: RunSession) -> void:
 	state.add_proposal_to_hand(draft)
 	session.draft_bill_system.move_proposal_from_hand(state, 1)
 	state.draft_bill.title = "待议《存档》"
-	state.draft_bill.policies = [Policy]
+	state.draft_bill.policies = [PolicyState.new(Policy, 7)]
 	var saved := SavedBillState.new()
 	saved.title = "已保存法案"
 	saved.proposals = [draft.copy()]
-	saved.policies = [Policy]
+	saved.policies = [PolicyState.new(Policy, 8)]
 	state.saved_bills = [saved]
 	state.editing_saved_bill_index = 0
 	var active := ActiveBillState.new()
@@ -79,9 +79,12 @@ static func populate(session: RunSession) -> void:
 	active.proposals[0].digested_months = 3
 	active.proposals[0].digestion_progress = 0.2738492327483928
 	active.pure_target = session.proposal_system.calculate_pure_target(active.start_values, [active.proposals[0].proposal])
-	active.policies = [PolicyState.new(Policy), PolicyState.new(OtherPolicy)]
+	active.policies = [PolicyState.new(Policy, 5), PolicyState.new(OtherPolicy, 7)]
+	active.policies[0].elapsed_months = 4
+	active.policies[1].elapsed_months = 7
 	active.policies[1].triggered = true
 	state.active_bill = active
+	state.scheduled_policies = [active.policies[0]]
 	state.newspaper_pending_bill = active
 	state.newspaper_triggered_policies = [OtherPolicy]
 	var event := EventState.new(state.seats[0].race, Metric.Id.PRODUCTION, 100, 180)
