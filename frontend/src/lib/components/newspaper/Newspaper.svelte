@@ -27,10 +27,12 @@
 		metrics: NewspaperMetricData[];
 		front?: NewspaperFrontData;
 		events: NewspaperEventData[];
+		suppressionRemaining?: number;
 		disabled?: boolean;
 		open?: boolean;
 		onAdvance?: () => void;
 		onFolded?: () => void;
+		onSuppress?: (eventIndex: number) => void;
 	};
 
 	let {
@@ -39,10 +41,12 @@
 		metrics,
 		front,
 		events,
+		suppressionRemaining = 0,
 		disabled = false,
 		open = true,
 		onAdvance,
-		onFolded
+		onFolded,
+		onSuppress
 	}: Props = $props();
 	let foldReported = false;
 	let foldTimer: ReturnType<typeof setTimeout> | undefined;
@@ -54,7 +58,7 @@
 			for (const event of sortedEvents) result.push({ kind: 'event', event });
 		} else if (sortedEvents.length > 0) {
 			result.push({ kind: 'front', event: sortedEvents[0] });
-			for (const event of sortedEvents.slice(1)) result.push({ kind: 'event', event });
+			for (const event of sortedEvents) result.push({ kind: 'event', event });
 		}
 		result.push({ kind: 'calendar' }, { kind: 'comment' });
 		return result;
@@ -136,7 +140,7 @@
 			{:else if page.kind === 'summary'}
 				<Front {...page.front} />
 			{:else if page.kind === 'event'}
-				<Event {...page.event} />
+				<Event {...page.event} {suppressionRemaining} {disabled} {onSuppress} />
 			{:else if page.kind === 'calendar'}
 				<Calendar {month} />
 			{:else}
