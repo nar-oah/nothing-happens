@@ -24,6 +24,23 @@
 		background: transparent;
 	}
 
+	:global(body),
+	:global(body *) {
+		-webkit-user-select: none;
+		user-select: none;
+	}
+
+	:global(input),
+	:global(textarea),
+	:global([contenteditable='true']) {
+		-webkit-user-select: text;
+		user-select: text;
+	}
+
+	:global(img) {
+		-webkit-user-drag: none;
+	}
+
 	:global(button),
 	:global(input) {
 		font: inherit;
