@@ -38,8 +38,8 @@ const baseline = {
 
 test('policy mark faces show gap and stabilization effects instead of condition state', () => {
 	assert.deepEqual(createPolicyMarkContent(policy, baseline, zh), {
-		gap: { label: '落差', headline: '生産－25', detail: '（生産－消費）×0.5' },
-		smoothing: { label: '平抑', headline: '税課＋50', detail: '生産－消費' }
+		gap: { label: '落差', headline: '生産＋25', detail: '（消費－生産）×0.5' },
+		smoothing: { label: '平抑', headline: '税課－50', detail: '消費－生産' }
 	});
 	assert.equal(createPolicyMarkContent(policy, baseline, en).smoothing.label, 'Damp');
 });
@@ -48,8 +48,8 @@ test('vertical memorial policy content has fixed gap and stabilization blocks', 
 	assert.deepEqual(policyToMemorialContent(policy, zh, zh), {
 		policyTitle: '测试政策',
 		contents: [
-			{ title: '落差', body: '生産－（生産－消費）×0.5' },
-			{ title: '平抑', body: '税課＋（生産－消費）' }
+			{ title: '落差', body: '生産－（消費－生産）×0.5' },
+			{ title: '平抑', body: '税課＋（消費－生産）' }
 		]
 	});
 	assert.deepEqual(
@@ -74,15 +74,15 @@ test('all effects after the first appear in the smoothing section in order', () 
 	};
 	assert.deepEqual(createPolicyMarkContent(withThirdEffect, baseline, zh).smoothing, {
 		label: '平抑',
-		headline: '税課＋50\n就業－25',
-		detail: '生産－消費\n税課×0.25',
+		headline: '税課－50\n就業－25',
+		detail: '消費－生産\n税課×0.25',
 		lines: [
-			{ headline: '税課＋50', detail: '生産－消費' },
+			{ headline: '税課－50', detail: '消費－生産' },
 			{ headline: '就業－25', detail: '税課×0.25' }
 		]
 	});
 	assert.equal(
 		policyToMemorialContent(withThirdEffect, zh, zh).contents[1].body,
-		'税課＋（生産－消費）\n就業－税課×0.25'
+		'税課＋（消費－生産）\n就業－税課×0.25'
 	);
 });
