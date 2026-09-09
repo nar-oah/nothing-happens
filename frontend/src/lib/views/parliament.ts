@@ -45,10 +45,7 @@ export function toggleBribedSeat(
 	return [...bribedSeats, vote.seat_index];
 }
 
-export function deriveLocalVote(
-	seatVotes: SeatVoteDto[],
-	bribedSeats: number[]
-): LocalVotePreview {
+export function deriveLocalVote(seatVotes: SeatVoteDto[], bribedSeats: number[]): LocalVotePreview {
 	const selected = new Set(bribedSeats);
 	const localVotes: SeatVoteDto[] = seatVotes.map((vote): SeatVoteDto =>
 		selected.has(vote.seat_index) && vote.bribe_allowed

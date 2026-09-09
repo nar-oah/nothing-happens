@@ -536,8 +536,7 @@ function isVoteResult(value: unknown): value is VoteResultDto {
 				vote.bribe_cost >= 0 &&
 				isNonnegativeInteger(vote.vote_weight) &&
 				vote.vote_weight >= 1 &&
-				((vote.race_support_weight === undefined &&
-					vote.race_present_weight === undefined) ||
+				((vote.race_support_weight === undefined && vote.race_present_weight === undefined) ||
 					(isNonnegativeInteger(vote.race_support_weight) &&
 						isNonnegativeInteger(vote.race_present_weight))) &&
 				isNumberRecord(vote.breakdown)

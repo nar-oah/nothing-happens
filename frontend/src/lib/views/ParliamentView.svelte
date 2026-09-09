@@ -230,9 +230,7 @@
 		return currentSeats.flatMap((seat): AnchoredSeat[] => {
 			const anchor = anchorsByIndex.get(seat.seat_index);
 			const vote = votesByIndex.get(seat.seat_index);
-			return anchor && vote
-				? [{ ...anchor, ...vote }]
-				: [];
+			return anchor && vote ? [{ ...anchor, ...vote }] : [];
 		});
 	}
 </script>
@@ -244,12 +242,7 @@
 			<div class="seat-anchor" style:left={`${seat.x * 100}%`} style:top={`${seat.y * 100}%`}>
 				<ChoreSwitch
 					left={seatScoreText(seat)}
-					right={seatActionText(
-						seat,
-						$t('view.support'),
-						$t('view.bribe'),
-						$t('view.absent')
-					)}
+					right={seatActionText(seat, $t('view.support'), $t('view.bribe'), $t('view.absent'))}
 					isSwitch={seat.position === SUPPORT_POSITION}
 					disabled={seat.position === ABSENT_POSITION ||
 						(!isBribed &&
