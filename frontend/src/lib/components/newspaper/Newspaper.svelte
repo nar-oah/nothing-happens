@@ -179,7 +179,7 @@
 				<Event
 					{...page.event}
 					suppressionRemaining={localSuppressionRemaining}
-					suppressed={isSuppressed(page.eventIndex)}
+					suppressed={isSuppressed(page.event.eventIndex)}
 					{disabled}
 					onSuppressionChange={onSuppress ? setSuppressionSelection : undefined}
 				/>
