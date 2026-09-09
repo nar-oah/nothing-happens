@@ -6,7 +6,29 @@
 
 	let { children } = $props();
 
-	onMount(installUiSfx);
+	onMount(() => {
+		const removeUiSfx = installUiSfx();
+		const handleWheel = (event: WheelEvent) => {
+			if (event.defaultPrevented || !event.deltaY || Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
+				return;
+			}
+			const target = event.target;
+			if (!(target instanceof Element)) return;
+			const scroller = target.closest<HTMLElement>('.editor-slot');
+			if (!scroller) return;
+			const maxScroll = scroller.scrollWidth - scroller.clientWidth;
+			if (maxScroll <= 0) return;
+			const next = Math.max(0, Math.min(maxScroll, scroller.scrollLeft + event.deltaY));
+			if (next === scroller.scrollLeft) return;
+			event.preventDefault();
+			scroller.scrollLeft = next;
+		};
+		document.addEventListener('wheel', handleWheel, { passive: false });
+		return () => {
+			removeUiSfx();
+			document.removeEventListener('wheel', handleWheel);
+		};
+	});
 </script>
 
 <svelte:head>
