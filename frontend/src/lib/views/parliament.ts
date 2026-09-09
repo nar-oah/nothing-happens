@@ -1,4 +1,4 @@
-import type { SeatVoteDto } from '$lib/game/state/types';
+import type { SeatVoteDto } from '../game/state/types.ts';
 
 export const ABSENT_POSITION = 0;
 export const OPPOSE_POSITION = 1;

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import type { SeatVoteDto } from '$lib/game/state/types';
+import type { SeatVoteDto } from '../game/state/types.ts';
 import {
 	ABSENT_POSITION,
 	deriveLocalVote,
