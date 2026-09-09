@@ -222,9 +222,9 @@ func _test_strike_effect_locks_absent(t: BackendTestContext) -> void:
 func _test_peach_weighted_race_vote(t: BackendTestContext) -> void:
 	for maximum in [2, 4, 8]:
 		var definition := PeachRaceDefinition.new()
-		definition.max_elder_weight = maximum
+		definition.max_elder_weight = int(maximum)
 		var expected: Array[int] = []
-		var current := maximum
+		var current: int = int(maximum)
 		for _index in range(5):
 			expected.append(current)
 			current = maxi(ceili(float(current) / 2.0), 1)
