@@ -36,9 +36,6 @@ const YinYangRuleDefinitionScript = preload("res://definitions/yin_yang_rule_def
 @export_range(0.0, 100.0, 0.5) var support_threshold: float = 1.0
 @export_range(0.0, 1.0, 0.01) var donation_detection_probability: float = 0.25
 
-@export_group("南柯")
-@export_range(0.0, 1.0, 0.01) var normal_absence_probability: float = 0.15
-
 @export_group("事件")
 @export_range(1, 999, 1) var initial_interest_group_proposal_requirement: int = 5
 @export_range(0, 999, 1) var event_spawn_count_min: int = 1

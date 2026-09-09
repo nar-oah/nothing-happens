@@ -42,7 +42,6 @@ var constitution: ConstitutionState
 var annual_proposal_slot_counts: Dictionary[InterestGroupDefinition, int] = {}
 var last_annual_proposal_slot_counts: Dictionary[InterestGroupDefinition, int] = {}
 var last_annual_source_shares: Dictionary[InterestGroupDefinition, float] = {}
-var vote_donations: Dictionary[SeatDefinition, float] = {}
 var political_donation_pool: float = 0.0
 # Petition capacity is derived from active effects; only actual usage is mutable state.
 var petition_used_this_year: int = 0
