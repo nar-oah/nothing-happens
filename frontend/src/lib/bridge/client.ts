@@ -54,6 +54,8 @@ export class CefIpcClient {
 	private readonly receiveListener: CefIpcListener;
 	private requestSequence = 0;
 	private connected = false;
+	private pendingParliamentLayout: InboundMessage<'parliament.layout'> | null = null;
+	private parliamentLayoutFrame: number | null = null;
 
 	constructor(target: CefBridgeWindow, options: CefIpcClientOptions) {
 		this.target = target;
@@ -86,6 +88,11 @@ export class CefIpcClient {
 	destroy(): void {
 		if (this.connected) this.target.ipcMessage.removeListener?.(this.receiveListener);
 		this.connected = false;
+		if (this.parliamentLayoutFrame !== null) {
+			this.target.cancelAnimationFrame(this.parliamentLayoutFrame);
+			this.parliamentLayoutFrame = null;
+		}
+		this.pendingParliamentLayout = null;
 		for (const pending of this.pending.values()) pending.reject(new Error('IPC client destroyed'));
 		this.pending.clear();
 	}
@@ -98,6 +105,27 @@ export class CefIpcClient {
 		}
 
 		const message = decoded.value;
+		if (message.type === 'parliament.layout' && !message.request_id) {
+			this.queueParliamentLayout(message);
+			return;
+		}
+
+		this.deliver(message);
+	}
+
+	private queueParliamentLayout(message: InboundMessage<'parliament.layout'>): void {
+		this.pendingParliamentLayout = message;
+		if (this.parliamentLayoutFrame !== null) return;
+
+		this.parliamentLayoutFrame = this.target.requestAnimationFrame(() => {
+			this.parliamentLayoutFrame = null;
+			const latest = this.pendingParliamentLayout;
+			this.pendingParliamentLayout = null;
+			if (latest) this.onMessage(latest);
+		});
+	}
+
+	private deliver(message: InboundMessage): void {
 		this.onMessage(message);
 		if (!message.request_id) return;
 		const pending = this.pending.get(message.request_id);
