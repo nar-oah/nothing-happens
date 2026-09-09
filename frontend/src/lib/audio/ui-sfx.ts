@@ -41,7 +41,9 @@ export function playUiSfx(name: UiSfx, suppressDefault = false): void {
 	const audio = pool.find((candidate) => candidate.paused || candidate.ended) ?? pool[0];
 	audio.currentTime = 0;
 	audio.volume = name === 'other' ? 0.72 : 0.86;
-	void audio.play().catch(() => {});
+	void audio.play().catch((error: unknown) => {
+		console.error(`[ui-sfx] Failed to play ${name}`, error);
+	});
 }
 
 function disabled(control: HTMLElement): boolean {
