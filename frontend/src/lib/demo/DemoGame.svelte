@@ -231,9 +231,8 @@
 			seats={[]}
 			seatAnchors={[]}
 			seatVotes={[]}
+			donationPool={20}
 			{preview}
-			voteCanPass
-			supportCount={0}
 			onAddProposal={addProposal}
 			onRemoveProposal={removeProposal}
 			onAddPolicy={addPolicy}

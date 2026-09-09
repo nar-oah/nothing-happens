@@ -50,9 +50,9 @@ export function deriveLocalVote(
 	bribedSeats: number[]
 ): LocalVotePreview {
 	const selected = new Set(bribedSeats);
-	const localVotes = seatVotes.map((vote) =>
+	const localVotes: SeatVoteDto[] = seatVotes.map((vote): SeatVoteDto =>
 		selected.has(vote.seat_index) && vote.bribe_allowed
-			? { ...vote, score: vote.score + vote.bribe_cost, position: SUPPORT_POSITION as const }
+			? { ...vote, score: vote.score + vote.bribe_cost, position: SUPPORT_POSITION }
 			: { ...vote }
 	);
 	let supportCount = 0;
