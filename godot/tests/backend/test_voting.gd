@@ -39,8 +39,8 @@ func _test_planned_policy_projection_drives_support(t: BackendTestContext) -> vo
 	var effect := PolicyEffect.new()
 	effect.target_metric = Metric.Id.PRODUCTION
 	effect.formula = PolicyEffect.Formula.METRIC_GAP
-	effect.source_a = Metric.Id.TAX
-	effect.source_b = Metric.Id.INVESTMENT
+	effect.source_a = Metric.Id.INVESTMENT
+	effect.source_b = Metric.Id.TAX
 	var policy := PolicyDefinition.new()
 	policy.display_name = "future policy"
 	policy.effects.append(effect)
