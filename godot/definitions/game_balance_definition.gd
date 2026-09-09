@@ -31,6 +31,7 @@ const YinYangRuleDefinitionScript = preload("res://definitions/yin_yang_rule_def
 @export_range(0.0, 100.0, 0.05) var donation_per_positive_point: float = 1.0
 
 @export_group("投票与政治献金")
+@export_range(0.0, 999999.0, 1.0) var initial_political_donation_pool: float = 10.0
 @export_range(0.0, 100.0, 0.5) var race_expectation_score: float = 6.0
 @export_range(0.0, 100.0, 0.5) var support_threshold: float = 1.0
 @export_range(0.0, 1.0, 0.01) var donation_detection_probability: float = 0.25
