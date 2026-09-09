@@ -48,13 +48,19 @@
 	function getCloseDuration(count: number): number {
 		const positionDuration = 520 + Math.max(0, count - 1) * 32;
 		const straightenDuration = 620 + 260;
-		return Math.max(positionDuration, straightenDuration) + 20;
+		return Math.max(positionDuration, straightenDuration) + 100;
 	}
 
 	function clearCloseTimer() {
 		if (closeTimer === undefined) return;
 		clearTimeout(closeTimer);
 		closeTimer = undefined;
+	}
+
+	function finishClose() {
+		if (open || showClosed) return;
+		clearCloseTimer();
+		showClosed = true;
 	}
 
 	function setOpen(next: boolean) {
@@ -73,10 +79,7 @@
 		}
 		if (showClosed) return;
 
-		closeTimer = setTimeout(() => {
-			showClosed = true;
-			closeTimer = undefined;
-		}, getCloseDuration(skews.length));
+		closeTimer = setTimeout(finishClose, getCloseDuration(skews.length));
 	});
 
 	onDestroy(clearCloseTimer);
@@ -98,6 +101,7 @@
 			{index}
 			count={skews.length}
 			skew={skews[index]}
+			onCloseSettled={finishClose}
 		>
 			<div
 				class="box-border h-full w-full overflow-hidden px-12 text-ink-primary"
