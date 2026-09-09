@@ -48,6 +48,7 @@ func is_bribe_allowed(context: RunContext, vote: SeatVoteState) -> bool:
 		and vote.position != SeatVoteState.Position.ABSENT
 		and _seat_allows_donation(context, vote.seat)
 		and get_bribe_cost(context, vote) > 0.0
+		and get_bribe_cost(context, vote) <= context.state.political_donation_pool
 	)
 
 
