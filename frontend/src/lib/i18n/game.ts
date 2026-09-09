@@ -25,7 +25,7 @@ export const gameZhCN = {
 	'view.constitutionAction': '约法',
 	'view.confirm': '确认',
 	'view.support': '支持',
-	'view.bribe': '政治献金',
+	'view.bribe': '贿赂',
 	'view.absent': '缺席',
 	'view.draft': '草案',
 	'view.votePass': '投票(可通过)',
