@@ -31,6 +31,16 @@
 		scrollContainer.scrollLeft = NEWSPAPER_SCROLL_RESERVE;
 	});
 
+	function scrollHorizontally(event: WheelEvent) {
+		if (!event.deltaY || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+		const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
+		if (maxScroll <= 0) return;
+		const next = Math.max(0, Math.min(maxScroll, scrollContainer.scrollLeft + event.deltaY));
+		if (next === scrollContainer.scrollLeft) return;
+		event.preventDefault();
+		scrollContainer.scrollLeft = next;
+	}
+
 	function open(item: TopItemData) {
 		expandedKey = item.key;
 		item.onSelect?.(item.payload);
@@ -45,7 +55,11 @@
 </script>
 
 <nav class="flex w-screen items-start justify-end gap-12 overflow-hidden" aria-label={$t('ui.top')}>
-	<div bind:this={scrollContainer} class="top-items min-w-0 flex-1 overflow-x-auto">
+	<div
+		bind:this={scrollContainer}
+		class="top-items min-w-0 flex-1 overflow-x-auto"
+		onwheel={scrollHorizontally}
+	>
 		<div class="ml-auto flex w-max items-start" data-block-world-input>
 			<div class="w-[282px] shrink-0" aria-hidden="true"></div>
 
