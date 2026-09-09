@@ -152,7 +152,14 @@ func _test_absent_and_non_bribable_seats_reject_donations(t: BackendTestContext)
 	).seat_votes[0]
 	t.check_equal(absent_vote.position, SeatVoteState.Position.ABSENT, "monthly Nanke absence serializes as ABSENT")
 	t.check(not absent_session.vote_system.is_bribe_allowed(absent_session.context, absent_vote), "ABSENT cannot receive a donation")
+	var absent_payload := UiSerializer.new().vote_result(
+		absent_session.vote_system.preview_vote(DraftBillState.new(), absent_session.context),
+		absent_session
+	)
+	t.check_equal(absent_payload["seat_votes"][0]["position"], int(SeatVoteState.Position.ABSENT), "Nanke serializes through the unified ABSENT position")
 	absent_session.free()
+	var configured_yanou: RaceDefinition = load("res://data/races/偃偶.tres")
+	t.check(not configured_yanou.political_donations_allowed, "configured Yanou race disables political donations")
 	var yanou := t.make_race("non-bribable")
 	yanou.political_donations_allowed = false
 	var yanou_session := t.make_session([yanou], [group], t.make_seats(1, "yanou"))
