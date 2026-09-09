@@ -108,16 +108,22 @@ func vote_result(result: VoteResultState, source: Variant) -> Dictionary:
 		var breakdown := {}
 		for reason in current.breakdown:
 			breakdown[str(reason)] = current.breakdown[reason]
-		seat_votes.append({
+		var serialized_vote := {
 			"seat_index": -1 if seat == null or state == null else state.seats.find(seat),
 			"seat_display_name": _seat_name(seat),
 			"race_display_name": _active_race_name_from_source(session, state, null if seat == null else seat.race),
 			"interest_group_display_name": _active_group_name_from_source(session, state, null if seat == null else seat.actual_group),
 			"position": int(current.position),
 			"score": current.score,
-			"can_bribe": session != null and session.vote_system.can_bribe(session.context, current),
+			"bribe_allowed": session != null and session.vote_system.is_bribe_allowed(session.context, current),
+			"bribe_cost": 0.0 if session == null else session.vote_system.get_bribe_cost(session.context, current),
+			"vote_weight": current.vote_weight,
 			"breakdown": breakdown,
-		})
+		}
+		if _is_peach_vote(state, seat):
+			serialized_vote["race_support_weight"] = current.race_support_weight
+			serialized_vote["race_present_weight"] = current.race_present_weight
+		seat_votes.append(serialized_vote)
 	return {"passed": result.passed, "submitted": result.submitted, "support_count": result.support_count, "oppose_count": result.oppose_count, "abstain_count": result.abstain_count, "absent_count": result.absent_count, "present_count": result.present_count(), "seat_votes": seat_votes}
 
 
@@ -446,6 +452,16 @@ func _active_group_name_from_source(session: RunSession, state: RunState, defini
 
 func _seat_name(state: SeatState) -> String:
 	return "" if state == null or state.definition == null else state.definition.display_name
+
+
+func _is_peach_vote(state: RunState, seat: SeatState) -> bool:
+	if state == null or seat == null:
+		return false
+	var race_state := state.get_race(seat.race)
+	if race_state == null:
+		return false
+	var active := race_state.definition if race_state.active_definition == null else race_state.active_definition
+	return active is PeachRaceDefinition
 
 
 func _t(text: String) -> String:

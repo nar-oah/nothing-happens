@@ -489,7 +489,7 @@ func _handle_bill_submit(message: Dictionary, messages: Array[Dictionary]) -> vo
 			message["request_id"]
 		)
 		return
-	var vote_payload := _serializer.vote_result(result, run_session.state)
+	var vote_payload := _serializer.vote_result(result, run_session)
 	_advance_month_and_set_mode()
 	state_version += 1
 	var payload := {
