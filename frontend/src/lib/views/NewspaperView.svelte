@@ -202,7 +202,6 @@
 					class:entering={motionPhase === 'entering'}
 					class:leaving={motionPhase === 'leaving'}
 					onanimationend={finishMotion}
-					onanimationcancel={finishMotion}
 				>
 					<div
 						class="newspaper-rotator"
