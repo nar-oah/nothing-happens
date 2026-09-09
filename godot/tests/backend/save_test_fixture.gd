@@ -45,11 +45,11 @@ static func populate(session: RunSession) -> void:
 	state.annual_proposal_slot_counts[group] = 7
 	state.last_annual_proposal_slot_counts[group] = 4
 	state.last_annual_source_shares[group] = 0.375
-	state.vote_donations[state.seats[0].definition] = 13.5
 	state.political_donation_pool = 42.75
 	state.petition_used_this_year = 2
 	state.seats[1].annual_group = session.interest_groups[2]
 	state.seats[1].fixed_race = state.seats[1].race
+	state.seats[1].absent_this_month = true
 	for race in state.races:
 		race.resolved_events_this_year = 2
 		race.last_year_resolved_events = 3
