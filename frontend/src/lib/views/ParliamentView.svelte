@@ -135,6 +135,7 @@
 	function selectLeft(item: LeftItem, mode: LeftMode) {
 		if (mode !== 'selection') return;
 		if (item.kind === 'proposal') {
+			bribedSeats = [];
 			const proposals = [...visibleDraft.proposals, item.proposal];
 			playUiSfx('memorial-insert', true);
 			optimisticDraft = {
@@ -145,6 +146,7 @@
 			return onAddProposal?.(item.ref.index);
 		}
 		if (item.kind === 'policy') {
+			bribedSeats = [];
 			const { min } = getPolicyDelayBounds(visibleDraft.proposals);
 			playUiSfx('memorial-insert', true);
 			optimisticDraft = {
@@ -157,6 +159,7 @@
 	}
 
 	function loadBill(savedItem: BillLeftItem) {
+		bribedSeats = [];
 		optimisticDraft = reconcileSavedBill(
 			savedItem.bill,
 			[...proposalHand, ...draft.proposals],
@@ -166,6 +169,7 @@
 	}
 
 	function removeProposal(_proposal: Proposal, index: number) {
+		bribedSeats = [];
 		const proposals = visibleDraft.proposals.filter((_, currentIndex) => currentIndex !== index);
 		optimisticDraft = {
 			...visibleDraft,
@@ -176,6 +180,7 @@
 	}
 
 	function removePolicy(_policy: PolicyInstance, index: number) {
+		bribedSeats = [];
 		optimisticDraft = {
 			...visibleDraft,
 			policies: visibleDraft.policies.filter((_, currentIndex) => currentIndex !== index)
@@ -185,6 +190,7 @@
 
 	function setPolicyDelay(index: number, delayMonths: number) {
 		if (!visibleDraft.policies[index]) return;
+		bribedSeats = [];
 		const delay = clampPolicyDelayMonths(delayMonths, visibleDraft.proposals);
 		optimisticDraft = {
 			...visibleDraft,
