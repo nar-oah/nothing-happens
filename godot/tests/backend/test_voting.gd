@@ -13,6 +13,7 @@ func run(t: BackendTestContext) -> void:
 	_test_nanke_monthly_absence_is_stable(t)
 	_test_strike_effect_locks_absent(t)
 	_test_peach_weighted_race_vote(t)
+	_test_parliament_visual_only_hides_absent(t)
 	_test_global_yin_yang_rule(t)
 	_test_biyi_portrait_switch(t)
 
@@ -279,6 +280,18 @@ func _test_peach_weighted_race_vote(t: BackendTestContext) -> void:
 	t.check_equal(serialized["seat_votes"][0]["race_support_weight"], 2, "serializer exposes Peach support weight")
 	t.check_equal(serialized["seat_votes"][0]["race_present_weight"], 3, "serializer exposes Peach present weight")
 	session.free()
+
+
+func _test_parliament_visual_only_hides_absent(t: BackendTestContext) -> void:
+	var scene: PackedScene = load("res://worlds/parliament_seat.tscn")
+	var seat: ParliamentSeat = scene.instantiate()
+	Engine.get_main_loop().root.add_child(seat)
+	seat.set_preview_position(SeatVoteState.Position.ABSENT)
+	t.check(not seat.visual.visible, "ABSENT preview hides the parliament portrait")
+	t.check(seat.visible and seat.ui_anchor.visible, "ABSENT preview keeps the seat and UI anchor visible")
+	seat.set_preview_position(SeatVoteState.Position.ABSTAIN)
+	t.check(seat.visual.visible, "a present preview restores the parliament portrait")
+	seat.free()
 
 
 func _test_global_yin_yang_rule(t: BackendTestContext) -> void:
