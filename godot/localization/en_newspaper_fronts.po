@@ -14,11 +14,11 @@ msgid "本月没有任何种族事件达到公开门槛。报馆未能找到足�
 msgstr "No event concerning any people reached the threshold for publication this month. Unable to find a crisis worthy of the front page, the press can only remind its readers: perhaps no news is the most alarming news of all."
 
 # New term
-msgid "第%d次入主会同"
-msgstr "Term %d Begins in Huitong"
+msgid "第%d次驻岁执政"
+msgstr "Zhushui Takes Office — Term %d"
 
-msgid "新一任联合政府开议。各族在彼此之间挑了一圈，最终还是把会同的印信交到驻岁案前；至少在谁也不肯让步的时候，长生者看起来还算能等。"
-msgstr "A new Joint Government has convened. After looking one another over, the peoples have once again placed Huitong's seal before the Zhushui desk; when no one else is willing to yield, the long-lived at least look capable of waiting."
+msgid "新一任联合政府开议。各族彼此看了一圈，最终还是把会同的印信交到驻岁案前；不是因为谁真正满意，只是眼下谁也拿不出更能让彼此放心的人选。长寿不能代替政绩，上届遗下的积弊正等着本届收拾，议会也会据此衡量本届执政的能力。若一时不知从何下手，本报评论或能给些启发。"
+msgstr "A new Joint Government convenes. After looking one another over, the peoples have once again placed Huitong's seal before the Zhushui desk—not because anyone is truly satisfied, but because no one can name a choice the others trust more. Longevity is no substitute for results: old troubles left by the last government now await this administration, and Parliament will judge its competence by how they are handled. If the way forward is unclear, this paper's Comment column may offer a useful hint."
 
 # Bill passed
 msgid "%s获议会通过"
