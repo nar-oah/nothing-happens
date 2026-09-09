@@ -110,7 +110,7 @@
 		primary: { ...gameState.primary, value: localDonationPool }
 	});
 	let votesNeeded = $derived(
-		Math.max(0, Math.floor(localVote.presentCount / 2) + 1 - localVote.supportCount)
+		Math.max(0, Math.floor(seats.length / 2) + 1 - localVote.supportCount)
 	);
 	let editorScroller: HTMLDivElement;
 
