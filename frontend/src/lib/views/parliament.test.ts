@@ -78,5 +78,39 @@ test('Peach seats show weights and local bribery updates the shared majority', (
 	const local = deriveLocalVote(votes, [1]);
 	assert.equal(local.seatVotes[0].race_support_weight, 6);
 	assert.equal(local.seatVotes[1].race_present_weight, 6);
-	assert.equal(local.supportCount, 1);
+	assert.equal(local.supportCount, 2);
+	assert.equal(local.absentCount, 1);
+	assert.equal(local.presentCount, 2);
+	assert.equal(local.passed, true);
+});
+
+test('Peach consensus applies to every present seat instead of one race vote', () => {
+	const votes = [
+		vote({
+			position: 2,
+			vote_weight: 2,
+			race_display_name: '桃花妖',
+			race_support_weight: 1,
+			race_present_weight: 3
+		}),
+		vote({
+			seat_index: 1,
+			position: 3,
+			bribe_allowed: false,
+			vote_weight: 1,
+			race_display_name: '桃花妖',
+			race_support_weight: 1,
+			race_present_weight: 3
+		})
+	];
+	const tied = deriveLocalVote(votes, []);
+	assert.equal(tied.supportCount, 0);
+	assert.equal(tied.abstainCount, 2);
+	assert.equal(tied.presentCount, 2);
+	assert.equal(tied.passed, false);
+	const secured = deriveLocalVote(votes, [0]);
+	assert.equal(secured.supportCount, 2);
+	assert.equal(secured.abstainCount, 0);
+	assert.equal(secured.presentCount, 2);
+	assert.equal(secured.passed, true);
 });
