@@ -396,8 +396,10 @@
 		pendingNewspaperAction = null;
 	}
 
-	function submitBill(): void {
-		transitionThroughNewspaper(() => requestMutation('bill.submit', {}));
+	function submitBill(bribedSeatIndices: number[]): void {
+		transitionThroughNewspaper(() =>
+			requestMutation('bill.submit', { bribed_seat_indices: bribedSeatIndices })
+		);
 	}
 
 	function submitConstitution(): void {
@@ -420,10 +422,6 @@
 			negative_base_index: confirmation.negativeBaseRef.index,
 			selected_positive_index: confirmation.reverseSource?.ref.index ?? null
 		});
-	}
-
-	function bribeSeat(seatIndex: number): void {
-		mutate('vote.donation.add', { seat_index: seatIndex });
 	}
 
 	function selectConstitutionArticle(articleRef: number, selected: boolean): void {
@@ -460,9 +458,8 @@
 				seats={snapshot.seats}
 				seatAnchors={snapshot.parliament_seat_anchors}
 				seatVotes={snapshot.draft_preview.vote.seat_votes}
+				donationPool={snapshot.political_donation_pool}
 				{preview}
-				voteCanPass={snapshot.draft_preview.vote.passed}
-				supportCount={snapshot.draft_preview.vote.support_count}
 				onAddProposal={(handIndex) => mutate('draft.proposal.add', { hand_index: handIndex })}
 				onRemoveProposal={(draftIndex) =>
 					mutate('draft.proposal.remove', { draft_index: draftIndex })}
@@ -476,7 +473,6 @@
 				onTitleChange={(title) => mutate('draft.title.set', { title })}
 				onEditSavedBill={(savedBillIndex) =>
 					mutate('bill.edit', { saved_bill_index: savedBillIndex })}
-				onBribeSeat={bribeSeat}
 				onSubmit={submitBill}
 			/>
 		{:else if snapshot.ui_mode === 'constitution'}
