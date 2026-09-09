@@ -80,9 +80,10 @@ export function deriveLocalVote(seatVotes: SeatVoteDto[], bribedSeats: number[])
 			vote.race_support_weight = supportWeight;
 			vote.race_present_weight = presentWeight;
 		}
-		if (presentWeight === 0) absentCount += 1;
-		else if (supportWeight * 2 > presentWeight) supportCount += 1;
-		else abstainCount += 1;
+		absentCount += votes.length - present.length;
+		if (presentWeight === 0) continue;
+		if (supportWeight * 2 > presentWeight) supportCount += present.length;
+		else abstainCount += present.length;
 	}
 	const presentCount = supportCount + opposeCount + abstainCount;
 	return {
