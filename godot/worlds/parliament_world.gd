@@ -8,6 +8,7 @@ signal layout_changed(parliament_seat_anchors: Array[Dictionary])
 @export var camera_move_speed: float = 1600.0
 @export var camera_left_boundary: float = -2800.0
 @export var camera_right_boundary: float = 7600.0
+@export_range(15.0, 60.0, 1.0) var layout_update_fps: float = 30.0
 @onready var camera: Camera2D = $Camera2D
 @onready var seats_root: Node2D = $Seats
 
@@ -15,6 +16,8 @@ var seat_races: Array[RaceDefinition] = []
 var seat_positions: Array[int] = []
 var seats: Array[ParliamentSeat] = []
 var current_month: int = 1
+var _layout_emit_accumulator: float = 0.0
+var _camera_was_moving: bool = false
 
 
 func _ready() -> void:
@@ -31,6 +34,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	var direction := Input.get_axis("parliament_left", "parliament_right")
 	if is_zero_approx(direction):
+		_flush_camera_layout()
 		return
 	var next_x := clampf(
 		camera.position.x + direction * camera_move_speed * delta,
@@ -38,8 +42,15 @@ func _process(delta: float) -> void:
 		camera_right_boundary
 	)
 	if is_equal_approx(next_x, camera.position.x):
+		_flush_camera_layout()
 		return
 	camera.position.x = next_x
+	_camera_was_moving = true
+	_layout_emit_accumulator += delta
+	var update_interval := 1.0 / maxf(layout_update_fps, 1.0)
+	if _layout_emit_accumulator < update_interval:
+		return
+	_layout_emit_accumulator = fmod(_layout_emit_accumulator, update_interval)
 	_emit_layout_changed()
 
 
@@ -110,6 +121,14 @@ func _collect_seats(parent: Node) -> void:
 
 
 func _on_viewport_size_changed() -> void:
+	_emit_layout_changed()
+
+
+func _flush_camera_layout() -> void:
+	if not _camera_was_moving:
+		return
+	_camera_was_moving = false
+	_layout_emit_accumulator = 0.0
 	_emit_layout_changed()
 
 

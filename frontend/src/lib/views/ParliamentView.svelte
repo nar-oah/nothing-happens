@@ -245,7 +245,10 @@
 	<div class="seat-layer">
 		{#each anchoredSeats as seat (seat.seat_index)}
 			{@const isBribed = bribedSeats.includes(seat.seat_index)}
-			<div class="seat-anchor" style:left={`${seat.x * 100}%`} style:top={`${seat.y * 100}%`}>
+			<div
+				class="seat-anchor"
+				style:transform={`translate3d(${seat.x * 100}vw, ${seat.y * 100}vh, 0) translate(-50%, -50%)`}
+			>
 				<ChoreSwitch
 					left={seatScoreText(seat)}
 					right={seatActionText(seat, $t('view.support'), $t('view.bribe'), $t('view.absent'))}
@@ -318,8 +321,11 @@
 
 	.seat-anchor {
 		position: absolute;
-		transform: translate(-50%, -50%);
+		top: 0;
+		left: 0;
 		pointer-events: auto;
+		will-change: transform;
+		transform-origin: top left;
 	}
 
 	.top-slot {

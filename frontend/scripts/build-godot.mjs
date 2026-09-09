@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { access, cp, mkdir, readdir, rm, writeFile } from 'node:fs/promises';
+import { access, cp, mkdir, readFile, readdir, rename, rm, writeFile } from 'node:fs/promises';
 import { dirname, extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -19,8 +19,34 @@ const keepExtensions = new Set([
 	'.webp',
 	'.svg',
 	'.gif',
-	'.ico'
+	'.ico',
+	'.oga'
 ]);
+const browserTextExtensions = new Set(['.html', '.js', '.mjs', '.css', '.json']);
+
+async function rewriteBrowserAudio(directory) {
+	const entries = await readdir(directory, { withFileTypes: true });
+
+	for (const entry of entries) {
+		const path = join(directory, entry.name);
+
+		if (entry.isDirectory()) {
+			await rewriteBrowserAudio(path);
+			continue;
+		}
+
+		const extension = extname(entry.name).toLowerCase();
+		if (extension === '.ogg') {
+			await rename(path, `${path.slice(0, -extension.length)}.oga`);
+			continue;
+		}
+		if (!browserTextExtensions.has(extension)) continue;
+
+		const source = await readFile(path, 'utf8');
+		const rewritten = source.replaceAll('.ogg', '.oga');
+		if (rewritten !== source) await writeFile(path, rewritten);
+	}
+}
 
 async function addGodotKeepImports(directory) {
 	const entries = await readdir(directory, { withFileTypes: true });
@@ -62,6 +88,7 @@ await cp(buildDir, godotWebDir, {
 	recursive: true
 });
 
+await rewriteBrowserAudio(godotWebDir);
 await addGodotKeepImports(godotWebDir);
 
 console.log(`Copied ${buildDir} to ${godotWebDir} with Godot keep imports`);
