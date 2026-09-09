@@ -20,7 +20,7 @@ func calculate_amount(snapshot: MetricValues) -> int:
 		Formula.METRIC_VALUE:
 			raw_value = float(snapshot.get_value(source_a))
 		Formula.METRIC_GAP:
-			raw_value = (float(snapshot.get_value(source_a)) - float(snapshot.get_value(source_b)))
+			raw_value = (float(snapshot.get_value(source_b)) - float(snapshot.get_value(source_a)))
 		_:
 			push_error("Unknown policy effect formula: %s" % formula)
 			return 0
