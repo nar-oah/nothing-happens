@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { t, type Language } from '$lib/i18n';
-	import { tick } from 'svelte';
+	import { onDestroy, tick } from 'svelte';
 	import ChoreItem from '$lib/components/chore/ChoreItem.svelte';
 	import ChoreSwitch from '$lib/components/chore/ChoreSwitch.svelte';
 	import { deriveSaveItems } from '$lib/game/state/saves';
@@ -47,6 +47,8 @@
 	const ROTATION_RADIANS = (Math.abs(ROTATION_DEGREES) * Math.PI) / 180;
 	const ROTATION_SIN = Math.sin(ROTATION_RADIANS);
 	const ROTATION_COS = Math.cos(ROTATION_RADIANS);
+	const MOTION_DURATION_MS = 420;
+	const MOTION_FALLBACK_MS = 120;
 
 	let {
 		term = 1,
@@ -84,6 +86,8 @@
 	let loadingSaves = $state(false);
 	let saveScrollElement = $state<HTMLDivElement>();
 	let scrollElement: HTMLDivElement;
+	let motionTimer: ReturnType<typeof setTimeout> | undefined;
+	let leavingReported = false;
 	const saveItems = $derived(deriveSaveItems(saves, { term, year, month }, loadingSaves, $t));
 	const pageCount = $derived(4 + events.length + (front || events.length > 0 ? 1 : 0));
 	const baseHeight = $derived(pageCount * VERTICAL_FOLD_WIDTH);
@@ -100,15 +104,30 @@
 		if (scrollElement) scrollPosition = scrollElement.scrollTop;
 	}
 
-	function finishMotion(event: AnimationEvent) {
-		if (event.target !== event.currentTarget) return;
-		if (motionPhase === 'entering') {
+	function clearMotionTimer() {
+		if (motionTimer === undefined) return;
+		clearTimeout(motionTimer);
+		motionTimer = undefined;
+	}
+
+	function completeMotion(phase: NewspaperMotionPhase) {
+		if (motionPhase !== phase) return;
+		clearMotionTimer();
+		if (phase === 'entering') {
 			motionPhase = 'active';
 			backgroundCovered = true;
 			onCovered?.();
 			return;
 		}
-		if (motionPhase === 'leaving') onClosed?.();
+		if (phase === 'leaving' && !leavingReported) {
+			leavingReported = true;
+			onClosed?.();
+		}
+	}
+
+	function finishMotion(event: AnimationEvent) {
+		if (event.target !== event.currentTarget) return;
+		completeMotion(motionPhase);
 	}
 
 	function requestClose() {
@@ -117,7 +136,18 @@
 	}
 
 	$effect(() => {
+		const phase = motionPhase;
+		clearMotionTimer();
+		if (phase === 'active') return;
+		motionTimer = setTimeout(
+			() => completeMotion(phase),
+			MOTION_DURATION_MS + MOTION_FALLBACK_MS
+		);
+	});
+
+	$effect(() => {
 		if (!leaving || motionPhase === 'leaving') return;
+		leavingReported = false;
 		backgroundCovered = false;
 		motionPhase = 'leaving';
 	});
@@ -140,6 +170,8 @@
 			scrollPosition = target;
 		});
 	});
+
+	onDestroy(clearMotionTimer);
 </script>
 
 <main
@@ -170,6 +202,7 @@
 					class:entering={motionPhase === 'entering'}
 					class:leaving={motionPhase === 'leaving'}
 					onanimationend={finishMotion}
+					onanimationcancel={finishMotion}
 				>
 					<div
 						class="newspaper-rotator"
