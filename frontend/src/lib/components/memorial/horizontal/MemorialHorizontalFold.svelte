@@ -10,6 +10,7 @@
 		skew: number;
 		width?: number;
 		height?: number;
+		onCloseSettled?: () => void;
 		children: Snippet;
 	};
 
@@ -21,8 +22,38 @@
 		skew,
 		width = HORIZONTAL_FOLD_WIDTH,
 		height = HORIZONTAL_FOLD_HEIGHT,
+		onCloseSettled,
 		children
 	}: Props = $props();
+
+	const SHAPE_CLOSE_END_MS = 620 + 260;
+	let positionCloseEndMs = $derived(520 + Math.max(0, count - 1) * 32);
+
+	function finishPositionTransition(event: TransitionEvent) {
+		if (
+			event.target !== event.currentTarget ||
+			event.propertyName !== 'transform' ||
+			open ||
+			index !== count - 1 ||
+			positionCloseEndMs <= SHAPE_CLOSE_END_MS
+		) {
+			return;
+		}
+		onCloseSettled?.();
+	}
+
+	function finishShapeTransition(event: TransitionEvent) {
+		if (
+			event.target !== event.currentTarget ||
+			event.propertyName !== 'transform' ||
+			open ||
+			index !== 0 ||
+			positionCloseEndMs > SHAPE_CLOSE_END_MS
+		) {
+			return;
+		}
+		onCloseSettled?.();
+	}
 </script>
 
 <div
@@ -33,6 +64,7 @@
 	style:transform={`translate3d(${open ? x : 0}px, ${open ? index * height : 0}px, 0)`}
 	style:z-index={count - index}
 	style:transition-delay={`${open ? (count - index - 1) * 24 : index * 32}ms`}
+	ontransitionend={finishPositionTransition}
 >
 	<div
 		class="memorial-fold-shape box-border h-full w-full origin-top-left overflow-hidden will-change-transform"
@@ -40,6 +72,7 @@
 		class:bg-accent-amber-deep={index % 2 === 1}
 		style:transform={`skewX(${open ? skew : 0}deg)`}
 		style:transition-delay={`${open ? 0 : 620}ms`}
+		ontransitionend={finishShapeTransition}
 	>
 		{@render children()}
 	</div>
