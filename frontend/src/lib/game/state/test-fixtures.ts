@@ -77,7 +77,9 @@ export function makeLiveState(stateVersion = 1): LiveGameState {
 				interest_group_display_name: testGroup.display_name,
 				position: 3 as const,
 				score: 2,
-				can_bribe: false,
+				bribe_allowed: false,
+				bribe_cost: 0,
+				vote_weight: 1,
 				breakdown: { proposal: 2 }
 			}
 		]

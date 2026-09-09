@@ -12,6 +12,7 @@ signal layout_changed(parliament_seat_anchors: Array[Dictionary])
 @onready var seats_root: Node2D = $Seats
 
 var seat_races: Array[RaceDefinition] = []
+var seat_positions: Array[int] = []
 var seats: Array[ParliamentSeat] = []
 var current_month: int = 1
 
@@ -59,6 +60,12 @@ func set_month(value: int) -> void:
 		_refresh_seats()
 
 
+func set_seat_positions(value: Array[int]) -> void:
+	seat_positions = value
+	if is_node_ready():
+		_refresh_seat_positions()
+
+
 func get_seat_anchors() -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	for seat in seats:
@@ -81,7 +88,18 @@ func _refresh_seats() -> void:
 	for index in range(seat_races.size()):
 		seats[index].seat_index = index
 		seats[index].set_race(seat_races[index], current_month)
+	_refresh_seat_positions()
 	_emit_layout_changed()
+
+
+func _refresh_seat_positions() -> void:
+	for index in range(seats.size()):
+		var position := (
+			seat_positions[index]
+			if index < seat_positions.size()
+			else int(SeatVoteState.Position.ABSTAIN)
+		)
+		seats[index].set_preview_position(position)
 
 
 func _collect_seats(parent: Node) -> void:

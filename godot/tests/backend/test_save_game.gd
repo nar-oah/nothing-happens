@@ -94,7 +94,7 @@ func _check_references(t: BackendTestContext, loaded: RunSession, control: RunSe
 	t.check_equal(state.active_bill.proposals[0].digestion_progress, 0.2738492327483928, "digestion progress retains full float precision")
 	t.check_equal(state.events[0].growth_progress, 0.471938291723891, "event growth retains full float precision")
 	t.check_equal(state.seats[1].fixed_race, control.state.seats[1].fixed_race, "runtime fixed-seat override survives")
-	t.check_equal(state.vote_donations[state.seats[0].definition], 13.5, "resource-keyed vote donations survive")
+	t.check(state.seats[1].absent_this_month, "fixed monthly absence survives without a reroll")
 	t.check_equal(state.petition_used_this_year, 2, "used petition allowance survives")
 	loaded.cancel_bill_editing()
 	t.check(state.proposal_hand[1] == state.proposal_acquisition_order[1], "loaded draft returns to its original hand position")

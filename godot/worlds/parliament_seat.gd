@@ -13,6 +13,10 @@ func set_race(value: RaceDefinition, month: int = 1) -> void:
 	visual.texture = null if value == null else value.get_portrait(month)
 
 
+func set_preview_position(position: int) -> void:
+	visual.visible = position != SeatVoteState.Position.ABSENT
+
+
 func get_normalized_ui_anchor() -> Vector2:
 	var viewport_size := get_viewport_rect().size
 	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:

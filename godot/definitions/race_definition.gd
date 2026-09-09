@@ -12,6 +12,7 @@ const YinYangRuleDefinitionScript = preload("res://definitions/yin_yang_rule_def
 
 @export_group("制度参数")
 @export var yin_yang_enabled: bool = false
+@export var political_donations_allowed: bool = true
 
 @export_group("希望提高")
 @export var increase_tax: bool = false

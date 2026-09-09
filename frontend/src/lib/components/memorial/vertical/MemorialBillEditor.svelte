@@ -114,7 +114,11 @@
 	});
 </script>
 
-<section class="flex items-start" aria-label={$t('memorial.editor')} data-block-world-input>
+<section
+	class="pointer-events-auto flex items-start"
+	aria-label={$t('memorial.editor')}
+	data-block-world-input
+>
 	<div class="flex items-start">
 		<MemorialVerticalCover>
 			<div class="relative h-full w-full">

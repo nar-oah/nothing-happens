@@ -251,8 +251,8 @@ func enact_bill(draft: DraftBillState) -> void:
 	flow_controller.enact_bill(draft)
 
 
-func submit_draft() -> VoteResultState:
-	return flow_controller.submit_draft(state.draft_bill)
+func submit_draft(bribed_seat_indices: Array[int] = []) -> VoteResultState:
+	return flow_controller.submit_draft(state.draft_bill, bribed_seat_indices)
 
 
 func start_new_bill(title: String = "") -> void:

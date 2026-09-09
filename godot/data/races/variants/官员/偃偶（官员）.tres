@@ -12,6 +12,7 @@ description = "偃偶既是有姓名、有责任、有选票的公民，又是�
 在行省制度下，该族议员以朝廷官员身份参与政务，并额外服从人类官署所关心的税课与生产要求。"
 event_description = "偃偶不再以公共指标形成独立的种族年度期望；其议席的普通政治压力来自造身公所。"
 fixed_interest_group = ExtResource("fixed_group")
+political_donations_allowed = false
 portrait = ExtResource("2_0bfut")
 hover_portrait = ExtResource("2_pei3m")
 increase_tax = true

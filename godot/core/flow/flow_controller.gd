@@ -14,6 +14,7 @@ func advance_month() -> bool:
 	if context.state.month == 0:
 		context.state.constitution.revision_available = false
 		context.time_system.advance_month(context.state)
+		context.vote_system.roll_monthly_absences(context)
 		if context.state.year == 1 and context.state.governing_months == 0:
 			context.proposal_system.draw_automatic_proposals(context)
 		return true
@@ -42,6 +43,8 @@ func advance_month() -> bool:
 	if context.state.month == 12:
 		context.annual_settlement_system.settle_year(context)
 	context.time_system.advance_month(context.state)
+	if context.state.month > 0:
+		context.vote_system.roll_monthly_absences(context)
 	return true
 
 
@@ -61,20 +64,23 @@ func enact_bill(draft: DraftBillState) -> void:
 	_record_triggered_policies(context.policy_system.last_triggered_definitions)
 
 
-func submit_draft(draft: DraftBillState) -> VoteResultState:
+func submit_draft(draft: DraftBillState, bribed_seat_indices: Array[int] = []) -> VoteResultState:
 	var result := VoteResultState.new()
 	if context.state.run_phase != RunState.RunPhase.RUNNING or not context.draft_bill_system.is_ready_to_submit(context, draft):
 		return result
+	var bribes := context.vote_system.validate_bribes(draft, context, bribed_seat_indices)
+	if not bribes["ok"]:
+		return result
 	context.draft_bill_system.save_draft(context.state, draft)
-	result = context.vote_system.calculate_vote(draft, context, true)
+	context.state.political_donation_pool -= bribes["total_cost"]
+	result = context.vote_system.calculate_vote(draft, context, bribes["donations"])
 	result.submitted = true
 	if result.passed:
 		enact_bill(draft)
 		context.draft_bill_system.consume_draft_proposals(context.state, draft)
 		context.state.draft_bill = DraftBillState.new()
 		context.state.editing_saved_bill_index = RunState.NEW_BILL_INDEX
-	context.vote_system.resolve_donation_detection(context)
-	context.vote_system.clear_donations(context.state)
+	context.vote_system.resolve_donation_detection(context, bribes["donations"])
 	return result
 
 

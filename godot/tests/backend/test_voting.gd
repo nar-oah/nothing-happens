@@ -8,9 +8,12 @@ func run(t: BackendTestContext) -> void:
 	_test_fixed_proposal_source_support(t)
 	_test_planned_policy_projection_drives_support(t)
 	_test_zhushui_support_is_always_99(t)
-	_test_donation_pool_spending_and_detection(t)
-	_test_nanke_variant_absence_is_submit_only(t)
+	_test_submit_donations_are_one_shot(t)
+	_test_absent_and_non_bribable_seats_reject_donations(t)
+	_test_nanke_monthly_absence_is_stable(t)
 	_test_strike_effect_locks_absent(t)
+	_test_peach_weighted_race_vote(t)
+	_test_parliament_visual_only_hides_absent(t)
 	_test_global_yin_yang_rule(t)
 	_test_biyi_portrait_switch(t)
 
@@ -106,7 +109,7 @@ func _test_zhushui_support_is_always_99(t: BackendTestContext) -> void:
 	session.free()
 
 
-func _test_donation_pool_spending_and_detection(t: BackendTestContext) -> void:
+func _test_submit_donations_are_one_shot(t: BackendTestContext) -> void:
 	var race := t.make_race("donation")
 	var group := t.make_group("group")
 	var balance := GameBalanceDefinition.new()
@@ -120,19 +123,59 @@ func _test_donation_pool_spending_and_detection(t: BackendTestContext) -> void:
 	detection.probability = 1.0
 	article.effects.append(detection)
 	var session := t.make_session([race], [group], t.make_seats(2, "donation"), [article], balance)
-	var first_seat := session.state.seats[0]
-	var second_seat := session.state.seats[1]
 	session.state.political_donation_pool = 10.0
-	t.check(session.vote_system.set_donation(session.context, first_seat, 4.0), "donation spends pool")
-	t.check(session.vote_system.set_donation(session.context, second_seat, 2.0), "second donation spends pool")
-	t.check_approx(session.state.political_donation_pool, 4.0, "only allocated donations are charged")
-	var detected := session.vote_system.resolve_donation_detection(session.context)
-	t.check_equal(detected, 2, "DonationDetectionEffect overrides detection probability")
+	session.balance.proposal_support = 0.0
+	session.state.draft_bill.proposals.append(t.make_proposal(group))
+	var preview := session.vote_system.preview_vote(session.state.draft_bill, session.context)
+	t.check_approx(preview.seat_votes[0].score, 0.0, "ordinary preview excludes unsent donations")
+	t.check(session.vote_system.is_bribe_allowed(session.context, preview.seat_votes[0]), "ordinary abstaining seat can receive a donation")
+	t.check_approx(session.vote_system.get_bribe_cost(session.context, preview.seat_votes[0]), 1.0, "bribe cost reaches the support threshold")
+	var plan := session.vote_system.validate_bribes(session.state.draft_bill, session.context, [0, 1])
+	t.check(plan["ok"], "valid one-shot donations pass submission validation")
+	t.check_approx(session.state.political_donation_pool, 10.0, "preview and validation never charge the pool")
+	var rejected := session.submit_draft([0, 0])
+	t.check(not rejected.submitted, "submit rejects duplicate bribed seat indices")
+	t.check_approx(session.state.political_donation_pool, 10.0, "rejected donation payload is atomic")
+	var result := session.submit_draft([0, 1])
+	t.check(result.submitted and result.passed, "submitted donations temporarily secure both votes")
+	t.check_approx(result.seat_votes[0].breakdown[&"political_donation"], 1.0, "submitted vote records its temporary donation reason")
+	t.check_approx(session.state.political_donation_pool, 8.0, "only bill submission charges donations")
 	t.check_equal(session.state.collapse_level, 6, "each detected donation adds collapse")
 	session.free()
 
 
-func _test_nanke_variant_absence_is_submit_only(t: BackendTestContext) -> void:
+func _test_absent_and_non_bribable_seats_reject_donations(t: BackendTestContext) -> void:
+	var nanke := NankeRaceDefinition.new()
+	nanke.display_name = "absent"
+	nanke.absence_probability = 1.0
+	var group := t.make_group("group")
+	var absent_session := t.make_session([nanke], [group], t.make_seats(1, "absent"))
+	t.check(absent_session.advance_month(), "first operable month initializes absence")
+	var absent_vote := absent_session.vote_system.preview_vote(
+		DraftBillState.new(), absent_session.context
+	).seat_votes[0]
+	t.check_equal(absent_vote.position, SeatVoteState.Position.ABSENT, "monthly Nanke absence serializes as ABSENT")
+	t.check(not absent_session.vote_system.is_bribe_allowed(absent_session.context, absent_vote), "ABSENT cannot receive a donation")
+	var absent_payload := UiSerializer.new().vote_result(
+		absent_session.vote_system.preview_vote(DraftBillState.new(), absent_session.context),
+		absent_session
+	)
+	t.check_equal(absent_payload["seat_votes"][0]["position"], int(SeatVoteState.Position.ABSENT), "Nanke serializes through the unified ABSENT position")
+	absent_session.free()
+	var configured_yanou: RaceDefinition = load("res://data/races/偃偶.tres")
+	t.check(not configured_yanou.political_donations_allowed, "configured Yanou race disables political donations")
+	var yanou := t.make_race("non-bribable")
+	yanou.political_donations_allowed = false
+	var yanou_session := t.make_session([yanou], [group], t.make_seats(1, "yanou"))
+	var yanou_vote := yanou_session.vote_system.preview_vote(
+		DraftBillState.new(), yanou_session.context
+	).seat_votes[0]
+	t.check(not yanou_session.vote_system.is_bribe_allowed(yanou_session.context, yanou_vote), "authoritative Yanou rule rejects donations")
+	t.check(not yanou_session.vote_system.validate_bribes(DraftBillState.new(), yanou_session.context, [0])["ok"], "illegal donation payload is rejected")
+	yanou_session.free()
+
+
+func _test_nanke_monthly_absence_is_stable(t: BackendTestContext) -> void:
 	var canonical := NankeRaceDefinition.new()
 	canonical.display_name = "nanke"
 	var sleeping := NankeRaceDefinition.new()
@@ -145,12 +188,19 @@ func _test_nanke_variant_absence_is_submit_only(t: BackendTestContext) -> void:
 	article.effects.append(modify)
 	var session := t.make_session([canonical], [t.make_group("group")], t.make_seats(1, "nanke"), [article])
 	t.check(session.state.get_race(canonical).active_definition == sleeping, "Nanke constitution selects active race variant")
+	t.check(session.advance_month(), "Nanke first operable month starts")
+	t.check(session.state.seats[0].absent_this_month, "active Nanke variant rolls absence once at month start")
 	var rng_before := session.random_system.rng.state
 	var preview := session.vote_system.preview_vote(DraftBillState.new(), session.context)
-	t.check_equal(t.vote_for_race(preview, canonical).position, SeatVoteState.Position.ABSTAIN, "preview does not resolve random absence")
+	t.check_equal(t.vote_for_race(preview, canonical).position, SeatVoteState.Position.ABSENT, "preview uses fixed monthly absence")
+	var second_preview := session.vote_system.preview_vote(DraftBillState.new(), session.context)
+	t.check_equal(t.vote_for_race(second_preview, canonical).position, SeatVoteState.Position.ABSENT, "repeated preview keeps the same absence")
 	t.check_equal(session.random_system.rng.state, rng_before, "preview consumes no RNG")
-	var actual := session.vote_system.calculate_vote(DraftBillState.new(), session.context, true)
-	t.check_equal(t.vote_for_race(actual, canonical).position, SeatVoteState.Position.ABSENT, "submit resolves variant absence")
+	session.state.draft_bill.proposals.append(t.make_proposal(session.interest_groups[0]))
+	var actual := session.submit_draft()
+	t.check(actual.submitted, "an absent Nanke vote can be formally submitted")
+	t.check_equal(t.vote_for_race(actual, canonical).position, SeatVoteState.Position.ABSENT, "submit reuses fixed monthly absence")
+	t.check_equal(session.random_system.rng.state, rng_before, "formal submit does not reroll Nanke absence")
 	session.free()
 
 
@@ -174,7 +224,77 @@ func _test_strike_effect_locks_absent(t: BackendTestContext) -> void:
 	var vote := t.vote_for_race(result, race)
 	t.check_equal(vote.position, SeatVoteState.Position.ABSENT, "strike locks affected seat to absent")
 	t.check(vote.breakdown.has(&"constitution_strike"), "strike effect records constitution reason")
+	var serialized := UiSerializer.new().vote_result(result, session)
+	t.check_equal(serialized["seat_votes"][0]["position"], int(SeatVoteState.Position.ABSENT), "strike serializes through the unified ABSENT position")
+	t.check(not serialized["seat_votes"][0]["bribe_allowed"], "strike absence is not bribable in the preview DTO")
 	session.free()
+
+
+func _test_peach_weighted_race_vote(t: BackendTestContext) -> void:
+	for maximum in [2, 4, 8]:
+		var definition := PeachRaceDefinition.new()
+		definition.max_elder_weight = int(maximum)
+		var expected: Array[int] = []
+		var current: int = int(maximum)
+		for _index in range(5):
+			expected.append(current)
+			current = maxi(ceili(float(current) / 2.0), 1)
+		var actual: Array[int] = []
+		for index in range(5):
+			actual.append(definition.get_vote_weight(index))
+		t.check_equal(actual, expected, "Peach max %s halves elder weights with a floor of one" % maximum)
+	var peach := PeachRaceDefinition.new()
+	peach.display_name = "peach"
+	peach.max_elder_weight = 2
+	var supporter := t.make_group("supporter")
+	var neutral := t.make_group("neutral")
+	var absent_group := t.make_group("striker")
+	absent_group.decrease_employment = true
+	var article := t.make_article(peach)
+	var strike := StrikeEffect.new()
+	strike.interest_group = absent_group
+	strike.races = [peach]
+	strike.metric = Metric.Id.EMPLOYMENT
+	article.effects.append(strike)
+	var session := t.make_session(
+		[peach], [supporter, neutral, absent_group], t.make_seats(3, "peach"), [article]
+	)
+	session.state.seats[0].actual_group = supporter
+	session.state.seats[1].actual_group = neutral
+	session.state.seats[2].actual_group = neutral
+	var proposal := t.make_proposal(supporter)
+	proposal.base_effect.employment = -1
+	var draft := DraftBillState.new()
+	draft.proposals.append(proposal)
+	var tied := session.vote_system.preview_vote(draft, session.context)
+	t.check_equal(tied.seat_votes[0].vote_weight, 2, "first Peach seat receives maximum elder weight")
+	t.check_equal(tied.seat_votes[1].vote_weight, 1, "second Peach seat receives halved weight")
+	t.check_equal(tied.seat_votes[0].race_support_weight, 2, "Peach support numerator sums supporting weights")
+	t.check_equal(tied.seat_votes[0].race_present_weight, 4, "all present Peach weights form the denominator")
+	t.check(not tied.passed, "exactly half of Peach weight does not pass the race vote")
+	session.state.seats[2].actual_group = absent_group
+	var reduced := session.vote_system.preview_vote(draft, session.context)
+	t.check_equal(reduced.seat_votes[2].position, SeatVoteState.Position.ABSENT, "striking Peach seat uses ABSENT")
+	t.check_equal(reduced.seat_votes[0].race_present_weight, 3, "absent Peach weight leaves the denominator")
+	t.check(reduced.passed, "support strictly over half of present Peach weight passes the race vote")
+	t.check_equal(reduced.support_count, 1, "Peach consensus contributes one final race vote")
+	var serialized := UiSerializer.new().vote_result(reduced, session)
+	t.check_equal(serialized["seat_votes"][0]["vote_weight"], 2, "serializer exposes Peach seat weight")
+	t.check_equal(serialized["seat_votes"][0]["race_support_weight"], 2, "serializer exposes Peach support weight")
+	t.check_equal(serialized["seat_votes"][0]["race_present_weight"], 3, "serializer exposes Peach present weight")
+	session.free()
+
+
+func _test_parliament_visual_only_hides_absent(t: BackendTestContext) -> void:
+	var scene: PackedScene = load("res://worlds/parliament_seat.tscn")
+	var seat: ParliamentSeat = scene.instantiate()
+	Engine.get_main_loop().root.add_child(seat)
+	seat.set_preview_position(SeatVoteState.Position.ABSENT)
+	t.check(not seat.visual.visible, "ABSENT preview hides the parliament portrait")
+	t.check(seat.visible and seat.ui_anchor.visible, "ABSENT preview keeps the seat and UI anchor visible")
+	seat.set_preview_position(SeatVoteState.Position.ABSTAIN)
+	t.check(seat.visual.visible, "a present preview restores the parliament portrait")
+	seat.free()
 
 
 func _test_global_yin_yang_rule(t: BackendTestContext) -> void:

@@ -22,12 +22,18 @@
 		type Proposal
 	} from '$lib/game';
 	import type { ParliamentSeatAnchorDto, SeatSummaryDto, SeatVoteDto } from '$lib/game/state/types';
+	import {
+		ABSENT_POSITION,
+		SUPPORT_POSITION,
+		deriveLocalVote,
+		donationTotal,
+		seatActionText,
+		seatScoreText,
+		toggleBribedSeat
+	} from './parliament';
 	import type { ViewFrameProps } from './types';
 
-	type AnchoredSeat = ParliamentSeatAnchorDto & {
-		score: number;
-		canBribe: boolean;
-	};
+	type AnchoredSeat = ParliamentSeatAnchorDto & SeatVoteDto;
 
 	type Props = ViewFrameProps & {
 		stateVersion: number;
@@ -38,9 +44,8 @@
 		seats: SeatSummaryDto[];
 		seatAnchors: ParliamentSeatAnchorDto[];
 		seatVotes: SeatVoteDto[];
+		donationPool: number;
 		preview: MemorialMetricData[];
-		voteCanPass: boolean;
-		supportCount: number;
 		onAddProposal?: (handIndex: number) => void;
 		onRemoveProposal?: (draftIndex: number) => void;
 		onAddPolicy?: (displayName: string) => void;
@@ -48,8 +53,7 @@
 		onSetPolicyDelay?: (draftIndex: number, delayMonths: number) => void;
 		onTitleChange?: (title: string) => void;
 		onEditSavedBill?: (savedBillIndex: number) => void;
-		onBribeSeat?: (seatIndex: number) => void;
-		onSubmit?: () => void;
+		onSubmit?: (bribedSeatIndices: number[]) => void;
 	};
 
 	const LEFT_SCROLL_RESERVE = 390;
@@ -71,9 +75,8 @@
 		seats,
 		seatAnchors,
 		seatVotes,
+		donationPool,
 		preview,
-		voteCanPass,
-		supportCount,
 		onAddProposal,
 		onRemoveProposal,
 		onAddPolicy,
@@ -81,14 +84,15 @@
 		onSetPolicyDelay,
 		onTitleChange,
 		onEditSavedBill,
-		onBribeSeat,
 		onSubmit
 	}: Props = $props();
 	let activeLeftMode = $state<LeftMode>('archive');
 	let voteMode = $state(false);
 	let optimisticDraft = $state<Bill>();
+	let bribedSeats = $state<number[]>([]);
 	let appliedVersion = untrack(() => stateVersion);
 	let appliedDraft = untrack(() => draft);
+	let appliedVoteDraft = untrack(() => voteDraftKey(draft));
 	let visibleDraft = $derived(optimisticDraft ?? draft);
 	let policyBaseline = $derived(
 		calculateDraftProjectedMetrics(baseline, visibleDraft.proposals, visibleDraft.policies)
@@ -98,8 +102,16 @@
 		policyDisplayNames: visibleDraft.policies.map((policy) => policy.definition.display_name),
 		editingSavedBillIndex
 	});
-	let anchoredSeats = $derived(mergeSeats(seats, seatAnchors, seatVotes));
-	let votesNeeded = $derived(Math.max(0, Math.floor(seats.length / 2) + 1 - supportCount));
+	let localVote = $derived(deriveLocalVote(seatVotes, bribedSeats));
+	let anchoredSeats = $derived(mergeSeats(seats, seatAnchors, localVote.seatVotes));
+	let localDonationPool = $derived(donationPool - donationTotal(seatVotes, bribedSeats));
+	let localGameState = $derived({
+		...gameState,
+		primary: { ...gameState.primary, value: localDonationPool }
+	});
+	let votesNeeded = $derived(
+		Math.max(0, Math.floor(seats.length / 2) + 1 - localVote.supportCount)
+	);
 	let editorScroller: HTMLDivElement;
 
 	onMount(() => {
@@ -113,9 +125,17 @@
 		optimisticDraft = undefined;
 	});
 
+	$effect(() => {
+		const currentVoteDraft = voteDraftKey(draft);
+		if (currentVoteDraft === appliedVoteDraft) return;
+		appliedVoteDraft = currentVoteDraft;
+		bribedSeats = [];
+	});
+
 	function selectLeft(item: LeftItem, mode: LeftMode) {
 		if (mode !== 'selection') return;
 		if (item.kind === 'proposal') {
+			bribedSeats = [];
 			const proposals = [...visibleDraft.proposals, item.proposal];
 			playUiSfx('memorial-insert', true);
 			optimisticDraft = {
@@ -126,6 +146,7 @@
 			return onAddProposal?.(item.ref.index);
 		}
 		if (item.kind === 'policy') {
+			bribedSeats = [];
 			const { min } = getPolicyDelayBounds(visibleDraft.proposals);
 			playUiSfx('memorial-insert', true);
 			optimisticDraft = {
@@ -138,6 +159,7 @@
 	}
 
 	function loadBill(savedItem: BillLeftItem) {
+		bribedSeats = [];
 		optimisticDraft = reconcileSavedBill(
 			savedItem.bill,
 			[...proposalHand, ...draft.proposals],
@@ -147,6 +169,7 @@
 	}
 
 	function removeProposal(_proposal: Proposal, index: number) {
+		bribedSeats = [];
 		const proposals = visibleDraft.proposals.filter((_, currentIndex) => currentIndex !== index);
 		optimisticDraft = {
 			...visibleDraft,
@@ -157,6 +180,7 @@
 	}
 
 	function removePolicy(_policy: PolicyInstance, index: number) {
+		bribedSeats = [];
 		optimisticDraft = {
 			...visibleDraft,
 			policies: visibleDraft.policies.filter((_, currentIndex) => currentIndex !== index)
@@ -166,6 +190,7 @@
 
 	function setPolicyDelay(index: number, delayMonths: number) {
 		if (!visibleDraft.policies[index]) return;
+		bribedSeats = [];
 		const delay = clampPolicyDelayMonths(delayMonths, visibleDraft.proposals);
 		optimisticDraft = {
 			...visibleDraft,
@@ -184,14 +209,21 @@
 	function submitDraft(isVote: boolean) {
 		if (!isVote) return;
 		playUiSfx('passed', true);
-		onSubmit?.();
+		onSubmit?.([...bribedSeats].sort((left, right) => left - right));
 		queueMicrotask(() => (voteMode = false));
 	}
 
-	function bribeSeat(seatIndex: number, isSwitch: boolean) {
-		if (!isSwitch) return;
-		playUiSfx('bribe', true);
-		onBribeSeat?.(seatIndex);
+	function bribeSeat(seatIndex: number) {
+		const vote = seatVotes.find((candidate) => candidate.seat_index === seatIndex);
+		if (!vote) return;
+		const next = toggleBribedSeat(bribedSeats, vote, seatVotes, donationPool);
+		if (next === bribedSeats) return;
+		if (next.length > bribedSeats.length) playUiSfx('bribe', true);
+		bribedSeats = next;
+	}
+
+	function voteDraftKey(value: Bill): string {
+		return JSON.stringify({ proposals: value.proposals, policies: value.policies });
 	}
 
 	function mergeSeats(
@@ -204,15 +236,7 @@
 		return currentSeats.flatMap((seat): AnchoredSeat[] => {
 			const anchor = anchorsByIndex.get(seat.seat_index);
 			const vote = votesByIndex.get(seat.seat_index);
-			return anchor && vote
-				? [
-						{
-							...anchor,
-							score: vote.score,
-							canBribe: vote.can_bribe
-						}
-					]
-				: [];
+			return anchor && vote ? [{ ...anchor, ...vote }] : [];
 		});
 	}
 </script>
@@ -220,13 +244,18 @@
 <main class="game-view" aria-label={$t('view.parliament')}>
 	<div class="seat-layer">
 		{#each anchoredSeats as seat (seat.seat_index)}
+			{@const isBribed = bribedSeats.includes(seat.seat_index)}
 			<div class="seat-anchor" style:left={`${seat.x * 100}%`} style:top={`${seat.y * 100}%`}>
 				<ChoreSwitch
-					left={String(seat.score)}
-					right={seat.score > 0 ? $t('view.support') : $t('view.bribe')}
-					isSwitch={seat.score > 0}
-					disabled={seat.score > 0 || !seat.canBribe}
-					onSwitchChange={(isSwitch) => bribeSeat(seat.seat_index, isSwitch)}
+					left={seatScoreText(seat)}
+					right={seatActionText(seat, $t('view.support'), $t('view.bribe'), $t('view.absent'))}
+					isSwitch={seat.position === SUPPORT_POSITION}
+					disabled={seat.position === ABSENT_POSITION ||
+						(!isBribed &&
+							(seat.position === SUPPORT_POSITION ||
+								!seat.bribe_allowed ||
+								seat.bribe_cost > localDonationPool))}
+					onSwitchChange={() => bribeSeat(seat.seat_index)}
 				/>
 			</div>
 		{/each}
@@ -243,7 +272,7 @@
 	<div class="top-slot">
 		<Top {raceItems} {interestGroupItems} />
 	</div>
-	<div class="state-slot"><GameStateDisplay {...gameState} /></div>
+	<div class="state-slot"><GameStateDisplay {...localGameState} /></div>
 	<div bind:this={editorScroller} class="editor-slot">
 		<div class="editor-scroll-range">
 			<div class="editor-track">
@@ -251,11 +280,11 @@
 					<div class="vote-switch">
 						<ChoreSwitch
 							left={$t('view.draft')}
-							right={voteCanPass
+							right={localVote.passed
 								? $t('view.votePass')
 								: $t('view.voteShort', { count: votesNeeded })}
 							bind:isSwitch={voteMode}
-							disabled={!voteCanPass}
+							disabled={!localVote.passed}
 							onSwitchChange={submitDraft}
 						/>
 					</div>
@@ -312,6 +341,7 @@
 		z-index: 20;
 		width: 100%;
 		overflow-x: auto;
+		pointer-events: none;
 		scrollbar-width: none;
 		overscroll-behavior-x: contain;
 	}
@@ -342,5 +372,6 @@
 
 	.vote-switch {
 		margin-bottom: 8px;
+		pointer-events: auto;
 	}
 </style>

@@ -89,13 +89,19 @@ func _on_simple_dialogue_requested(
 
 
 func _on_ui_message(message: Dictionary) -> void:
-	if message.get("type") != "state.full":
+	var message_type: Variant = message.get("type")
+	if message_type not in ["state.full", "draft.sync"]:
 		return
-	_sync_audio_collapse()
+	if message_type == "state.full":
+		_sync_audio_collapse()
 	if scene_manager.current_scene_name == "office":
-		_sync_office_visitors(scene_manager.current_world)
+		if message_type == "state.full":
+			_sync_office_visitors(scene_manager.current_world)
 	elif scene_manager.current_scene_name == "parliament":
-		_sync_parliament_seats(scene_manager.current_world)
+		if message_type == "state.full":
+			_sync_parliament_seats(scene_manager.current_world)
+		else:
+			_sync_parliament_preview(scene_manager.current_world)
 
 
 func _sync_office_visitors(world: Node) -> void:
@@ -129,6 +135,19 @@ func _sync_parliament_seats(world: Node) -> void:
 			)
 		seat_races.append(active)
 	world.call("set_seat_races", seat_races)
+	_sync_parliament_preview(world)
+
+
+func _sync_parliament_preview(world: Node) -> void:
+	if world == null or not world.has_method("set_seat_positions"):
+		return
+	var result := run_session.vote_system.preview_vote(
+		run_session.state.draft_bill, run_session.context
+	)
+	var positions: Array[int] = []
+	for vote in result.seat_votes:
+		positions.append(int(vote.position))
+	world.call("set_seat_positions", positions)
 
 
 func _audio_director() -> Node:

@@ -8,11 +8,9 @@ func modify_vote(vote_context) -> void:
 	if (
 		vote_context == null
 		or vote_context.vote == null
-		or not vote_context.resolve_randomness
-		or vote_context.run_context == null
+		or vote_context.seat == null
+		or not vote_context.seat.absent_this_month
 	):
-		return
-	if not vote_context.run_context.random_system.chance(absence_probability):
 		return
 	vote_context.vote.breakdown[&"nanke_asleep"] = 1.0
 	vote_context.locked_position = SeatVoteState.Position.ABSENT

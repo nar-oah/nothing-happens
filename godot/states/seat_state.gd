@@ -9,6 +9,7 @@ var race: RaceDefinition
 var base_group: InterestGroupDefinition
 var annual_group: InterestGroupDefinition
 var actual_group: InterestGroupDefinition
+var absent_this_month: bool = false
 
 
 func _init(

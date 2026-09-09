@@ -50,8 +50,7 @@ export type OutboundPayloads = {
 	'draft.title.set': { state_version: number; title: string };
 	'bill.new': { state_version: number };
 	'bill.edit': { state_version: number; saved_bill_index: number };
-	'bill.submit': { state_version: number };
-	'vote.donation.add': { state_version: number; seat_index: number };
+	'bill.submit': { state_version: number; bribed_seat_indices: number[] };
 	'proposal.merge': {
 		state_version: number;
 		hand_indices: number[];
