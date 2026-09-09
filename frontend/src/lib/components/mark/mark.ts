@@ -70,7 +70,7 @@ function formatEffectSource(effect: PolicyEffect, translator: Translate): string
 	const source =
 		effect.formula === PolicyEffectFormula.METRIC_VALUE
 			? sourceA
-			: `${sourceA}－${getMetricDisplayName(effect.source_b, translator)}`;
+			: `${getMetricDisplayName(effect.source_b, translator)}－${sourceA}`;
 	const multiplier = Math.abs(effect.multiplier);
 	if (multiplier === 1) return source;
 	const wrapped = effect.formula === PolicyEffectFormula.METRIC_GAP ? `（${source}）` : source;
