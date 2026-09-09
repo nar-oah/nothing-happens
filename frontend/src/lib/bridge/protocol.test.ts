@@ -37,4 +37,12 @@ test('IPC rejects malformed command and state payloads', () => {
 		),
 		{ ok: false, error: 'Invalid payload for state.full' }
 	);
+	assert.throws(
+		() =>
+			encodeOutboundMessage({
+				type: 'bill.submit',
+				payload: { state_version: 5, bribed_seat_indices: [1, 1] }
+			}),
+		TypeError
+	);
 });

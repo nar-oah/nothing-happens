@@ -70,7 +70,6 @@ const outboundTypes = new Set<OutboundType>([
 	'bill.new',
 	'bill.edit',
 	'bill.submit',
-	'vote.donation.add',
 	'proposal.merge',
 	'office.visit.resolve',
 	'event.suppress',
@@ -81,18 +80,25 @@ const outboundTypes = new Set<OutboundType>([
 ]);
 
 export function encodeOutboundMessage(message: OutboundMessage): string {
-	if (!isSettingsPayload(message.type, message.payload)) {
+	if (!isOutboundPayload(message.type, message.payload)) {
 		throw new TypeError(`Invalid payload for ${message.type}`);
 	}
 	return JSON.stringify(message);
 }
 
-function isSettingsPayload(type: OutboundType, payload: unknown): boolean {
+function isOutboundPayload(type: OutboundType, payload: unknown): boolean {
 	if (type === 'settings.language.set')
 		return isRecord(payload) && isLanguage(payload.language) && Object.keys(payload).length === 1;
 	if (type === 'settings.display.set')
 		return isRecord(payload) && isDisplayMode(payload.mode) && Object.keys(payload).length === 1;
 	if (type === 'app.quit') return isRecord(payload) && Object.keys(payload).length === 0;
+	if (type === 'bill.submit')
+		return (
+			isRecord(payload) &&
+			isVersion(payload.state_version) &&
+			isUniqueIndexArray(payload.bribed_seat_indices) &&
+			Object.keys(payload).length === 2
+		);
 	return true;
 }
 
@@ -525,7 +531,15 @@ function isVoteResult(value: unknown): value is VoteResultDto {
 					vote.position === 2 ||
 					vote.position === 3) &&
 				isNumber(vote.score) &&
-				typeof vote.can_bribe === 'boolean' &&
+				typeof vote.bribe_allowed === 'boolean' &&
+				isNumber(vote.bribe_cost) &&
+				vote.bribe_cost >= 0 &&
+				isNonnegativeInteger(vote.vote_weight) &&
+				vote.vote_weight >= 1 &&
+				((vote.race_support_weight === undefined &&
+					vote.race_present_weight === undefined) ||
+					(isNonnegativeInteger(vote.race_support_weight) &&
+						isNonnegativeInteger(vote.race_present_weight))) &&
 				isNumberRecord(vote.breakdown)
 		)
 	);
@@ -633,6 +647,14 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function isArrayOf<T>(value: unknown, predicate: (item: unknown) => boolean): value is T[] {
 	return Array.isArray(value) && value.every(predicate);
+}
+
+function isUniqueIndexArray(value: unknown): value is number[] {
+	return (
+		Array.isArray(value) &&
+		value.every(isNonnegativeInteger) &&
+		new Set(value).size === value.length
+	);
 }
 
 function isNumberRecord(value: unknown): value is Record<string, number> {

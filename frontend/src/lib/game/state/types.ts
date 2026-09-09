@@ -100,7 +100,11 @@ export type SeatVoteDto = {
 	interest_group_display_name: string;
 	position: 0 | 1 | 2 | 3;
 	score: number;
-	can_bribe: boolean;
+	bribe_allowed: boolean;
+	bribe_cost: number;
+	vote_weight: number;
+	race_support_weight?: number;
+	race_present_weight?: number;
 	breakdown: Record<string, number>;
 };
 export type VoteResultDto = {
