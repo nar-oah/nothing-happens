@@ -43,9 +43,8 @@ func _create_cef_texture() -> Control:
 		cef_texture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	if has_cef:
 		cef_texture.set("url", "res://web/index.html")
-		var accelerated_osr := OS.get_name() != "Windows"
-		cef_texture.set("enable_accelerated_osr", accelerated_osr)
-		print("CEF accelerated OSR: %s (%s)" % [accelerated_osr, OS.get_name()])
+		cef_texture.set("enable_accelerated_osr", true)
+		print("CEF accelerated OSR: true (%s)" % OS.get_name())
 		cef_texture.set("background_color", Color(0.0, 0.0, 0.0, 0.0))
 	return cef_texture
 
