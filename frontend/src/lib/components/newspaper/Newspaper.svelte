@@ -116,7 +116,7 @@
 	function finishFold(): void {
 		if (open || foldReported) return;
 		foldReported = true;
-		foldTimer = undefined;
+		clearFoldTimer();
 		onFolded?.();
 	}
 
@@ -129,7 +129,7 @@
 	function getFoldDuration(count: number): number {
 		const positionDuration = 520 + Math.max(0, count - 1) * 32;
 		const straightenDuration = 620 + 260;
-		return Math.max(positionDuration, straightenDuration) + 20;
+		return Math.max(positionDuration, straightenDuration) + 100;
 	}
 
 	$effect(() => {
@@ -160,6 +160,7 @@
 			skew={skews[index]}
 			width={NEWSPAPER_FOLD_WIDTH}
 			height={NEWSPAPER_FOLD_HEIGHT}
+			onCloseSettled={finishFold}
 		>
 			{#if page.kind === 'top'}
 				<Top
