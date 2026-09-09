@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
 	calculateDraftProjectedMetrics,
+	calculatePolicyEffectAmount,
 	calculatePureProposalTarget,
 	clampBillPolicyDelays,
 	getPolicyDelayBounds,
@@ -48,6 +49,22 @@ test('proposal target keeps the backend-facing signed metric semantics', () => {
 	);
 });
 
+test('metric gap calculates source_b minus source_a', () => {
+	assert.equal(
+		calculatePolicyEffectAmount(
+			{
+				target_metric: Metric.PRODUCTION,
+				formula: PolicyEffectFormula.METRIC_GAP,
+				source_a: Metric.TAX,
+				source_b: Metric.PRODUCTION,
+				multiplier: 0.5
+			},
+			{ tax: 80, consumption: 100, production: 100, employment: 100, investment: 100 }
+		),
+		10
+	);
+});
+
 test('policy projection batches equal delays and chains different delays', () => {
 	const current = { tax: 100, consumption: 100, production: 100, employment: 100, investment: 100 };
 	const raiseInvestment: PolicyDefinition = {
@@ -68,8 +85,8 @@ test('policy projection batches equal delays and chains different delays', () =>
 			{
 				target_metric: Metric.PRODUCTION,
 				formula: PolicyEffectFormula.METRIC_GAP,
-				source_a: Metric.INVESTMENT,
-				source_b: Metric.TAX,
+				source_a: Metric.TAX,
+				source_b: Metric.INVESTMENT,
 				multiplier: 1
 			}
 		]

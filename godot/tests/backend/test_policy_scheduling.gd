@@ -9,7 +9,7 @@ func run(t: BackendTestContext) -> void:
 	_test_new_bill_cancels_old_schedule(t)
 	_test_different_months_resolve_in_order(t)
 	_test_month_flow_orders_market_policy_and_event(t)
-	_test_negative_policy_effect_is_preserved(t)
+	_test_metric_gap_uses_source_b_minus_source_a(t)
 	_test_single_policy_planning_preview(t)
 	_test_planning_preview_groups_by_delay(t)
 
@@ -202,9 +202,9 @@ func _test_month_flow_orders_market_policy_and_event(t: BackendTestContext) -> v
 	session.free()
 
 
-func _test_negative_policy_effect_is_preserved(t: BackendTestContext) -> void:
+func _test_metric_gap_uses_source_b_minus_source_a(t: BackendTestContext) -> void:
 	var policy := _make_metric_policy(
-		"negative effect", Metric.Id.EMPLOYMENT, PolicyEffect.Formula.METRIC_GAP,
+		"metric gap direction", Metric.Id.EMPLOYMENT, PolicyEffect.Formula.METRIC_GAP,
 		Metric.Id.TAX, Metric.Id.CONSUMPTION, 1.0
 	)
 	var state := RunState.new()
@@ -213,7 +213,7 @@ func _test_negative_policy_effect_is_preserved(t: BackendTestContext) -> void:
 	state.metrics.employment = 0
 	state.scheduled_policies.append(PolicyState.new(policy, 0))
 	PolicySystem.new().resolve_due_policies(state)
-	t.check_equal(state.metrics.employment, -5, "a signed policy calculation may produce a negative metric")
+	t.check_equal(state.metrics.employment, 5, "metric gap calculates source_b minus source_a")
 
 
 func _test_single_policy_planning_preview(t: BackendTestContext) -> void:
