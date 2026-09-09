@@ -36,7 +36,7 @@ test('local donations toggle, charge, refund, and affect only final submission s
 });
 
 test('absent and authoritative non-bribable seats reject local donations', () => {
-	const absent = vote({ position: ABSENT_POSITION, bribe_allowed: false });
+	const absent = vote({ position: ABSENT_POSITION, score: 10, bribe_allowed: false });
 	const yanou = vote({ seat_index: 1, race_display_name: '偃偶', bribe_allowed: false });
 	assert.deepEqual(toggleBribedSeat([], absent, [absent, yanou], 10), []);
 	assert.deepEqual(toggleBribedSeat([], yanou, [absent, yanou], 10), []);
