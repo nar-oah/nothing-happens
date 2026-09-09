@@ -62,8 +62,8 @@ description = "南柯睡着时曾无数次生活在另一个世界。那里有�
 他们并不知道现实一定会走到那里，所以决定亲手把它建出来。
 理想国不是预言实现，而是南柯终于拒绝在醒来后接受“现实只能如此”。从此，梦中的标准不再是慰藉，而成为现实制度必须达到的最低线。"
 row = ExtResource("row_7")
-expectation_growth_rate = 0.1
 is_terminal = true
 seat_condition = SubResource("Condition_1")
+expectation_growth_rate = 0.1
 policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
 effects = Array[ExtResource("effect_type_3")]([SubResource("Effect_1"), SubResource("Effect_2"), SubResource("Effect_3"), SubResource("Effect_4"), SubResource("Effect_5")])

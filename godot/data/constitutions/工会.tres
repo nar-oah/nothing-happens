@@ -35,7 +35,8 @@ races = Array[ExtResource("race_type_5")]([ExtResource("race_12")])
 [resource]
 script = ExtResource("article_script_1")
 display_name = "工会"
-description = "南柯守着听弦塔、维修机器、制造未然胆，也最常被人抱怨“怎么又睡着了”。\n工会把一个长期被当作个人懒散的问题重新解释成劳动问题：若全岛都离不开南柯的技术，那么他们至少应当有权决定自己以什么条件继续工作。梦仍会偶尔把人带走，但现实里终于有人替醒着的人守住底线。"
+description = "南柯守着听弦塔、维修机器、制造未然胆，也最常被人抱怨“怎么又睡着了”。
+工会把一个长期被当作个人懒散的问题重新解释成劳动问题：若全岛都离不开南柯的技术，那么他们至少应当有权决定自己以什么条件继续工作。梦仍会偶尔把人带走，但现实里终于有人替醒着的人守住底线。"
 row = ExtResource("row_7")
 expectation_growth_rate = 0.1
 policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
