@@ -47,7 +47,7 @@ export function calculatePolicyEffectAmount(effect: PolicyEffect, values: Metric
 	const raw =
 		effect.formula === PolicyEffectFormula.METRIC_VALUE
 			? getMetricValue(values, effect.source_a)
-			: getMetricValue(values, effect.source_a) - getMetricValue(values, effect.source_b);
+			: getMetricValue(values, effect.source_b) - getMetricValue(values, effect.source_a);
 	return roundLikeGodot(raw * effect.multiplier);
 }
 
