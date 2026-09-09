@@ -341,6 +341,7 @@
 		z-index: 20;
 		width: 100%;
 		overflow-x: auto;
+		pointer-events: none;
 		scrollbar-width: none;
 		overscroll-behavior-x: contain;
 	}
@@ -371,5 +372,6 @@
 
 	.vote-switch {
 		margin-bottom: 8px;
+		pointer-events: auto;
 	}
 </style>
