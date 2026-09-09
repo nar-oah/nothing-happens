@@ -22,7 +22,6 @@ const COMMAND_TYPES: Array[String] = [
 	"bill.new",
 	"bill.edit",
 	"bill.submit",
-	"vote.donation.add",
 	"proposal.merge",
 	"office.visit.resolve",
 	"event.suppress",
@@ -45,7 +44,6 @@ const GAMEPLAY_MUTATIONS: Array[String] = [
 	"bill.new",
 	"bill.edit",
 	"bill.submit",
-	"vote.donation.add",
 	"proposal.merge",
 	"office.visit.resolve",
 	"event.suppress",
@@ -109,6 +107,23 @@ func read_int(payload: Dictionary, key: String) -> Dictionary:
 	if value is float and is_equal_approx(value, roundf(value)):
 		return {"ok": true, "value": int(value)}
 	return _failure("invalid_field", "payload.%s must be an integer." % key)
+
+
+func read_int_array(payload: Dictionary, key: String) -> Dictionary:
+	if not payload.has(key):
+		return _failure("missing_field", "payload.%s is required." % key)
+	var raw: Variant = payload[key]
+	if not raw is Array:
+		return _failure("invalid_field", "payload.%s must be an integer array." % key)
+	var values: Array[int] = []
+	for item in raw:
+		if item is int:
+			values.append(item)
+		elif item is float and is_equal_approx(item, roundf(item)):
+			values.append(int(item))
+		else:
+			return _failure("invalid_field", "payload.%s must be an integer array." % key)
+	return {"ok": true, "value": values}
 
 
 func _failure(code: String, detail: String) -> Dictionary:
