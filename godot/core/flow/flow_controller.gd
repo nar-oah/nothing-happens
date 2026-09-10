@@ -36,7 +36,7 @@ func advance_month() -> bool:
 	context.event_system.update_information(context)
 	context.event_system.cleanup_published_event_visits(context.state)
 	context.state.governing_months += 1
-	_record_month_report(report_year, report_month, report_previous_metrics)
+	record_month_report(report_year, report_month, report_previous_metrics)
 	if context.state.run_phase == RunState.RunPhase.TERM_ENDED:
 		return true
 	context.proposal_system.draw_automatic_proposals(context)
@@ -91,7 +91,7 @@ func _record_triggered_policies(definitions: Array[PolicyDefinition]) -> void:
 		context.state.newspaper_triggered_policies.append(definition)
 
 
-func _record_month_report(report_year: int, report_month: int, previous_metrics: MetricValues) -> void:
+func record_month_report(report_year: int, report_month: int, previous_metrics: MetricValues) -> void:
 	var state := context.state
 	state.month_report_year = report_year
 	state.month_report_month = report_month
