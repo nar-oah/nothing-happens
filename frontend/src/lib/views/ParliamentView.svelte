@@ -119,7 +119,7 @@
 		votesNeededForMajority(localVote.supportCount, localVote.presentCount)
 	);
 	let draftCanSubmit = $derived(
-		canSubmitDraft(
+		optimisticDraft === undefined && canSubmitDraft(
 			localVote.passed || minimumDonationPlan !== null,
 			visibleDraft.proposals.length
 		)
