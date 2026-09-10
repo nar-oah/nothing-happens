@@ -53,6 +53,35 @@ func _test_formal_board_policy_pool_and_tiers(t: BackendTestContext) -> void:
 	context.constitution_board = Board
 	context.constitution_system = system
 	var center := Board.get_center_column_index()
+	var expected_by_article := {
+		"外藩": 0.5,
+		"朝贡": 0.75,
+		"自由贸易": 1.0,
+		"内附": 0.75,
+		"行省": 1.5,
+		"包容": 0.5,
+		"汉化": 0.75,
+		"比翼化": 0.75,
+		"国有化": 1.0,
+		"法团": 1.5,
+		"有限": 0.5,
+		"承认": 0.75,
+		"否决": 0.75,
+		"托拉斯": 1.5,
+		"自治": 0.5,
+		"开放": 0.75,
+		"封闭": 0.75,
+		"地区自治": 1.5,
+		"工会": 0.5,
+		"互助": 0.75,
+		"合作社": 0.75,
+		"理想国": 1.5,
+		"哲人王": 0.5,
+		"有限监管": 0.5,
+		"言论自由": 0.5,
+		"透明政府": 0.5,
+		"锦衣卫": 0.5,
+	}
 	var terminal_names: Array[String] = []
 	for article in Board.get_articles():
 		t.check_equal(article.policies.size(), 1, "%s provides exactly one policy" % article.display_name)
@@ -61,18 +90,14 @@ func _test_formal_board_policy_pool_and_tiers(t: BackendTestContext) -> void:
 		if article.policies.is_empty() or article.policies[0] == null:
 			continue
 		var policy := article.policies[0]
-		t.check(policy.effects.size() >= 2, "%s keeps its main gap effect" % policy.display_name)
+		t.check(policy.effects.size() >= 2, "%s keeps its tier-scaled gap effect" % policy.display_name)
 		if policy.effects.size() < 2 or policy.effects[1] == null:
 			continue
-		var distance := absi(Board.get_column_index_for_article(article) - center)
-		var expected := 1.0
-		if article.is_terminal:
-			expected = 1.5
-		elif distance == 0:
-			expected = 0.5
-		elif distance == 1:
-			expected = 0.75
-		t.check_approx(policy.effects[1].multiplier, expected, "%s main gap multiplier follows its constitution tier" % policy.display_name)
+		t.check(expected_by_article.has(article.display_name), "%s has an explicit route-depth policy tier" % article.display_name)
+		if not expected_by_article.has(article.display_name):
+			continue
+		var expected: float = expected_by_article[article.display_name]
+		t.check_approx(policy.effects[1].multiplier, expected, "%s main gap multiplier follows route depth and regulation exceptions" % policy.display_name)
 	terminal_names.sort()
 	var expected_terminal_names: Array[String] = ["地区自治", "托拉斯", "法团", "理想国", "行省"]
 	expected_terminal_names.sort()
@@ -86,7 +111,7 @@ func _test_formal_board_policy_pool_and_tiers(t: BackendTestContext) -> void:
 		t.check(draft_system.add_available_policy(context, policy), "all six available policies can enter one bill")
 	t.check_equal(context.state.draft_bill.policies.size(), 6, "one bill keeps all six available policies without a policy cap")
 	t.check(not TransparentGovernment.is_terminal, "the outer regulation article remains non-terminal")
-	t.check_approx(TransparentGovernment.policies[0].effects[1].multiplier, 1.0, "the non-terminal outer regulation policy does not receive the terminal multiplier")
+	t.check_approx(TransparentGovernment.policies[0].effects[1].multiplier, 0.5, "all regulation policies stay at the base multiplier")
 
 
 func _test_requirement_descriptions(t: BackendTestContext) -> void:
@@ -161,6 +186,8 @@ func _test_local_interest_groups(t: BackendTestContext) -> void:
 		unique[local] = true
 		t.check(local == session.state.constitution.local_interest_groups[seat.definition], "seat uses its own local group")
 		t.check(local.decrease_tax, "local group stance follows effect metric")
+		t.check_equal(local.description, seat.definition.description, "local group inherits location description",)
+		t.check_equal(local.description, seat.definition.description, "local group inherits location description")
 		t.check_equal(local.description, seat.definition.description, "local group inherits location description")
 	t.check_equal(unique.size(), seats.size(), "local groups are unique Resources")
 	session.free()
