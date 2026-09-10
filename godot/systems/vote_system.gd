@@ -212,10 +212,7 @@ func _calculate_seat_vote(
 	elif vote_context.position_override >= 0:
 		vote.position = vote_context.position_override as SeatVoteState.Position
 	elif donated:
-		vote.add_reason(
-			&"political_donation",
-			maxf(context.balance.support_threshold - vote.score, 0.0)
-		)
+		vote.add_reason(&"political_donation", DONATION_COST)
 		vote.position = SeatVoteState.Position.SUPPORT
 	else:
 		vote.position = _position_from_score(vote.score, context.balance.support_threshold)
