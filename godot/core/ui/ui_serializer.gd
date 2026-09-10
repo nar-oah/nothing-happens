@@ -380,15 +380,12 @@ func _article(definition: ConstitutionArticleDefinition, article_index: int) -> 
 func _article_requirement_percent(definition: ConstitutionArticleDefinition) -> Variant:
 	if definition == null:
 		return null
-	var condition := definition.seat_condition
-	if condition == null:
-		for current in definition.conditions:
-			if current is ConstitutionSeatCondition:
-				condition = current
-				break
-	if condition == null:
+	for current in definition.conditions:
+		if current is ConstitutionSeatCondition:
+			return (current as ConstitutionSeatCondition).required_rate * 100.0
+	if definition.seat_condition == null:
 		return null
-	return condition.required_rate * 100.0
+	return definition.seat_condition.required_rate * 100.0
 
 
 func _proposals(values: Array[ProposalInstance]) -> Array:
