@@ -194,12 +194,14 @@ func _calculate_seat_vote(
 	var active_race := race_state.active_definition
 	if active_race == null:
 		active_race = race_state.definition
+	var donated := (
+		_seat_allows_donation(context, seat)
+		and float(donations.get(seat, 0.0)) > 0.0
+	)
 	vote.add_reason(&"race_expectation", _race_expectation_score(race_state, projected, context))
 	vote.add_reason(
 		&"proposal_source", _group_support_score(seat.actual_group, draft, projected, context)
 	)
-	if _seat_allows_donation(context, seat):
-		vote.add_reason(&"political_donation", float(donations.get(seat, 0.0)))
 	var vote_context := VoteContext.new(
 		context, seat, race_state, draft, pure_target, projected, vote
 	)
@@ -209,6 +211,12 @@ func _calculate_seat_vote(
 		vote.position = vote_context.locked_position as SeatVoteState.Position
 	elif vote_context.position_override >= 0:
 		vote.position = vote_context.position_override as SeatVoteState.Position
+	elif donated:
+		vote.add_reason(
+			&"political_donation",
+			maxf(context.balance.support_threshold - vote.score, 0.0)
+		)
+		vote.position = SeatVoteState.Position.SUPPORT
 	else:
 		vote.position = _position_from_score(vote.score, context.balance.support_threshold)
 	return vote
