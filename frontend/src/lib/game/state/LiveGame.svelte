@@ -138,7 +138,7 @@
 			month: state.month,
 			metrics: report ? deriveTermReportMetrics(report, translator) : deriveNewspaperMetrics(state),
 			...(front ? { front } : {}),
-			events: report ? [] : deriveNewspaperEvents(state, translator)
+			events: deriveNewspaperEvents(state, translator)
 		};
 	}
 
