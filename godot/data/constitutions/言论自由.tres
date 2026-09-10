@@ -8,8 +8,6 @@
 [ext_resource type="Script" uid="uid://dbweki6m0jjf5" path="res://definitions/constitution_effects/event_intel_probability_effect.gd" id="effscript_intel_14"]
 [ext_resource type="Script" uid="uid://dijsxl05i7yxo" path="res://definitions/constitution_effects/race_seat_effect.gd" id="effscript_race_seat_11"]
 [ext_resource type="Resource" uid="uid://danwbji16siyl" path="res://data/policies/公开竞价.tres" id="policy_8"]
-[ext_resource type="Resource" uid="uid://b43s8bgxrisa2" path="res://data/policies/报刊问薪.tres" id="policy_9"]
-[ext_resource type="Resource" uid="uid://r0n82hdnh1ib" path="res://data/policies/舆论揭税.tres" id="policy_10"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="policy_type_2"]
 [ext_resource type="Resource" uid="uid://dknll48i00v4u" path="res://data/races/驻岁.tres" id="race_12"]
 [ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="race_type_5"]
@@ -40,5 +38,5 @@ display_name = "言论自由"
 description = "监督不应依赖官署愿意公开多少，而应允许任何人去问、去写、去查。
 报馆、议员和普通人因此更容易发现那些原本只在办公室里解决的交易。政府未必因此更清白，但越来越难假装没人知道。"
 row = ExtResource("row_7")
-policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
+policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8")])
 effects = Array[ExtResource("effect_type_3")]([SubResource("Effect_1"), SubResource("Effect_2"), SubResource("Effect_3"), SubResource("Effect_4")])

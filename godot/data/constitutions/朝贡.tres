@@ -6,8 +6,6 @@
 [ext_resource type="Script" uid="uid://4himuh5fg8m4" path="res://definitions/constitution_effects/petition_effect.gd" id="effscript_petition_13"]
 [ext_resource type="Script" uid="uid://dijsxl05i7yxo" path="res://definitions/constitution_effects/race_seat_effect.gd" id="effscript_race_seat_11"]
 [ext_resource type="Resource" uid="uid://d1tjiryxrc6fw" path="res://data/policies/折贡为货.tres" id="policy_8"]
-[ext_resource type="Resource" uid="uid://ifeh7dncll23" path="res://data/policies/贡期缓征.tres" id="policy_9"]
-[ext_resource type="Resource" uid="uid://vwtxr08mshcr" path="res://data/policies/海舶限贡.tres" id="policy_10"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="policy_type_2"]
 [ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/人类.tres" id="race_12"]
 [ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="race_type_5"]
@@ -30,5 +28,5 @@ description = "既然只是奉表称臣、按期入贡，又何必让朝廷继�
 朝贡派愿意保留天朝名分，却要求把名分重新缩回礼仪与贡路之中。蓬莱仍向大明低头，但这一低头应当止于海岸，不该一路伸进议会。"
 row = ExtResource("row_7")
 expectation_growth_rate = 0.1
-policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
+policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8")])
 effects = Array[ExtResource("effect_type_3")]([SubResource("Effect_1"), SubResource("Effect_2")])

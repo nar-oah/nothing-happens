@@ -8,8 +8,6 @@
 [ext_resource type="Script" uid="uid://dbweki6m0jjf5" path="res://definitions/constitution_effects/event_intel_probability_effect.gd" id="effscript_intel_14"]
 [ext_resource type="Script" uid="uid://dijsxl05i7yxo" path="res://definitions/constitution_effects/race_seat_effect.gd" id="effscript_race_seat_11"]
 [ext_resource type="Resource" uid="uid://c5g3c2ddcydgs" path="res://data/policies/权宜平准.tres" id="policy_8"]
-[ext_resource type="Resource" uid="uid://c3lw0bc4rhf4r" path="res://data/policies/特旨通商.tres" id="policy_9"]
-[ext_resource type="Resource" uid="uid://d4l6vd3cswlv7" path="res://data/policies/临机调工.tres" id="policy_10"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="policy_type_2"]
 [ext_resource type="Resource" uid="uid://dknll48i00v4u" path="res://data/races/驻岁.tres" id="race_12"]
 [ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="race_type_5"]
@@ -39,5 +37,5 @@ display_name = "哲人王"
 description = "蓬莱把政权交给驻岁，本来就是因为相信活得足够久的人能够看得比普通人更远。
 既然执政者已经见过几代人的兴衰，又何必让那些只能看到眼前几十年的人监督他们？哲人王制度建立在一份简单而危险的信任上：长寿本身足以保证审慎。"
 row = ExtResource("row_7")
-policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
+policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8")])
 effects = Array[ExtResource("effect_type_3")]([SubResource("Effect_1"), SubResource("Effect_2"), SubResource("Effect_3"), SubResource("Effect_4")])

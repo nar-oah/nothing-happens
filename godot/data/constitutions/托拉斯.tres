@@ -11,8 +11,6 @@
 [ext_resource type="Resource" uid="uid://b7vlc4eb8m4io" path="res://data/interest_groups/造身公所.tres" id="group_12"]
 [ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="group_type_6"]
 [ext_resource type="Resource" uid="uid://bi88cp6wyendn" path="res://data/policies/全业并购.tres" id="policy_8"]
-[ext_resource type="Resource" uid="uid://c256dkijh3g8y" path="res://data/policies/统一定价.tres" id="policy_9"]
-[ext_resource type="Resource" uid="uid://5i0u8uobs8sd" path="res://data/policies/自动替工.tres" id="policy_10"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="policy_type_2"]
 [ext_resource type="Resource" uid="uid://c2eco18e42n34" path="res://data/races/偃偶.tres" id="race_14"]
 [ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/人类.tres" id="race_16"]
@@ -71,5 +69,5 @@ row = ExtResource("row_7")
 is_terminal = true
 seat_condition = SubResource("Condition_1")
 expectation_growth_rate = 0.1
-policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
+policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8")])
 effects = Array[ExtResource("effect_type_3")]([SubResource("Effect_1"), SubResource("Effect_2"), SubResource("Effect_3"), SubResource("Effect_4"), SubResource("Effect_5")])
