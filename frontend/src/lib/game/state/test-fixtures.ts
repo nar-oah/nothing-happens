@@ -205,7 +205,8 @@ export function makeLiveState(stateVersion = 1): LiveGameState {
 			pure_proposal_target: { ...current, consumption: 92 },
 			immediate_policy_result: current,
 			projected_metrics: { ...current, consumption: 92 },
-			vote
+			vote,
+			minimum_donation_plan: { seat_indices: [], cost: 0 }
 		},
 		pending_dialogue: {
 			kind: 'interest_group',
