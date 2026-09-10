@@ -67,7 +67,10 @@ func spawn_event(context: RunContext, race: RaceDefinition, metric: Metric.Id) -
 	var baseline := context.state.metrics.get_value(metric)
 	if baseline >= target:
 		return null
-	var event := EventState.new(race, metric, baseline, target)
+	var initial_requirement := _get_initial_requirement(
+		baseline, context.balance.event_pause_satisfaction_threshold
+	)
+	var event := EventState.new(race, metric, initial_requirement, maxi(target, initial_requirement))
 	context.state.events.append(event)
 	return event
 
@@ -85,16 +88,28 @@ func spawn_interest_group_event(context: RunContext, race: RaceDefinition) -> Ev
 	var baseline := _get_interest_group_proposal_count(context, group)
 	if baseline >= target:
 		return null
+	var initial_requirement := _get_initial_requirement(
+		baseline, context.balance.event_pause_satisfaction_threshold
+	)
 	var event := EventState.new(
 		race,
 		Metric.Id.TAX,
-		baseline,
-		target,
+		initial_requirement,
+		maxi(target, initial_requirement),
 		EventState.RequirementKind.INTEREST_GROUP_PROPOSALS,
 		group
 	)
 	context.state.events.append(event)
 	return event
+
+
+func _get_initial_requirement(current_value: int, pause_threshold: float) -> int:
+	if current_value < 0:
+		return current_value
+	var threshold := clampf(pause_threshold, 0.0, 1.0)
+	if threshold <= 0.0:
+		return current_value
+	return floori(float(current_value) / threshold) + 1
 
 
 func settle_month(context: RunContext) -> void:
