@@ -8,6 +8,7 @@ const COMMAND_TYPES: Array[String] = [
 	"ui.newspaper.close",
 	"settings.language.set",
 	"settings.display.set",
+	"settings.music_volume.set",
 	"app.quit",
 	"saves.list",
 	"saves.create",
