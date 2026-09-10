@@ -30,10 +30,14 @@ export function createPolicyMarkContent(
 	baseline: MetricValues,
 	translator: Translate = translate
 ): { gap: MarkFaceContent; smoothing: MarkFaceContent } {
+	const gapEffects =
+		policy.effects.length >= 2 ? policy.effects.slice(1, 2) : policy.effects.slice(0, 1);
+	const smoothingEffects =
+		policy.effects.length >= 2 ? [policy.effects[0], ...policy.effects.slice(2)] : [];
 	return {
-		gap: createEffectFace(policy.effects.slice(0, 1), baseline, translator('mark.gap'), translator),
+		gap: createEffectFace(gapEffects, baseline, translator('mark.gap'), translator),
 		smoothing: createEffectFace(
-			policy.effects.slice(1),
+			smoothingEffects,
 			baseline,
 			translator('mark.smoothing'),
 			translator
