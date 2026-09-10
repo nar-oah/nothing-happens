@@ -19,12 +19,22 @@ func _ready() -> void:
 	state.political_donation_pool = 99
 	var slot_id := "manual_900001"
 	_write(session, slot_id)
-	var saved := RunSaveStore.read_save(OUTPUT_DIR, slot_id)
-	if saved["ok"]:
-		print("VIDEO SAVE BUILD OK")
+	var restored := _make_session()
+	var result := restored.load_save(slot_id)
+	if result["ok"] != true:
+		push_error("Failed to restore video save: result.ok is false")
+	elif restored.state.term != 9:
+		push_error("Failed to restore video save: state.term is %s, expected 9" % restored.state.term)
+	elif restored.state.year != 9:
+		push_error("Failed to restore video save: state.year is %s, expected 9" % restored.state.year)
+	elif restored.state.month != 9:
+		push_error("Failed to restore video save: state.month is %s, expected 9" % restored.state.month)
+	elif restored.state.political_donation_pool != 99:
+		push_error("Failed to restore video save: state.political_donation_pool is %s, expected 99" % restored.state.political_donation_pool)
 	else:
-		push_error("Failed to verify video save: %s" % saved["error"]["message"])
+		print("VIDEO SAVE BUILD OK")
 	session.free()
+	restored.free()
 	get_tree().quit()
 
 
