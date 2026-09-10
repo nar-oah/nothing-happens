@@ -138,7 +138,7 @@
 			month: state.month,
 			metrics: report ? deriveTermReportMetrics(report, translator) : deriveNewspaperMetrics(state),
 			...(front ? { front } : {}),
-			events: report ? [] : deriveNewspaperEvents(state, translator)
+			events: deriveNewspaperEvents(state, translator)
 		};
 	}
 
@@ -463,6 +463,7 @@
 				seatAnchors={snapshot.parliament_seat_anchors}
 				seatVotes={snapshot.draft_preview.vote.seat_votes}
 				donationPool={snapshot.political_donation_pool}
+				minimumDonationPlan={snapshot.draft_preview.minimum_donation_plan}
 				{preview}
 				onAddProposal={(handIndex) => mutate('draft.proposal.add', { hand_index: handIndex })}
 				onRemoveProposal={(draftIndex) =>

@@ -31,6 +31,7 @@
 		peachVotesNeeded,
 		seatActionText,
 		seatScoreText,
+		submittedDonationSeats,
 		toggleBribedSeat,
 		votesNeededForMajority
 	} from './parliament';
@@ -48,6 +49,7 @@
 		seatAnchors: ParliamentSeatAnchorDto[];
 		seatVotes: SeatVoteDto[];
 		donationPool: number;
+		minimumDonationPlan: { seat_indices: number[]; cost: number } | null;
 		preview: MemorialMetricData[];
 		onAddProposal?: (handIndex: number) => void;
 		onRemoveProposal?: (draftIndex: number) => void;
@@ -79,6 +81,7 @@
 		seatAnchors,
 		seatVotes,
 		donationPool,
+		minimumDonationPlan,
 		preview,
 		onAddProposal,
 		onRemoveProposal,
@@ -115,7 +118,20 @@
 	let votesNeeded = $derived(
 		votesNeededForMajority(localVote.supportCount, localVote.presentCount)
 	);
-	let draftCanSubmit = $derived(canSubmitDraft(localVote.passed, visibleDraft.proposals.length));
+	let voteActionText = $derived(
+		localVote.passed
+			? $t('view.votePass')
+			: minimumDonationPlan !== null
+				? `${$t('view.bribe')} ${minimumDonationPlan.cost}`
+				: $t('view.voteShort', { count: votesNeeded })
+	);
+	let draftCanSubmit = $derived(
+		optimisticDraft === undefined &&
+			canSubmitDraft(
+				localVote.passed || minimumDonationPlan !== null,
+				visibleDraft.proposals.length
+			)
+	);
 	let editorScroller: HTMLDivElement;
 
 	onMount(() => {
@@ -210,10 +226,31 @@
 		onTitleChange?.(title);
 	}
 
+	function getDefaultBillTitle(): string {
+		const baseTitle = $t('memorial.newBill');
+		const usedTitles = new Set(
+			items
+				.filter((item): item is BillLeftItem => item.kind === 'bill')
+				.map((item) => item.bill.title.trim())
+		);
+		if (!usedTitles.has(baseTitle)) return baseTitle;
+		let suffix = 1;
+		while (usedTitles.has(`${baseTitle}${suffix}`)) suffix += 1;
+		return `${baseTitle}${suffix}`;
+	}
+
 	function submitDraft(isVote: boolean) {
 		if (!isVote || !draftCanSubmit) return;
+		const submittedSeats = submittedDonationSeats(
+			localVote.passed,
+			bribedSeats,
+			minimumDonationPlan
+		);
+		if (!submittedSeats) return;
+		if (!visibleDraft.title.trim()) onTitleChange?.(getDefaultBillTitle());
+		bribedSeats = [...submittedSeats];
 		playUiSfx('passed', true);
-		onSubmit?.([...bribedSeats].sort((left, right) => left - right));
+		onSubmit?.([...submittedSeats].sort((left, right) => left - right));
 		queueMicrotask(() => (voteMode = false));
 	}
 
@@ -294,9 +331,7 @@
 					<div class="vote-switch">
 						<ChoreSwitch
 							left={$t('view.draft')}
-							right={localVote.passed
-								? $t('view.votePass')
-								: $t('view.voteShort', { count: votesNeeded })}
+							right={voteActionText}
 							bind:isSwitch={voteMode}
 							disabled={!draftCanSubmit}
 							onSwitchChange={submitDraft}

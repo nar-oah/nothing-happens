@@ -10,6 +10,7 @@ import {
 	peachVotesNeeded,
 	seatActionText,
 	seatScoreText,
+	submittedDonationSeats,
 	toggleBribedSeat,
 	votesNeededForMajority
 } from './parliament.ts';
@@ -52,10 +53,17 @@ test('absent and authoritative non-bribable seats reject local donations', () =>
 	assert.equal(seatActionText(absent, '支持', '政治献金', '缺席', ''), '缺席');
 });
 
-test('draft submission requires both a passing vote and at least one proposal', () => {
+test('draft submission requires a passable vote and at least one proposal', () => {
 	assert.equal(canSubmitDraft(true, 1), true);
 	assert.equal(canSubmitDraft(true, 0), false);
 	assert.equal(canSubmitDraft(false, 1), false);
+});
+
+test('submission uses the backend minimum plan only when local selections do not pass', () => {
+	const automaticPlan = { seat_indices: [4, 1] };
+	assert.deepEqual(submittedDonationSeats(false, [3], automaticPlan), [4, 1]);
+	assert.deepEqual(submittedDonationSeats(true, [3], automaticPlan), [3]);
+	assert.equal(submittedDonationSeats(false, [3], null), null);
 });
 
 test('strict-majority shortfall uses the same calculation for weighted and ordinary votes', () => {
@@ -79,7 +87,7 @@ test('Peach seats show localized weights and shortfall while local bribery updat
 		vote({
 			seat_index: 1,
 			score: -1,
-			bribe_cost: 2,
+			bribe_cost: 1,
 			vote_weight: 2,
 			race_display_name: '桃花妖',
 			race_support_weight: 2,

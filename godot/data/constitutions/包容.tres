@@ -5,8 +5,6 @@
 [ext_resource type="Script" uid="uid://cpc61vbc5rd11" path="res://definitions/constitution_effect.gd" id="effect_type_3"]
 [ext_resource type="Script" uid="uid://ccj4ntfstuxfm" path="res://definitions/constitution_effects/modify_race_effect.gd" id="effscript_modify_race_11"]
 [ext_resource type="Resource" uid="uid://6sm312dvcjjg" path="res://data/policies/双文契约.tres" id="policy_8"]
-[ext_resource type="Resource" uid="uid://xi5hgacnhan0" path="res://data/policies/两历调度.tres" id="policy_9"]
-[ext_resource type="Resource" uid="uid://50cisjxt1jq4" path="res://data/policies/异俗折衷.tres" id="policy_10"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="policy_type_2"]
 [ext_resource type="Resource" uid="uid://bw162ei21njtt" path="res://data/races/比翼.tres" id="race_12"]
 [ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="race_type_5"]
@@ -25,5 +23,5 @@ description = "官署说汉语，比翼仍保存自己的文字、历法和学�
 这套制度没有解决比翼对失去知识地位的不满，只是默认一种朴素的妥协：公共世界可以改变，但至少族内还有些东西不必跟着改变。"
 row = ExtResource("row_7")
 expectation_growth_rate = 0.1
-policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
+policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8")])
 effects = Array[ExtResource("effect_type_3")]([SubResource("Effect_1")])

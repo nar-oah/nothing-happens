@@ -1,6 +1,8 @@
 extends RefCounted
 class_name VoteSystem
 
+const DONATION_COST: float = 1.0
+
 
 func preview_vote(draft: DraftBillState, context: RunContext) -> VoteResultState:
 	return calculate_vote(draft, context)
@@ -36,9 +38,9 @@ func roll_monthly_absences(context: RunContext) -> void:
 
 
 func get_bribe_cost(context: RunContext, vote: SeatVoteState) -> float:
-	if context == null or context.balance == null or vote == null or vote.seat == null:
+	if context == null or vote == null or vote.seat == null:
 		return 0.0
-	return maxf(context.balance.support_threshold - vote.score, 0.0)
+	return DONATION_COST
 
 
 func is_bribe_allowed(context: RunContext, vote: SeatVoteState) -> bool:
@@ -47,8 +49,6 @@ func is_bribe_allowed(context: RunContext, vote: SeatVoteState) -> bool:
 		and vote.position != SeatVoteState.Position.SUPPORT
 		and vote.position != SeatVoteState.Position.ABSENT
 		and _seat_allows_donation(context, vote.seat)
-		and get_bribe_cost(context, vote) > 0.0
-		and get_bribe_cost(context, vote) <= context.state.political_donation_pool
 	)
 
 
@@ -74,6 +74,110 @@ func validate_bribes(
 	if total_cost > context.state.political_donation_pool:
 		return {"ok": false}
 	return {"ok": true, "donations": donations, "total_cost": total_cost}
+
+
+func get_minimum_donation_plan(draft: DraftBillState, context: RunContext) -> Dictionary:
+	if (
+		draft == null
+		or context == null
+		or context.state == null
+		or context.draft_bill_system == null
+		or not context.draft_bill_system.is_ready_to_submit(context, draft)
+	):
+		return {}
+	var preview := preview_vote(draft, context)
+	if preview.passed:
+		return {"seat_indices": [], "cost": 0.0}
+	var options: Array = []
+	var peach_votes: Dictionary[RaceState, Array] = {}
+	for seat_index in range(preview.seat_votes.size()):
+		var vote := preview.seat_votes[seat_index]
+		var race_state := context.state.get_race(vote.seat.race)
+		if race_state != null and _active_race(context, vote.seat) is PeachRaceDefinition:
+			if not peach_votes.has(race_state):
+				peach_votes[race_state] = []
+			peach_votes[race_state].append([seat_index, vote])
+		elif is_bribe_allowed(context, vote):
+			options.append({"seat_indices": [seat_index], "support_gain": 1})
+	for race_state in peach_votes:
+		var entries: Array = peach_votes[race_state]
+		var present_weight := 0
+		var support_weight := 0
+		var present_seat_count := 0
+		var candidates: Array = []
+		for entry in entries:
+			var vote: SeatVoteState = entry[1]
+			if vote.position == SeatVoteState.Position.ABSENT:
+				continue
+			present_seat_count += 1
+			present_weight += vote.vote_weight
+			if vote.position == SeatVoteState.Position.SUPPORT:
+				support_weight += vote.vote_weight
+			elif is_bribe_allowed(context, vote):
+				candidates.append(entry)
+		var peach := race_state.active_definition as PeachRaceDefinition
+		if peach == null or peach.has_support_majority(support_weight, present_weight):
+			continue
+		candidates.sort_custom(func(first: Array, second: Array) -> bool:
+			var first_vote: SeatVoteState = first[1]
+			var second_vote: SeatVoteState = second[1]
+			return (
+				int(first[0]) < int(second[0])
+				if first_vote.vote_weight == second_vote.vote_weight
+				else first_vote.vote_weight > second_vote.vote_weight
+			)
+		)
+		var option: Array[int] = []
+		var planned_support_weight := support_weight
+		for candidate in candidates:
+			option.append(int(candidate[0]))
+			var candidate_vote: SeatVoteState = candidate[1]
+			planned_support_weight += candidate_vote.vote_weight
+			if peach.has_support_majority(planned_support_weight, present_weight):
+				break
+		if peach.has_support_majority(planned_support_weight, present_weight):
+			options.append(
+				{"seat_indices": option, "support_gain": present_seat_count}
+			)
+	var votes_needed := floori(float(preview.present_count()) / 2.0) + 1 - preview.support_count
+	var seat_indices := _minimum_option_seats(options, votes_needed)
+	if seat_indices.is_empty():
+		return {}
+	seat_indices.sort()
+	var cost := float(seat_indices.size()) * DONATION_COST
+	if cost > context.state.political_donation_pool:
+		return {}
+	var validated := validate_bribes(draft, context, seat_indices)
+	if not validated["ok"]:
+		return {}
+	var result := calculate_vote(draft, context, validated["donations"])
+	if not result.passed:
+		return {}
+	return {"seat_indices": seat_indices, "cost": cost}
+
+
+func _minimum_option_seats(options: Array, votes_needed: int) -> Array[int]:
+	var plans: Array = []
+	plans.resize(votes_needed + 1)
+	plans[0] = []
+	for option in options:
+		var option_seats: Array = option["seat_indices"]
+		var support_gain: int = option["support_gain"]
+		for current_gain in range(votes_needed - 1, -1, -1):
+			if plans[current_gain] == null:
+				continue
+			var target_gain := mini(current_gain + support_gain, votes_needed)
+			var candidate: Array[int] = []
+			for seat_index in plans[current_gain]:
+				candidate.append(int(seat_index))
+			for seat_index in option_seats:
+				candidate.append(int(seat_index))
+			if plans[target_gain] == null or candidate.size() < plans[target_gain].size():
+				plans[target_gain] = candidate
+	var result: Array[int] = []
+	if plans[votes_needed] != null:
+		result.assign(plans[votes_needed])
+	return result
 
 
 func resolve_donation_detection(
@@ -112,12 +216,14 @@ func _calculate_seat_vote(
 	var active_race := race_state.active_definition
 	if active_race == null:
 		active_race = race_state.definition
+	var donated := (
+		_seat_allows_donation(context, seat)
+		and float(donations.get(seat, 0.0)) > 0.0
+	)
 	vote.add_reason(&"race_expectation", _race_expectation_score(race_state, projected, context))
 	vote.add_reason(
 		&"proposal_source", _group_support_score(seat.actual_group, draft, projected, context)
 	)
-	if _seat_allows_donation(context, seat):
-		vote.add_reason(&"political_donation", float(donations.get(seat, 0.0)))
 	var vote_context := VoteContext.new(
 		context, seat, race_state, draft, pure_target, projected, vote
 	)
@@ -127,6 +233,9 @@ func _calculate_seat_vote(
 		vote.position = vote_context.locked_position as SeatVoteState.Position
 	elif vote_context.position_override >= 0:
 		vote.position = vote_context.position_override as SeatVoteState.Position
+	elif donated:
+		vote.add_reason(&"political_donation", DONATION_COST)
+		vote.position = SeatVoteState.Position.SUPPORT
 	else:
 		vote.position = _position_from_score(vote.score, context.balance.support_threshold)
 	return vote

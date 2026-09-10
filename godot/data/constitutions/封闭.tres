@@ -7,8 +7,6 @@
 [ext_resource type="Script" uid="uid://ccj4ntfstuxfm" path="res://definitions/constitution_effects/modify_race_effect.gd" id="effscript_modify_race_13"]
 [ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="group_type_6"]
 [ext_resource type="Resource" uid="uid://bnyvicjgl8uey" path="res://data/policies/闭关减市.tres" id="policy_8"]
-[ext_resource type="Resource" uid="uid://cq1ot5f7pmk3b" path="res://data/policies/归田自给.tres" id="policy_9"]
-[ext_resource type="Resource" uid="uid://cg0ej8imb83y3" path="res://data/policies/族内免征.tres" id="policy_10"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="policy_type_2"]
 [ext_resource type="Resource" uid="uid://b4e7rdu770lrv" path="res://data/races/桃花妖.tres" id="race_12"]
 [ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="race_type_5"]
@@ -38,5 +36,5 @@ description = "桃花妖看见的答案比其他人简单得多：麻烦之所�
 row = ExtResource("row_7")
 seat_condition = SubResource("Condition_1")
 expectation_growth_rate = 0.1
-policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
+policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8")])
 effects = Array[ExtResource("effect_type_3")]([SubResource("Effect_1"), SubResource("Effect_2")])

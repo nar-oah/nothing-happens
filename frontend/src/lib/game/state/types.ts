@@ -123,6 +123,7 @@ export type DraftPreviewDto = {
 	immediate_policy_result: MetricValues;
 	projected_metrics: MetricValues;
 	vote: VoteResultDto;
+	minimum_donation_plan: { seat_indices: number[]; cost: number } | null;
 };
 export type PendingDialogueDto =
 	| {

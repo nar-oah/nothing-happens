@@ -9,8 +9,6 @@
 [ext_resource type="Script" uid="uid://dijsxl05i7yxo" path="res://definitions/constitution_effects/race_seat_effect.gd" id="effscript_race_seat_13"]
 [ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="group_type_6"]
 [ext_resource type="Resource" uid="uid://ctdshm7piam16" path="res://data/policies/平准官仓.tres" id="policy_8"]
-[ext_resource type="Resource" uid="uid://dsbfw6wkdld46" path="res://data/policies/驿运统筹.tres" id="policy_9"]
-[ext_resource type="Resource" uid="uid://cjq1ijklbkgf0" path="res://data/policies/徭役统筹.tres" id="policy_10"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="policy_type_2"]
 [ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/人类.tres" id="race_12"]
 [ext_resource type="Resource" uid="uid://bw162ei21njtt" path="res://data/races/比翼.tres" id="race_15"]
@@ -61,5 +59,5 @@ row = ExtResource("row_7")
 is_terminal = true
 seat_condition = SubResource("Condition_1")
 expectation_growth_rate = 0.1
-policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
+policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8")])
 effects = Array[ExtResource("effect_type_3")]([SubResource("Effect_1"), SubResource("Effect_2"), SubResource("Effect_3"), SubResource("Effect_4")])

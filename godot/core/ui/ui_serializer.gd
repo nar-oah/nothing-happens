@@ -133,7 +133,8 @@ func draft_preview(session: RunSession) -> Dictionary:
 	var pure_target := session.proposal_system.calculate_pure_target(state.metrics, draft.proposals)
 	var projected := session.policy_system.calculate_planned_result(pure_target, draft.policies)
 	var vote := session.vote_system.preview_vote(draft, session.context)
-	return {"current_metrics": metric_values(state.metrics), "pure_proposal_target": metric_values(pure_target), "immediate_policy_result": metric_values(state.metrics), "projected_metrics": metric_values(projected), "vote": vote_result(vote, session)}
+	var donation_plan := session.vote_system.get_minimum_donation_plan(draft, session.context)
+	return {"current_metrics": metric_values(state.metrics), "pure_proposal_target": metric_values(pure_target), "immediate_policy_result": metric_values(state.metrics), "projected_metrics": metric_values(projected), "vote": vote_result(vote, session), "minimum_donation_plan": null if donation_plan.is_empty() else donation_plan}
 
 
 func pending_dialogue(session: RunSession) -> Variant:

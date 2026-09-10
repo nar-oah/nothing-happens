@@ -5,8 +5,6 @@
 [ext_resource type="Script" uid="uid://cpc61vbc5rd11" path="res://definitions/constitution_effect.gd" id="effect_type_3"]
 [ext_resource type="Script" uid="uid://ccj4ntfstuxfm" path="res://definitions/constitution_effects/modify_race_effect.gd" id="effscript_modify_race_11"]
 [ext_resource type="Resource" uid="uid://bwqcl5ttb6eat" path="res://data/policies/开山通路.tres" id="policy_8"]
-[ext_resource type="Resource" uid="uid://cdrcnokne8wah" path="res://data/policies/外货竞价.tres" id="policy_9"]
-[ext_resource type="Resource" uid="uid://sw8vf06gj1o2" path="res://data/policies/土产外销.tres" id="policy_10"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="policy_type_2"]
 [ext_resource type="Resource" uid="uid://b4e7rdu770lrv" path="res://data/races/桃花妖.tres" id="race_12"]
 [ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="race_type_5"]
@@ -26,5 +24,5 @@ description = "道路既然已经修到桃源门口，再不断封闭它们，�
 他们相信桃源可以生活在世界之中，而不是永远藏在世界之外。"
 row = ExtResource("row_7")
 expectation_growth_rate = 0.1
-policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
+policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8")])
 effects = Array[ExtResource("effect_type_3")]([SubResource("Effect_1")])

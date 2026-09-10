@@ -6,8 +6,6 @@
 [ext_resource type="Script" uid="uid://ccj4ntfstuxfm" path="res://definitions/constitution_effects/modify_race_effect.gd" id="effscript_modify_race_13"]
 [ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="group_type_6"]
 [ext_resource type="Resource" uid="uid://cevrii67ltmsg" path="res://data/policies/阴历平准.tres" id="policy_8"]
-[ext_resource type="Resource" uid="uid://bpj8sxytmtoyp" path="res://data/policies/阳历分利.tres" id="policy_9"]
-[ext_resource type="Resource" uid="uid://dl3mgnbq5hgfp" path="res://data/policies/阴阳转录.tres" id="policy_10"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="policy_type_2"]
 [ext_resource type="Resource" uid="uid://bw162ei21njtt" path="res://data/races/比翼.tres" id="race_12"]
 [ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/人类.tres" id="race_14"]
@@ -43,5 +41,5 @@ description = "如果蓬莱必须拥有一种共同文化，比翼相信最合�
 row = ExtResource("row_7")
 seat_condition = SubResource("Condition_1")
 expectation_growth_rate = 0.1
-policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
+policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8")])
 effects = Array[ExtResource("effect_type_3")]([SubResource("Effect_1")])

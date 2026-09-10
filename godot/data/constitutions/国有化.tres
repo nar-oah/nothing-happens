@@ -12,8 +12,6 @@
 [ext_resource type="Resource" uid="uid://nuiau2qkch4e" path="res://data/interest_groups/蓬莱公所.tres" id="group_29"]
 [ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="group_type_6"]
 [ext_resource type="Resource" uid="uid://d0tsptffgoh8s" path="res://data/policies/官营平价.tres" id="policy_8"]
-[ext_resource type="Resource" uid="uid://bs7ofkv8hds3c" path="res://data/policies/官业扩工.tres" id="policy_9"]
-[ext_resource type="Resource" uid="uid://rj2c4acnwl5f" path="res://data/policies/统购统销.tres" id="policy_10"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="policy_type_2"]
 [ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/人类.tres" id="race_16"]
 [ext_resource type="Resource" uid="uid://bw162ei21njtt" path="res://data/races/比翼.tres" id="race_17"]
@@ -72,5 +70,5 @@ description = "外来的市场夺走了知识，本地的小集团又把公共�
 row = ExtResource("row_7")
 conditions = Array[ExtResource("condition_type_4")]([SubResource("Condition_101"), SubResource("Condition_102"), SubResource("Condition_103")])
 expectation_growth_rate = 0.1
-policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
+policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8")])
 effects = Array[ExtResource("effect_type_3")]([SubResource("Effect_1"), SubResource("Effect_2"), SubResource("Effect_3")])

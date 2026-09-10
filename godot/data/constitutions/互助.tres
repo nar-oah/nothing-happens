@@ -5,8 +5,6 @@
 [ext_resource type="Script" uid="uid://cpc61vbc5rd11" path="res://definitions/constitution_effect.gd" id="effect_type_3"]
 [ext_resource type="Script" uid="uid://ccj4ntfstuxfm" path="res://definitions/constitution_effects/modify_race_effect.gd" id="effscript_modify_race_11"]
 [ext_resource type="Resource" uid="uid://b8m2jao836rm" path="res://data/policies/换班互济.tres" id="policy_8"]
-[ext_resource type="Resource" uid="uid://dbj7pruw111a2" path="res://data/policies/弦塔赊能.tres" id="policy_9"]
-[ext_resource type="Resource" uid="uid://ckm6a1ywjx4xh" path="res://data/policies/会账相助.tres" id="policy_10"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="policy_type_2"]
 [ext_resource type="Resource" uid="uid://bto7mkhf8cqca" path="res://data/races/南柯.tres" id="race_12"]
 [ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="race_type_5"]
@@ -26,5 +24,5 @@ description = "并不是所有共同劳动都需要一座正式组织，也不�
 世界仍然很累，只是大家再次把如何撑下去当成彼此之间的私事。"
 row = ExtResource("row_7")
 expectation_growth_rate = 0.1
-policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
+policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8")])
 effects = Array[ExtResource("effect_type_3")]([SubResource("Effect_1")])

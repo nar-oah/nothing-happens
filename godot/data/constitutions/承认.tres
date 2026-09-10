@@ -7,8 +7,6 @@
 [ext_resource type="Resource" uid="uid://b7vlc4eb8m4io" path="res://data/interest_groups/造身公所.tres" id="group_12"]
 [ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="group_type_6"]
 [ext_resource type="Resource" uid="uid://boq6isoei3e55" path="res://data/policies/自主身契.tres" id="policy_8"]
-[ext_resource type="Resource" uid="uid://cxnr2v5cpw160" path="res://data/policies/行身信贷.tres" id="policy_9"]
-[ext_resource type="Resource" uid="uid://dhsgt5yf783d8" path="res://data/policies/自营维修.tres" id="policy_10"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="policy_type_2"]
 [ext_resource type="Resource" uid="uid://c2eco18e42n34" path="res://data/races/偃偶.tres" id="race_14"]
 [ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="race_type_5"]
@@ -33,5 +31,5 @@ description = "既然偃偶能够思考、签约、投票和承担责任，那�
 row = ExtResource("row_7")
 seat_condition = SubResource("Condition_1")
 expectation_growth_rate = 0.1
-policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
+policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8")])
 effects = Array[ExtResource("effect_type_3")]([SubResource("Effect_1")])

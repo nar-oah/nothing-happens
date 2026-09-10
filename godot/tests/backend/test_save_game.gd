@@ -5,16 +5,49 @@ const Fixture = preload("res://tests/backend/save_test_fixture.gd")
 
 
 func run(t: BackendTestContext) -> void:
+	_test_opening_legacy_events_survive_save(t)
 	_test_round_trip_and_continuation(t)
 	_test_manual_and_automatic_slots(t)
 	_test_invalid_snapshot_does_not_replace_state(t)
 	_test_bridge_load_refreshes_world(t)
 
 
+func _test_opening_legacy_events_survive_save(t: BackendTestContext) -> void:
+	var directory := _directory("opening_legacy_events")
+	var control := Fixture.make_session(directory)
+	t.check_equal(control.state.events.size(), 2, "real-content term starts with two legacy events")
+	t.check_equal(control.state.month_report_events.size(), 2, "initial autosave includes the opening event report")
+	var expected := _snapshot(control)
+	var restored := Fixture.make_session(directory)
+	var result := restored.load_save("auto")
+	t.check(result.get("ok", false), "opening legacy events load from the initial automatic save")
+	if result.get("ok", false):
+		t.check(_snapshot(restored) == expected, "opening legacy event state survives save round trip exactly")
+		t.check_equal(restored.state.events.size(), 2, "load replaces generated state without duplicating legacy events")
+		t.check(restored.state.month_report_events == control.state.month_report_events, "opening newspaper events survive save round trip")
+		for index in range(restored.state.events.size()):
+			var event := restored.state.events[index]
+			var source := control.state.events[index]
+			t.check(event.race == source.race, "loaded legacy event keeps its definition race")
+			t.check_equal(event.requirement_kind, source.requirement_kind, "loaded legacy event keeps its requirement kind")
+			t.check_equal(event.metric, source.metric, "loaded legacy event keeps its definition metric")
+			t.check(event.interest_group == source.interest_group, "loaded legacy event keeps its interest group definition")
+			t.check(event.known and event.published, "loaded legacy event remains known and published")
+			t.check_approx(event.growth_progress, 0.5, "loaded legacy event keeps half-strength initialization")
+			t.check_equal(event.months_alive, 0, "loaded legacy event keeps default initial age")
+	control.free()
+	restored.free()
+	Fixture.clean(directory)
+
+
 func _test_round_trip_and_continuation(t: BackendTestContext) -> void:
 	var directory := _directory("round_trip")
 	var control := Fixture.make_session(directory)
 	Fixture.populate(control)
+	var expected_donation_plan := control.vote_system.get_minimum_donation_plan(
+		control.state.draft_bill, control.context
+	)
+	var expected_policies := control.constitution_system.get_available_policies(control.context)
 	var expected := _snapshot(control)
 	var saved := control.create_manual_save()
 	t.check(saved.get("ok", false), "a complete real-resource snapshot saves as JSON")
@@ -41,6 +74,9 @@ func _test_round_trip_and_continuation(t: BackendTestContext) -> void:
 	t.check(restored.context.state == restored.state, "rebuilt context references loaded RunState")
 	t.check(restored.context.meta_progression == restored.meta_progression, "rebuilt context references loaded meta progression")
 	t.check(restored.flow_controller.context == restored.context, "rebuilt flow references loaded context")
+	t.check_approx(restored.state.political_donation_pool, control.state.political_donation_pool, "political donation balance survives save round trip")
+	t.check_equal(restored.vote_system.get_minimum_donation_plan(restored.state.draft_bill, restored.context), expected_donation_plan, "derived minimum donation plan is stable after load")
+	t.check_equal(restored.constitution_system.get_available_policies(restored.context), expected_policies, "current constitution policy pool is stable after load")
 	_check_references(t, restored, control)
 	for index in range(13):
 		t.check(control.advance_month(), "control advances continuation month %s" % index)

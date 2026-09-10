@@ -9,8 +9,6 @@
 [ext_resource type="Resource" uid="uid://by7u482sgaihw" path="res://data/interest_groups/听弦塔.tres" id="group_12"]
 [ext_resource type="Script" uid="uid://218ohk2o5q6k" path="res://definitions/interest_group_definition.gd" id="group_type_6"]
 [ext_resource type="Resource" uid="uid://5jgynpvrk6lo" path="res://data/policies/盈余返工.tres" id="policy_8"]
-[ext_resource type="Resource" uid="uid://vgb0eaxgnklm" path="res://data/policies/共担订单.tres" id="policy_9"]
-[ext_resource type="Resource" uid="uid://b0ptugehrabq0" path="res://data/policies/合作采购.tres" id="policy_10"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="policy_type_2"]
 [ext_resource type="Resource" uid="uid://bto7mkhf8cqca" path="res://data/races/南柯.tres" id="race_14"]
 [ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/人类.tres" id="race_18"]
@@ -52,5 +50,5 @@ description = "如果共同劳动创造的东西最终仍由别人决定如何�
 row = ExtResource("row_7")
 seat_condition = SubResource("Condition_1")
 expectation_growth_rate = 0.1
-policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
+policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8")])
 effects = Array[ExtResource("effect_type_3")]([SubResource("Effect_1"), SubResource("Effect_2"), SubResource("Effect_3")])

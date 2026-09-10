@@ -23,8 +23,16 @@ export function votesNeededForMajority(supportCount: number, presentCount: numbe
 	return Math.max(0, Math.floor(presentCount / 2) + 1 - supportCount);
 }
 
-export function canSubmitDraft(passed: boolean, proposalCount: number): boolean {
-	return passed && proposalCount > 0;
+export function canSubmitDraft(passable: boolean, proposalCount: number): boolean {
+	return passable && proposalCount > 0;
+}
+
+export function submittedDonationSeats(
+	passed: boolean,
+	bribedSeats: number[],
+	minimumDonationPlan: { seat_indices: number[] } | null
+): number[] | null {
+	return passed ? bribedSeats : (minimumDonationPlan?.seat_indices ?? null);
 }
 
 export function peachVotesNeeded(vote: SeatVoteDto): number {

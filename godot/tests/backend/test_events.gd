@@ -4,6 +4,8 @@ const BackendTestContext = preload("res://tests/backend/backend_test_context.gd"
 
 
 func run(t: BackendTestContext) -> void:
+	_test_term_start_legacy_events(t)
+	_test_term_start_legacy_event_shortage(t)
 	_test_generation_count_and_pair_identity(t)
 	_test_zero_seat_race_is_ineligible(t)
 	_test_fixed_interest_group_events_use_proposal_counts(t)
@@ -27,6 +29,70 @@ func _event_balance() -> GameBalanceDefinition:
 	balance.event_relief_satisfaction_threshold = 1.0
 	balance.event_relief_progress_per_month = 0.5
 	return balance
+
+
+func _test_term_start_legacy_events(t: BackendTestContext) -> void:
+	var race := t.make_race("legacy events")
+	race.increase_tax = true
+	race.increase_production = true
+	var balance := _event_balance()
+	var session := t.make_session(
+		[race],
+		[t.make_group("legacy group")],
+		t.make_seats(1, "legacy"),
+		[t.make_article(race, true, 0.10)],
+		balance
+	)
+	t.check_equal(session.state.events.size(), 2, "new term creates two legacy events when two definitions are eligible")
+	var seen: Dictionary[int, bool] = {}
+	for event in session.state.events:
+		t.check(event.race == race, "legacy event keeps its canonical participating race")
+		t.check(not seen.has(event.metric), "legacy events use different event definitions")
+		seen[event.metric] = true
+		t.check(event.known, "legacy event is known immediately")
+		t.check(event.published, "legacy event is published immediately")
+		t.check(not event.public_window_entered, "legacy publication does not enter the normal public window")
+		t.check_approx(event.growth_progress, 0.5, "legacy event starts at half strength")
+		t.check_equal(event.months_alive, 0, "legacy event keeps default initial age")
+		t.check_equal(event.phase, EventState.Phase.WORSENING, "legacy event keeps the normal initial phase")
+	t.check(session.state.office_visits.is_empty(), "legacy publication does not queue intelligence visits")
+	t.check_equal(session.state.month_report_events.size(), 2, "legacy events are recorded in the opening newspaper")
+	for report in session.state.month_report_events:
+		t.check_equal(int(report["strength"]), 50, "opening newspaper shows half-strength legacy events")
+		t.check_equal(int(report["countdown"]), balance.event_lifetime_months, "opening newspaper shows the full event lifetime")
+	t.check_equal(session.event_system.generate_legacy_events(session.context).size(), 0, "legacy generation cannot duplicate active event definitions")
+	session.state.run_phase = RunState.RunPhase.TERM_ENDED
+	session.state.term_outcome = RunState.TermOutcome.COLLAPSE
+	t.check(session.start_next_term(), "a completed term can start its successor")
+	t.check_equal(session.state.term, 2, "successor term advances the term number")
+	t.check_equal(session.state.events.size(), 2, "every new term creates its own legacy events")
+	session.free()
+
+
+func _test_term_start_legacy_event_shortage(t: BackendTestContext) -> void:
+	var one := t.make_race("one legacy event")
+	one.increase_tax = true
+	var one_session := t.make_session(
+		[one],
+		[t.make_group("one group")],
+		t.make_seats(1, "one legacy"),
+		[t.make_article(one, true, 0.10)],
+		_event_balance()
+	)
+	t.check_equal(one_session.state.events.size(), 1, "new term uses the single eligible event definition")
+	one_session.free()
+	var none := t.make_race("no legacy events")
+	none.increase_tax = true
+	var none_session := t.make_session(
+		[none],
+		[t.make_group("no-event group")],
+		t.make_seats(1, "no legacy"),
+		[t.make_article(none)],
+		_event_balance()
+	)
+	t.check_equal(none_session.state.events.size(), 0, "new term creates no legacy event when no definition is eligible")
+	t.check_equal(none_session.state.month_report_events.size(), 0, "opening newspaper accepts an empty legacy candidate pool")
+	none_session.free()
 
 
 func _test_generation_count_and_pair_identity(t: BackendTestContext) -> void:
@@ -91,6 +157,8 @@ func _test_fixed_interest_group_events_use_proposal_counts(t: BackendTestContext
 	var session := t.make_session([race], [group], t.make_seats(1, "fixed group event"), [article], balance)
 	var race_state := session.state.get_race(race)
 	t.check(race_state.expectation_targets.is_empty(), "fixed-group race needs no metric expectation targets")
+	session.state.events.clear()
+	session.state.month_report_events.clear()
 	session.state.annual_proposal_slot_counts[group] = 2
 	var generated := session.event_system.try_generate_month(session.context)
 	t.check_equal(generated.size(), 1, "insufficient fixed-group proposal count creates an event")
