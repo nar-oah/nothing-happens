@@ -24,6 +24,7 @@ func _ready() -> void:
 		print("VIDEO SAVE BUILD OK")
 	else:
 		push_error("Failed to verify video save: %s" % saved["error"]["message"])
+	session.free()
 	get_tree().quit()
 
 
