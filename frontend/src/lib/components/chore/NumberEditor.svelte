@@ -76,11 +76,11 @@
 </script>
 
 <div
-	class="flex h-[55px] w-[45px] flex-col items-center justify-center font-document text-30 font-light leading-auto text-shadow-deep"
+	class="flex w-[45px] flex-col items-center justify-center font-document text-30 font-light leading-auto text-shadow-deep"
 >
 	<button
 		type="button"
-		class="m-0 flex w-[45px] cursor-pointer items-center justify-center border-0 bg-transparent p-0 font-document text-30 font-light leading-auto text-shadow-deep disabled:cursor-default"
+		class="m-0 flex w-[45px] shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent p-0 font-document text-30 font-light leading-auto text-shadow-deep disabled:cursor-default"
 		disabled={incrementDisabled}
 		onpointerdown={(event) => event.preventDefault()}
 		onclick={() => adjust(1)}
@@ -92,7 +92,7 @@
 		{max}
 		step={normalizedStep}
 		disabled={disabled}
-		class="m-0 w-[45px] border-0 bg-transparent p-0 text-center font-document text-30 font-light leading-auto text-shadow-deep outline-none [letter-spacing:-16px] disabled:cursor-default"
+		class="m-0 block w-[45px] shrink-0 border-0 bg-transparent p-0 text-center font-document text-30 font-light leading-auto text-shadow-deep outline-none [letter-spacing:-16px] [text-indent:-8px] disabled:cursor-default"
 		onfocus={beginEditing}
 		oninput={(event) => (draft = event.currentTarget.value)}
 		onblur={commitDraft}
@@ -100,7 +100,7 @@
 	/>
 	<button
 		type="button"
-		class="m-0 flex w-[45px] cursor-pointer items-center justify-center border-0 bg-transparent p-0 font-document text-30 font-light leading-auto text-shadow-deep disabled:cursor-default"
+		class="m-0 flex w-[45px] shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent p-0 font-document text-30 font-light leading-auto text-shadow-deep disabled:cursor-default"
 		disabled={decrementDisabled}
 		onpointerdown={(event) => event.preventDefault()}
 		onclick={() => adjust(-1)}
@@ -109,6 +109,7 @@
 
 <style>
 	input[type='number'] {
+		appearance: textfield;
 		-moz-appearance: textfield;
 	}
 
