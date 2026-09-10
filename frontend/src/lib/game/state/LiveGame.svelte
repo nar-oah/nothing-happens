@@ -214,7 +214,10 @@
 
 	async function changeSetting<
 		T extends
-			'settings.language.set' | 'settings.display.set' | 'settings.music_volume.set' | 'app.quit'
+			| 'settings.language.set'
+			| 'settings.display.set'
+			| 'settings.music_volume.set'
+			| 'app.quit'
 	>(type: T, payload: OutboundPayloads[T]): Promise<void> {
 		if (settingsBusy || !client) return;
 		const requestClient = client;
@@ -516,7 +519,8 @@
 					changeSetting('settings.display.set', {
 						mode: snapshot.display_mode === 'windowed' ? 'fullscreen' : 'windowed'
 					})}
-				onMusicVolumeChange={(volume) => changeSetting('settings.music_volume.set', { volume })}
+				onMusicVolumeChange={(volume) =>
+					changeSetting('settings.music_volume.set', { volume })}
 				onExitClick={() => changeSetting('app.quit', {})}
 				saveError={saveError
 					? errorOperation === 'quit'

@@ -113,10 +113,7 @@ test('Peach seats show localized weights and shortfall while local bribery updat
 	assert.equal(seatScoreText(target, zhWeight), '-1(权重2)');
 	assert.equal(seatActionText(target, '支持', '政治献金', '缺席', zhShort), '政治献金(差1票)');
 	assert.equal(seatScoreText(target, enWeight), '-1(Weight 2)');
-	assert.equal(
-		seatActionText(target, 'Support', 'Bribe', 'Absent', enShort),
-		'Bribe(1 votes short)'
-	);
+	assert.equal(seatActionText(target, 'Support', 'Bribe', 'Absent', enShort), 'Bribe(1 votes short)');
 	const local = deriveLocalVote(votes, [1]);
 	assert.equal(local.seatVotes[0].race_support_weight, 4);
 	assert.equal(local.seatVotes[1].race_present_weight, 4);
