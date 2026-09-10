@@ -44,6 +44,10 @@ func _test_round_trip_and_continuation(t: BackendTestContext) -> void:
 	var directory := _directory("round_trip")
 	var control := Fixture.make_session(directory)
 	Fixture.populate(control)
+	var expected_donation_plan := control.vote_system.get_minimum_donation_plan(
+		control.state.draft_bill, control.context
+	)
+	var expected_policies := control.constitution_system.get_available_policies(control.context)
 	var expected := _snapshot(control)
 	var saved := control.create_manual_save()
 	t.check(saved.get("ok", false), "a complete real-resource snapshot saves as JSON")
@@ -70,6 +74,9 @@ func _test_round_trip_and_continuation(t: BackendTestContext) -> void:
 	t.check(restored.context.state == restored.state, "rebuilt context references loaded RunState")
 	t.check(restored.context.meta_progression == restored.meta_progression, "rebuilt context references loaded meta progression")
 	t.check(restored.flow_controller.context == restored.context, "rebuilt flow references loaded context")
+	t.check_approx(restored.state.political_donation_pool, control.state.political_donation_pool, "political donation balance survives save round trip")
+	t.check_equal(restored.vote_system.get_minimum_donation_plan(restored.state.draft_bill, restored.context), expected_donation_plan, "derived minimum donation plan is stable after load")
+	t.check_equal(restored.constitution_system.get_available_policies(restored.context), expected_policies, "current constitution policy pool is stable after load")
 	_check_references(t, restored, control)
 	for index in range(13):
 		t.check(control.advance_month(), "control advances continuation month %s" % index)
