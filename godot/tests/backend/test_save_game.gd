@@ -33,7 +33,7 @@ func _test_opening_legacy_events_survive_save(t: BackendTestContext) -> void:
 			t.check_equal(event.metric, source.metric, "loaded legacy event keeps its definition metric")
 			t.check(event.interest_group == source.interest_group, "loaded legacy event keeps its interest group definition")
 			t.check(event.known and event.published, "loaded legacy event remains known and published")
-			t.check_approx(event.growth_progress, 0.0, "loaded legacy event keeps default initial strength")
+			t.check_approx(event.growth_progress, 0.5, "loaded legacy event keeps half-strength initialization")
 			t.check_equal(event.months_alive, 0, "loaded legacy event keeps default initial age")
 	control.free()
 	restored.free()
