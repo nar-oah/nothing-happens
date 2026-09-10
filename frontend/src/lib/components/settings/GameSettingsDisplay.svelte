@@ -27,7 +27,7 @@
 	const languageLabel = $derived($t(`settings.${language}`));
 	const displayLabel = $derived($t(`settings.${displayMode}`));
 	const musicVolumeLabel = $derived(language === 'en' ? 'Volume' : '音量');
-	const musicVolumeValue = $derived<ChoreNumberEditorValue>({
+	const musicVolumeValue: ChoreNumberEditorValue = $derived({
 		value: musicVolume,
 		min: 0,
 		max: 100,
