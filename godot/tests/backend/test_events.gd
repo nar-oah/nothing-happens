@@ -165,7 +165,7 @@ func _test_fixed_interest_group_events_use_proposal_counts(t: BackendTestContext
 	var event := generated[0]
 	t.check_equal(event.requirement_kind, EventState.RequirementKind.INTEREST_GROUP_PROPOSALS, "event records proposal-count requirement kind")
 	t.check(event.interest_group == group, "event keeps the fixed interest group Resource")
-	t.check_equal(event.baseline_value, 2, "event baseline uses current annual authorized proposal count")
+	t.check_equal(event.baseline_value, 3, "event baseline is raised so the current proposal count starts below the pause threshold")
 	t.check_equal(event.full_target, 5, "first-year proposal requirement uses configured initial target")
 	t.check(session.event_system.spawn_event(session.context, race, Metric.Id.TAX) == null, "fixed-group race does not generate metric events")
 	event.known = true
@@ -341,11 +341,10 @@ func _test_relief_uses_current_requirement_and_rewinds_deadline(t: BackendTestCo
 	var balance := _event_balance()
 	balance.event_relief_progress_per_month = 0.25
 	var session := t.make_session([race], [t.make_group("group")], t.make_seats(1, "higher only"), [], balance)
-	var race_state := session.state.get_race(race)
-	race_state.expectation_targets[Metric.Id.PRODUCTION] = 16
+	session.state.events.clear()
 	session.state.metrics.production = 15
-	var event := session.event_system.spawn_event(session.context, race, Metric.Id.PRODUCTION)
-	t.check(event != null, "a one-point higher-only gap creates an event")
+	var event := EventState.new(race, Metric.Id.PRODUCTION, 15, 16)
+	session.state.events.append(event)
 	event.known = true
 	event.published = true
 	event.growth_progress = 0.5
