@@ -19,6 +19,15 @@ export function isPeachVote(vote: SeatVoteDto): boolean {
 	return vote.race_support_weight !== undefined && vote.race_present_weight !== undefined;
 }
 
+export function votesNeededForMajority(supportCount: number, presentCount: number): number {
+	return Math.max(0, Math.floor(presentCount / 2) + 1 - supportCount);
+}
+
+export function peachVotesNeeded(vote: SeatVoteDto): number {
+	if (!isPeachVote(vote)) return 0;
+	return votesNeededForMajority(vote.race_support_weight!, vote.race_present_weight!);
+}
+
 export function donationTotal(seatVotes: SeatVoteDto[], bribedSeats: number[]): number {
 	const selected = new Set(bribedSeats);
 	return seatVotes.reduce(
@@ -80,9 +89,10 @@ export function deriveLocalVote(seatVotes: SeatVoteDto[], bribedSeats: number[])
 			vote.race_support_weight = supportWeight;
 			vote.race_present_weight = presentWeight;
 		}
-		if (presentWeight === 0) absentCount += 1;
-		else if (supportWeight * 2 > presentWeight) supportCount += 1;
-		else abstainCount += 1;
+		absentCount += votes.length - present.length;
+		if (presentWeight === 0) continue;
+		if (votesNeededForMajority(supportWeight, presentWeight) === 0) supportCount += present.length;
+		else abstainCount += present.length;
 	}
 	const presentCount = supportCount + opposeCount + abstainCount;
 	return {
@@ -92,25 +102,24 @@ export function deriveLocalVote(seatVotes: SeatVoteDto[], bribedSeats: number[])
 		abstainCount,
 		absentCount,
 		presentCount,
-		passed: presentCount > 0 && supportCount * 2 > presentCount
+		passed: presentCount > 0 && votesNeededForMajority(supportCount, presentCount) === 0
 	};
 }
 
-export function seatScoreText(vote: SeatVoteDto): string {
+export function seatScoreText(vote: SeatVoteDto, weightLabel: string): string {
 	if (vote.position === ABSENT_POSITION) return '';
 	const score = String(vote.score);
-	return isPeachVote(vote)
-		? `${score}（${vote.race_support_weight}/${vote.race_present_weight}）`
-		: score;
+	return isPeachVote(vote) ? `${score}(${weightLabel})` : score;
 }
 
 export function seatActionText(
 	vote: SeatVoteDto,
 	supportLabel: string,
 	bribeLabel: string,
-	absentLabel: string
+	absentLabel: string,
+	votesShortLabel: string
 ): string {
 	if (vote.position === ABSENT_POSITION) return absentLabel;
 	const label = vote.position === SUPPORT_POSITION ? supportLabel : bribeLabel;
-	return isPeachVote(vote) ? `${label}（${vote.vote_weight}）` : label;
+	return isPeachVote(vote) ? `${label}(${votesShortLabel})` : label;
 }
