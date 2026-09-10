@@ -33,6 +33,7 @@ export type OutboundPayloads = {
 	'ui.newspaper.close': Record<string, never>;
 	'settings.language.set': { language: Language };
 	'settings.display.set': { mode: DisplayMode };
+	'settings.music_volume.set': { volume: number };
 	'app.quit': Record<string, never>;
 	'saves.list': Record<string, never>;
 	'saves.create': { state_version: number };
@@ -74,6 +75,7 @@ export type GameplayCommandType = Exclude<
 	| 'saves.list'
 	| 'settings.language.set'
 	| 'settings.display.set'
+	| 'settings.music_volume.set'
 	| 'app.quit'
 >;
 

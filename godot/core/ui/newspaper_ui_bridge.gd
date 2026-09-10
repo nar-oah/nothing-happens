@@ -6,6 +6,9 @@ func _dispatch(message: Dictionary, messages: Array[Dictionary]) -> void:
 	if message["type"] == "event.suppress":
 		_handle_event_petition(message, messages)
 		return
+	if message["type"] == "settings.music_volume.set":
+		_handle_music_volume_set(message, messages)
+		return
 	super._dispatch(message, messages)
 
 
@@ -13,7 +16,34 @@ func _full_state(request_id: Variant = null) -> Dictionary:
 	var message := super._full_state(request_id)
 	if message.has("payload"):
 		message["payload"]["suppression_remaining"] = run_session.parliament_system.get_petition_remaining(run_session.context)
+		message["payload"]["music_volume"] = SettingsManager.DEFAULT_MUSIC_VOLUME if settings_manager == null else settings_manager.music_volume
 	return message
+
+
+func _handle_music_volume_set(message: Dictionary, messages: Array[Dictionary]) -> void:
+	if message["payload"].size() != 1:
+		_append_mutation_error(
+			messages,
+			{"code": "invalid_payload", "message": "Music volume requires exactly one volume field."},
+			message["request_id"]
+		)
+		return
+	var volume := _protocol.read_int(message["payload"], "volume")
+	if not volume["ok"]:
+		_append_mutation_error(messages, volume["error"], message["request_id"])
+		return
+	if settings_manager == null:
+		_append_mutation_error(
+			messages,
+			{"code": "settings_not_ready", "message": "SettingsManager is not ready."},
+			message["request_id"]
+		)
+		return
+	var result := settings_manager.set_music_volume(volume["value"])
+	if not result["ok"]:
+		_append_mutation_error(messages, result["error"], message["request_id"])
+		return
+	messages.append(_full_state(message["request_id"]))
 
 
 func _handle_event_petition(message: Dictionary, messages: Array[Dictionary]) -> void:

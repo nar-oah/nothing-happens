@@ -24,9 +24,11 @@
 		onSaveSelect?: (slot: SaveSlotDto, loading: boolean) => void;
 		language?: Language;
 		displayMode?: 'windowed' | 'fullscreen';
+		musicVolume?: number;
 		settingsDisabled?: boolean;
 		onLanguageClick?: () => void;
 		onDisplayClick?: () => void;
+		onMusicVolumeChange?: (value: number) => void;
 		onExitClick?: () => void;
 		metrics: NewspaperMetricData[];
 		front?: NewspaperFrontData;
@@ -59,9 +61,11 @@
 		onSaveSelect,
 		language = 'zh_CN',
 		displayMode = 'windowed',
+		musicVolume = 100,
 		settingsDisabled = false,
 		onLanguageClick,
 		onDisplayClick,
+		onMusicVolumeChange,
 		onExitClick,
 		metrics,
 		front,
@@ -283,9 +287,11 @@
 			<GameSettingsDisplay
 				{language}
 				{displayMode}
+				{musicVolume}
 				disabled={interactionDisabled || settingsDisabled}
 				{onLanguageClick}
 				{onDisplayClick}
+				{onMusicVolumeChange}
 				{onExitClick}
 			/>
 		</div>

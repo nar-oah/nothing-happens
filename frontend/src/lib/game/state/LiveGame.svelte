@@ -213,7 +213,11 @@
 	onDestroy(unsubscribe);
 
 	async function changeSetting<
-		T extends 'settings.language.set' | 'settings.display.set' | 'app.quit'
+		T extends
+			| 'settings.language.set'
+			| 'settings.display.set'
+			| 'settings.music_volume.set'
+			| 'app.quit'
 	>(type: T, payload: OutboundPayloads[T]): Promise<void> {
 		if (settingsBusy || !client) return;
 		const requestClient = client;
@@ -504,6 +508,7 @@
 				saves={snapshot.saves}
 				language={snapshot.language}
 				displayMode={snapshot.display_mode}
+				musicVolume={snapshot.music_volume}
 				settingsDisabled={settingsBusy}
 				onLanguageClick={() =>
 					changeSetting('settings.language.set', {
@@ -513,6 +518,8 @@
 					changeSetting('settings.display.set', {
 						mode: snapshot.display_mode === 'windowed' ? 'fullscreen' : 'windowed'
 					})}
+				onMusicVolumeChange={(volume) =>
+					changeSetting('settings.music_volume.set', { volume })}
 				onExitClick={() => changeSetting('app.quit', {})}
 				saveError={saveError
 					? errorOperation === 'quit'
