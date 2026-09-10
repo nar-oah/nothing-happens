@@ -118,6 +118,13 @@
 	let votesNeeded = $derived(
 		votesNeededForMajority(localVote.supportCount, localVote.presentCount)
 	);
+	let voteActionText = $derived(
+		localVote.passed
+			? $t('view.votePass')
+			: minimumDonationPlan !== null
+				? `${$t('view.bribe')} ${minimumDonationPlan.cost}`
+				: $t('view.voteShort', { count: votesNeeded })
+	);
 	let draftCanSubmit = $derived(
 		optimisticDraft === undefined &&
 			canSubmitDraft(
@@ -219,6 +226,19 @@
 		onTitleChange?.(title);
 	}
 
+	function getDefaultBillTitle(): string {
+		const baseTitle = $t('memorial.newBill');
+		const usedTitles = new Set(
+			items
+				.filter((item): item is BillLeftItem => item.kind === 'bill')
+				.map((item) => item.bill.title.trim())
+		);
+		if (!usedTitles.has(baseTitle)) return baseTitle;
+		let suffix = 1;
+		while (usedTitles.has(`${baseTitle}${suffix}`)) suffix += 1;
+		return `${baseTitle}${suffix}`;
+	}
+
 	function submitDraft(isVote: boolean) {
 		if (!isVote || !draftCanSubmit) return;
 		const submittedSeats = submittedDonationSeats(
@@ -227,6 +247,7 @@
 			minimumDonationPlan
 		);
 		if (!submittedSeats) return;
+		if (!visibleDraft.title.trim()) onTitleChange?.(getDefaultBillTitle());
 		bribedSeats = [...submittedSeats];
 		playUiSfx('passed', true);
 		onSubmit?.([...submittedSeats].sort((left, right) => left - right));
@@ -310,9 +331,7 @@
 					<div class="vote-switch">
 						<ChoreSwitch
 							left={$t('view.draft')}
-							right={localVote.passed || minimumDonationPlan !== null
-								? $t('view.votePass')
-								: $t('view.voteShort', { count: votesNeeded })}
+							right={voteActionText}
 							bind:isSwitch={voteMode}
 							disabled={!draftCanSubmit}
 							onSwitchChange={submitDraft}

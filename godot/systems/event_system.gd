@@ -15,6 +15,7 @@ func try_generate_month(context: RunContext) -> Array[EventState]:
 func generate_legacy_events(context: RunContext) -> Array[EventState]:
 	var generated := _generate_events(context, 2)
 	for event in generated:
+		event.growth_progress = 0.5
 		event.known = true
 		event.published = true
 	return generated
