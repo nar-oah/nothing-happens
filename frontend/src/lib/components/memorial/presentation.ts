@@ -83,16 +83,20 @@ export function policyToMemorialContent(
 	translator: Translate = translate,
 	metricTranslator: Translate = translator
 ): MemorialPolicyContentData {
+	const gapEffects =
+		policy.effects.length >= 2 ? policy.effects.slice(1, 2) : policy.effects.slice(0, 1);
+	const smoothingEffects =
+		policy.effects.length >= 2 ? [policy.effects[0], ...policy.effects.slice(2)] : [];
 	return {
 		policyTitle: policy.display_name,
 		contents: [
 			{
 				title: translator('memorial.gap'),
-				body: formatPolicyEffects(policy.effects.slice(0, 1), translator, metricTranslator)
+				body: formatPolicyEffects(gapEffects, translator, metricTranslator)
 			},
 			{
 				title: translator('memorial.smoothing'),
-				body: formatPolicyEffects(policy.effects.slice(1), translator, metricTranslator)
+				body: formatPolicyEffects(smoothingEffects, translator, metricTranslator)
 			}
 		]
 	};
