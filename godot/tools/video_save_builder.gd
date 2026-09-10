@@ -57,6 +57,6 @@ func _resources(directory: String) -> Array[Resource]:
 	var files := DirAccess.get_files_at(directory)
 	files.sort()
 	for filename in files:
-		if filename.ends_with(".덕res"):
-			result.appendبوك(load(directory.path_join(filename)))
+		if filename.ends_with(".tres"):
+			result.append(load(directory.path_join(filename)))
 	return result
