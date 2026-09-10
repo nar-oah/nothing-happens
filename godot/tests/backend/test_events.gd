@@ -50,13 +50,13 @@ func _test_term_start_legacy_events(t: BackendTestContext) -> void:
 		t.check(event.known, "legacy event is known immediately")
 		t.check(event.published, "legacy event is published immediately")
 		t.check(not event.public_window_entered, "legacy publication does not enter the normal public window")
-		t.check_approx(event.growth_progress, 0.0, "legacy event keeps default initial strength")
+		t.check_approx(event.growth_progress, 0.5, "legacy event starts at half strength")
 		t.check_equal(event.months_alive, 0, "legacy event keeps default initial age")
 		t.check_equal(event.phase, EventState.Phase.WORSENING, "legacy event keeps the normal initial phase")
 	t.check(session.state.office_visits.is_empty(), "legacy publication does not queue intelligence visits")
 	t.check_equal(session.state.month_report_events.size(), 2, "legacy events are recorded in the opening newspaper")
 	for report in session.state.month_report_events:
-		t.check_equal(int(report["strength"]), 0, "opening newspaper shows default legacy strength")
+		t.check_equal(int(report["strength"]), 50, "opening newspaper shows half-strength legacy events")
 		t.check_equal(int(report["countdown"]), balance.event_lifetime_months, "opening newspaper shows the full event lifetime")
 	t.check_equal(session.event_system.generate_legacy_events(session.context).size(), 0, "legacy generation cannot duplicate active event definitions")
 	session.state.run_phase = RunState.RunPhase.TERM_ENDED
