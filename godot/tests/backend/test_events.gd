@@ -257,7 +257,12 @@ func _test_hidden_growth_public_window_and_resolution(t: BackendTestContext) -> 
 	t.check(event.published, "public window publishes the event")
 	t.check(session.state.office_visits.is_empty(), "forced disclosure does not queue an event-intel visit")
 	session.event_system.settle_month(session.context)
-	t.check_equal(event.phase, EventState.Phase.RESOLVED, "satisfied known event resolves")
+	t.check_equal(event.phase, EventState.Phase.RELIEVING, "zero-strength relief remains visible for the resolution edition")
+	t.check_approx(event.growth_progress, 0.0, "relief can reach zero strength without disappearing immediately")
+	t.check_equal(event.months_alive, 0, "zero-strength relief restores the full countdown")
+	t.check(session.state.events.has(event), "zero-strength relief remains in the active event list for one edition")
+	session.event_system.settle_month(session.context)
+	t.check_equal(event.phase, EventState.Phase.RESOLVED, "a still-satisfied zero-strength event resolves on the following settlement")
 	t.check_equal(session.state.get_race(race).resolved_events_this_year, 1, "resolution increments annual race result")
 	session.free()
 
@@ -322,7 +327,11 @@ func _test_pause_relief_and_effect_early_reveal(t: BackendTestContext) -> void:
 	t.check_equal(event.phase, EventState.Phase.PAUSED, "middle satisfaction pauses known event")
 	session.state.metrics.investment = 100
 	session.event_system.settle_month(session.context)
-	t.check_equal(event.phase, EventState.Phase.RESOLVED, "relief threshold resolves by progress")
+	t.check_equal(event.phase, EventState.Phase.RELIEVING, "reaching zero strength remains visibly relieving for one settlement")
+	t.check_approx(event.growth_progress, 0.0, "full relief reaches zero strength")
+	t.check(session.state.events.has(event), "zero-strength event is still present for the current newspaper")
+	session.event_system.settle_month(session.context)
+	t.check_equal(event.phase, EventState.Phase.RESOLVED, "still-satisfied zero-strength event resolves on the next settlement")
 	session.free()
 
 
@@ -351,9 +360,34 @@ func _test_relief_uses_current_requirement_and_rewinds_deadline(t: BackendTestCo
 
 	session.state.metrics.production = 15
 	session.event_system.settle_month(session.context)
-	t.check_equal(event.phase, EventState.Phase.RESOLVED, "current value equal to the lowered requirement keeps relieving")
-	t.check_equal(event.months_alive, 0, "resolved event restores the full twelve-month countdown")
-	t.check(not session.state.events.has(event), "resolved event is removed from the active event list")
+	t.check_equal(event.phase, EventState.Phase.RELIEVING, "current value equal to the lowered requirement keeps relieving")
+	t.check_approx(event.growth_progress, 0.0, "relief reaches zero strength before final removal")
+	t.check_equal(event.months_alive, 0, "zero strength restores the full twelve-month countdown")
+	t.check(session.state.events.has(event), "zero-strength relief remains active through the current newspaper edition")
+	session.flow_controller.record_month_report(session.state.year, session.state.month, session.state.metrics)
+	t.check_equal(session.state.month_report_events.size(), 1, "published zero-strength relief remains visible in the month report")
+	var report: Dictionary = session.state.month_report_events[0]
+	t.check_equal(int(report["phase"]), int(EventState.Phase.RELIEVING), "month report keeps the visible relief state")
+	t.check_equal(int(report["strength"]), 0, "month report shows zero strength")
+	t.check_equal(int(report["countdown"]), balance.event_lifetime_months, "month report shows the restored full countdown")
+
+	session.state.metrics.production = 0
+	session.event_system.settle_month(session.context)
+	t.check_equal(event.phase, EventState.Phase.WORSENING, "a renewed shortfall worsens the same zero-strength event")
+	t.check(event.growth_progress > 0.0, "renewed shortfall raises strength again")
+	t.check_equal(event.months_alive, 1, "renewed worsening advances the countdown from its restored baseline")
+	t.check(session.state.events.has(event), "renewed shortfall does not require the event to disappear and respawn")
+	balance.event_spawn_count_min = 1
+	balance.event_spawn_count_max = 1
+	t.check_equal(session.event_system.try_generate_month(session.context).size(), 0, "the still-active event blocks a duplicate replacement event")
+
+	session.state.metrics.production = 15
+	session.event_system.settle_month(session.context)
+	t.check_equal(event.phase, EventState.Phase.RELIEVING, "restoring the lowered requirement resumes relief")
+	t.check_approx(event.growth_progress, 0.0, "resumed relief returns to zero strength")
+	session.event_system.settle_month(session.context)
+	t.check_equal(event.phase, EventState.Phase.RESOLVED, "a still-satisfied zero-strength event is finally resolved")
+	t.check(not session.state.events.has(event), "resolved event is removed only after its visible zero-strength relief edition")
 	session.free()
 
 
