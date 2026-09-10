@@ -98,16 +98,18 @@ func get_minimum_donation_plan(draft: DraftBillState, context: RunContext) -> Di
 				peach_votes[race_state] = []
 			peach_votes[race_state].append([seat_index, vote])
 		elif is_bribe_allowed(context, vote):
-			options.append([seat_index])
+			options.append({"seat_indices": [seat_index], "support_gain": 1})
 	for race_state in peach_votes:
 		var entries: Array = peach_votes[race_state]
 		var present_weight := 0
 		var support_weight := 0
+		var present_seat_count := 0
 		var candidates: Array = []
 		for entry in entries:
 			var vote: SeatVoteState = entry[1]
 			if vote.position == SeatVoteState.Position.ABSENT:
 				continue
+			present_seat_count += 1
 			present_weight += vote.vote_weight
 			if vote.position == SeatVoteState.Position.SUPPORT:
 				support_weight += vote.vote_weight
@@ -134,17 +136,13 @@ func get_minimum_donation_plan(draft: DraftBillState, context: RunContext) -> Di
 			if peach.has_support_majority(planned_support_weight, present_weight):
 				break
 		if peach.has_support_majority(planned_support_weight, present_weight):
-			options.append(option)
+			options.append(
+				{"seat_indices": option, "support_gain": present_seat_count}
+			)
 	var votes_needed := floori(float(preview.present_count()) / 2.0) + 1 - preview.support_count
-	if options.size() < votes_needed:
+	var seat_indices := _minimum_option_seats(options, votes_needed)
+	if seat_indices.is_empty():
 		return {}
-	options.sort_custom(func(first: Array, second: Array) -> bool:
-		return int(first[0]) < int(second[0]) if first.size() == second.size() else first.size() < second.size()
-	)
-	var seat_indices: Array[int] = []
-	for option_index in range(votes_needed):
-		for seat_index in options[option_index]:
-			seat_indices.append(int(seat_index))
 	seat_indices.sort()
 	var cost := float(seat_indices.size()) * DONATION_COST
 	if cost > context.state.political_donation_pool:
@@ -156,6 +154,30 @@ func get_minimum_donation_plan(draft: DraftBillState, context: RunContext) -> Di
 	if not result.passed:
 		return {}
 	return {"seat_indices": seat_indices, "cost": cost}
+
+
+func _minimum_option_seats(options: Array, votes_needed: int) -> Array[int]:
+	var plans: Array = []
+	plans.resize(votes_needed + 1)
+	plans[0] = []
+	for option in options:
+		var option_seats: Array = option["seat_indices"]
+		var support_gain: int = option["support_gain"]
+		for current_gain in range(votes_needed - 1, -1, -1):
+			if plans[current_gain] == null:
+				continue
+			var target_gain := mini(current_gain + support_gain, votes_needed)
+			var candidate: Array[int] = []
+			for seat_index in plans[current_gain]:
+				candidate.append(int(seat_index))
+			for seat_index in option_seats:
+				candidate.append(int(seat_index))
+			if plans[target_gain] == null or candidate.size() < plans[target_gain].size():
+				plans[target_gain] = candidate
+	var result: Array[int] = []
+	if plans[votes_needed] != null:
+		result.assign(plans[votes_needed])
+	return result
 
 
 func resolve_donation_detection(
