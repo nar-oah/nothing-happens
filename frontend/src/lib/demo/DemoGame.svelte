@@ -232,6 +232,7 @@
 			seatAnchors={[]}
 			seatVotes={[]}
 			donationPool={20}
+			minimumDonationPlan={null}
 			{preview}
 			onAddProposal={addProposal}
 			onRemoveProposal={removeProposal}
