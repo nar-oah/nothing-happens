@@ -45,6 +45,7 @@
 		seatAnchors: ParliamentSeatAnchorDto[];
 		seatVotes: SeatVoteDto[];
 		donationPool: number;
+		minimumDonationPlan: { seat_indices: number[]; cost: number } | null;
 		preview: MemorialMetricData[];
 		onAddProposal?: (handIndex: number) => void;
 		onRemoveProposal?: (draftIndex: number) => void;
@@ -76,6 +77,7 @@
 		seatAnchors,
 		seatVotes,
 		donationPool,
+		minimumDonationPlan,
 		preview,
 		onAddProposal,
 		onRemoveProposal,
@@ -110,7 +112,7 @@
 		primary: { ...gameState.primary, value: localDonationPool }
 	});
 	let votesNeeded = $derived(
-		Math.max(0, Math.floor(seats.length / 2) + 1 - localVote.supportCount)
+		Math.max(0, Math.floor(localVote.presentCount / 2) + 1 - localVote.supportCount)
 	);
 	let editorScroller: HTMLDivElement;
 
@@ -208,8 +210,13 @@
 
 	function submitDraft(isVote: boolean) {
 		if (!isVote) return;
+		const submittedSeats = localVote.passed
+			? bribedSeats
+			: minimumDonationPlan?.seat_indices;
+		if (!submittedSeats) return;
+		bribedSeats = [...submittedSeats];
 		playUiSfx('passed', true);
-		onSubmit?.([...bribedSeats].sort((left, right) => left - right));
+		onSubmit?.([...submittedSeats].sort((left, right) => left - right));
 		queueMicrotask(() => (voteMode = false));
 	}
 
@@ -283,11 +290,11 @@
 					<div class="vote-switch">
 						<ChoreSwitch
 							left={$t('view.draft')}
-							right={localVote.passed
+							right={localVote.passed || minimumDonationPlan !== null
 								? $t('view.votePass')
 								: $t('view.voteShort', { count: votesNeeded })}
 							bind:isSwitch={voteMode}
-							disabled={!localVote.passed}
+							disabled={minimumDonationPlan === null}
 							onSwitchChange={submitDraft}
 						/>
 					</div>
