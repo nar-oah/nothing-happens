@@ -545,7 +545,10 @@ func _build_nothing_happens_demo(session: RunSession) -> bool:
 			var expected_count := session.race_system.get_interest_group_proposal_expectation(
 				race_state, session.context
 			)
-			state.annual_proposal_slot_counts[race_state.definition.fixed_interest_group] = expected_count
+			var group := race_state.definition.fixed_interest_group
+			state.annual_proposal_slot_counts[group] = maxi(
+				int(state.annual_proposal_slot_counts.get(group, 0)), expected_count
+			)
 			continue
 		var active := race_state.active_definition
 		if active == null:
