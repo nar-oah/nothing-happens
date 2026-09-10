@@ -9,9 +9,11 @@ func run(t: BackendTestContext) -> void:
 	_test_generation_count_and_pair_identity(t)
 	_test_zero_seat_race_is_ineligible(t)
 	_test_fixed_interest_group_events_use_proposal_counts(t)
+	_test_biyi_yin_yang_expectations_only_expose_current_metrics(t)
 	_test_hidden_growth_public_window_and_resolution(t)
 	_test_forced_public_information_does_not_queue_visit(t)
 	_test_pause_relief_and_effect_early_reveal(t)
+	_test_relief_uses_current_requirement_and_rewinds_deadline(t)
 	_test_deadline_failure(t)
 
 
@@ -185,6 +187,56 @@ func _test_fixed_interest_group_events_use_proposal_counts(t: BackendTestContext
 	session.free()
 
 
+func _test_biyi_yin_yang_expectations_only_expose_current_metrics(t: BackendTestContext) -> void:
+	var race := BiyiRaceDefinition.new()
+	race.display_name = "biyi"
+	race.yin_yang_enabled = true
+	race.increase_tax = true
+	race.increase_employment = true
+	race.increase_investment = true
+	var balance := _event_balance()
+	balance.event_spawn_count_min = 3
+	balance.event_spawn_count_max = 3
+	var session := t.make_session([race], [t.make_group("group")], t.make_seats(1, "biyi"), [], balance)
+	for metric in Metric.all_ids():
+		session.state.metrics.set_value(metric, 0)
+
+	session.state.month = 1
+	var yin_race: Dictionary = UiSerializer.new().races(session)[0]
+	var yin_expectations: Array = yin_race["expectations"]
+	t.check_equal(yin_expectations.size(), 2, "Biyi yin month exposes only two active expectations")
+	t.check_equal(yin_expectations[0]["metric"], int(Metric.Id.TAX), "Biyi yin month keeps tax")
+	t.check_equal(yin_expectations[1]["metric"], int(Metric.Id.EMPLOYMENT), "Biyi employment remains shared across yin and yang months")
+	t.check_equal(yin_expectations[1]["target"], 100, "shared Biyi employment is not yin-yang adjusted")
+	var yin_events := session.event_system.try_generate_month(session.context)
+	t.check_equal(yin_events.size(), 2, "Biyi yin month can generate only its two active metric events")
+	t.check(_events_contain_metric(yin_events, Metric.Id.TAX), "Biyi yin month routes tax events")
+	t.check(_events_contain_metric(yin_events, Metric.Id.EMPLOYMENT), "Biyi yin month routes shared employment events")
+	t.check(not _events_contain_metric(yin_events, Metric.Id.INVESTMENT), "Biyi yin month excludes investment events")
+
+	session.state.events.clear()
+	session.state.month = 2
+	var yang_race: Dictionary = UiSerializer.new().races(session)[0]
+	var yang_expectations: Array = yang_race["expectations"]
+	t.check_equal(yang_expectations.size(), 2, "Biyi yang month exposes only two active expectations")
+	t.check_equal(yang_expectations[0]["metric"], int(Metric.Id.EMPLOYMENT), "Biyi yang month keeps shared employment")
+	t.check_equal(yang_expectations[1]["metric"], int(Metric.Id.INVESTMENT), "Biyi yang month keeps investment")
+	t.check_equal(yang_expectations[0]["target"], 100, "shared Biyi employment keeps the annual base target")
+	var yang_events := session.event_system.try_generate_month(session.context)
+	t.check_equal(yang_events.size(), 2, "Biyi yang month can generate only its two active metric events")
+	t.check(not _events_contain_metric(yang_events, Metric.Id.TAX), "Biyi yang month excludes tax events")
+	t.check(_events_contain_metric(yang_events, Metric.Id.EMPLOYMENT), "Biyi yang month routes shared employment events")
+	t.check(_events_contain_metric(yang_events, Metric.Id.INVESTMENT), "Biyi yang month routes investment events")
+	session.free()
+
+
+func _events_contain_metric(events: Array[EventState], metric: Metric.Id) -> bool:
+	for event in events:
+		if event != null and event.metric == metric:
+			return true
+	return false
+
+
 func _test_hidden_growth_public_window_and_resolution(t: BackendTestContext) -> void:
 	var race := t.make_race("deadline")
 	race.increase_production = true
@@ -205,7 +257,12 @@ func _test_hidden_growth_public_window_and_resolution(t: BackendTestContext) -> 
 	t.check(event.published, "public window publishes the event")
 	t.check(session.state.office_visits.is_empty(), "forced disclosure does not queue an event-intel visit")
 	session.event_system.settle_month(session.context)
-	t.check_equal(event.phase, EventState.Phase.RESOLVED, "satisfied known event resolves")
+	t.check_equal(event.phase, EventState.Phase.RELIEVING, "zero-strength relief remains visible for the resolution edition")
+	t.check_approx(event.growth_progress, 0.0, "relief can reach zero strength without disappearing immediately")
+	t.check_equal(event.months_alive, 0, "zero-strength relief restores the full countdown")
+	t.check(session.state.events.has(event), "zero-strength relief remains in the active event list for one edition")
+	session.event_system.settle_month(session.context)
+	t.check_equal(event.phase, EventState.Phase.RESOLVED, "a still-satisfied zero-strength event resolves on the following settlement")
 	t.check_equal(session.state.get_race(race).resolved_events_this_year, 1, "resolution increments annual race result")
 	session.free()
 
@@ -241,6 +298,7 @@ func _test_pause_relief_and_effect_early_reveal(t: BackendTestContext) -> void:
 	var session := t.make_session([race], [t.make_group("group")], t.make_seats(2, "intel"), [article], balance)
 	session.state.metrics.investment = 0
 	var event := session.event_system.spawn_event(session.context, race, Metric.Id.INVESTMENT)
+	event.growth_progress = 0.1
 	session.event_system.update_information(session.context)
 	t.check(event.known, "EventIntelProbabilityEffect reveals event early")
 	t.check(not event.published, "early information remains unpublished until acknowledged or the next settlement")
@@ -269,7 +327,67 @@ func _test_pause_relief_and_effect_early_reveal(t: BackendTestContext) -> void:
 	t.check_equal(event.phase, EventState.Phase.PAUSED, "middle satisfaction pauses known event")
 	session.state.metrics.investment = 100
 	session.event_system.settle_month(session.context)
-	t.check_equal(event.phase, EventState.Phase.RESOLVED, "relief threshold resolves by progress")
+	t.check_equal(event.phase, EventState.Phase.RELIEVING, "reaching zero strength remains visibly relieving for one settlement")
+	t.check_approx(event.growth_progress, 0.0, "full relief reaches zero strength")
+	t.check(session.state.events.has(event), "zero-strength event is still present for the current newspaper")
+	session.event_system.settle_month(session.context)
+	t.check_equal(event.phase, EventState.Phase.RESOLVED, "still-satisfied zero-strength event resolves on the next settlement")
+	session.free()
+
+
+func _test_relief_uses_current_requirement_and_rewinds_deadline(t: BackendTestContext) -> void:
+	var race := t.make_race("higher only")
+	race.increase_production = true
+	var balance := _event_balance()
+	balance.event_relief_progress_per_month = 0.25
+	var session := t.make_session([race], [t.make_group("group")], t.make_seats(1, "higher only"), [], balance)
+	var race_state := session.state.get_race(race)
+	race_state.expectation_targets[Metric.Id.PRODUCTION] = 16
+	session.state.metrics.production = 15
+	var event := session.event_system.spawn_event(session.context, race, Metric.Id.PRODUCTION)
+	t.check(event != null, "a one-point higher-only gap creates an event")
+	event.known = true
+	event.published = true
+	event.growth_progress = 0.5
+	event.months_alive = 4
+
+	session.state.metrics.production = 16
+	session.event_system.settle_month(session.context)
+	t.check_equal(event.phase, EventState.Phase.RELIEVING, "meeting the current requirement starts relief")
+	t.check_approx(event.growth_progress, 0.25, "relief lowers event strength")
+	t.check_equal(event.months_alive, 3, "relief rewinds the event deadline instead of advancing it")
+	t.check_equal(session.event_system.get_current_requirement(event), 15, "relief lowers the current event requirement")
+
+	session.state.metrics.production = 15
+	session.event_system.settle_month(session.context)
+	t.check_equal(event.phase, EventState.Phase.RELIEVING, "current value equal to the lowered requirement keeps relieving")
+	t.check_approx(event.growth_progress, 0.0, "relief reaches zero strength before final removal")
+	t.check_equal(event.months_alive, 0, "zero strength restores the full twelve-month countdown")
+	t.check(session.state.events.has(event), "zero-strength relief remains active through the current newspaper edition")
+	session.flow_controller.record_month_report(session.state.year, session.state.month, session.state.metrics)
+	t.check_equal(session.state.month_report_events.size(), 1, "published zero-strength relief remains visible in the month report")
+	var report: Dictionary = session.state.month_report_events[0]
+	t.check_equal(int(report["phase"]), int(EventState.Phase.RELIEVING), "month report keeps the visible relief state")
+	t.check_equal(int(report["strength"]), 0, "month report shows zero strength")
+	t.check_equal(int(report["countdown"]), balance.event_lifetime_months, "month report shows the restored full countdown")
+
+	session.state.metrics.production = 0
+	session.event_system.settle_month(session.context)
+	t.check_equal(event.phase, EventState.Phase.WORSENING, "a renewed shortfall worsens the same zero-strength event")
+	t.check(event.growth_progress > 0.0, "renewed shortfall raises strength again")
+	t.check_equal(event.months_alive, 1, "renewed worsening advances the countdown from its restored baseline")
+	t.check(session.state.events.has(event), "renewed shortfall does not require the event to disappear and respawn")
+	balance.event_spawn_count_min = 1
+	balance.event_spawn_count_max = 1
+	t.check_equal(session.event_system.try_generate_month(session.context).size(), 0, "the still-active event blocks a duplicate replacement event")
+
+	session.state.metrics.production = 15
+	session.event_system.settle_month(session.context)
+	t.check_equal(event.phase, EventState.Phase.RELIEVING, "restoring the lowered requirement resumes relief")
+	t.check_approx(event.growth_progress, 0.0, "resumed relief returns to zero strength")
+	session.event_system.settle_month(session.context)
+	t.check_equal(event.phase, EventState.Phase.RESOLVED, "a still-satisfied zero-strength event is finally resolved")
+	t.check(not session.state.events.has(event), "resolved event is removed only after its visible zero-strength relief edition")
 	session.free()
 
 

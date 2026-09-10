@@ -57,7 +57,11 @@ func spawn_event(context: RunContext, race: RaceDefinition, metric: Metric.Id) -
 	if has_active_event(context.state, race, metric):
 		return null
 	var active := race_state.active_definition
-	if active == null or active.get_stance(metric) == Metric.Direction.NONE:
+	if (
+		active == null
+		or active.get_stance(metric) == Metric.Direction.NONE
+		or not active.is_vote_metric_active(metric, context)
+	):
 		return null
 	var target := context.race_system.get_effective_expectation(race_state, metric, context)
 	var baseline := context.state.metrics.get_value(metric)
@@ -99,14 +103,22 @@ func settle_month(context: RunContext) -> void:
 	for event in context.state.events:
 		if event == null or not event.is_active():
 			continue
-		event.months_alive += 1
-		var forced_public := _force_public_window(event, context.balance)
-		if forced_public or event.known:
+		if event.known:
 			_update_known_event(event, context)
+			if event.is_active():
+				_update_deadline_from_phase(event, context.balance)
+				if event.phase == EventState.Phase.WORSENING:
+					_force_public_window(event, context.balance)
 		else:
-			_advance_growth(event, context.balance)
+			event.months_alive = mini(event.months_alive + 1, maxi(context.balance.event_lifetime_months, 1))
+			var forced_public := _force_public_window(event, context.balance)
+			if forced_public:
+				_update_known_event(event, context)
+			else:
+				_advance_growth(event, context.balance)
 		if event.is_active() and event.months_alive >= context.balance.event_lifetime_months:
 			_fail(event, context)
+	_remove_resolved_events(context.state)
 
 
 func update_information(context: RunContext) -> void:
@@ -131,6 +143,7 @@ func update_information(context: RunContext) -> void:
 			visit.event = event
 			context.state.office_visits.append(visit)
 			_update_known_event(event, context)
+	_remove_resolved_events(context.state)
 
 
 func publish_known_events(context: RunContext) -> void:
@@ -212,7 +225,10 @@ func _get_eligible_metrics(context: RunContext, race: RaceDefinition) -> Array[M
 	var race_state := context.state.get_race(race)
 	if race_state == null or race_state.active_definition == null or _get_fixed_interest_group(race_state) != null:
 		return result
-	for metric in race_state.active_definition.get_stance_metrics():
+	var active := race_state.active_definition
+	for metric in active.get_stance_metrics():
+		if not active.is_vote_metric_active(metric, context):
+			continue
 		if has_active_event(context.state, race, metric):
 			continue
 		var target := context.race_system.get_effective_expectation(race_state, metric, context)
@@ -282,6 +298,20 @@ func _advance_growth(event: EventState, balance: GameBalanceDefinition) -> void:
 	event.growth_progress = clampf(event.growth_progress + 1.0 / float(growth_months), 0.0, 1.0)
 
 
+func _update_deadline_from_phase(event: EventState, balance: GameBalanceDefinition) -> void:
+	var lifetime := maxi(balance.event_lifetime_months, 1)
+	match event.phase:
+		EventState.Phase.WORSENING:
+			event.months_alive = mini(event.months_alive + 1, lifetime)
+		EventState.Phase.RELIEVING:
+			if is_zero_approx(event.growth_progress):
+				event.months_alive = 0
+			else:
+				event.months_alive = maxi(event.months_alive - 1, 0)
+		_:
+			pass
+
+
 func _update_known_event(event: EventState, context: RunContext) -> void:
 	event.satisfaction_rate = _calculate_satisfaction(event, context)
 	if event.satisfaction_rate < context.balance.event_pause_satisfaction_threshold:
@@ -294,22 +324,25 @@ func _update_known_event(event: EventState, context: RunContext) -> void:
 	if event.full_target == 0 and event.baseline_value < 0:
 		_resolve(event, context.state)
 		return
-	event.phase = EventState.Phase.RELIEVING
-	event.growth_progress = maxf(0.0, event.growth_progress - context.balance.event_relief_progress_per_month)
+	# Reaching zero strength is itself a visible final relief state. Only resolve on
+	# the next settlement if the event is still satisfied; this keeps the zero-strength,
+	# full-countdown state in the newspaper for one edition and lets a renewed shortfall
+	# worsen the same event instead of making it disappear and respawn.
 	if is_zero_approx(event.growth_progress):
 		_resolve(event, context.state)
+		return
+	event.phase = EventState.Phase.RELIEVING
+	event.growth_progress = maxf(0.0, event.growth_progress - context.balance.event_relief_progress_per_month)
 
 
 func _calculate_satisfaction(event: EventState, context: RunContext) -> float:
 	var requirement := get_current_requirement(event)
-	var required_change := float(requirement - event.baseline_value)
-	if is_zero_approx(required_change):
-		required_change = float(event.full_target - event.baseline_value)
-	if is_zero_approx(required_change):
-		return 0.0
 	var current := _get_current_value(event, context)
-	var achieved_change := maxf(float(current - event.baseline_value), 0.0)
-	return achieved_change / required_change
+	if current >= requirement:
+		return 1.0
+	if requirement <= 0:
+		return 0.0
+	return clampf(float(current) / float(requirement), 0.0, 1.0)
 
 
 func _get_current_value(event: EventState, context: RunContext) -> int:
@@ -324,9 +357,29 @@ func _resolve(event: EventState, state: RunState) -> void:
 	if not event.is_active():
 		return
 	event.phase = EventState.Phase.RESOLVED
+	event.months_alive = 0
 	var race_state := state.get_race(event.race)
 	if race_state != null:
 		race_state.resolved_events_this_year += 1
+	_remove_event_visits(state, event)
+
+
+func _remove_event_visits(state: RunState, event: EventState) -> void:
+	if state == null or event == null:
+		return
+	for index in range(state.office_visits.size() - 1, -1, -1):
+		var visit := state.office_visits[index]
+		if visit != null and visit.kind == OfficeVisitState.Kind.EVENT_INTEL and visit.event == event:
+			state.office_visits.remove_at(index)
+
+
+func _remove_resolved_events(state: RunState) -> void:
+	if state == null:
+		return
+	for index in range(state.events.size() - 1, -1, -1):
+		var event := state.events[index]
+		if event != null and event.phase == EventState.Phase.RESOLVED:
+			state.events.remove_at(index)
 
 
 func _fail(event: EventState, context: RunContext) -> void:

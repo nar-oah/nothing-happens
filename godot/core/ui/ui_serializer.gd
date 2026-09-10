@@ -306,6 +306,8 @@ func races(session: RunSession) -> Array:
 		var active := current.active_definition if current.active_definition != null else current.definition
 		var expectations: Array = []
 		for metric in active.get_stance_metrics():
+			if not active.is_vote_metric_active(metric, session.context):
+				continue
 			expectations.append({"metric": int(metric), "target": session.race_system.get_effective_expectation(current, metric, session.context), "direction": int(active.get_stance(metric))})
 		var data := {"race_index": index, "display_name": _t(active.display_name), "description": _translate_multiline(active.description), "seat_count": seat_count, "expectations": expectations, "resolved_events_this_year": current.resolved_events_this_year, "last_year_resolved_events": current.last_year_resolved_events}
 		if current.definition.fixed_interest_group != null:

@@ -22,6 +22,13 @@ func validate_draft(
 			var race_state := context.state.get_race(race)
 			if race_state == null:
 				continue
+			var active := race_state.active_definition if race_state.active_definition != null else race_state.definition
+			if (
+				active == null
+				or active.get_stance(metric) == Metric.Direction.NONE
+				or not active.is_vote_metric_active(metric, context)
+			):
+				continue
 			var requirement := context.race_system.get_effective_expectation(race_state, metric, context)
 			if pure_target.get_value(metric) < requirement:
 				return false
