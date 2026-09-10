@@ -50,6 +50,9 @@ func _ready() -> void:
 	var restored_event: EventState = (
 		null if core_gap_state.events.is_empty() else core_gap_state.events[0]
 	)
+	var restored_nanke_state := core_gap_state.get_race(
+		_find_race(core_gap_restored, "南柯")
+	)
 	if core_gap_result["ok"] != true:
 		push_error("Failed to restore core gap save: result.ok is false")
 	elif core_gap_state.metrics.tax != 100:
@@ -80,12 +83,20 @@ func _ready() -> void:
 		push_error("Failed to restore core gap save: event race is not 南柯")
 	elif restored_event.metric != Metric.Id.CONSUMPTION:
 		push_error("Failed to restore core gap save: event metric is %s, expected CONSUMPTION" % restored_event.metric)
+	elif restored_event.baseline_value != 88:
+		push_error("Failed to restore core gap save: event baseline_value is %s, expected 88" % restored_event.baseline_value)
 	elif restored_event.full_target != 95:
 		push_error("Failed to restore core gap save: event full_target is %s, expected 95" % restored_event.full_target)
+	elif restored_event.months_alive != 9:
+		push_error("Failed to restore core gap save: event months_alive is %s, expected 9" % restored_event.months_alive)
+	elif restored_event.growth_progress != 1.0:
+		push_error("Failed to restore core gap save: event growth_progress is %s, expected 1.0" % restored_event.growth_progress)
 	elif restored_event.known != true:
 		push_error("Failed to restore core gap save: event known is false")
 	elif restored_event.published != true:
 		push_error("Failed to restore core gap save: event published is false")
+	elif restored_nanke_state.expectation_targets[Metric.Id.CONSUMPTION] != 95:
+		push_error("Failed to restore core gap save: 南柯 consumption expectation is %s, expected 95" % restored_nanke_state.expectation_targets[Metric.Id.CONSUMPTION])
 	else:
 		print("VIDEO CORE GAP SAVE OK")
 	core_gap_session.free()
@@ -139,10 +150,12 @@ func _build_core_gap_demo(session: RunSession) -> void:
 		for metric in race.active_definition.get_stance_metrics():
 			race.expectation_targets[metric] = state.metrics.get_value(metric) + 10
 	var nanke := _find_race(session, "南柯")
-	var event := EventState.new(nanke, Metric.Id.CONSUMPTION, 70, 95)
+	var nanke_state := state.get_race(nanke)
+	nanke_state.expectation_targets[Metric.Id.CONSUMPTION] = 95
+	var event := EventState.new(nanke, Metric.Id.CONSUMPTION, 88, 95)
 	event.growth_progress = 1.0
 	event.satisfaction_rate = 70.0 / 95.0
-	event.months_alive = 2
+	event.months_alive = session.balance.event_lifetime_months - session.balance.event_public_remaining_months
 	event.known = true
 	event.published = true
 	event.public_window_entered = true
