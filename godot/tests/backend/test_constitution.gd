@@ -53,8 +53,11 @@ func _test_formal_board_policy_pool_and_tiers(t: BackendTestContext) -> void:
 	context.constitution_board = Board
 	context.constitution_system = system
 	var center := Board.get_center_column_index()
+	var terminal_names: Array[String] = []
 	for article in Board.get_articles():
 		t.check_equal(article.policies.size(), 1, "%s provides exactly one policy" % article.display_name)
+		if article.is_terminal:
+			terminal_names.append(article.display_name)
 		if article.policies.is_empty() or article.policies[0] == null:
 			continue
 		var policy := article.policies[0]
@@ -70,6 +73,10 @@ func _test_formal_board_policy_pool_and_tiers(t: BackendTestContext) -> void:
 		elif distance == 1:
 			expected = 0.75
 		t.check_approx(policy.effects[1].multiplier, expected, "%s main gap multiplier follows its constitution tier" % policy.display_name)
+	terminal_names.sort()
+	var expected_terminal_names: Array[String] = ["地区自治", "托拉斯", "法团", "理想国", "行省"]
+	expected_terminal_names.sort()
+	t.check_equal(terminal_names, expected_terminal_names, "only the five actual 90% articles carry the terminal marker")
 	for row in Board.get_rows():
 		context.state.constitution.active_articles[row] = Board.get_article(row, center)
 	var available := system.get_available_policies(context)
