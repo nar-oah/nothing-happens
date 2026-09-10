@@ -3,6 +3,7 @@ extends SceneTree
 const TestContextScript = preload("res://tests/backend/backend_test_context.gd")
 const ParliamentAndProposalTests = preload("res://tests/backend/test_parliament_and_proposals.gd")
 const EventTests = preload("res://tests/backend/test_events.gd")
+const EventInitialRequirementTests = preload("res://tests/backend/test_event_initial_requirements.gd")
 const ConstitutionTests = preload("res://tests/backend/test_constitution.gd")
 const ConstitutionRequirementSerializationTests = preload("res://tests/backend/test_constitution_requirement_serialization.gd")
 const VotingTests = preload("res://tests/backend/test_voting.gd")
@@ -33,6 +34,7 @@ func _run() -> void:
 	var suites := [
 		ParliamentAndProposalTests.new(),
 		EventTests.new(),
+		EventInitialRequirementTests.new(),
 		ConstitutionTests.new(),
 		ConstitutionRequirementSerializationTests.new(),
 		VotingTests.new(),
