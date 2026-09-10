@@ -119,10 +119,11 @@
 		votesNeededForMajority(localVote.supportCount, localVote.presentCount)
 	);
 	let draftCanSubmit = $derived(
-		optimisticDraft === undefined && canSubmitDraft(
-			localVote.passed || minimumDonationPlan !== null,
-			visibleDraft.proposals.length
-		)
+		optimisticDraft === undefined &&
+			canSubmitDraft(
+				localVote.passed || minimumDonationPlan !== null,
+				visibleDraft.proposals.length
+			)
 	);
 	let editorScroller: HTMLDivElement;
 
