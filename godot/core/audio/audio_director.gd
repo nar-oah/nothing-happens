@@ -7,6 +7,8 @@ const OTHER_SFX_PATH := "res://assets/audio/other.ogg"
 const TYPEWRITER_ANXIETY_PATH := "res://assets/audio/typewriter_anxiety.ogg"
 const PARLIAMENT_MURMUR_PATH := "res://assets/audio/parliament_murmur.ogg"
 
+const MUSIC_BASE_VOLUME_DB := -10.0
+const SILENCE_VOLUME_DB := -80.0
 const TYPEWRITER_INTERVALS := {
 	1: Vector2(22.0, 34.0),
 	2: Vector2(11.0, 20.0),
@@ -20,6 +22,7 @@ const MURMUR_VOLUMES := {
 
 var _world_scene: String = "office"
 var _anxiety_stage: int = 0
+var _music_volume: int = 100
 var _music_player: AudioStreamPlayer
 var _typewriter_player: AudioStreamPlayer
 var _murmur_player: AudioStreamPlayer
@@ -33,7 +36,8 @@ var _other_sfx: AudioStream
 
 
 func _ready() -> void:
-	_music_player = _make_player("Music", -10.0)
+	_music_player = _make_player("Music", MUSIC_BASE_VOLUME_DB)
+	_apply_music_volume()
 	_typewriter_player = _make_player("TypewriterAnxiety", -13.0)
 	_murmur_player = _make_player("ParliamentMurmur", -80.0)
 	for index in range(4):
@@ -64,6 +68,11 @@ func _ready() -> void:
 	_refresh_anxiety()
 
 
+func set_music_volume(value: int) -> void:
+	_music_volume = clampi(value, 0, 100)
+	_apply_music_volume()
+
+
 func set_world_scene(scene_name: String) -> void:
 	if scene_name == _world_scene:
 		return
@@ -91,6 +100,15 @@ func play_door() -> void:
 
 func play_other() -> void:
 	_play_interaction(_other_sfx, -3.0)
+
+
+func _apply_music_volume() -> void:
+	if _music_player == null:
+		return
+	if _music_volume <= 0:
+		_music_player.volume_db = SILENCE_VOLUME_DB
+		return
+	_music_player.volume_db = MUSIC_BASE_VOLUME_DB + linear_to_db(float(_music_volume) / 100.0)
 
 
 func _stage_for(collapse_level: int, max_collapse: int) -> int:
