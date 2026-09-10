@@ -1,6 +1,8 @@
 extends RefCounted
 class_name VoteSystem
 
+const DONATION_COST: float = 1.0
+
 
 func preview_vote(draft: DraftBillState, context: RunContext) -> VoteResultState:
 	return calculate_vote(draft, context)
@@ -36,9 +38,9 @@ func roll_monthly_absences(context: RunContext) -> void:
 
 
 func get_bribe_cost(context: RunContext, vote: SeatVoteState) -> float:
-	if context == null or context.balance == null or vote == null or vote.seat == null:
+	if context == null or vote == null or vote.seat == null:
 		return 0.0
-	return maxf(context.balance.support_threshold - vote.score, 0.0)
+	return DONATION_COST
 
 
 func is_bribe_allowed(context: RunContext, vote: SeatVoteState) -> bool:
@@ -47,8 +49,6 @@ func is_bribe_allowed(context: RunContext, vote: SeatVoteState) -> bool:
 		and vote.position != SeatVoteState.Position.SUPPORT
 		and vote.position != SeatVoteState.Position.ABSENT
 		and _seat_allows_donation(context, vote.seat)
-		and get_bribe_cost(context, vote) > 0.0
-		and get_bribe_cost(context, vote) <= context.state.political_donation_pool
 	)
 
 
