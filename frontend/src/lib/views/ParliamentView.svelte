@@ -31,6 +31,7 @@
 		peachVotesNeeded,
 		seatActionText,
 		seatScoreText,
+		submittedDonationSeats,
 		toggleBribedSeat,
 		votesNeededForMajority
 	} from './parliament';
@@ -219,9 +220,11 @@
 
 	function submitDraft(isVote: boolean) {
 		if (!isVote || !draftCanSubmit) return;
-		const submittedSeats = localVote.passed
-			? bribedSeats
-			: minimumDonationPlan?.seat_indices;
+		const submittedSeats = submittedDonationSeats(
+			localVote.passed,
+			bribedSeats,
+			minimumDonationPlan
+		);
 		if (!submittedSeats) return;
 		bribedSeats = [...submittedSeats];
 		playUiSfx('passed', true);

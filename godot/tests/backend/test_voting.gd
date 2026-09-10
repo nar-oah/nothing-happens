@@ -9,6 +9,8 @@ func run(t: BackendTestContext) -> void:
 	_test_planned_policy_projection_drives_support(t)
 	_test_zhushui_support_is_always_99(t)
 	_test_submit_donations_are_one_shot(t)
+	_test_minimum_donation_plan_uses_weighted_vote_gain(t)
+	_test_minimum_donation_plan_respects_absence_and_bans(t)
 	_test_absent_and_non_bribable_seats_reject_donations(t)
 	_test_nanke_monthly_absence_is_stable(t)
 	_test_strike_effect_locks_absent(t)
@@ -111,6 +113,7 @@ func _test_zhushui_support_is_always_99(t: BackendTestContext) -> void:
 
 func _test_submit_donations_are_one_shot(t: BackendTestContext) -> void:
 	var race := t.make_race("donation")
+	race.increase_tax = true
 	var group := t.make_group("group")
 	var balance := GameBalanceDefinition.new()
 	balance.automatic_draw_count = 0
@@ -125,11 +128,18 @@ func _test_submit_donations_are_one_shot(t: BackendTestContext) -> void:
 	var session := t.make_session([race], [group], t.make_seats(2, "donation"), [article], balance)
 	session.state.political_donation_pool = 10.0
 	session.balance.proposal_support = 0.0
-	session.state.draft_bill.proposals.append(t.make_proposal(group))
+	var proposal := t.make_proposal(group)
+	proposal.base_effect.tax = -1
+	session.state.draft_bill.proposals.append(proposal)
 	var preview := session.vote_system.preview_vote(session.state.draft_bill, session.context)
-	t.check_approx(preview.seat_votes[0].score, 0.0, "ordinary preview excludes unsent donations")
-	t.check(session.vote_system.is_bribe_allowed(session.context, preview.seat_votes[0]), "ordinary abstaining seat can receive a donation")
-	t.check_approx(session.vote_system.get_bribe_cost(session.context, preview.seat_votes[0]), 1.0, "bribe cost reaches the support threshold")
+	t.check_approx(preview.seat_votes[0].score, -6.0, "ordinary preview excludes unsent donations")
+	t.check(session.vote_system.is_bribe_allowed(session.context, preview.seat_votes[0]), "ordinary opposing seat can receive a donation")
+	t.check_approx(session.vote_system.get_bribe_cost(session.context, preview.seat_votes[0]), 1.0, "donation cost is fixed regardless of support score")
+	var minimum := session.vote_system.get_minimum_donation_plan(
+		session.state.draft_bill, session.context
+	)
+	t.check_equal(minimum["seat_indices"], [0, 1], "minimum plan buys the two votes required to pass")
+	t.check_approx(minimum["cost"], 2.0, "minimum plan charges one donation per selected seat")
 	var plan := session.vote_system.validate_bribes(session.state.draft_bill, session.context, [0, 1])
 	t.check(plan["ok"], "valid one-shot donations pass submission validation")
 	t.check_approx(session.state.political_donation_pool, 10.0, "preview and validation never charge the pool")
@@ -137,10 +147,82 @@ func _test_submit_donations_are_one_shot(t: BackendTestContext) -> void:
 	t.check(not rejected.submitted, "submit rejects duplicate bribed seat indices")
 	t.check_approx(session.state.political_donation_pool, 10.0, "rejected donation payload is atomic")
 	var result := session.submit_draft([0, 1])
-	t.check(result.submitted and result.passed, "submitted donations temporarily secure both votes")
+	t.check(result.submitted and result.passed, "fixed donations directly secure both opposing votes")
+	t.check_approx(result.seat_votes[0].score, -5.0, "donation does not erase the seat's existing support score")
+	t.check_equal(result.seat_votes[0].position, SeatVoteState.Position.SUPPORT, "donation support does not depend on crossing the score threshold")
 	t.check_approx(result.seat_votes[0].breakdown[&"political_donation"], 1.0, "submitted vote records its temporary donation reason")
 	t.check_approx(session.state.political_donation_pool, 8.0, "only bill submission charges donations")
 	t.check_equal(session.state.collapse_level, 6, "each detected donation adds collapse")
+	session.free()
+
+
+func _test_minimum_donation_plan_uses_weighted_vote_gain(t: BackendTestContext) -> void:
+	var peach := PeachRaceDefinition.new()
+	peach.display_name = "weighted donation"
+	peach.max_elder_weight = 2
+	var ordinary := t.make_race("ordinary donation")
+	var supporter := t.make_group("supporter")
+	var neutral := t.make_group("neutral")
+	var session := t.make_session(
+		[peach, ordinary], [supporter, neutral], t.make_seats(5, "weighted donation")
+	)
+	for index in range(3):
+		session.state.seats[index].race = peach
+		session.state.seats[index].actual_group = neutral
+	session.state.seats[3].race = ordinary
+	session.state.seats[3].actual_group = supporter
+	session.state.seats[4].race = ordinary
+	session.state.seats[4].actual_group = neutral
+	session.state.political_donation_pool = 2.0
+	session.state.draft_bill.proposals.append(t.make_proposal(supporter))
+	var preview := session.vote_system.preview_vote(session.state.draft_bill, session.context)
+	t.check_equal(preview.support_count, 1, "only the ordinary supporter backs the initial draft")
+	t.check_equal(preview.present_count(), 5, "all weighted and ordinary seats remain present")
+	var plan := session.vote_system.get_minimum_donation_plan(
+		session.state.draft_bill, session.context
+	)
+	t.check_equal(plan["seat_indices"], [0, 1], "two highest-weight Peach donations flip all three Peach seats")
+	t.check_approx(plan["cost"], 2.0, "weighted group gain still costs one per donated seat")
+	var serialized := UiSerializer.new().draft_preview(session)
+	t.check_equal(serialized["minimum_donation_plan"]["seat_indices"], [0, 1], "UI preview exposes the authoritative weighted minimum plan")
+	var result := session.submit_draft(plan["seat_indices"])
+	t.check(result.submitted and result.passed, "the weighted minimum plan passes under actual vote counting")
+	t.check_equal(result.support_count, 4, "Peach consensus contributes every present Peach seat")
+	t.check_approx(session.state.political_donation_pool, 0.0, "automatic weighted plan charges its exact cost")
+	session.free()
+
+
+func _test_minimum_donation_plan_respects_absence_and_bans(t: BackendTestContext) -> void:
+	var ordinary := t.make_race("eligible")
+	var nanke := NankeRaceDefinition.new()
+	nanke.display_name = "absent candidate"
+	var blocked := t.make_race("blocked candidate")
+	blocked.political_donations_allowed = false
+	var supporter := t.make_group("supporter")
+	var neutral := t.make_group("neutral")
+	var session := t.make_session(
+		[ordinary, nanke, blocked], [supporter, neutral], t.make_seats(4, "eligibility")
+	)
+	session.state.seats[0].race = ordinary
+	session.state.seats[0].actual_group = supporter
+	session.state.seats[1].race = nanke
+	session.state.seats[1].actual_group = neutral
+	session.state.seats[1].absent_this_month = true
+	session.state.seats[2].race = blocked
+	session.state.seats[2].actual_group = neutral
+	session.state.seats[3].race = ordinary
+	session.state.seats[3].actual_group = neutral
+	session.state.political_donation_pool = 1.0
+	session.state.draft_bill.proposals.append(t.make_proposal(supporter))
+	var preview := session.vote_system.preview_vote(session.state.draft_bill, session.context)
+	t.check_equal(preview.present_count(), 3, "absence is excluded from the automatic majority denominator")
+	t.check(not session.vote_system.is_bribe_allowed(session.context, preview.seat_votes[1]), "automatic plan cannot buy an absent seat")
+	t.check(not session.vote_system.is_bribe_allowed(session.context, preview.seat_votes[2]), "automatic plan cannot buy a prohibited seat")
+	var plan := session.vote_system.get_minimum_donation_plan(
+		session.state.draft_bill, session.context
+	)
+	t.check_equal(plan["seat_indices"], [3], "automatic plan selects only the eligible vote needed to pass")
+	t.check_approx(plan["cost"], 1.0, "eligible automatic vote has the fixed unit cost")
 	session.free()
 
 
