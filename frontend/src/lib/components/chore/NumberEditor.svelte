@@ -80,7 +80,7 @@
 >
 	<button
 		type="button"
-		class="-mb-[16px] m-0 flex w-[45px] cursor-pointer items-center justify-center border-0 bg-transparent p-0 font-document text-30 font-light leading-auto text-shadow-deep disabled:cursor-default"
+		class="m-0 flex w-[45px] cursor-pointer items-center justify-center border-0 bg-transparent p-0 font-document text-30 font-light leading-auto text-shadow-deep disabled:cursor-default"
 		disabled={incrementDisabled}
 		onpointerdown={(event) => event.preventDefault()}
 		onclick={() => adjust(1)}
@@ -92,7 +92,7 @@
 		{max}
 		step={normalizedStep}
 		disabled={disabled}
-		class="-mb-[16px] m-0 w-[45px] border-0 bg-transparent p-0 text-center font-document text-30 font-light leading-auto text-shadow-deep outline-none disabled:cursor-default"
+		class="m-0 w-[45px] border-0 bg-transparent p-0 text-center font-document text-30 font-light leading-auto text-shadow-deep outline-none [letter-spacing:-16px] disabled:cursor-default"
 		onfocus={beginEditing}
 		oninput={(event) => (draft = event.currentTarget.value)}
 		onblur={commitDraft}
