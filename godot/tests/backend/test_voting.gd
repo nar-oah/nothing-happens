@@ -173,11 +173,14 @@ func _test_minimum_donation_plan_uses_weighted_vote_gain(t: BackendTestContext) 
 	session.state.seats[3].actual_group = supporter
 	session.state.seats[4].race = ordinary
 	session.state.seats[4].actual_group = neutral
-	session.state.political_donation_pool = 2.0
+	session.state.political_donation_pool = 1.0
 	session.state.draft_bill.proposals.append(t.make_proposal(supporter))
 	var preview := session.vote_system.preview_vote(session.state.draft_bill, session.context)
 	t.check_equal(preview.support_count, 1, "only the ordinary supporter backs the initial draft")
 	t.check_equal(preview.present_count(), 5, "all weighted and ordinary seats remain present")
+	t.check(session.vote_system.get_minimum_donation_plan(session.state.draft_bill, session.context).is_empty(), "automatic plan stays unavailable when the pool is below the true weighted cost")
+	t.check(UiSerializer.new().draft_preview(session)["minimum_donation_plan"] == null, "UI keeps automatic submission disabled for insufficient donations")
+	session.state.political_donation_pool = 2.0
 	var plan := session.vote_system.get_minimum_donation_plan(
 		session.state.draft_bill, session.context
 	)
