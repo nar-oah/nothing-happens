@@ -281,6 +281,10 @@ func _build_terminal_demo(session: RunSession, article_name: String) -> bool:
 	if not session.constitution_system.revise(session.context, article):
 		push_error("Formal constitution revision failed for: %s" % article_name)
 		return false
+	if article_name == "行省":
+		for effect in article.effects:
+			if effect is ModifyRaceEffect:
+				effect.apply(session.context)
 	var validation_error := _terminal_demo_error(session, article_name)
 	if not validation_error.is_empty():
 		push_error("Terminal constitution validation failed for %s: %s" % [article_name, validation_error])
