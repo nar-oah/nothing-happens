@@ -139,61 +139,61 @@ export const gameEn: Record<keyof typeof gameZhCN, string> = {
 	'saves.actionLabel': '{action}: {term}, {date}{automatic}',
 	'saves.term': 'Term {term}',
 	'saves.date': 'Year {year}, month {month}',
-	'newspaper.comment.0.title': 'Start with the trouble,\nthen build the gap',
+	'newspaper.comment.0.title': 'Build the gap',
 	'newspaper.comment.0.body':
-		'The troubles in the paper tell you what is missing. Interest-group proposals lower public metrics, but buy parliamentary support and pull the metrics apart. Policies read those gaps when they come due and turn them into the values you actually need. Watch the event first, then decide what to sacrifice.',
-	'newspaper.comment.1.title': 'Early warning\nonly buys months',
+		'Events show what you need. Proposals lower metrics for votes, creating gaps. Policies turn those gaps into the metrics you need.',
+	'newspaper.comment.1.title': 'Early warning buys time',
 	'newspaper.comment.1.body':
-		'Advance intelligence does not reduce an event’s requirements. It only lets the government see them sooner. Earlier news means more time to arrange the next bill and its policies; the demand itself does not shrink.',
-	'newspaper.comment.2.title': 'Eighty percent can hold,\nfull compliance can heal',
+		'Advance intel lowers no requirement. It only gives you more months to prepare a bill and its policies.',
+	'newspaper.comment.2.title': '80% holds; 100% heals',
 	'newspaper.comment.2.body':
-		'Meeting eighty percent of the current requirement only stops an event from worsening. It begins to subside only after the current requirement is fully met; holding at eighty percent will not make it disappear.',
-	'newspaper.comment.3.title': 'Off the front page\ndoes not mean harmless',
+		'At 80%, an event stops worsening. Meet the full requirement to make it recover.',
+	'newspaper.comment.3.title': 'Unseen trouble still grows',
 	'newspaper.comment.3.body':
-		'Unknown events continue to worsen even before the government can see their exact requirements. By the time they become public they may already be stronger; annual expectations at least show which directions deserve caution.',
-	'newspaper.comment.4.title': 'A draft needs numbers\nand votes',
+		'Unknown events keep worsening. Annual expectations show which metrics are most at risk before details arrive.',
+	'newspaper.comment.4.title': 'Bills need votes too',
 	'newspaper.comment.4.body':
-		'Lawmakers chiefly watch two things: whether the draft’s planned result moves their people closer to its annual expectations, and whether you adopted a proposal from the group influencing them. Absence and constitutional exceptions can override this; if votes still fall short, consider political donations.',
-	'newspaper.comment.5.title': 'A bad proposal\nstill has a use',
+		"Lawmakers judge annual expectations and whether you used their group's proposal. If votes fall short, donations can help.",
+	'newspaper.comment.5.title': 'Bad proposals have uses',
 	'newspaper.comment.5.body':
-		'Ordinary proposals only lower public metrics, but adopting a group’s proposal can win support from lawmakers it influences. Those losses also create the gaps your policies use. Do not ask only how much a proposal subtracts; ask whether its hole can become useful.',
-	'newspaper.comment.6.title': 'Weaker groups\nknock more often',
+		'Group proposals lower metrics but win support. Those losses also create gaps for policies to exploit.',
+	'newspaper.comment.6.title': 'Weak groups knock more',
 	'newspaper.comment.6.body':
-		"Groups with less influence in parliament are more eager to put proposals on the government's desk and more likely to visit in person. Lacking votes, they offer more things to trade.",
-	'newspaper.comment.7.title': 'Visitors leave\na little extra sweetness',
+		'Weak groups send more proposals and visit more often. Fewer votes mean more offers to bargain with.',
+	'newspaper.comment.7.title': 'Visitors bring a bonus',
 	'newspaper.comment.7.body':
-		'Proposals left by personal visitors always include one positive bonus; ordinary automatic proposals do not. If you want that benefit to last, preserve and strengthen it later by combining proposals from the same group.',
-	'newspaper.comment.8.title': 'Three old proposals,\none framework to keep',
+		'Visitor proposals always carry one positive bonus. Keep it by combining proposals from the same group.',
+	'newspaper.comment.8.title': 'Three proposals, one base',
 	'newspaper.comment.8.body':
-		'When combining three proposals from the same group, you must keep one complete negative base rather than assembling a perfect document effect by effect. You may also keep at most one positive bonus; the others only strengthen the one you chose.',
-	'newspaper.comment.9.title': 'The destination is visible,\nthe road will not obey',
+		'When merging three proposals, keep one full negative base and at most one bonus; the others only strengthen it.',
+	'newspaper.comment.9.title': 'You know the end, not the road',
 	'newspaper.comment.9.body':
-		'The proposal-only target shows where full absorption will end, but not exactly how each month gets there. Market movement can wander, so the gap a policy actually reads when it comes due may differ from the draft’s planned value.',
-	'newspaper.comment.10.title': 'The proposal target\nis not a prophecy',
+		'The proposal target shows the long-run end, not each month. A policy may face a different gap when it finally fires.',
+	'newspaper.comment.10.title': 'Targets exclude policies',
 	'newspaper.comment.10.body':
-		'The proposal-only target includes only the fully absorbed effects of proposals. Policies are excluded: each resolves once in its chosen month, using the real metrics that exist at that time.',
-	'newspaper.comment.11.title': 'Set the seal now,\nreceive the effect later',
+		'The proposal target counts proposals only. Policies resolve later, once, using the real metrics of their chosen month.',
+	'newspaper.comment.11.title': 'Seal now, effect later',
 	'newspaper.comment.11.body':
-		'When a bill passes, each policy’s execution month is locked with it. The policy waits until that month, then reads the real gap and resolves once. Earlier is safer; later may leave a larger gap to exploit.',
-	'newspaper.comment.12.title': 'Gaps have direction.\nWaiting is not always profit.',
+		'A bill locks each policy month. It waits, then reads the real gap once. Later can pay more—but with more risk.',
+	'newspaper.comment.12.title': 'Gaps have direction',
 	'newspaper.comment.12.body':
-		'Policies read signed gaps; they do not automatically take absolute values. Waiting longer may widen a gap, or reverse it. Delay is not a free bonus—it is a wager on where the real numbers will stand when the policy comes due.',
-	'newspaper.comment.13.title': "Whose trouble you handle today\nshapes next year's seats",
+		'Policies use signed gaps. Waiting can widen a gap or reverse it, so delay is a wager, not a free bonus.',
+	'newspaper.comment.13.title': "Today's crises, tomorrow's seats",
 	'newspaper.comment.13.body':
-		"Resolved and failed events become political trust and reshape variable seats in the following year. Whom you rescue or neglect today becomes tomorrow's parliamentary structure.",
-	'newspaper.comment.14.title': 'Whose proposals pass this year\nshapes who is heard next year',
+		"Event outcomes become political trust and reshape next year's variable seats.",
+	'newspaper.comment.14.title': "Today's bills, tomorrow's influence",
 	'newspaper.comment.14.body':
-		"The groups behind newly authorized proposals in bills passed this year influence whom lawmakers actually listen to next year. Greater influence makes a group's proposals easier to pass; more passages make further expansion easier.",
-	'newspaper.comment.15.title': 'The constitution\nis not an emergency button',
+		'Groups used in passed bills gain influence next year. More influence makes their proposals easier to pass again.',
+	'newspaper.comment.15.title': 'The Constitution is long-term',
 	'newspaper.comment.15.body':
-		"The Penglai Constitution can be revised only once a year. Once any of the five peoples' paths advances toward one side, it cannot be reversed or redirected. You are not changing this month's numbers; you are changing the rules used to handle future trouble.",
-	'newspaper.comment.16.title': 'Donations can save votes—\nand create scandals',
+		'You may revise the Penglai Constitution once a year. A path cannot be reversed; it changes future rules, not today\'s numbers.',
+	'newspaper.comment.16.title': 'Donations buy votes, risk scandal',
 	'newspaper.comment.16.body':
-		'Political donations can win over lawmakers who may legally trade and are not absent. Even if a transaction is exposed, the vote still counts, but collapse rises. Oversight determines the chance of exposure, so donations are best kept as a fallback.',
-	'newspaper.comment.17.title': 'Collapse measures belief,\nnot production',
+		'Eligible lawmakers can be won with donations. Exposed deals still count, but raise Collapse; oversight sets the risk.',
+	'newspaper.comment.17.title': 'Collapse measures belief',
 	'newspaper.comment.17.body':
-		'Collapse records how strongly the peoples believe a total breakdown is coming; it is not the sum of the five metrics. Ugly numbers create political consequences through events, but they do not secretly raise panic merely for looking low.',
-	'newspaper.comment.18.title': 'A desk full of papers\ndoes not move the market',
+		'Collapse tracks belief in disaster, not the five metrics themselves. Bad numbers matter through events and political failure.',
+	'newspaper.comment.18.title': 'Paperwork changes nothing',
 	'newspaper.comment.18.body':
-		'Receiving, negotiating, shelving, or combining proposals does not change the market. Only when a new bill actually passes and replaces the old one do proposals begin absorbing and policies begin counting down; suppression and constitutional changes follow their own rules.'
+		'Proposals do nothing until a bill passes. Then proposals start changing the market and policies start counting down.'
 };
