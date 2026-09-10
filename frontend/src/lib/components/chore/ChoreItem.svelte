@@ -110,7 +110,7 @@
 	{:else if !isRow}
 		{#if editor}
 			<div
-				class="z-2 -mr-[10px] flex h-[55px] w-[30px] items-center justify-center bg-accent-amber-deep"
+				class="z-2 -mr-[10px] flex w-[30px] items-center justify-center bg-accent-amber-deep"
 			>
 				{@render numberEditor(editor)}
 			</div>
