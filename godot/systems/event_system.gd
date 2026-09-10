@@ -304,7 +304,10 @@ func _update_deadline_from_phase(event: EventState, balance: GameBalanceDefiniti
 		EventState.Phase.WORSENING:
 			event.months_alive = mini(event.months_alive + 1, lifetime)
 		EventState.Phase.RELIEVING:
-			event.months_alive = maxi(event.months_alive - 1, 0)
+			if is_zero_approx(event.growth_progress):
+				event.months_alive = 0
+			else:
+				event.months_alive = maxi(event.months_alive - 1, 0)
 		_:
 			pass
 
@@ -321,10 +324,15 @@ func _update_known_event(event: EventState, context: RunContext) -> void:
 	if event.full_target == 0 and event.baseline_value < 0:
 		_resolve(event, context.state)
 		return
-	event.phase = EventState.Phase.RELIEVING
-	event.growth_progress = maxf(0.0, event.growth_progress - context.balance.event_relief_progress_per_month)
+	# Reaching zero strength is itself a visible final relief state. Only resolve on
+	# the next settlement if the event is still satisfied; this keeps the zero-strength,
+	# full-countdown state in the newspaper for one edition and lets a renewed shortfall
+	# worsen the same event instead of making it disappear and respawn.
 	if is_zero_approx(event.growth_progress):
 		_resolve(event, context.state)
+		return
+	event.phase = EventState.Phase.RELIEVING
+	event.growth_progress = maxf(0.0, event.growth_progress - context.balance.event_relief_progress_per_month)
 
 
 func _calculate_satisfaction(event: EventState, context: RunContext) -> float:
