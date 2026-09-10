@@ -27,9 +27,11 @@
 		SUPPORT_POSITION,
 		deriveLocalVote,
 		donationTotal,
+		peachVotesNeeded,
 		seatActionText,
 		seatScoreText,
-		toggleBribedSeat
+		toggleBribedSeat,
+		votesNeededForMajority
 	} from './parliament';
 	import type { ViewFrameProps } from './types';
 
@@ -110,7 +112,7 @@
 		primary: { ...gameState.primary, value: localDonationPool }
 	});
 	let votesNeeded = $derived(
-		Math.max(0, Math.floor(seats.length / 2) + 1 - localVote.supportCount)
+		votesNeededForMajority(localVote.supportCount, localVote.presentCount)
 	);
 	let editorScroller: HTMLDivElement;
 
@@ -250,8 +252,14 @@
 				style:transform={`translate3d(${seat.x * 100}vw, ${seat.y * 100}vh, 0) translate(-50%, -50%)`}
 			>
 				<ChoreSwitch
-					left={seatScoreText(seat)}
-					right={seatActionText(seat, $t('view.support'), $t('view.bribe'), $t('view.absent'))}
+					left={seatScoreText(seat, $t('view.voteWeight', { weight: seat.vote_weight }))}
+					right={seatActionText(
+						seat,
+						$t('view.support'),
+						$t('view.bribe'),
+						$t('view.absent'),
+						$t('view.votesShort', { count: peachVotesNeeded(seat) })
+					)}
 					isSwitch={seat.position === SUPPORT_POSITION}
 					disabled={seat.position === ABSENT_POSITION ||
 						(!isBribed &&
