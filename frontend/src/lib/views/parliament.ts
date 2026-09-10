@@ -100,9 +100,7 @@ export function deriveLocalVote(seatVotes: SeatVoteDto[], bribedSeats: number[])
 export function seatScoreText(vote: SeatVoteDto): string {
 	if (vote.position === ABSENT_POSITION) return '';
 	const score = String(vote.score);
-	return isPeachVote(vote)
-		? `${score}（${vote.race_support_weight}/${vote.race_present_weight}）`
-		: score;
+	return isPeachVote(vote) ? `${score}(权重${vote.vote_weight})` : score;
 }
 
 export function seatActionText(
@@ -113,5 +111,10 @@ export function seatActionText(
 ): string {
 	if (vote.position === ABSENT_POSITION) return absentLabel;
 	const label = vote.position === SUPPORT_POSITION ? supportLabel : bribeLabel;
-	return isPeachVote(vote) ? `${label}（${vote.vote_weight}）` : label;
+	const get_count = (vote: SeatVoteDto): number | void => {
+		const support = vote.race_support_weight;
+		const present = vote.race_present_weight;
+		if (support !== undefined && present !== undefined) return Math.max(0, present / 2 - support);
+	};
+	return isPeachVote(vote) ? `${label}(差${get_count(vote)}票)` : label;
 }
