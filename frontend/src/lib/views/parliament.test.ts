@@ -87,7 +87,7 @@ test('Peach seats show localized weights and shortfall while local bribery updat
 		vote({
 			seat_index: 1,
 			score: -1,
-			bribe_cost: 2,
+			bribe_cost: 1,
 			vote_weight: 2,
 			race_display_name: '桃花妖',
 			race_support_weight: 2,
