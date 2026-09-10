@@ -277,23 +277,26 @@ func _count_votes(result: VoteResultState, context: RunContext) -> void:
 	for race_state in peach_votes:
 		var support_weight := 0
 		var present_weight := 0
+		var present_seat_count := 0
 		var race_votes: Array = peach_votes[race_state]
 		for vote in race_votes:
 			if vote.position == SeatVoteState.Position.ABSENT:
 				continue
+			present_seat_count += 1
 			present_weight += vote.vote_weight
 			if vote.position == SeatVoteState.Position.SUPPORT:
 				support_weight += vote.vote_weight
 		for vote in race_votes:
 			vote.race_support_weight = support_weight
 			vote.race_present_weight = present_weight
-		var peach := race_state.active_definition as PeachRaceDefinition
+		result.absent_count += race_votes.size() - present_seat_count
 		if present_weight <= 0:
-			result.absent_count += 1
-		elif peach.has_support_majority(support_weight, present_weight):
-			result.support_count += 1
+			continue
+		var peach := race_state.active_definition as PeachRaceDefinition
+		if peach.has_support_majority(support_weight, present_weight):
+			result.support_count += present_seat_count
 		else:
-			result.abstain_count += 1
+			result.abstain_count += present_seat_count
 
 
 func _active_race(context: RunContext, seat: SeatState) -> RaceDefinition:

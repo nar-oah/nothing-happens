@@ -81,7 +81,7 @@
 
 	{#if !isCenter}
 		{#if editor}
-			<div class="z-1 flex max-w-[500px] items-center justify-center">
+			<div class="z-1 flex max-w-[500px] items-center justify-center bg-accent-amber-deep">
 				{@render numberEditor(editor)}
 			</div>
 		{:else}
@@ -95,7 +95,7 @@
 		{/if}
 	{:else if rowWithValue}
 		{#if editor}
-			<div class="z-1 flex items-center justify-center">
+			<div class="z-1 flex items-center justify-center bg-accent-amber-deep">
 				{@render numberEditor(editor)}
 			</div>
 		{:else}
@@ -109,7 +109,9 @@
 		{/if}
 	{:else if !isRow}
 		{#if editor}
-			<div class="z-2 -mr-[10px] flex items-center justify-center">
+			<div
+				class="z-2 -mr-[10px] flex w-[30px] items-center justify-center bg-accent-amber-deep"
+			>
 				{@render numberEditor(editor)}
 			</div>
 		{:else if limit}

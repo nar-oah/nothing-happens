@@ -221,6 +221,7 @@ export type SaveSlotDto = {
 export type LiveGameState = GameStatusDto & {
 	language: Language;
 	display_mode: DisplayMode;
+	music_volume: number;
 	state_version: number;
 	saves: SaveSlotDto[];
 	ui_mode: UiMode;

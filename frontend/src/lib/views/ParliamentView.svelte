@@ -25,11 +25,14 @@
 	import {
 		ABSENT_POSITION,
 		SUPPORT_POSITION,
+		canSubmitDraft,
 		deriveLocalVote,
 		donationTotal,
+		peachVotesNeeded,
 		seatActionText,
 		seatScoreText,
-		toggleBribedSeat
+		toggleBribedSeat,
+		votesNeededForMajority
 	} from './parliament';
 	import type { ViewFrameProps } from './types';
 
@@ -112,7 +115,13 @@
 		primary: { ...gameState.primary, value: localDonationPool }
 	});
 	let votesNeeded = $derived(
-		Math.max(0, Math.floor(localVote.presentCount / 2) + 1 - localVote.supportCount)
+		votesNeededForMajority(localVote.supportCount, localVote.presentCount)
+	);
+	let draftCanSubmit = $derived(
+		canSubmitDraft(
+			localVote.passed || minimumDonationPlan !== null,
+			visibleDraft.proposals.length
+		)
 	);
 	let editorScroller: HTMLDivElement;
 
@@ -209,7 +218,7 @@
 	}
 
 	function submitDraft(isVote: boolean) {
-		if (!isVote) return;
+		if (!isVote || !draftCanSubmit) return;
 		const submittedSeats = localVote.passed
 			? bribedSeats
 			: minimumDonationPlan?.seat_indices;
@@ -257,14 +266,21 @@
 				style:transform={`translate3d(${seat.x * 100}vw, ${seat.y * 100}vh, 0) translate(-50%, -50%)`}
 			>
 				<ChoreSwitch
-					left={seatScoreText(seat)}
-					right={seatActionText(seat, $t('view.support'), $t('view.bribe'), $t('view.absent'))}
+					left={seatScoreText(seat, $t('view.voteWeight', { weight: seat.vote_weight }))}
+					right={seatActionText(
+						seat,
+						$t('view.support'),
+						$t('view.bribe'),
+						$t('view.absent'),
+						$t('view.votesShort', { count: peachVotesNeeded(seat) })
+					)}
 					isSwitch={seat.position === SUPPORT_POSITION}
 					disabled={seat.position === ABSENT_POSITION ||
 						(!isBribed &&
 							(seat.position === SUPPORT_POSITION ||
 								!seat.bribe_allowed ||
 								seat.bribe_cost > localDonationPool))}
+					blurOnPointerClick
 					onSwitchChange={() => bribeSeat(seat.seat_index)}
 				/>
 			</div>
@@ -294,7 +310,7 @@
 								? $t('view.votePass')
 								: $t('view.voteShort', { count: votesNeeded })}
 							bind:isSwitch={voteMode}
-							disabled={minimumDonationPlan === null}
+							disabled={!draftCanSubmit}
 							onSwitchChange={submitDraft}
 						/>
 					</div>
