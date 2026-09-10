@@ -76,6 +76,88 @@ func validate_bribes(
 	return {"ok": true, "donations": donations, "total_cost": total_cost}
 
 
+func get_minimum_donation_plan(draft: DraftBillState, context: RunContext) -> Dictionary:
+	if (
+		draft == null
+		or context == null
+		or context.state == null
+		or context.draft_bill_system == null
+		or not context.draft_bill_system.is_ready_to_submit(context, draft)
+	):
+		return {}
+	var preview := preview_vote(draft, context)
+	if preview.passed:
+		return {"seat_indices": [], "cost": 0.0}
+	var options: Array = []
+	var peach_votes: Dictionary[RaceState, Array] = {}
+	for seat_index in range(preview.seat_votes.size()):
+		var vote := preview.seat_votes[seat_index]
+		var race_state := context.state.get_race(vote.seat.race)
+		if race_state != null and _active_race(context, vote.seat) is PeachRaceDefinition:
+			if not peach_votes.has(race_state):
+				peach_votes[race_state] = []
+			peach_votes[race_state].append([seat_index, vote])
+		elif is_bribe_allowed(context, vote):
+			options.append([seat_index])
+	for race_state in peach_votes:
+		var entries: Array = peach_votes[race_state]
+		var present_weight := 0
+		var support_weight := 0
+		var candidates: Array = []
+		for entry in entries:
+			var vote: SeatVoteState = entry[1]
+			if vote.position == SeatVoteState.Position.ABSENT:
+				continue
+			present_weight += vote.vote_weight
+			if vote.position == SeatVoteState.Position.SUPPORT:
+				support_weight += vote.vote_weight
+			elif is_bribe_allowed(context, vote):
+				candidates.append(entry)
+		var peach := race_state.active_definition as PeachRaceDefinition
+		if peach == null or peach.has_support_majority(support_weight, present_weight):
+			continue
+		candidates.sort_custom(func(first: Array, second: Array) -> bool:
+			var first_vote: SeatVoteState = first[1]
+			var second_vote: SeatVoteState = second[1]
+			return (
+				int(first[0]) < int(second[0])
+				if first_vote.vote_weight == second_vote.vote_weight
+				else first_vote.vote_weight > second_vote.vote_weight
+			)
+		)
+		var option: Array[int] = []
+		var planned_support_weight := support_weight
+		for candidate in candidates:
+			option.append(int(candidate[0]))
+			var candidate_vote: SeatVoteState = candidate[1]
+			planned_support_weight += candidate_vote.vote_weight
+			if peach.has_support_majority(planned_support_weight, present_weight):
+				break
+		if peach.has_support_majority(planned_support_weight, present_weight):
+			options.append(option)
+	var votes_needed := floori(float(preview.present_count()) / 2.0) + 1 - preview.support_count
+	if options.size() < votes_needed:
+		return {}
+	options.sort_custom(func(first: Array, second: Array) -> bool:
+		return int(first[0]) < int(second[0]) if first.size() == second.size() else first.size() < second.size()
+	)
+	var seat_indices: Array[int] = []
+	for option_index in range(votes_needed):
+		for seat_index in options[option_index]:
+			seat_indices.append(int(seat_index))
+	seat_indices.sort()
+	var cost := float(seat_indices.size()) * DONATION_COST
+	if cost > context.state.political_donation_pool:
+		return {}
+	var validated := validate_bribes(draft, context, seat_indices)
+	if not validated["ok"]:
+		return {}
+	var result := calculate_vote(draft, context, validated["donations"])
+	if not result.passed:
+		return {}
+	return {"seat_indices": seat_indices, "cost": cost}
+
+
 func resolve_donation_detection(
 	context: RunContext, donations: Dictionary[SeatState, float]
 ) -> int:
