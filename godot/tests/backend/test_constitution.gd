@@ -186,8 +186,6 @@ func _test_local_interest_groups(t: BackendTestContext) -> void:
 		unique[local] = true
 		t.check(local == session.state.constitution.local_interest_groups[seat.definition], "seat uses its own local group")
 		t.check(local.decrease_tax, "local group stance follows effect metric")
-		t.check_equal(local.description, seat.definition.description, "local group inherits location description",)
-		t.check_equal(local.description, seat.definition.description, "local group inherits location description")
 		t.check_equal(local.description, seat.definition.description, "local group inherits location description")
 	t.check_equal(unique.size(), seats.size(), "local groups are unique Resources")
 	session.free()
