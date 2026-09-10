@@ -13,7 +13,7 @@ metadata/_custom_type_script = "uid://djwe47mhwecbs"
 [sub_resource type="Resource" id="Effect_2"]
 script = ExtResource("1_effect")
 source_a = 2
-multiplier = 0.55
+multiplier = 0.75
 metadata/_custom_type_script = "uid://djwe47mhwecbs"
 
 [resource]

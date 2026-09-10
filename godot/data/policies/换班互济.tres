@@ -16,7 +16,7 @@ script = ExtResource("1_effect")
 target_metric = 3
 source_a = 2
 source_b = 3
-multiplier = 0.3
+multiplier = 0.75
 metadata/_custom_type_script = "uid://djwe47mhwecbs"
 
 [resource]
