@@ -23,6 +23,10 @@ export function votesNeededForMajority(supportCount: number, presentCount: numbe
 	return Math.max(0, Math.floor(presentCount / 2) + 1 - supportCount);
 }
 
+export function canSubmitDraft(passed: boolean, proposalCount: number): boolean {
+	return passed && proposalCount > 0;
+}
+
 export function peachVotesNeeded(vote: SeatVoteDto): number {
 	if (!isPeachVote(vote)) return 0;
 	return votesNeededForMajority(vote.race_support_weight!, vote.race_present_weight!);

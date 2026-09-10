@@ -4,6 +4,7 @@ import type { SeatVoteDto } from '../game/state/types.ts';
 import { parliamentEn, parliamentZhCN } from '../i18n/parliament.ts';
 import {
 	ABSENT_POSITION,
+	canSubmitDraft,
 	deriveLocalVote,
 	donationTotal,
 	peachVotesNeeded,
@@ -49,6 +50,12 @@ test('absent and authoritative non-bribable seats reject local donations', () =>
 	assert.deepEqual(toggleBribedSeat([], absent, [absent, yanou], 10), []);
 	assert.deepEqual(toggleBribedSeat([], yanou, [absent, yanou], 10), []);
 	assert.equal(seatActionText(absent, '支持', '政治献金', '缺席', ''), '缺席');
+});
+
+test('draft submission requires both a passing vote and at least one proposal', () => {
+	assert.equal(canSubmitDraft(true, 1), true);
+	assert.equal(canSubmitDraft(true, 0), false);
+	assert.equal(canSubmitDraft(false, 1), false);
 });
 
 test('strict-majority shortfall uses the same calculation for weighted and ordinary votes', () => {

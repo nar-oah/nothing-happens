@@ -5,6 +5,7 @@
 		right: string;
 		isSwitch?: boolean;
 		disabled?: boolean;
+		blurOnPointerClick?: boolean;
 		onSwitchChange?: (isSwitch: boolean) => void;
 	};
 
@@ -13,12 +14,16 @@
 		right,
 		isSwitch = $bindable(false),
 		disabled = false,
+		blurOnPointerClick = false,
 		onSwitchChange
 	}: Props = $props();
 
-	function toggle() {
+	function toggle(event: MouseEvent) {
 		isSwitch = !isSwitch;
 		onSwitchChange?.(isSwitch);
+		if (blurOnPointerClick && event.detail > 0) {
+			(event.currentTarget as HTMLButtonElement).blur();
+		}
 	}
 </script>
 

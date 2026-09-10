@@ -25,6 +25,7 @@
 	import {
 		ABSENT_POSITION,
 		SUPPORT_POSITION,
+		canSubmitDraft,
 		deriveLocalVote,
 		donationTotal,
 		peachVotesNeeded,
@@ -114,6 +115,7 @@
 	let votesNeeded = $derived(
 		votesNeededForMajority(localVote.supportCount, localVote.presentCount)
 	);
+	let draftCanSubmit = $derived(canSubmitDraft(localVote.passed, visibleDraft.proposals.length));
 	let editorScroller: HTMLDivElement;
 
 	onMount(() => {
@@ -209,7 +211,7 @@
 	}
 
 	function submitDraft(isVote: boolean) {
-		if (!isVote) return;
+		if (!isVote || !draftCanSubmit) return;
 		playUiSfx('passed', true);
 		onSubmit?.([...bribedSeats].sort((left, right) => left - right));
 		queueMicrotask(() => (voteMode = false));
@@ -266,6 +268,7 @@
 							(seat.position === SUPPORT_POSITION ||
 								!seat.bribe_allowed ||
 								seat.bribe_cost > localDonationPool))}
+					blurOnPointerClick
 					onSwitchChange={() => bribeSeat(seat.seat_index)}
 				/>
 			</div>
@@ -295,7 +298,7 @@
 								? $t('view.votePass')
 								: $t('view.voteShort', { count: votesNeeded })}
 							bind:isSwitch={voteMode}
-							disabled={!localVote.passed}
+							disabled={!draftCanSubmit}
 							onSwitchChange={submitDraft}
 						/>
 					</div>
