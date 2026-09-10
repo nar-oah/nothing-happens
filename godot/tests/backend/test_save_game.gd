@@ -5,10 +5,39 @@ const Fixture = preload("res://tests/backend/save_test_fixture.gd")
 
 
 func run(t: BackendTestContext) -> void:
+	_test_opening_legacy_events_survive_save(t)
 	_test_round_trip_and_continuation(t)
 	_test_manual_and_automatic_slots(t)
 	_test_invalid_snapshot_does_not_replace_state(t)
 	_test_bridge_load_refreshes_world(t)
+
+
+func _test_opening_legacy_events_survive_save(t: BackendTestContext) -> void:
+	var directory := _directory("opening_legacy_events")
+	var control := Fixture.make_session(directory)
+	t.check_equal(control.state.events.size(), 2, "real-content term starts with two legacy events")
+	t.check_equal(control.state.month_report_events.size(), 2, "initial autosave includes the opening event report")
+	var expected := _snapshot(control)
+	var restored := Fixture.make_session(directory)
+	var result := restored.load_save("auto")
+	t.check(result.get("ok", false), "opening legacy events load from the initial automatic save")
+	if result.get("ok", false):
+		t.check(_snapshot(restored) == expected, "opening legacy event state survives save round trip exactly")
+		t.check_equal(restored.state.events.size(), 2, "load replaces generated state without duplicating legacy events")
+		t.check(restored.state.month_report_events == control.state.month_report_events, "opening newspaper events survive save round trip")
+		for index in range(restored.state.events.size()):
+			var event := restored.state.events[index]
+			var source := control.state.events[index]
+			t.check(event.race == source.race, "loaded legacy event keeps its definition race")
+			t.check_equal(event.requirement_kind, source.requirement_kind, "loaded legacy event keeps its requirement kind")
+			t.check_equal(event.metric, source.metric, "loaded legacy event keeps its definition metric")
+			t.check(event.interest_group == source.interest_group, "loaded legacy event keeps its interest group definition")
+			t.check(event.known and event.published, "loaded legacy event remains known and published")
+			t.check_approx(event.growth_progress, 0.0, "loaded legacy event keeps default initial strength")
+			t.check_equal(event.months_alive, 0, "loaded legacy event keeps default initial age")
+	control.free()
+	restored.free()
+	Fixture.clean(directory)
 
 
 func _test_round_trip_and_continuation(t: BackendTestContext) -> void:
