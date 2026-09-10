@@ -551,7 +551,13 @@ function isDraftPreview(value: unknown): value is DraftPreviewDto {
 		isMetricValues(value.pure_proposal_target) &&
 		isMetricValues(value.immediate_policy_result) &&
 		isMetricValues(value.projected_metrics) &&
-		isVoteResult(value.vote)
+		isVoteResult(value.vote) &&
+		(value.minimum_donation_plan === null ||
+			(isRecord(value.minimum_donation_plan) &&
+				isUniqueIndexArray(value.minimum_donation_plan.seat_indices) &&
+				isNumber(value.minimum_donation_plan.cost) &&
+				value.minimum_donation_plan.cost ===
+					value.minimum_donation_plan.seat_indices.length))
 	);
 }
 

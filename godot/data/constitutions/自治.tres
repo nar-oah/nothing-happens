@@ -5,8 +5,6 @@
 [ext_resource type="Script" uid="uid://cpc61vbc5rd11" path="res://definitions/constitution_effect.gd" id="effect_type_3"]
 [ext_resource type="Script" uid="uid://ccj4ntfstuxfm" path="res://definitions/constitution_effects/modify_race_effect.gd" id="effscript_modify_race_11"]
 [ext_resource type="Resource" uid="uid://ciftqchbiykxl" path="res://data/policies/乡约平粜.tres" id="policy_8"]
-[ext_resource type="Resource" uid="uid://ba6m2tycj6l4m" path="res://data/policies/合枝互济.tres" id="policy_9"]
-[ext_resource type="Resource" uid="uid://dff4mgdklaew0" path="res://data/policies/缓路休市.tres" id="policy_10"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="policy_type_2"]
 [ext_resource type="Resource" uid="uid://b4e7rdu770lrv" path="res://data/races/桃花妖.tres" id="race_12"]
 [ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="race_type_5"]
@@ -25,5 +23,5 @@ description = "桃源各地仍由自己的家系、长辈与合枝议处理生�
 他们参加蓬莱，却从来不觉得蓬莱有必要进入生活的每一个角落。道路可以相通，议会可以存在，只要外面的变化不要来得太深、太快。"
 row = ExtResource("row_7")
 expectation_growth_rate = 0.1
-policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
+policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8")])
 effects = Array[ExtResource("effect_type_3")]([SubResource("Effect_1")])

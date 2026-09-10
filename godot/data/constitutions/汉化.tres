@@ -8,8 +8,6 @@
 [ext_resource type="Script" path="res://definitions/interest_group_definition.gd" id="group_type_6"]
 [ext_resource type="Resource" path="res://data/constitution_rows/文化.tres" id="row_7"]
 [ext_resource type="Resource" path="res://data/policies/同文公契.tres" id="policy_8"]
-[ext_resource type="Resource" path="res://data/policies/官学定式.tres" id="policy_9"]
-[ext_resource type="Resource" path="res://data/policies/一体征解.tres" id="policy_10"]
 
 [resource]
 script = ExtResource("article_script_1")
@@ -17,5 +15,5 @@ display_name = "汉化"
 description = "既然大家已经在同一个政府、同一个市场和同一份报纸里生活，为什么还要维持一套只有少数人掌握的文字与历法？\n汉化把这种疑问变成制度答案：公共生活只保留汉语，比翼旧有的知识体系退出官署与教育。它让交流变得简单，也告诉比翼，他们最珍视的那些东西今后只能算私人的旧习。"
 row = ExtResource("row_7")
 expectation_growth_rate = 0.1
-policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
+policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8")])
 effects = Array[ExtResource("effect_type_3")]([])

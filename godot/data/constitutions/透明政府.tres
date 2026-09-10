@@ -8,8 +8,6 @@
 [ext_resource type="Script" uid="uid://dbweki6m0jjf5" path="res://definitions/constitution_effects/event_intel_probability_effect.gd" id="effscript_intel_14"]
 [ext_resource type="Script" uid="uid://dijsxl05i7yxo" path="res://definitions/constitution_effects/race_seat_effect.gd" id="effscript_race_seat_11"]
 [ext_resource type="Resource" uid="uid://cry42v402fitv" path="res://data/policies/公开预算.tres" id="policy_8"]
-[ext_resource type="Resource" uid="uid://b8k7e3cppeh88" path="res://data/policies/逐项拨款.tres" id="policy_9"]
-[ext_resource type="Resource" uid="uid://ca8c58gipfmb0" path="res://data/policies/实时账簿.tres" id="policy_10"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="policy_type_2"]
 [ext_resource type="Resource" uid="uid://dknll48i00v4u" path="res://data/races/驻岁.tres" id="race_12"]
 [ext_resource type="Script" uid="uid://c6jh5c18ipwnq" path="res://definitions/race_definition.gd" id="race_type_5"]
@@ -40,5 +38,5 @@ display_name = "透明政府"
 description = "既然权力属于联合政府，那么联合政府做过的交易就没有理由藏起来。
 透明政府把监督推到最彻底的程度：不再赌事情会不会被发现，而是假定一切迟早都会公开。秘密政治并没有因此消失，只是每一次秘密都必须按“终将成为新闻”的方式计算代价。"
 row = ExtResource("row_7")
-policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
+policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8")])
 effects = Array[ExtResource("effect_type_3")]([SubResource("Effect_1"), SubResource("Effect_2"), SubResource("Effect_3"), SubResource("Effect_4")])

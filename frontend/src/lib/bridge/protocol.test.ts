@@ -37,6 +37,17 @@ test('IPC rejects malformed command and state payloads', () => {
 		),
 		{ ok: false, error: 'Invalid payload for state.full' }
 	);
+	const invalidPlanState = makeLiveState(5);
+	invalidPlanState.draft_preview.minimum_donation_plan = { seat_indices: [0], cost: 2 };
+	assert.deepEqual(
+		decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: invalidPlanState })),
+		{ ok: false, error: 'Invalid payload for state.full' }
+	);
+	invalidPlanState.draft_preview.minimum_donation_plan = { seat_indices: [0, 0], cost: 2 };
+	assert.deepEqual(
+		decodeInboundMessage(JSON.stringify({ type: 'state.full', payload: invalidPlanState })),
+		{ ok: false, error: 'Invalid payload for state.full' }
+	);
 	assert.throws(
 		() =>
 			encodeOutboundMessage({

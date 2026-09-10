@@ -1,10 +1,13 @@
 extends RefCounted
 
 const BackendTestContext = preload("res://tests/backend/backend_test_context.gd")
+const Board = preload("res://data/constitutions/constitution_board.tres")
+const TransparentGovernment = preload("res://data/constitutions/透明政府.tres")
 
 
 func run(t: BackendTestContext) -> void:
 	_test_conditions_and_policy_union(t)
+	_test_formal_board_policy_pool_and_tiers(t)
 	_test_requirement_descriptions(t)
 	_test_race_and_group_variants(t)
 	_test_local_interest_groups(t)
@@ -41,6 +44,49 @@ func _test_conditions_and_policy_union(t: BackendTestContext) -> void:
 	group_condition.required_rate = 0.5
 	t.check(group_condition.is_met(session.context), "group condition uses current influence share")
 	session.free()
+
+
+func _test_formal_board_policy_pool_and_tiers(t: BackendTestContext) -> void:
+	var system := ConstitutionSystem.new()
+	var context := RunContext.new()
+	context.state = RunState.new()
+	context.constitution_board = Board
+	context.constitution_system = system
+	var center := Board.get_center_column_index()
+	var terminal_names: Array[String] = []
+	for article in Board.get_articles():
+		t.check_equal(article.policies.size(), 1, "%s provides exactly one policy" % article.display_name)
+		if article.is_terminal:
+			terminal_names.append(article.display_name)
+		if article.policies.is_empty() or article.policies[0] == null:
+			continue
+		var policy := article.policies[0]
+		t.check(policy.effects.size() >= 2, "%s keeps its main gap effect" % policy.display_name)
+		if policy.effects.size() < 2 or policy.effects[1] == null:
+			continue
+		var distance := absi(Board.get_column_index_for_article(article) - center)
+		var expected := 1.0
+		if article.is_terminal:
+			expected = 1.5
+		elif distance == 0:
+			expected = 0.5
+		elif distance == 1:
+			expected = 0.75
+		t.check_approx(policy.effects[1].multiplier, expected, "%s main gap multiplier follows its constitution tier" % policy.display_name)
+	terminal_names.sort()
+	var expected_terminal_names: Array[String] = ["地区自治", "托拉斯", "法团", "理想国", "行省"]
+	expected_terminal_names.sort()
+	t.check_equal(terminal_names, expected_terminal_names, "only the five actual 90% articles carry the terminal marker")
+	for row in Board.get_rows():
+		context.state.constitution.active_articles[row] = Board.get_article(row, center)
+	var available := system.get_available_policies(context)
+	t.check_equal(available.size(), 6, "the six opening constitution rows expose at most six policies")
+	var draft_system := DraftBillSystem.new()
+	for policy in available:
+		t.check(draft_system.add_available_policy(context, policy), "all six available policies can enter one bill")
+	t.check_equal(context.state.draft_bill.policies.size(), 6, "one bill keeps all six available policies without a policy cap")
+	t.check(not TransparentGovernment.is_terminal, "the outer regulation article remains non-terminal")
+	t.check_approx(TransparentGovernment.policies[0].effects[1].multiplier, 1.0, "the non-terminal outer regulation policy does not receive the terminal multiplier")
 
 
 func _test_requirement_descriptions(t: BackendTestContext) -> void:

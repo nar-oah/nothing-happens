@@ -9,6 +9,22 @@ func try_generate_month(context: RunContext) -> Array[EventState]:
 	var minimum := mini(context.balance.event_spawn_count_min, context.balance.event_spawn_count_max)
 	var maximum := maxi(context.balance.event_spawn_count_min, context.balance.event_spawn_count_max)
 	var target_count := context.random_system.random_int(minimum, maximum)
+	return _generate_events(context, target_count)
+
+
+func generate_legacy_events(context: RunContext) -> Array[EventState]:
+	var generated := _generate_events(context, 2)
+	for event in generated:
+		event.growth_progress = 0.5
+		event.known = true
+		event.published = true
+	return generated
+
+
+func _generate_events(context: RunContext, target_count: int) -> Array[EventState]:
+	var generated: Array[EventState] = []
+	if context == null or context.state == null or context.balance == null:
+		return generated
 	while generated.size() < target_count:
 		var races := _get_eligible_races(context)
 		if races.is_empty():

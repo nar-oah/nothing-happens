@@ -6,8 +6,6 @@
 [ext_resource type="Script" uid="uid://4himuh5fg8m4" path="res://definitions/constitution_effects/petition_effect.gd" id="effscript_petition_13"]
 [ext_resource type="Script" uid="uid://dijsxl05i7yxo" path="res://definitions/constitution_effects/race_seat_effect.gd" id="effscript_race_seat_11"]
 [ext_resource type="Resource" uid="uid://dn3yutdyfdsqg" path="res://data/policies/勘合互市.tres" id="policy_8"]
-[ext_resource type="Resource" uid="uid://ds88n41mt5qdu" path="res://data/policies/岁贡折征.tres" id="policy_9"]
-[ext_resource type="Resource" uid="uid://dct3b6eiwpswg" path="res://data/policies/港务调停.tres" id="policy_10"]
 [ext_resource type="Script" uid="uid://bjs57iwq17q3a" path="res://definitions/policy_definition.gd" id="policy_type_2"]
 [ext_resource type="Resource" uid="uid://bkkiux2yl5gln" path="res://data/races/人类.tres" id="race_12"]
 [ext_resource type="Resource" uid="uid://bw162ei21njtt" path="res://data/races/比翼.tres" id="race_14"]
@@ -35,5 +33,5 @@ description = "大明守着永乐港与远洋航路，蓬莱诸族守着自己�
 这不是独立，也不是统治，而是一份维持了太久、以至于所有人都习惯把它当成自然秩序的停战书。"
 row = ExtResource("row_7")
 expectation_growth_rate = 0.1
-policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8"), ExtResource("policy_9"), ExtResource("policy_10")])
+policies = Array[ExtResource("policy_type_2")]([ExtResource("policy_8")])
 effects = Array[ExtResource("effect_type_3")]([SubResource("Effect_1"), SubResource("Effect_2")])

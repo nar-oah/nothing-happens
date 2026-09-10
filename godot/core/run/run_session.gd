@@ -113,6 +113,8 @@ func _start_term(term_number: int) -> bool:
 	constitution_system.run_effects(context, ConstitutionEffect.Timing.AFTER_GROUP_ALLOCATION)
 	constitution_system.run_effects(context, ConstitutionEffect.Timing.ON_ACTIVATE)
 	race_system.rebuild_annual_expectations(context)
+	event_system.generate_legacy_events(context)
+	flow_controller.record_month_report(state.year, state.month, state.metrics)
 	_previous_newspaper_collapse = state.collapse_level
 	return true
 
