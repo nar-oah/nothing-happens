@@ -57,10 +57,10 @@ func _ready() -> void:
 		push_error("Failed to restore core gap save: result.ok is false")
 	elif core_gap_state.metrics.tax != 100:
 		push_error("Failed to restore core gap save: metrics.tax is %s, expected 100" % core_gap_state.metrics.tax)
-	elif core_gap_state.metrics.consumption != 70:
-		push_error("Failed to restore core gap save: metrics.consumption is %s, expected 70" % core_gap_state.metrics.consumption)
-	elif core_gap_state.metrics.production != 150:
-		push_error("Failed to restore core gap save: metrics.production is %s, expected 150" % core_gap_state.metrics.production)
+	elif core_gap_state.metrics.consumption != 80:
+		push_error("Failed to restore core gap save: metrics.consumption is %s, expected 80" % core_gap_state.metrics.consumption)
+	elif core_gap_state.metrics.production != 40:
+		push_error("Failed to restore core gap save: metrics.production is %s, expected 40" % core_gap_state.metrics.production)
 	elif core_gap_state.metrics.employment != 100:
 		push_error("Failed to restore core gap save: metrics.employment is %s, expected 100" % core_gap_state.metrics.employment)
 	elif core_gap_state.metrics.investment != 100:
@@ -69,12 +69,14 @@ func _ready() -> void:
 		push_error("Failed to restore core gap save: political_donation_pool is %s, expected 10" % core_gap_state.political_donation_pool)
 	elif core_gap_state.proposal_hand.size() != 1:
 		push_error("Failed to restore core gap save: proposal_hand.size is %s, expected 1" % core_gap_state.proposal_hand.size())
-	elif restored_proposal.source_group != _find_group(core_gap_restored, "永乐局"):
-		push_error("Failed to restore core gap save: proposal source_group is not 永乐局")
-	elif restored_proposal.base_effect.consumption != -20:
-		push_error("Failed to restore core gap save: proposal consumption is %s, expected -20" % restored_proposal.base_effect.consumption)
-	elif restored_proposal.base_effect.production != -5:
-		push_error("Failed to restore core gap save: proposal production is %s, expected -5" % restored_proposal.base_effect.production)
+	elif restored_proposal.source_group != _find_group(core_gap_restored, "岁契基金"):
+		push_error("Failed to restore core gap save: proposal source_group is not 岁契基金")
+	elif restored_proposal.base_effect.tax != -10:
+		push_error("Failed to restore core gap save: proposal tax is %s, expected -10" % restored_proposal.base_effect.tax)
+	elif restored_proposal.base_effect.production != -10:
+		push_error("Failed to restore core gap save: proposal production is %s, expected -10" % restored_proposal.base_effect.production)
+	elif restored_proposal.base_effect.consumption != 0:
+		push_error("Failed to restore core gap save: proposal consumption is %s, expected 0" % restored_proposal.base_effect.consumption)
 	elif restored_proposal.lag_months != 6:
 		push_error("Failed to restore core gap save: proposal lag_months is %s, expected 6" % restored_proposal.lag_months)
 	elif core_gap_state.events.size() != 1:
@@ -83,10 +85,10 @@ func _ready() -> void:
 		push_error("Failed to restore core gap save: event race is not 南柯")
 	elif restored_event.metric != Metric.Id.CONSUMPTION:
 		push_error("Failed to restore core gap save: event metric is %s, expected CONSUMPTION" % restored_event.metric)
-	elif restored_event.baseline_value != 88:
-		push_error("Failed to restore core gap save: event baseline_value is %s, expected 88" % restored_event.baseline_value)
-	elif restored_event.full_target != 95:
-		push_error("Failed to restore core gap save: event full_target is %s, expected 95" % restored_event.full_target)
+	elif restored_event.baseline_value != 101:
+		push_error("Failed to restore core gap save: event baseline_value is %s, expected 101" % restored_event.baseline_value)
+	elif restored_event.full_target != 101:
+		push_error("Failed to restore core gap save: event full_target is %s, expected 101" % restored_event.full_target)
 	elif restored_event.months_alive != 9:
 		push_error("Failed to restore core gap save: event months_alive is %s, expected 9" % restored_event.months_alive)
 	elif restored_event.growth_progress != 1.0:
@@ -95,8 +97,8 @@ func _ready() -> void:
 		push_error("Failed to restore core gap save: event known is false")
 	elif restored_event.published != true:
 		push_error("Failed to restore core gap save: event published is false")
-	elif restored_nanke_state.expectation_targets[Metric.Id.CONSUMPTION] != 95:
-		push_error("Failed to restore core gap save: 南柯 consumption expectation is %s, expected 95" % restored_nanke_state.expectation_targets[Metric.Id.CONSUMPTION])
+	elif restored_nanke_state.expectation_targets[Metric.Id.CONSUMPTION] != 101:
+		push_error("Failed to restore core gap save: 南柯 consumption expectation is %s, expected 101" % restored_nanke_state.expectation_targets[Metric.Id.CONSUMPTION])
 	else:
 		print("VIDEO CORE GAP SAVE OK")
 	core_gap_session.free()
@@ -129,8 +131,8 @@ func _build_core_gap_demo(session: RunSession) -> void:
 	state.collapse_level = 2
 	state.political_donation_pool = 10
 	state.metrics.tax = 100
-	state.metrics.consumption = 70
-	state.metrics.production = 150
+	state.metrics.consumption = 80
+	state.metrics.production = 40
 	state.metrics.employment = 100
 	state.metrics.investment = 100
 	state.year_start_metrics = state.metrics.copy()
@@ -151,21 +153,24 @@ func _build_core_gap_demo(session: RunSession) -> void:
 			race.expectation_targets[metric] = state.metrics.get_value(metric) + 10
 	var nanke := _find_race(session, "南柯")
 	var nanke_state := state.get_race(nanke)
-	nanke_state.expectation_targets[Metric.Id.CONSUMPTION] = 95
-	var event := EventState.new(nanke, Metric.Id.CONSUMPTION, 88, 95)
+	nanke_state.expectation_targets[Metric.Id.CONSUMPTION] = 101
+	var event := EventState.new(nanke, Metric.Id.CONSUMPTION, 101, 101)
 	event.growth_progress = 1.0
-	event.satisfaction_rate = 70.0 / 95.0
-	event.months_alive = session.balance.event_lifetime_months - session.balance.event_public_remaining_months
+	event.satisfaction_rate = 80.0 / 101.0
+	event.months_alive = (
+		session.balance.event_lifetime_months
+		- session.balance.event_public_remaining_months
+	)
 	event.known = true
 	event.published = true
 	event.public_window_entered = true
 	event.phase = EventState.Phase.WORSENING
 	state.events = [event]
-	var yongle := _find_group(session, "永乐局")
+	var fund := _find_group(session, "岁契基金")
 	var proposal := ProposalInstance.new()
-	proposal.source_group = yongle
-	proposal.base_effect.consumption = -20
-	proposal.base_effect.production = -5
+	proposal.source_group = fund
+	proposal.base_effect.tax = -10
+	proposal.base_effect.production = -10
 	proposal.lag_months = 6
 	proposal.donation_offer = 0
 	proposal.bonus_choice_resolved = true
@@ -178,8 +183,8 @@ func _build_core_gap_demo(session: RunSession) -> void:
 		if assigned >= 6:
 			break
 		if seat.race != null and seat.race != yanyou and seat.race != zhushui:
-			seat.annual_group = yongle
-			seat.actual_group = yongle
+			seat.annual_group = fund
+			seat.actual_group = fund
 			assigned += 1
 
 
